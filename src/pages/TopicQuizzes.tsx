@@ -81,13 +81,13 @@ export default function TopicQuizzes() {
           onClick={() => setActiveTab('default')}
           className={`py-3 px-6 font-semibold text-sm border-b-2 transition-colors ${activeTab === 'default' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
         >
-          Default (Guest users)
+          Open Library
         </button>
         <button
           onClick={() => setActiveTab('custom')}
           className={`py-3 px-6 font-semibold text-sm border-b-2 transition-colors ${activeTab === 'custom' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
         >
-          Create your own
+          Personalized Space
         </button>
       </div>
 

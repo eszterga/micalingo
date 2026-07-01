@@ -15,7 +15,7 @@ export default function Practice() {
     {
       title: "Articles (der/die/das, ein/kein)",
       description: "Master the German articles with this focused quiz.",
-      path: `/quiz?topic=articles&quizId=1`,
+      path: `/practice/articles`,
     },
   ];
 
