@@ -1,5 +1,0 @@
-User-agent: *
-Allow: /
-
-# Point this to your actual domain name once you deploy the app!
-Sitemap: https://eszterga.github.io/micalingo/sitemap.xml
