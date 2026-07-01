@@ -4,7 +4,7 @@ import { useAuth } from "../AuthContext";
 import { useCloudVocabulary, addCloudWord, updateCloudWord, deleteCloudWord, type CloudVocabularyItem } from "../lib/firestore";
 import { signInWithRedirect, GoogleAuthProvider } from 'firebase/auth';
 import { auth } from '../lib/firebase';
-import { publicVocabulary } from '../lib/public-data';
+import { publicVocabulary, publicPhrases, publicArticles } from '../lib/public-data';
 
 export default function Vocabulary() {
   const { user, loading } = useAuth();
@@ -53,7 +53,9 @@ export default function Vocabulary() {
     return g.includes(search) || h.includes(search) || e.includes(search);
   });
 
-  const filteredLibraryWords = publicVocabulary.filter(word => {
+  const allPublicWords = useMemo(() => [...publicVocabulary, ...publicPhrases, ...publicArticles], []);
+
+  const filteredLibraryWords = allPublicWords.filter(word => {
     const search = searchTerm.toLowerCase();
     const g = (word.german || "").toLowerCase();
     const h = (word.hungarian || "").toLowerCase();
@@ -62,7 +64,7 @@ export default function Vocabulary() {
 
   // Grouping logic for the library
   const groupedLibrary = useMemo(() => {
-    const groups: Record<string, typeof publicVocabulary> = {
+    const groups: Record<string, typeof allPublicWords> = {
       "A - D": [],
       "E - H": [],
       "I - L": [],
@@ -98,6 +100,46 @@ export default function Vocabulary() {
 
   const toggleGroup = (group: string) => {
     setOpenGroups(prev => ({ ...prev, [group]: !prev[group] }));
+  };
+
+  const groupedPersonal = useMemo(() => {
+    const groups: Record<string, CloudVocabularyItem[]> = {
+      "A - D": [],
+      "E - H": [],
+      "I - L": [],
+      "M - P": [],
+      "Q - T": [],
+      "U - Z": [],
+      "Other": []
+    };
+
+    if (!filteredWords) return groups;
+
+    const sortedPersonal = [...filteredWords].sort((a, b) => {
+      const cleanA = a.german.replace(/^(der|die|das)\s+/i, '').trim().toLowerCase();
+      const cleanB = b.german.replace(/^(der|die|das)\s+/i, '').trim().toLowerCase();
+      return cleanA.localeCompare(cleanB);
+    });
+
+    sortedPersonal.forEach(word => {
+      const cleanWord = word.german.replace(/^(der|die|das)\s+/i, '').trim().toUpperCase();
+      const firstChar = cleanWord.charAt(0);
+      if (/[A-DÄ]/.test(firstChar)) groups["A - D"].push(word);
+      else if (/[E-H]/.test(firstChar)) groups["E - H"].push(word);
+      else if (/[I-L]/.test(firstChar)) groups["I - L"].push(word);
+      else if (/[M-PÖ]/.test(firstChar)) groups["M - P"].push(word);
+      else if (/[Q-T]/.test(firstChar)) groups["Q - T"].push(word);
+      else if (/[U-ZÜ]/.test(firstChar)) groups["U - Z"].push(word);
+      else groups["Other"].push(word);
+    });
+
+    return groups;
+  }, [filteredWords]);
+
+  const [openPersonalGroups, setOpenPersonalGroups] = useState<Record<string, boolean>>({ "A - D": true });
+
+  const togglePersonalGroup = (group: string) => {
+    setOpenPersonalGroups(prev => ({ ...prev, [group]: !prev[group] }));
   };
 
   const openAddModal = () => {
@@ -264,60 +306,73 @@ export default function Vocabulary() {
           ) : !words ? (
             <div className="text-gray-500">Loading your vocabulary...</div>
           ) : (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-              <table className="w-full text-left border-collapse">
-                <thead className="bg-gray-50 border-b border-gray-200">
-                  <tr>
-                    <th className="p-4 font-semibold text-gray-700 w-1/3">German</th>
-                    <th className="p-4 font-semibold text-gray-700 w-1/3">Hungarian</th>
-                    <th className="p-4 font-semibold text-gray-700">Example / Comment</th>
-                    <th className="p-4 font-semibold text-gray-700 w-24 text-center">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {filteredWords?.length === 0 ? (
-                    <tr>
-                      <td colSpan={4} className="p-8 text-center text-gray-500">
-                        No words match your search.
-                      </td>
-                    </tr>
-                  ) : (
-                    filteredWords?.map((word) => (
-                      <tr key={word.id} className="hover:bg-gray-50 transition-colors group">
-                        <td className="p-4 font-medium text-gray-900">
-                          {word.german}
-                          {word.category && word.category !== 'vocabulary' && (
-                            <span className="ml-2 px-2 py-0.5 text-[10px] uppercase font-bold bg-blue-100 text-blue-800 rounded">
-                              {word.category}
-                            </span>
-                          )}
-                        </td>
-                        <td className="p-4 text-gray-600">{word.hungarian}</td>
-                        <td className="p-4 text-gray-500 text-sm italic">{word.example}</td>
-                        <td className="p-4 text-center">
-                          <div className="flex justify-center items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button
-                              onClick={() => handleEditClick(word)}
-                              className="text-blue-500 hover:text-blue-700 p-2 rounded hover:bg-blue-50 transition-colors"
-                              title="Edit word"
-                            >
-                              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /></svg>
-                            </button>
-                            <button
-                              onClick={() => handleDelete(word.id)}
-                              className="text-red-500 hover:text-red-700 p-2 rounded hover:bg-red-50 transition-colors"
-                              title="Delete word"
-                            >
-                              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
+          <div className="space-y-4">
+            {Object.entries(groupedPersonal).map(([groupName, wordsInGroup]) => {
+              if (wordsInGroup.length === 0) return null;
+              const isOpen = openPersonalGroups[groupName];
+              
+              return (
+                <div key={groupName} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                  <button
+                    onClick={() => togglePersonalGroup(groupName)}
+                    className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="font-bold text-lg text-gray-800">{groupName}</span>
+                      <span className="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-0.5 rounded-full">{wordsInGroup.length} words</span>
+                    </div>
+                    <svg className={`w-5 h-5 text-gray-500 transition-transform ${isOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                  </button>
+                  
+                  {isOpen && (
+                    <table className="w-full text-left border-collapse border-t border-gray-200">
+                      <tbody className="divide-y divide-gray-100">
+                        {wordsInGroup.map((word) => (
+                          <tr key={word.id} className="hover:bg-gray-50 transition-colors group">
+                            <td className="p-4 font-medium text-gray-900 w-1/3">
+                              {word.german}
+                              {word.category && word.category !== 'vocabulary' && (
+                                <span className="ml-2 px-2 py-0.5 text-[10px] uppercase font-bold bg-blue-100 text-blue-800 rounded">
+                                  {word.category}
+                                </span>
+                              )}
+                            </td>
+                            <td className="p-4 text-gray-600 w-1/3">{word.hungarian}</td>
+                            <td className="p-4 text-gray-500 text-sm italic w-1/3">{word.example}</td>
+                            <td className="p-4 text-center w-24">
+                              <div className="flex justify-center items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button
+                                  onClick={() => handleEditClick(word)}
+                                  className="text-blue-500 hover:text-blue-700 p-2 rounded hover:bg-blue-50 transition-colors"
+                                  title="Edit word"
+                                >
+                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /></svg>
+                                </button>
+                                <button
+                                  onClick={() => handleDelete(word.id)}
+                                  className="text-red-500 hover:text-red-700 p-2 rounded hover:bg-red-50 transition-colors"
+                                  title="Delete word"
+                                >
+                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   )}
-                </tbody>
-              </table>
-            </div>
+                </div>
+              );
+            })}
+            {(!filteredWords || filteredWords.length === 0) && (
+               <div className="p-8 text-center text-gray-500 bg-white rounded-xl border border-gray-200 shadow-sm">
+                 No words match your search.
+               </div>
+            )}
+          </div>
           )}
         </div>
       )}
