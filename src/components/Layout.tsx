@@ -8,7 +8,7 @@ export default function Layout() {
   const navLinks = [
     { path: '/', label: 'Home' },
     { path: '/import', label: 'Import' },
-    { path: '/collections', label: 'Collections' },
+    { path: '/quizzes', label: 'Quizzes' },
     { path: '/vocabulary', label: 'Vocabulary' },
     { path: '/grammar', label: 'Grammar' },
     { path: '/statistics', label: 'Statistics' },
@@ -43,16 +43,6 @@ export default function Layout() {
             Practice
           </Link>
         </nav>
-        
-        {/* User Profile / Logout Desktop */}
-        {user && (
-          <div className="p-4 border-t border-gray-800 mt-4">
-            <div className="text-sm truncate mb-2 px-2 text-gray-400" title={user.email || ''}>{user.email}</div>
-            <button onClick={signOut} className="w-full text-left px-2 py-1.5 text-sm text-gray-300 hover:text-white transition-colors">
-              Sign Out
-            </button>
-          </div>
-        )}
       </aside>
 
       {/* Mobile Top Header */}
@@ -64,18 +54,56 @@ export default function Layout() {
           <Link to="/quiz" className="bg-blue-600 text-white font-bold px-3 py-1.5 rounded shadow hover:bg-blue-700 transition-colors text-sm">
             Practice
           </Link>
-          {user && (
-            <button onClick={signOut} className="text-xs text-gray-400 hover:text-white border border-gray-600 px-2 py-1.5 rounded">Logout</button>
+          {user ? (
+            <button onClick={signOut} title="Sign Out" className="flex items-center">
+              {user.photoURL ? (
+                <img src={user.photoURL} alt="Profile" className="w-7 h-7 rounded-full border border-gray-700" />
+              ) : (
+                <div className="w-7 h-7 rounded-full bg-gray-700 text-white flex items-center justify-center font-bold text-xs border border-gray-600">
+                  {user.email?.charAt(0).toUpperCase()}
+                </div>
+              )}
+            </button>
+          ) : (
+            <Link to="/login" className="text-xs text-gray-400 hover:text-white border border-gray-600 px-2 py-1.5 rounded">Login</Link>
           )}
         </div>
       </div>
 
-      {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto p-4 md:p-8 pb-20 md:pb-8">
-        <div className="max-w-4xl mx-auto">
-          <Outlet />
-        </div>
-      </main>
+      {/* Desktop Top Header & Main Content Area */}
+      <div className="flex-1 flex flex-col h-screen overflow-hidden bg-gray-50">
+        {/* Desktop Top Profile Widget */}
+        <header className="hidden md:flex justify-end items-center px-8 py-4 bg-white border-b border-gray-200 shadow-sm z-10">
+          {user ? (
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                {user.photoURL ? (
+                  <img src={user.photoURL} alt="Profile" className="w-8 h-8 rounded-full border border-gray-200 shadow-sm" />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold shadow-sm">
+                    {user.email?.charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <span className="text-sm font-medium text-gray-700 hidden lg:block">{user.displayName || user.email}</span>
+              </div>
+              <button onClick={signOut} className="text-sm font-medium text-gray-500 hover:text-gray-900 border-l pl-4 border-gray-300 transition-colors">
+                Sign Out
+              </button>
+            </div>
+          ) : (
+            <Link to="/login" className="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors">
+              Log in
+            </Link>
+          )}
+        </header>
+
+        {/* Main Content */}
+        <main className="flex-1 overflow-y-auto p-4 md:p-8 pb-20 md:pb-8">
+          <div className="max-w-4xl mx-auto">
+            <Outlet />
+          </div>
+        </main>
+      </div>
 
       {/* Mobile Bottom Navigation */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around items-center h-16 text-xs font-medium z-10">
@@ -88,8 +116,8 @@ export default function Layout() {
         <Link to="/import" className={`flex flex-col items-center flex-1 py-2 ${location.pathname === '/import' ? 'text-blue-600' : 'text-gray-500'}`}>
           Import
         </Link>
-        <Link to="/collections" className={`flex flex-col items-center flex-1 py-2 ${location.pathname === '/collections' ? 'text-blue-600' : 'text-gray-500'}`}>
-          More
+        <Link to="/quizzes" className={`flex flex-col items-center flex-1 py-2 ${location.pathname === '/quizzes' ? 'text-blue-600' : 'text-gray-500'}`}>
+          Quizzes
         </Link>
       </nav>
     </div>

@@ -1,20 +1,40 @@
-import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
-import { auth } from '../lib/firebase';
+import { useEffect } from 'react';
+import { signInWithRedirect, GoogleAuthProvider } from 'firebase/auth';
+import { auth } from '../lib/firebase'; // Corrected path
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../AuthContext';
 
 export default function Login() {
+  const { user, loading } = useAuth(); // Corrected from previous version
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // If the user is already logged in, redirect them to the home page.
+    if (!loading && user) { // Corrected from previous version
+      navigate('/');
+    }
+  }, [user, loading, navigate]); // Corrected from previous version
 
   const handleGoogleLogin = async () => {
     try {
       const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
-      navigate('/'); // Redirect to home after successful login
+      // Use redirect for all devices for maximum compatibility.
+      // The page will reload after Google redirects back, and AuthContext will handle the user state.
+      await signInWithRedirect(auth, provider);
     } catch (error) {
       console.error("Login failed:", error);
       alert("Failed to log in with Google.");
     }
   };
+
+  // While authenticating or if user is already logged in, show a loading state to prevent flicker. // Corrected from previous version
+  if (loading || user) { // Corrected from previous version
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4 w-full absolute inset-0">
+        <p className="text-gray-500">Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4 w-full absolute inset-0">
@@ -35,6 +55,13 @@ export default function Login() {
             <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
           </svg>
           Continue with Google
+        </button>
+        
+        <button
+          onClick={() => navigate('/')}
+          className="w-full flex items-center justify-center gap-3 bg-transparent text-gray-500 hover:text-gray-800 font-medium py-3 px-4 rounded-xl transition-all"
+        >
+          Continue as a guest
         </button>
       </div>
     </div>

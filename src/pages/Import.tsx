@@ -2,9 +2,12 @@ import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import FileDropZone from "../components/FileDropZone";
 import { ParsedImport } from "../lib/importParser";
-import { db } from "../lib/db";
+import { useAuth } from "../AuthContext";
+import { useCloudVocabulary, bulkAddCloudWords } from "../lib/firestore";
 
 export default function Import() {
+  const { user } = useAuth();
+  const existingItems = useCloudVocabulary(user?.uid) || [];
   const [data, setData] = useState<ParsedImport | null>(null);
   const [saving, setSaving] = useState(false);
   const [destination, setDestination] = useState("vocabulary");
@@ -41,15 +44,13 @@ export default function Import() {
   }, [data]);
 
   const handleSave = async () => {
-    if (parsedPreview.length === 0) {
-      alert("No valid vocabulary items to save.");
+    if (parsedPreview.length === 0 || !user) {
+      alert("No valid vocabulary items to save or user not logged in.");
       return;
     }
     
     setSaving(true);
     try {
-      // Fetch existing items to check for duplicates
-      const existingItems = await db.vocabulary.toArray();
       const existingSet = new Set(
         existingItems.map(item => `${item.german.toLowerCase().trim()}|${item.hungarian.toLowerCase().trim()}`)
       );
@@ -63,6 +64,7 @@ export default function Import() {
           existingSet.add(key); // Prevent duplicates within the new batch itself
           itemsToSave.push({
             ...item,
+            userId: user.uid,
             dateAdded: Date.now(),
             category: destination
           });
@@ -72,7 +74,7 @@ export default function Import() {
       }
 
       if (itemsToSave.length > 0) {
-        await db.vocabulary.bulkAdd(itemsToSave);
+        await bulkAddCloudWords(itemsToSave);
       }
       setData(null); // Clear preview after saving
       

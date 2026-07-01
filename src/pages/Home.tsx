@@ -1,10 +1,13 @@
 import { Link } from 'react-router-dom';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../lib/db';
+import { useAuth } from '../AuthContext';
+import { useCloudVocabulary } from '../lib/firestore';
 
 export default function Home() {
-  const wordCount = useLiveQuery(() => db.vocabulary.count());
-  const recentWords = useLiveQuery(() => db.vocabulary.orderBy('id').reverse().limit(3).toArray());
+  const { user } = useAuth();
+  const allWords = useCloudVocabulary(user?.uid);
+  
+  const wordCount = allWords?.length || 0;
+  const recentWords = allWords ? [...allWords].sort((a, b) => b.dateAdded - a.dateAdded).slice(0, 3) : [];
 
   return (
     <div className="space-y-6">
@@ -22,20 +25,12 @@ export default function Home() {
     <p className="text-blue-100 mb-4">
       Continue practicing or start a new quiz session.
     </p>
-    <div className="flex flex-wrap gap-4">
-      <Link
-        to="/quiz"
-        className="inline-block bg-white text-blue-600 font-bold px-4 py-2 rounded shadow hover:bg-gray-50 transition-colors"
-      >
-        Start Practice
-      </Link>
-      <Link
-        to="/import"
-        className="inline-block bg-blue-700 text-white font-bold px-4 py-2 rounded shadow border border-blue-500 hover:bg-blue-800 transition-colors"
-      >
-        Import Materials
-      </Link>
-    </div>
+    <Link
+      to="/quiz"
+      className="inline-block bg-white text-blue-600 font-bold px-4 py-2 rounded shadow hover:bg-gray-50 transition-colors"
+    >
+      Start Practice
+    </Link>
   </div>
 
   {/* Secondary Actions */}
@@ -43,17 +38,41 @@ export default function Home() {
 
     <Link to="/import" className="p-4 bg-white rounded shadow hover:shadow-md border-l-4 border-green-500">
       <h3 className="font-bold">Import Data</h3>
-      <p className="text-sm text-gray-600">Upload new vocabulary and files</p>
+      <div className="text-sm text-gray-600 mt-1">
+        Upload new learning materials
+        {!user && (
+          <span className="flex items-center gap-1 text-xs text-gray-400 mt-1.5 font-medium">
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+            (log in required)
+          </span>
+        )}
+      </div>
     </Link>
 
-    <Link to="/collections" className="p-4 bg-white rounded shadow hover:shadow-md">
-      <h3 className="font-bold">Collections</h3>
-      <p className="text-sm text-gray-600">Manage your learning sets</p>
+    <Link to="/quizzes" className="p-4 bg-white rounded shadow hover:shadow-md">
+      <h3 className="font-bold">Quizzes</h3>
+      <div className="text-sm text-gray-600 mt-1">
+        Manage your learning sets
+        {!user && (
+          <span className="flex items-center gap-1 text-xs text-gray-400 mt-1.5 font-medium">
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+            (to create new quizzes, log in required)
+          </span>
+        )}
+      </div>
     </Link>
 
     <Link to="/vocabulary" className="p-4 bg-white rounded shadow hover:shadow-md">
       <h3 className="font-bold">Vocabulary</h3>
-      <p className="text-sm text-gray-600">Browse all words</p>
+      <div className="text-sm text-gray-600 mt-1">
+        Learn new words and phrases
+        {!user && (
+          <span className="flex items-center gap-1 text-xs text-gray-400 mt-1.5 font-medium">
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+            (for extending, log in required)
+          </span>
+        )}
+      </div>
     </Link>
 
     <Link to="/grammar" className="p-4 bg-white rounded shadow hover:shadow-md">

@@ -1,20 +1,29 @@
 import { Outlet } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
-import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { signInWithPopup, signInWithRedirect, GoogleAuthProvider } from 'firebase/auth';
 import { auth } from '../lib/firebase';
 
 export default function ProtectedRoute() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
 
   const handleGoogleLogin = async () => {
     try {
       const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
+      // Use redirect for all devices for maximum compatibility.
+      await signInWithRedirect(auth, provider);
     } catch (error) {
       console.error("Login failed:", error);
       alert("Failed to log in with Google.");
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[70vh]">
+        <p className="text-gray-500">Authenticating...</p>
+      </div>
+    );
+  }
 
   if (!user) {
     return (
