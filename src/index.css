@@ -2,15 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-/* basic global reset */
-html, body {
-  margin: 0;
-  padding: 0;
+html, body, #root {
   height: 100%;
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  background-color: #f9fafb;
-}
-
-#root {
-  min-height: 100%;
+  background-color: #f9fafb; /* gray-50 */
 }
