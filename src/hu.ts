@@ -1,4 +1,6 @@
 export const hu = {
+  title: "Német vizsga előkészítő",
+
   // Settings
   settings_title: "Beállítások",
   settings_subtitle: "Kezeld a fiókod és az alkalmazás beállításait.",
@@ -13,11 +15,24 @@ export const hu = {
   show_example_sentences: "Példamondatok mutatása",
   show_example_sentences_subtitle: "Példamondatok megjelenítése a kérdések megválaszolása után.",
   save_preferences: "Beállítások mentése",
+  saving_preferences: "Mentés...",
+  save_button: "Mentés",
   saved: "Mentve!",
+  data_management: "Adatkezelés",
+  data_management_subtitle: "Mentett haladás és helyi adatok kezelése.",
+  clear_local_data: "Helyi haladás törlése",
+  clear_local_data_desc: "Helyi kvíz eredmények és haladás törlése. A felhőben tárolt szókincset nem törli.",
+  confirm_clear_data: "Biztosan törölni szeretné az összes helyi haladást? Ezt nem lehet visszavonni.",
+  data_cleared: "A helyi haladás sikeresen törölve.",
+  reset_personal_library: "Saját könyvtár visszaállítása",
+  reset_personal_library_desc: "Véglegesen törli az összes egyénileg importált szót és nyelvtani anyagot a felhőből. Ezt nem lehet visszavonni.",
+  confirm_reset_library: "Biztosan törölni szeretné a saját könyvtár összes elemét? Ezt nem lehet visszavonni.",
+  library_wiped: "A saját könyvtár sikeresen törölve.",
+  wipe_error: "Nem sikerült törölni a saját könyvtárat. Kérjük, próbálja újra.",
+  wiping_data: "Adatok törlése...",
+  hard_reset_database: "Könyvtár törlése",
   developer_tools: "Fejlesztői eszközök",
   developer_tools_subtitle: "Használd ezt a gombot a személyes felhőadataid teljes törléséhez. (Ez NEM törli a nyilvános vendégkönyvtárat). Töröld ezt a kódból a közzététel előtt.",
-  wiping_data: "Adatok törlése...",
-  hard_reset_database: "Adatbázis teljes törlése",
   hard_reset_warning: "⚠️ FIGYELMEZTETÉS: BIZTOSAN törölni akarod az ÖSSZES személyes importált szókincsedet? (A nyilvános könyvtárat ez nem érinti). Ezt nem lehet visszavonni!",
   hard_reset_success: "Adatbázis teljesen törölve! Tiszta lappal kezdesz.",
 

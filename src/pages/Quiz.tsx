@@ -314,9 +314,9 @@ export default function Quiz() {
     if (isCorrect) {
       setScore(s => s + 1);
 
-      // Auto-advance. Longer delay if there is an example sentence to read (and it's enabled), and even longer if it exceeds 30 characters!
+        // Auto-advance: Wait 3 seconds, or 10 seconds if there's an example sentence longer than 20 characters.
       const currentExample = questions[currentQuestionIndex].example;
-      const delay = (showExamples && currentExample) ? (currentExample.length > 30 ? 20000 : 3500) : 1000;
+      const delay = (showExamples && currentExample) ? (currentExample.length > 20 ? 10000 : 3500) : 1000;
       setTimeout(() => {
         setIsAnswered(false);
         setSelectedAnswer(null);

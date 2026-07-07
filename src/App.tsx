@@ -43,11 +43,11 @@ export default function App() {
             <Route path="/learning-materials" element={<LearningMaterials />} />
             <Route path="/learning-materials/reading" element={<ReadingMaterials />} />
             <Route path="/learning-materials/reading/false-friends" element={<FalseFriends />} />
+            <Route path="/settings" element={<Settings />} />
             
             {/* Personalized sections requiring login */}
             <Route element={<ProtectedRoute />}>
               <Route path="/import" element={<Import />} />
-              <Route path="/settings" element={<Settings />} />
               <Route path="/create-quiz" element={<CreateQuiz />} />
             </Route>
           </Route>
