@@ -1,6 +1,10 @@
 export interface PublicWord {
   german: string;
   hungarian: string;
+  example?: string;
+  case?: string;
+  note?: string;
+  category?: string;
 }
 
 export const publicVocabulary: PublicWord[] = [
@@ -1353,4 +1357,26 @@ export const publicArticles: PublicWord[] = [
   { german: "Ziegel", hungarian: "der" },
   { german: "Löffel", hungarian: "der" },
   { german: "Schlüssel", hungarian: "der" },
+];
+
+export const publicPrepositions: PublicWord[] = [
+  { german: "mit", hungarian: "val/vel", case: "Dativ" },
+  { german: "nach", hungarian: "után", case: "Dativ" },
+  { german: "aus", hungarian: "ból/ből", case: "Dativ" },
+  { german: "zu", hungarian: "hoz/hez/höz", case: "Dativ" },
+  { german: "von", hungarian: "tól/től", case: "Dativ" },
+  { german: "bei", hungarian: "nál/nél", case: "Dativ" },
+  { german: "für", hungarian: "ért, számára", case: "Akkusativ" },
+  { german: "um", hungarian: "körül", case: "Akkusativ" },
+  { german: "durch", hungarian: "át, keresztül", case: "Akkusativ" },
+  { german: "ohne", hungarian: "nélkül", case: "Akkusativ" },
+  { german: "gegen", hungarian: "ellen", case: "Akkusativ" }
+];
+
+export const publicFalseFriends: PublicWord[] = [
+  { german: "das Gift", hungarian: "méreg", note: "Not a gift! (ajándék = das Geschenk)" },
+  { german: "bekommen", hungarian: "kapni", note: "Not 'to become'! (válni valamivé = werden)" },
+  { german: "das Gymnasium", hungarian: "gimnázium", note: "Not a gym! (edzőterem = das Fitnessstudio)" },
+  { german: "der Chef", hungarian: "főnök", note: "Not a chef! (séf/szakács = der Koch)" },
+  { german: "die Rente", hungarian: "nyugdíj", note: "Not rent! (bérleti díj = die Miete)" }
 ];

@@ -7,6 +7,8 @@ export interface VocabularyItem {
   example?: string;
   dateAdded: number;
   category?: string;
+  sourceFile?: string;
+  sourceType?: string;
 }
 
 const db = new Dexie('MicaLingoDB') as Dexie & {
@@ -20,6 +22,11 @@ db.version(1).stores({
 // Add version 2 to smoothly upgrade the database schema with the new category field
 db.version(2).stores({
   vocabulary: '++id, german, hungarian, dateAdded, category'
+});
+
+// Add version 3 to support source file tracking
+db.version(3).stores({
+  vocabulary: '++id, german, hungarian, dateAdded, category, sourceFile, sourceType'
 });
 
 export { db };

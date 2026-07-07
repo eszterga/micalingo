@@ -10,6 +10,8 @@ export interface CloudVocabularyItem {
   example?: string;
   dateAdded: number;
   category?: string;
+  sourceFile?: string;
+  sourceType?: string;
 }
 
 const VOCAB_COLLECTION = 'vocabulary';
@@ -57,4 +59,16 @@ export const bulkAddCloudWords = async (words: Omit<CloudVocabularyItem, 'id'>[]
     batch.set(newRef, word);
   });
   await batch.commit();
+};
+
+export const bulkDeleteCloudWords = async (ids: string[]) => {
+  const chunkSize = 500; // Firestore allows max 500 operations per batch
+  for (let i = 0; i < ids.length; i += chunkSize) {
+    const chunk = ids.slice(i, i + chunkSize);
+    const batch = writeBatch(dbCloud);
+    chunk.forEach(id => {
+      batch.delete(doc(dbCloud, VOCAB_COLLECTION, id));
+    });
+    await batch.commit();
+  }
 };
