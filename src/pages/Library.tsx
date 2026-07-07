@@ -6,9 +6,14 @@ export default function Library() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">{t('library')}</h1>
-        <p className="text-gray-600 mt-1">{t('library_subtitle')}</p>
+      <div className="flex items-center gap-4">
+        <Link to="/" className="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium px-4 py-2 rounded-lg shadow-sm transition-colors flex items-center gap-2">
+          {t('back_button')}
+        </Link>
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">{t('library')}</h1>
+          <p className="text-gray-600 mt-1">{t('library_subtitle')}</p>
+        </div>
       </div>
       
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

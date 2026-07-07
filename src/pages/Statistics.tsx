@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../AuthContext";
 import { useI18n } from "../I18nContext";
 import { Link } from "react-router-dom";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { dbCloud } from "../lib/firebase";
 
 export default function Statistics() {
   const { user } = useAuth();
@@ -12,6 +14,53 @@ export default function Statistics() {
   useEffect(() => {
     const historyKey = user ? `micalingo_history_${user.uid}` : 'micalingo_guest_history';
     setHistory(JSON.parse(localStorage.getItem(historyKey) || '{}'));
+    const fetchStats = async () => {
+      const guestHistory = JSON.parse(localStorage.getItem('micalingo_guest_history') || '{}');
+      const guestScores = JSON.parse(localStorage.getItem('micalingo_guest_scores') || '{}');
+
+      if (user) {
+        const historyKey = `micalingo_history_${user.uid}`;
+        const scoreKey = `micalingo_scores_${user.uid}`;
+        let localHistory = JSON.parse(localStorage.getItem(historyKey) || '{}');
+        let localScores = JSON.parse(localStorage.getItem(scoreKey) || '{}');
+
+        // Merge guest data into user data if they just logged in
+        if (Object.keys(guestHistory).length > 0) {
+          localHistory = { ...localHistory, ...guestHistory };
+          localScores = { ...localScores, ...guestScores };
+          localStorage.removeItem('micalingo_guest_history');
+          localStorage.removeItem('micalingo_guest_scores');
+          localStorage.setItem(historyKey, JSON.stringify(localHistory));
+          localStorage.setItem(scoreKey, JSON.stringify(localScores));
+          
+          try {
+            const statsRef = doc(dbCloud, 'user_stats', user.uid);
+            await setDoc(statsRef, { scores: localScores, history: localHistory }, { merge: true });
+          } catch(e) { console.error(e); }
+        }
+
+        // Fetch from Cloud
+        try {
+          const statsRef = doc(dbCloud, 'user_stats', user.uid);
+          const snap = await getDoc(statsRef);
+          if (snap.exists()) {
+            const data = snap.data();
+            if (data.history) localHistory = { ...localHistory, ...data.history };
+            if (data.scores) localScores = { ...localScores, ...data.scores };
+            localStorage.setItem(historyKey, JSON.stringify(localHistory));
+            localStorage.setItem(scoreKey, JSON.stringify(localScores));
+          }
+        } catch (error) {
+          console.error("Error fetching cloud stats:", error);
+        }
+
+        setHistory(localHistory);
+      } else {
+        setHistory(guestHistory);
+      }
+    };
+
+    fetchStats();
   }, [user]);
 
   const toggleSelection = (key: string) => {
@@ -21,7 +70,7 @@ export default function Statistics() {
     setSelectedKeys(next);
   };
 
-  const handleBulkDelete = () => {
+  const handleBulkDelete = async () => {
     if (selectedKeys.size === 0) return;
     if (!confirm(t('confirm_bulk_delete_records', { count: selectedKeys.size }) || "Are you sure?")) return;
 
@@ -38,19 +87,29 @@ export default function Statistics() {
     
     localStorage.setItem(historyKey, JSON.stringify(newHistory));
     localStorage.setItem(scoreKey, JSON.stringify(scores));
+
+    // Ensure cloud stays in sync with deletions
+    if (user) {
+      try {
+        const statsRef = doc(dbCloud, 'user_stats', user.uid);
+        await setDoc(statsRef, { history: newHistory, scores });
+      } catch(e) {
+        console.error("Failed to delete from cloud:", e);
+      }
+    }
     
     setHistory(newHistory);
     setSelectedKeys(new Set());
   };
 
   const downloadCsv = (key: string, data: any) => {
-    let csv = `${t('csv_question') || 'Question'},${t('your_answer') || 'Your Answer'},${t('correct_answer') || 'Correct Answer'},${t('csv_result') || 'Result'}\n`;
+    let csv = `German,Hungarian,Example,${t('csv_question') || 'Question'},${t('your_answer') || 'Your Answer'},${t('correct_answer') || 'Correct Answer'},${t('csv_result') || 'Result'}\n`;
     if (data.questions) {
       data.questions.forEach((q: any, i: number) => {
         const userAnswer = data.userAnswers ? data.userAnswers[i] || '' : '';
         const isCorrect = userAnswer === q.correctAnswer;
-        const statusText = isCorrect ? (t('csv_correct') || 'Correct') : (t('csv_incorrect') || 'Incorrect');
-        csv += `"${q.questionText}","${userAnswer}","${q.correctAnswer}","${statusText}"\n`;
+        const statusText = isCorrect ? '✅' : '❌';
+        csv += `"${q.german || ''}","${q.hungarian || ''}","${q.example || ''}","${q.questionText}","${userAnswer}","${q.correctAnswer}","${statusText}"\n`;
       });
     }
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -126,7 +185,7 @@ export default function Statistics() {
                   </th>
                   <th className="p-3 font-semibold text-gray-600 text-sm">Quiz</th>
                   <th className="p-3 font-semibold text-gray-600 text-sm">Score</th>
-                  <th className="p-3 font-semibold text-gray-600 text-sm text-center">Status</th>
+                  <th className="p-3 font-semibold text-gray-600 text-sm text-center">{t('result') || 'Result'}</th>
                   <th className="p-3 font-semibold text-gray-600 text-sm text-right">Actions</th>
                 </tr>
               </thead>
@@ -137,13 +196,13 @@ export default function Statistics() {
                   const percentage = Math.round((score / total) * 100) || 0;
                   
                   let statusColor = "bg-gray-100 text-gray-800";
-                  let statusText = "Needs Practice";
-                  if (percentage >= 80) {
+                  let statusText = t('status_needs_practice') || "Needs Practice";
+                  if (percentage >= 76) {
                     statusColor = "bg-green-100 text-green-800 border-green-200";
-                    statusText = "Excellent";
-                  } else if (percentage >= 50) {
+                    statusText = t('status_excellent') || "Excellent";
+                  } else if (percentage >= 41) {
                     statusColor = "bg-yellow-100 text-yellow-800 border-yellow-200";
-                    statusText = "Good";
+                    statusText = t('status_good') || "Good";
                   } else {
                     statusColor = "bg-red-100 text-red-800 border-red-200";
                   }
@@ -168,7 +227,7 @@ export default function Statistics() {
                         </div>
                         <div className="w-full max-w-[150px] bg-gray-200 rounded-full h-1.5 mt-2 overflow-hidden">
                           <div 
-                            className={`h-1.5 rounded-full ${percentage >= 80 ? 'bg-green-500' : percentage >= 50 ? 'bg-yellow-400' : 'bg-red-500'}`} 
+                            className={`h-1.5 rounded-full ${percentage >= 76 ? 'bg-green-500' : percentage >= 41 ? 'bg-yellow-400' : 'bg-red-500'}`} 
                             style={{ width: `${percentage}%` }}
                           ></div>
                         </div>

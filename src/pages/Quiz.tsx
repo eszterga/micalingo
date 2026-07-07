@@ -12,6 +12,8 @@ interface Question {
   options: string[];
   correctAnswer: string;
   example?: string;
+  german?: string;
+  hungarian?: string;
 }
 
 export default function Quiz() {
@@ -22,6 +24,7 @@ export default function Quiz() {
   const topic = searchParams.get("topic");
   const quizId = parseInt(searchParams.get("quizId") || "1", 10);
   const isCustom = searchParams.get("custom") === 'true';
+  const isRedo = searchParams.get("redo") === 'true';
   const userVocabulary = useCloudVocabulary(user?.uid);
   const publicDbWords = useCloudVocabulary("PUBLIC_LIBRARY") || [];
 
@@ -91,6 +94,8 @@ export default function Quiz() {
           options,
           correctAnswer,
           example: word.example,
+          german: word.german,
+          hungarian: word.hungarian
         };
       } else if (topic === 'prepositions' || (isCustom && topic === 'prepositions')) {
         const correctAnswer = word.case || "Akkusativ";
@@ -107,6 +112,8 @@ export default function Quiz() {
           options,
           correctAnswer,
           example: word.example,
+          german: word.german,
+          hungarian: word.hungarian
         };
       } else {
         // Standard logic for vocabulary and phrases
@@ -134,6 +141,8 @@ export default function Quiz() {
           options,
           correctAnswer,
           example: word.example,
+          german: word.german,
+          hungarian: word.hungarian
         };
       }
     }).filter(Boolean) as Question[];
@@ -146,7 +155,11 @@ export default function Quiz() {
     const quizKey = isCustom ? `custom_${topic || 'general'}_${quizId}` : `${topic || 'custom'}_${quizId}`;
     const savedProgress = progressMap[quizKey];
 
-    if (savedProgress && savedProgress.questions && savedProgress.questions.length > 0) {
+    if (isRedo && savedProgress) {
+      // Clear saved progress if user explicitly clicked Redo
+      delete progressMap[quizKey];
+      localStorage.setItem(progressKey, JSON.stringify(progressMap));
+    } else if (savedProgress && savedProgress.questions && savedProgress.questions.length > 0) {
       setQuestions(savedProgress.questions);
       setCurrentQuestionIndex(savedProgress.index);
       setScore(savedProgress.score);
@@ -303,7 +316,7 @@ export default function Quiz() {
 
       // Auto-advance. Longer delay if there is an example sentence to read (and it's enabled), and even longer if it exceeds 30 characters!
       const currentExample = questions[currentQuestionIndex].example;
-      const delay = (showExamples && currentExample) ? (currentExample.length > 30 ? 5500 : 3500) : 1000;
+      const delay = (showExamples && currentExample) ? (currentExample.length > 30 ? 20000 : 3500) : 1000;
       setTimeout(() => {
         setIsAnswered(false);
         setSelectedAnswer(null);
@@ -387,18 +400,12 @@ export default function Quiz() {
           </button>
           <button onClick={() => {
             const quizKey = isCustom ? `custom_${topic || 'general'}_${quizId}` : `${topic || 'custom'}_${quizId}`;
-            navigate(`/results?quizKey=${quizKey}`);
-          }} className="w-full sm:w-auto bg-purple-100 text-purple-700 font-bold px-6 py-2.5 rounded-lg hover:bg-purple-200 transition-colors">
-            {t('review_answers') || 'Review Answers'}
-          </button>
-          <button onClick={() => {
-            const quizKey = isCustom ? `custom_${topic || 'general'}_${quizId}` : `${topic || 'custom'}_${quizId}`;
-            let csv = `${t('csv_question') || 'Question'},${t('your_answer') || 'Your Answer'},${t('correct_answer') || 'Correct Answer'},${t('csv_result') || 'Result'}\n`;
+            let csv = `German,Hungarian,Example,${t('csv_question') || 'Question'},${t('your_answer') || 'Your Answer'},${t('correct_answer') || 'Correct Answer'},${t('csv_result') || 'Result'}\n`;
             questions.forEach((q, i) => {
               const userAnswer = userAnswers[i] || '';
               const isCorrect = userAnswer === q.correctAnswer;
-              const statusText = isCorrect ? (t('csv_correct') || 'Correct') : (t('csv_incorrect') || 'Incorrect');
-              csv += `"${q.questionText}","${userAnswer}","${q.correctAnswer}","${statusText}"\n`;
+              const statusText = isCorrect ? '✅' : '❌';
+              csv += `"${q.german || ''}","${q.hungarian || ''}","${q.example || ''}","${q.questionText}","${userAnswer}","${q.correctAnswer}","${statusText}"\n`;
             });
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);

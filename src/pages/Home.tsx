@@ -159,8 +159,7 @@ function CloudLink({ to, title, locked, isComingSoon, t, sizeClass, animationSty
     <div style={animationStyle}>
       <Link 
         to={to} 
-        className={`relative group flex flex-col items-center justify-center ${sizeClass || 'w-40 h-28 md:w-48 md:h-32'} ${locked ? 'opacity-80' : 'cursor-pointer hover:scale-105 transition-transform duration-300'}`}
-        onClick={(e) => { if (locked) e.preventDefault(); }}
+        className={`relative group flex flex-col items-center justify-center cursor-pointer hover:scale-105 transition-transform duration-300 ${sizeClass || 'w-40 h-28 md:w-48 md:h-32'} ${locked ? 'opacity-90' : ''}`}
       >
         {/* Authentic Smooth Cloud Shape */}
         <svg className="absolute inset-0 w-full h-full text-white group-hover:text-green-400 drop-shadow-xl transition-colors duration-300" viewBox="0 0 120 80" preserveAspectRatio="none" fill="currentColor">

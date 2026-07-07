@@ -21,13 +21,13 @@ export default function Results() {
   }, [user, selectedQuizKey]);
 
   const downloadCsv = (key: string, data: any) => {
-    let csv = `${t('csv_question') || 'Question'},${t('your_answer') || 'Your Answer'},${t('correct_answer') || 'Correct Answer'},${t('csv_result') || 'Result'}\n`;
+    let csv = `German,Hungarian,Example,${t('csv_question') || 'Question'},${t('your_answer') || 'Your Answer'},${t('correct_answer') || 'Correct Answer'},${t('csv_result') || 'Result'}\n`;
     if (data.questions) {
       data.questions.forEach((q: any, i: number) => {
         const userAnswer = data.userAnswers ? data.userAnswers[i] || '' : '';
         const isCorrect = userAnswer === q.correctAnswer;
-        const statusText = isCorrect ? (t('csv_correct') || 'Correct') : (t('csv_incorrect') || 'Incorrect');
-        csv += `"${q.questionText}","${userAnswer}","${q.correctAnswer}","${statusText}"\n`;
+        const statusText = isCorrect ? '✅' : '❌';
+        csv += `"${q.german || ''}","${q.hungarian || ''}","${q.example || ''}","${q.questionText}","${userAnswer}","${q.correctAnswer}","${statusText}"\n`;
       });
     }
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -113,9 +113,9 @@ export default function Results() {
                     <div className="flex justify-between items-start gap-4 mb-2">
                       <p className="font-bold text-gray-900 text-lg">{i + 1}. {q.questionText}</p>
                       {isCorrect ? (
-                        <span className="shrink-0 bg-green-100 text-green-800 text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">{t('csv_correct') || 'Correct'}</span>
+                        <span className="shrink-0 bg-green-100 text-green-800 text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">✅ {t('csv_correct') || 'Correct'}</span>
                       ) : (
-                        <span className="shrink-0 bg-red-100 text-red-800 text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">{t('csv_incorrect') || 'Incorrect'}</span>
+                        <span className="shrink-0 bg-red-100 text-red-800 text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">❌ {t('csv_incorrect') || 'Incorrect'}</span>
                       )}
                     </div>
                     

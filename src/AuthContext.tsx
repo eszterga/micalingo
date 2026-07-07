@@ -25,8 +25,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [adminMode, setAdminMode] = useState(false);
 
-  // Optional: Add your Google email here to unlock admin features
-  const isAdmin = user?.email === 'your.email@gmail.com'; 
+  const adminEmails = ['esztergalyos.ildiko@gmail.com', 'ildiko.esztergalyos@gmail.com'];
+  const isAdmin = user?.email ? adminEmails.includes(user.email) : false;
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {

@@ -80,9 +80,6 @@ export default function TopicQuizzes() {
             <p className="text-gray-600 mt-1">{t('select_level_to_start') || 'Select a level to start practicing.'}</p>
           </div>
         </div>
-        <Link to="/results" className="bg-purple-100 text-purple-700 hover:bg-purple-200 font-bold px-4 py-2 rounded-lg shadow-sm transition-colors whitespace-nowrap">
-          {t('review_answers') || 'Review Answers'}
-        </Link>
       </div>
 
       <div className="flex overflow-x-auto whitespace-nowrap border-b border-gray-200">
@@ -96,7 +93,7 @@ export default function TopicQuizzes() {
           onClick={() => setActiveTab('custom')}
           className={`py-3 px-6 font-semibold text-sm border-b-2 transition-colors ${activeTab === 'custom' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
         >
-          {t('personalized_space') || 'Personalized Space'}
+          {t('personalized_space') || 'Private Space'}
         </button>
       </div>
 
@@ -112,48 +109,81 @@ export default function TopicQuizzes() {
               const isPerfect = score === itemsInThisQuiz;
 
               return (
-                <Link
+                <div
                   key={quizId}
-                  to={`/quiz?topic=${topic}&quizId=${quizId}`}
-                  className={`group flex items-center justify-between p-4 rounded-xl border-2 transition-all ${
-                    isPerfect ? "bg-green-50 border-green-500 hover:bg-green-100" : "bg-gray-50 border-gray-200 hover:border-blue-400 hover:bg-white shadow-sm"
+                  className={`group flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-xl border-2 transition-all gap-4 ${
+                    isPerfect ? "bg-green-50 border-green-500" : "bg-gray-50 border-gray-200 hover:border-blue-300 hover:bg-white shadow-sm"
                   }`}
                 >
-                  <div className="flex items-center gap-4">
-                    <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg shadow-sm ${
+                  <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
+                    <div className="w-6 flex justify-center flex-shrink-0">
+                      {isFinished && !hasProgress && (
+                        <svg className="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                        </svg>
+                      )}
+                    </div>
+                    <div className={`w-12 h-12 flex-shrink-0 rounded-full flex items-center justify-center font-bold text-lg shadow-sm ${
                       isPerfect ? "bg-green-500 text-white" : "bg-white text-blue-600 border border-blue-100"
                     }`}>
                       {quizId}
                     </div>
-                    <div>
-                      <span className={`block font-bold text-lg ${isPerfect ? 'text-green-900' : 'text-gray-800'}`}>Level {quizId}</span>
+                    <div className="flex-1">
+                      <span className={`block font-bold text-lg ${isPerfect ? 'text-green-900' : 'text-gray-800'}`}>{t('level_id', { id: quizId }) || `Level ${quizId}`}</span>
                       <span className={`text-sm ${isPerfect ? 'text-green-700' : 'text-gray-500'}`}>
                         {t('items_count', { count: itemsInThisQuiz }) || `${itemsInThisQuiz} items`}
                       </span>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-4">
-                    {isFinished && (
-                      <span className={`font-bold text-lg ${isPerfect ? 'text-green-700' : 'text-gray-600'}`}>
+                  <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto justify-end sm:justify-start">
+                    {isFinished && !hasProgress && (
+                      <span className={`font-bold text-lg mr-2 ${isPerfect ? 'text-green-700' : 'text-gray-600'}`}>
                         {score} / {itemsInThisQuiz}
                       </span>
                     )}
-            {hasProgress ? (
-              <span className="text-blue-600 font-bold">{t('continue_button') || 'Continue →'}</span>
-            ) : isPerfect ? (
-                      <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white shadow-sm">
+                    {hasProgress ? (
+                      <>
+                        <Link
+                          to={`/quiz?topic=${topic}&quizId=${quizId}&redo=true`}
+                          className="flex-1 sm:flex-none text-center bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 font-bold px-4 py-2 rounded-lg shadow-sm transition-colors"
+                        >
+                          {t('redo_button') || 'Restart'}
+                        </Link>
+                        <Link
+                          to={`/quiz?topic=${topic}&quizId=${quizId}`}
+                          className="flex-1 sm:flex-none text-center bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-lg shadow-sm transition-colors"
+                        >
+                          {t('continue_button') || 'Continue →'}
+                        </Link>
+                      </>
+                    ) : isPerfect ? (
+                      <Link
+                        to={`/quiz?topic=${topic}&quizId=${quizId}&redo=true`}
+                        className="flex-1 sm:flex-none text-center bg-green-500 hover:bg-green-600 text-white font-bold px-4 py-2 rounded-lg shadow-sm transition-colors flex items-center justify-center gap-2"
+                      >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                         </svg>
-                      </div>
-                ) : isFinished ? (
-                  <span className="text-blue-500 font-medium">{t('retry_quiz') || 'Retry'}</span>
+                        {t('redo_button') || 'Restart'}
+                      </Link>
+                    ) : isFinished ? (
+                      <Link
+                        to={`/quiz?topic=${topic}&quizId=${quizId}&redo=true`}
+                        className="flex-1 sm:flex-none text-center bg-blue-100 hover:bg-blue-200 text-blue-700 font-bold px-4 py-2 rounded-lg shadow-sm transition-colors"
+                      >
+                        {t('retry_quiz') || 'Retry'}
+                      </Link>
                     ) : (
-                      <span className="text-gray-400 font-medium">{t('start_button') || 'Start'}</span>
+                      <Link
+                        to={`/quiz?topic=${topic}&quizId=${quizId}`}
+                        className="flex-1 sm:flex-none text-center bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2 rounded-lg shadow-sm transition-colors"
+                      >
+                        {t('start_button') || 'Start →'}
+                      </Link>
                     )}
                   </div>
-                </Link>
+                </div>
               );
             })}
           </div>
@@ -161,20 +191,31 @@ export default function TopicQuizzes() {
       )}
 
       {activeTab === 'custom' && (
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+        <div className="space-y-4">
           {!user ? (
-            <div className="text-center text-gray-500 py-8">
-              <p className="mb-4">{t('to_create_new_quizzes_login_required') || 'Log in to create custom quizzes.'}</p>
-              <button onClick={handleGoogleLogin} className="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-700">{t('login_with_google') || 'Log in with Google'}</button>
+            <div className="bg-white p-12 rounded-xl shadow-sm border border-gray-200 text-center">
+              <div className="max-w-md mx-auto">
+                <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                </div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-3">{t('personalized_space')}</h2>
+                <p className="text-gray-600 mb-8">
+                  {t('personalized_space_description')}
+                </p>
+                <button onClick={handleGoogleLogin} className="inline-flex items-center gap-3 bg-white border border-gray-300 hover:bg-gray-50 text-gray-800 font-bold py-3 px-6 rounded-xl shadow-sm transition-colors">
+                  <svg className="w-5 h-5" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                  {t('login_with_google')}
+                </button>
+              </div>
             </div>
           ) : customQuizzes.length === 0 ? (
-            <div className="text-center text-gray-500 py-8">
+            <div className="text-center text-gray-500 py-8 bg-white p-6 rounded-xl shadow-sm border border-gray-200">
               <h3 className="text-xl font-bold text-gray-800 mb-2">{t('not_enough_words')}</h3>
               <p className="mb-4">{t('not_enough_words_desc', { topic: pageTitle })}</p>
               <Link to={`/import?destination=${topic}`} className="bg-blue-600 text-white px-6 py-2.5 rounded-lg font-bold hover:bg-blue-700">{t('import_more_words') || 'Import Data'}</Link>
             </div>
           ) : (
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-3 bg-white p-6 rounded-xl shadow-sm border border-gray-200">
               {customQuizzes.map((quizId) => {
                 const scoreKey = `custom_${topic}_${quizId}`;
                 const score = scores[scoreKey];
@@ -188,20 +229,26 @@ export default function TopicQuizzes() {
                 const isPerfect = score === itemsInThisQuiz;
 
                 return (
-                  <Link
+                  <div
                     key={quizId}
-                    to={`/quiz?topic=${topic}&quizId=${quizId}&custom=true`}
-                    className={`group flex items-center justify-between p-4 rounded-xl border-2 transition-all ${
-                      isPerfect ? "bg-green-50 border-green-500 hover:bg-green-100" : "bg-gray-50 border-gray-200 hover:border-blue-400 hover:bg-white shadow-sm"
+                    className={`group flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-xl border-2 transition-all gap-4 ${
+                      isPerfect ? "bg-green-50 border-green-500" : "bg-gray-50 border-gray-200 hover:border-blue-300 hover:bg-white shadow-sm"
                     }`}
                   >
-                    <div className="flex items-center gap-4">
-                      <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg shadow-sm ${
+                    <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
+                      <div className="w-6 flex justify-center flex-shrink-0">
+                        {isFinished && !hasProgress && (
+                          <svg className="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                          </svg>
+                        )}
+                      </div>
+                      <div className={`w-12 h-12 flex-shrink-0 rounded-full flex items-center justify-center font-bold text-lg shadow-sm ${
                         isPerfect ? "bg-green-500 text-white" : "bg-white text-blue-600 border border-blue-100"
                       }`}>
                         {quizId}
                       </div>
-                      <div>
+                      <div className="flex-1">
                         <span className={`block font-bold text-lg ${isPerfect ? 'text-green-900' : 'text-gray-800'}`}>{t('level_id', { id: quizId }) || `Level ${quizId}`}</span>
                         <span className={`text-sm ${isPerfect ? 'text-green-700' : 'text-gray-500'}`}>
                           {t('items_count', { count: itemsInThisQuiz }) || `${itemsInThisQuiz} items`}
@@ -209,27 +256,54 @@ export default function TopicQuizzes() {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-4">
-                      {isFinished && (
-                        <span className={`font-bold text-lg ${isPerfect ? 'text-green-700' : 'text-gray-600'}`}>
+                    <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto justify-end sm:justify-start">
+                      {isFinished && !hasProgress && (
+                        <span className={`font-bold text-lg mr-2 ${isPerfect ? 'text-green-700' : 'text-gray-600'}`}>
                           {score} / {itemsInThisQuiz}
                         </span>
                       )}
-              {hasProgress ? (
-                <span className="text-blue-600 font-bold">{t('continue_button') || 'Continue →'}</span>
-              ) : isPerfect ? (
-                        <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white shadow-sm">
+                      {hasProgress ? (
+                        <>
+                          <Link
+                            to={`/quiz?topic=${topic}&quizId=${quizId}&custom=true&redo=true`}
+                            className="flex-1 sm:flex-none text-center bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 font-bold px-4 py-2 rounded-lg shadow-sm transition-colors"
+                          >
+                            {t('redo_button') || 'Restart'}
+                          </Link>
+                          <Link
+                            to={`/quiz?topic=${topic}&quizId=${quizId}&custom=true`}
+                            className="flex-1 sm:flex-none text-center bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-lg shadow-sm transition-colors"
+                          >
+                            {t('continue_button') || 'Continue →'}
+                          </Link>
+                        </>
+                      ) : isPerfect ? (
+                        <Link
+                          to={`/quiz?topic=${topic}&quizId=${quizId}&custom=true&redo=true`}
+                          className="flex-1 sm:flex-none text-center bg-green-500 hover:bg-green-600 text-white font-bold px-4 py-2 rounded-lg shadow-sm transition-colors flex items-center justify-center gap-2"
+                        >
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                           </svg>
-                        </div>
-                  ) : isFinished ? (
-                    <span className="text-blue-500 font-medium">{t('retry_quiz') || 'Retry'}</span>
+                          {t('redo_button') || 'Restart'}
+                        </Link>
+                      ) : isFinished ? (
+                        <Link
+                          to={`/quiz?topic=${topic}&quizId=${quizId}&custom=true&redo=true`}
+                          className="flex-1 sm:flex-none text-center bg-blue-100 hover:bg-blue-200 text-blue-700 font-bold px-4 py-2 rounded-lg shadow-sm transition-colors"
+                        >
+                          {t('retry_quiz') || 'Retry'}
+                        </Link>
                       ) : (
-                        <span className="text-gray-400 font-medium">{t('start_button') || 'Start'}</span>
+                        <Link
+                          to={`/quiz?topic=${topic}&quizId=${quizId}&custom=true`}
+                          className="flex-1 sm:flex-none text-center bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2 rounded-lg shadow-sm transition-colors"
+                        >
+                          {t('start_button') || 'Start →'}
+                        </Link>
                       )}
                     </div>
-                  </Link>
+                  </div>
                 );
               })}
             </div>

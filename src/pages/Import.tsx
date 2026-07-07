@@ -368,12 +368,12 @@ export default function Import() {
 
     if (type === 'articles') {
       templateData = [
-        { [t('template_article_header')]: "der", [t('template_noun_header')]: "Mann", [t('template_hungarian_header')]: "a férfi", [t('template_example_header')]: "Der Mann arbeitet im Büro." },
-        { [t('template_article_header')]: "die", [t('template_noun_header')]: "Frau", [t('template_hungarian_header')]: "a nő", [t('template_example_header')]: "Die Frau trinkt einen Kaffee." }
+        { [t('template_article_header')]: "der", [t('template_noun_header')]: "Mann, die Männer", [t('template_hungarian_header')]: "a férfi", [t('template_example_header')]: "Der Mann arbeitet im Büro." },
+        { [t('template_article_header')]: "die", [t('template_noun_header')]: "Frau, die Frauen", [t('template_hungarian_header')]: "a nő", [t('template_example_header')]: "Die Frau trinkt einen Kaffee." }
       ];
     } else if (type === 'false_friends') {
       templateData = [
-        { [t('template_german_header')]: "schmutzig", [t('template_hungarian_header')]: "smucig", [t('template_example_header')]: "Das Kind ist schmutzig.", [t('template_note_header')]: "Németben koszos..." }
+    { [t('template_german_header')]: "das Gift, die Gifte", [t('template_hungarian_header')]: "a méreg", [t('template_example_header')]: "Dieses Tier produziert ein starkes Gift.", [t('template_note_header')]: "Nem ajándék! (ajándék = das Geschenk)" }
       ];
     } else {
       templateData = [
@@ -454,11 +454,31 @@ export default function Import() {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex items-center gap-4">
-        <Link to="/" className="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium px-4 py-2 rounded-lg shadow-sm transition-colors flex items-center gap-2">
-          {t('back_button')}
-        </Link>
-        <h1 className="text-2xl font-bold">{t('import_title')}</h1>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <Link to="/" className="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium px-4 py-2 rounded-lg shadow-sm transition-colors flex items-center gap-2">
+            {t('back_button')}
+          </Link>
+          <h1 className="text-2xl font-bold">{t('import_title')}</h1>
+        </div>
+        
+        {isAdmin && (
+          <div className="flex items-center gap-2 bg-purple-50 px-4 py-2 rounded-xl border border-purple-200 shadow-sm w-full sm:w-auto">
+            <span className="text-sm font-bold text-purple-900 mr-2">Admin Target:</span>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input 
+                type="checkbox" 
+                className="sr-only peer" 
+                checked={saveToPublic}
+                onChange={(e) => setSaveToPublic(e.target.checked)}
+              />
+              <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+              <span className="ml-3 text-sm font-medium text-purple-800">
+                {saveToPublic ? 'Public Library' : 'Personal Library'}
+              </span>
+            </label>
+          </div>
+        )}
       </div>
 
       {/* Format Instructions */}
