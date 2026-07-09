@@ -444,13 +444,16 @@ export default function Import() {
       } else {
         alert(t('import_success', { saved: itemsToSave.length }));
       }
-    } catch (error) {
-      console.error("Failed to save vocabulary:", error);
-      alert(t('error_saving_db'));
-    } finally {
-      setSaving(false);
-    }
-  };
+    } 
+  };} catch (error) {
+  console.error("Failed to save vocabulary:", error);
+
+  const message = error instanceof Error 
+    ? error.message 
+    : JSON.stringify(error);
+
+  alert(`Database error:\n${message}`);
+}
 
   return (
     <div className="p-6 space-y-6">
