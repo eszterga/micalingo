@@ -107,6 +107,11 @@ export default function Import() {
         }
 
         if (destination === 'articles') {
+          // Validate that article and noun are not empty
+          if (!p0.trim() || !p1.trim()) {
+            console.warn(`Skipping incomplete article row: article="${p0}" | noun="${p1}"`);
+            continue;
+          }
           // Store article and noun separately for the preview, but also combine them for the quiz engine
           items.push({ article: p0, noun: p1, hungarian: p2, example: p3, german: `${p0} ${p1}`.trim() });
         } else if (destination === 'false_friends') {
@@ -368,12 +373,12 @@ export default function Import() {
 
     if (type === 'articles') {
       templateData = [
-        { [t('template_article_header')]: "der", [t('template_noun_header')]: "Mann, die Männer", [t('template_hungarian_header')]: "a férfi", [t('template_example_header')]: "Der Mann arbeitet im Büro." },
-        { [t('template_article_header')]: "die", [t('template_noun_header')]: "Frau, die Frauen", [t('template_hungarian_header')]: "a nő", [t('template_example_header')]: "Die Frau trinkt einen Kaffee." }
+        { [t('template_article_header')]: "der", [t('template_noun_header')]: "Mann, die Männer", [t('template_hungarian_header')]: "a férfi", [t('template_example_header')]: "Der Mann arbeitet im B[...]
+        { [t('template_article_header')]: "die", [t('template_noun_header')]: "Frau, die Frauen", [t('template_hungarian_header')]: "a nő", [t('template_example_header')]: "Die Frau trinkt einen Kaff[...]
       ];
     } else if (type === 'false_friends') {
       templateData = [
-    { [t('template_german_header')]: "das Gift, die Gifte", [t('template_hungarian_header')]: "a méreg", [t('template_example_header')]: "Dieses Tier produziert ein starkes Gift.", [t('template_note_header')]: "Nem ajándék! (ajándék = das Geschenk)" }
+    { [t('template_german_header')]: "das Gift, die Gifte", [t('template_hungarian_header')]: "a méreg", [t('template_example_header')]: "Dieses Tier produziert ein starkes Gift.", [t('template_note_[...]
       ];
     } else {
       templateData = [
@@ -444,16 +449,18 @@ export default function Import() {
       } else {
         alert(t('import_success', { saved: itemsToSave.length }));
       }
-    } 
-  };} catch (error) {
-  console.error("Failed to save vocabulary:", error);
+    } catch (error) {
+      console.error("Failed to save vocabulary:", error);
 
-  const message = error instanceof Error 
-    ? error.message 
-    : JSON.stringify(error);
+      const message = error instanceof Error 
+        ? error.message 
+        : JSON.stringify(error);
 
-  alert(`Database error:\n${message}`);
-}
+      alert(`Database error:\n${message}`);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <div className="p-6 space-y-6">
@@ -475,7 +482,7 @@ export default function Import() {
                 checked={saveToPublic}
                 onChange={(e) => setSaveToPublic(e.target.checked)}
               />
-              <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+              <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-[...]
               <span className="ml-3 text-sm font-medium text-purple-800">
                 {saveToPublic ? 'Public Library' : 'Personal Library'}
               </span>
@@ -503,23 +510,23 @@ export default function Import() {
           <div className="flex flex-col sm:flex-row flex-wrap gap-2 w-full lg:w-auto">
             <button
               onClick={() => handleDownloadTemplate('standard')}
-              className="whitespace-nowrap px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 shadow-sm w-full sm:w-auto"
+              className="whitespace-nowrap px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 shadow-sm w-full sm:w[...]
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003[...]
               {t('vocab_template')}
             </button>
             <button
               onClick={() => handleDownloadTemplate('articles')}
-              className="whitespace-nowrap px-4 py-2 bg-white text-blue-600 border border-blue-600 font-medium rounded-lg hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 shadow-sm w-full sm:w-auto"
+              className="whitespace-nowrap px-4 py-2 bg-white text-blue-600 border border-blue-600 font-medium rounded-lg hover:bg-blue-50 transition-colors flex items-center justify-center gap-2[...]
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003[...]
               {t('articles_template')}
             </button>
             <button
               onClick={() => handleDownloadTemplate('false_friends')}
-              className="whitespace-nowrap px-4 py-2 bg-white text-blue-600 border border-blue-600 font-medium rounded-lg hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 shadow-sm w-full sm:w-auto"
+              className="whitespace-nowrap px-4 py-2 bg-white text-blue-600 border border-blue-600 font-medium rounded-lg hover:bg-blue-50 transition-colors flex items-center justify-center gap-2[...]
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003[...]
               {t('false_friends_template')}
             </button>
           </div>
@@ -527,10 +534,10 @@ export default function Import() {
       </div>
 
       {/* DROP ZONE CENTER AREA */}
-      <div className="relative border-2 border-dashed border-blue-300 rounded-2xl bg-white hover:bg-blue-50 transition-colors flex flex-col items-center justify-center text-center shadow-sm group cursor-pointer overflow-hidden">
+      <div className="relative border-2 border-dashed border-blue-300 rounded-2xl bg-white hover:bg-blue-50 transition-colors flex flex-col items-center justify-center text-center shadow-sm group[...]
         <div className="p-10 pointer-events-none flex flex-col items-center">
           <div className="mb-4 bg-blue-100 p-4 rounded-full text-blue-600 group-hover:scale-110 transition-transform">
-            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 111[...]
           </div>
           <p className="mt-4 text-sm text-gray-500 font-medium">{t('drag_and_drop')}</p>
           <p className="text-xs text-gray-400 mt-1">{t('supported_files')}</p>
@@ -584,28 +591,28 @@ export default function Import() {
                     <tr key={idx} className="hover:bg-gray-50 transition-colors">
                       {destination === 'articles' ? (
                         <>
-                          <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={(item as any).article || ''} onChange={(e) => handleItemChange(idx, 'article', e.target.value)} className="w-full bg-transparent border-none focus:ring-0 p-1 text-sm font-medium text-gray-900 resize-y" /></td>
-                          <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={(item as any).noun || ''} onChange={(e) => handleItemChange(idx, 'noun', e.target.value)} className="w-full bg-transparent border-none focus:ring-0 p-1 text-sm font-medium text-gray-900 resize-y" /></td>
-                          <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleItemChange(idx, 'hungarian', e.target.value)} className="w-full bg-transparent border-none focus:ring-0 p-1 text-sm text-gray-600 resize-y" /></td>
-                          <td className="p-1 sm:p-2 align-top"><textarea rows={2} value={item.example || ''} onChange={(e) => handleItemChange(idx, 'example', e.target.value)} className="w-full bg-transparent border-none focus:ring-0 p-1 text-sm text-gray-500 italic resize-y" /></td>
+                          <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={(item as any).article || ''} onChange={(e) => handleItemChange(idx, 'article', e.[...]
+                          <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={(item as any).noun || ''} onChange={(e) => handleItemChange(idx, 'noun', e.target[...]
+                          <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleItemChange(idx, 'hungarian', e.targe[...]
+                          <td className="p-1 sm:p-2 align-top"><textarea rows={2} value={item.example || ''} onChange={(e) => handleItemChange(idx, 'example', e.target.value)} className="w-full b[...]
                         </>
                       ) : destination === 'false_friends' ? (
                         <>
-                          <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.german || ''} onChange={(e) => handleItemChange(idx, 'german', e.target.value)} className="w-full bg-transparent border-none focus:ring-0 p-1 text-sm font-medium text-gray-900 resize-y" /></td>
-                          <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleItemChange(idx, 'hungarian', e.target.value)} className="w-full bg-transparent border-none focus:ring-0 p-1 text-sm text-gray-600 resize-y" /></td>
-                          <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.example || ''} onChange={(e) => handleItemChange(idx, 'example', e.target.value)} className="w-full bg-transparent border-none focus:ring-0 p-1 text-sm text-gray-500 italic resize-y" /></td>
-                          <td className="p-1 sm:p-2 align-top"><textarea rows={2} value={(item as any).note || ''} onChange={(e) => handleItemChange(idx, 'note', e.target.value)} className="w-full bg-transparent border-none focus:ring-0 p-1 text-sm text-gray-500 resize-y" /></td>
+                          <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.german || ''} onChange={(e) => handleItemChange(idx, 'german', e.target.valu[...]
+                          <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleItemChange(idx, 'hungarian', e.targe[...]
+                          <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.example || ''} onChange={(e) => handleItemChange(idx, 'example', e.target.va[...]
+                          <td className="p-1 sm:p-2 align-top"><textarea rows={2} value={(item as any).note || ''} onChange={(e) => handleItemChange(idx, 'note', e.target.value)} className="w-ful[...]
                         </>
                       ) : (
                         <>
-                          <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.german || ''} onChange={(e) => handleItemChange(idx, 'german', e.target.value)} className="w-full bg-transparent border-none focus:ring-0 p-1 text-sm font-medium text-gray-900 resize-y" /></td>
-                          <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleItemChange(idx, 'hungarian', e.target.value)} className="w-full bg-transparent border-none focus:ring-0 p-1 text-sm text-gray-600 resize-y" /></td>
-                          <td className="p-1 sm:p-2 align-top"><textarea rows={2} value={item.example || ''} onChange={(e) => handleItemChange(idx, 'example', e.target.value)} className="w-full bg-transparent border-none focus:ring-0 p-1 text-sm text-gray-500 italic resize-y" /></td>
+                          <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.german || ''} onChange={(e) => handleItemChange(idx, 'german', e.target.valu[...]
+                          <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleItemChange(idx, 'hungarian', e.targe[...]
+                          <td className="p-1 sm:p-2 align-top"><textarea rows={2} value={item.example || ''} onChange={(e) => handleItemChange(idx, 'example', e.target.value)} className="w-full b[...]
                         </>
                       )}
                       <td className="p-1 sm:p-2 align-top text-center border-l border-gray-100">
-                        <button onClick={() => handleDeletePreviewItem(idx)} className="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50 transition-colors" title={t('delete') || "Delete"}>
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        <button onClick={() => handleDeletePreviewItem(idx)} className="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50 transition-colors" title={t('delete') || "Delet[...]
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12[...]
                         </button>
                       </td>
                     </tr>
@@ -691,17 +698,17 @@ export default function Import() {
                 <button
                   onClick={() => handleDownloadFiles(Array.from(selectedFiles))}
                   disabled={saving}
-                  className="flex items-center justify-center gap-2 bg-white border border-blue-600 text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg font-bold transition-colors shadow-sm disabled:opacity-50 w-full sm:w-auto"
+                  className="flex items-center justify-center gap-2 bg-white border border-blue-600 text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg font-bold transition-colors shadow-sm disab[...]
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0[...]
                   {t('download_selected')}
                 </button>
                 <button
                   onClick={handleBulkDeleteFiles}
                   disabled={saving}
-                  className="flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-bold transition-colors shadow-sm disabled:opacity-50 w-full sm:w-auto"
+                  className="flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-bold transition-colors shadow-sm disabled:opacity-50 w-full sm[...]
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 011[...]
                   {t('delete_selected')}
                 </button>
               </div>
@@ -724,7 +731,7 @@ export default function Import() {
                 {filteredImportedFiles.map((file) => (
                   <tr key={file.fileName} className="hover:bg-gray-50 transition-colors">
                     <td className="p-2 sm:p-4 text-center">
-                      <input type="checkbox" checked={selectedFiles.has(file.fileName)} onChange={() => toggleFileSelection(file.fileName)} className="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer" />
+                      <input type="checkbox" checked={selectedFiles.has(file.fileName)} onChange={() => toggleFileSelection(file.fileName)} className="w-5 h-5 text-blue-600 rounded border-gray-30[...]
                     </td>
                     <td className="p-2 sm:p-4 font-medium text-gray-900 break-words">{file.fileName}</td>
                     <td className="p-2 sm:p-4 text-gray-600 uppercase text-sm font-semibold">{file.fileType}</td>
@@ -734,16 +741,16 @@ export default function Import() {
                     <td className="p-2 sm:p-4 text-gray-600 font-medium">{file.itemCount}</td>
                   <td className="p-2 sm:p-4 text-right">
                     <div className="flex items-center justify-end gap-1 sm:gap-2">
-                      <button onClick={() => handleEditFile(file)} disabled={saving} className="flex items-center text-green-600 hover:text-green-800 p-1.5 sm:p-2 rounded hover:bg-green-50 transition-colors disabled:opacity-50 font-medium text-sm" title="Edit File">
-                        <svg className="w-4 h-4 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                      <button onClick={() => handleEditFile(file)} disabled={saving} className="flex items-center text-green-600 hover:text-green-800 p-1.5 sm:p-2 rounded hover:bg-green-50 transi[...]
+                        <svg className="w-4 h-4 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l[...]
                         <span className="hidden sm:inline">Edit</span>
                       </button>
-                      <button onClick={() => handleDownloadFiles([file.fileName])} disabled={saving} className="flex items-center text-blue-600 hover:text-blue-800 p-1.5 sm:p-2 rounded hover:bg-blue-50 transition-colors disabled:opacity-50 font-medium text-sm" title="Download File">
-                        <svg className="w-4 h-4 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                      <button onClick={() => handleDownloadFiles([file.fileName])} disabled={saving} className="flex items-center text-blue-600 hover:text-blue-800 p-1.5 sm:p-2 rounded hover:bg-b[...]
+                        <svg className="w-4 h-4 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 [...]
                         <span className="hidden sm:inline">{t('download')}</span>
                       </button>
-                      <button onClick={() => handleDeleteFile(file.fileName, file.wordIds)} disabled={saving} className="flex items-center text-red-600 hover:text-red-800 p-1.5 sm:p-2 rounded hover:bg-red-50 transition-colors disabled:opacity-50 font-medium text-sm" title="Delete File">
-                        <svg className="w-4 h-4 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                      <button onClick={() => handleDeleteFile(file.fileName, file.wordIds)} disabled={saving} className="flex items-center text-red-600 hover:text-red-800 p-1.5 sm:p-2 rounded hov[...]
+                        <svg className="w-4 h-4 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12[...]
                         <span className="hidden sm:inline">{t('delete')}</span>
                       </button>
                     </div>
@@ -801,28 +808,28 @@ export default function Import() {
                       <tr key={item.id || idx} className="hover:bg-gray-50 transition-colors">
                         {editingFileCategory === 'articles' ? (
                           <>
-                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={(item as any).article || ''} onChange={(e) => handleEditItemChange(idx, 'article', e.target.value)} className="w-full bg-transparent border-none focus:ring-0 p-1 text-sm font-medium text-gray-900 resize-y" /></td>
-                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={(item as any).noun || ''} onChange={(e) => handleEditItemChange(idx, 'noun', e.target.value)} className="w-full bg-transparent border-none focus:ring-0 p-1 text-sm font-medium text-gray-900 resize-y" /></td>
-                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleEditItemChange(idx, 'hungarian', e.target.value)} className="w-full bg-transparent border-none focus:ring-0 p-1 text-sm text-gray-600 resize-y" /></td>
-                            <td className="p-1 sm:p-2 align-top"><textarea rows={2} value={item.example || ''} onChange={(e) => handleEditItemChange(idx, 'example', e.target.value)} className="w-full bg-transparent border-none focus:ring-0 p-1 text-sm text-gray-500 italic resize-y" /></td>
+                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={(item as any).article || ''} onChange={(e) => handleEditItemChange(idx, 'articl[...]
+                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={(item as any).noun || ''} onChange={(e) => handleEditItemChange(idx, 'noun', e.[...]
+                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleEditItemChange(idx, 'hungarian', e[...]
+                            <td className="p-1 sm:p-2 align-top"><textarea rows={2} value={item.example || ''} onChange={(e) => handleEditItemChange(idx, 'example', e.target.value)} className="w-[...]
                           </>
                         ) : editingFileCategory === 'false_friends' ? (
                           <>
-                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.german || ''} onChange={(e) => handleEditItemChange(idx, 'german', e.target.value)} className="w-full bg-transparent border-none focus:ring-0 p-1 text-sm font-medium text-gray-900 resize-y" /></td>
-                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleEditItemChange(idx, 'hungarian', e.target.value)} className="w-full bg-transparent border-none focus:ring-0 p-1 text-sm text-gray-600 resize-y" /></td>
-                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.example || ''} onChange={(e) => handleEditItemChange(idx, 'example', e.target.value)} className="w-full bg-transparent border-none focus:ring-0 p-1 text-sm text-gray-500 italic resize-y" /></td>
-                            <td className="p-1 sm:p-2 align-top"><textarea rows={2} value={(item as any).note || ''} onChange={(e) => handleEditItemChange(idx, 'note', e.target.value)} className="w-full bg-transparent border-none focus:ring-0 p-1 text-sm text-gray-500 resize-y" /></td>
+                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.german || ''} onChange={(e) => handleEditItemChange(idx, 'german', e.targe[...]
+                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleEditItemChange(idx, 'hungarian', e[...]
+                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.example || ''} onChange={(e) => handleEditItemChange(idx, 'example', e.tar[...]
+                            <td className="p-1 sm:p-2 align-top"><textarea rows={2} value={(item as any).note || ''} onChange={(e) => handleEditItemChange(idx, 'note', e.target.value)} className=[...]
                           </>
                         ) : (
                           <>
-                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.german || ''} onChange={(e) => handleEditItemChange(idx, 'german', e.target.value)} className="w-full bg-transparent border-none focus:ring-0 p-1 text-sm font-medium text-gray-900 resize-y" /></td>
-                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleEditItemChange(idx, 'hungarian', e.target.value)} className="w-full bg-transparent border-none focus:ring-0 p-1 text-sm text-gray-600 resize-y" /></td>
-                            <td className="p-1 sm:p-2 align-top"><textarea rows={2} value={item.example || ''} onChange={(e) => handleEditItemChange(idx, 'example', e.target.value)} className="w-full bg-transparent border-none focus:ring-0 p-1 text-sm text-gray-500 italic resize-y" /></td>
+                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.german || ''} onChange={(e) => handleEditItemChange(idx, 'german', e.targe[...]
+                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleEditItemChange(idx, 'hungarian', e[...]
+                            <td className="p-1 sm:p-2 align-top"><textarea rows={2} value={item.example || ''} onChange={(e) => handleEditItemChange(idx, 'example', e.target.value)} className="w-[...]
                           </>
                         )}
                         <td className="p-1 sm:p-2 align-top text-center border-l border-gray-100">
                           <button onClick={() => handleDeleteEditItem(idx)} className="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50" title={t('delete') || "Delete"}>
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 [...]
                           </button>
                         </td>
                       </tr>
@@ -833,10 +840,10 @@ export default function Import() {
             </div>
 
             <div className="p-4 border-t border-gray-200 flex justify-end gap-3 bg-gray-50 rounded-b-xl">
-              <button onClick={() => setEditingFile(null)} disabled={isSavingEdit} className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2.5 px-6 rounded-lg transition-colors disabled:opacity-50">
+              <button onClick={() => setEditingFile(null)} disabled={isSavingEdit} className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2.5 px-6 rounded-lg transition-colors disabl[...]
                 {t('cancel')}
               </button>
-              <button onClick={handleSaveFileEdits} disabled={isSavingEdit} className="bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-6 rounded-lg shadow-sm disabled:opacity-50 flex items-center gap-2">
+              <button onClick={handleSaveFileEdits} disabled={isSavingEdit} className="bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-6 rounded-lg shadow-sm disabled:opacity-50 fl[...]
                 {isSavingEdit ? t('saving') : t('modal_save_changes') || 'Save Changes'}
               </button>
             </div>
