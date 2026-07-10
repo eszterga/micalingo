@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { useI18n } from "../I18nContext";
 import { useAuth } from "../AuthContext";
 
@@ -7,6 +7,7 @@ export default function Results() {
   const { t } = useI18n();
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [history, setHistory] = useState<Record<string, any>>({});
   const [selectedQuizKey, setSelectedQuizKey] = useState<string | null>(searchParams.get("quizKey"));
 
@@ -47,12 +48,37 @@ export default function Results() {
     return `/quiz?topic=${topic}&quizId=${quizId}${isCustom ? '&custom=true' : ''}`;
   };
 
+  const getNextLevelUrl = (key: string) => {
+    const isCustom = key.startsWith('custom_');
+    const stripped = isCustom ? key.replace('custom_', '') : key;
+    const parts = stripped.split('_');
+    const quizId = parseInt(parts.pop() || '0');
+    const topic = parts.join('_');
+    const nextQuizId = quizId + 1;
+    return `/quiz?topic=${topic}&quizId=${nextQuizId}${isCustom ? '&custom=true' : ''}`;
+  };
+
+  const isLastQuiz = (key: string) => {
+    // This checks if there's a next level available
+    // You might want to adjust this based on your actual quiz structure
+    const isCustom = key.startsWith('custom_');
+    const stripped = isCustom ? key.replace('custom_', '') : key;
+    const parts = stripped.split('_');
+    const quizId = parseInt(parts.pop() || '0');
+    // Assuming max 10 levels per topic - adjust as needed
+    return quizId >= 10;
+  };
+
   const quizData = selectedQuizKey ? history[selectedQuizKey] : null;
+  const hasNextLevel = selectedQuizKey && !isLastQuiz(selectedQuizKey);
 
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <button onClick={() => window.history.length > 2 ? window.history.back() : window.location.hash = '#/quizzes'} className="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium px-4 py-2 rounded-lg shadow-sm transition-colors flex items-center gap-2">
+        <button 
+          onClick={() => window.history.length > 2 ? window.history.back() : navigate('/quizzes')} 
+          className="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium px-4 py-2 rounded-lg shadow-sm transition-colors flex items-center gap-2"
+        >
           {t('back_button')}
         </button>
         <div>
@@ -98,9 +124,16 @@ export default function Results() {
           </div>
         ) : (
           <>
-            <div className="mb-6 p-4 bg-blue-50 border border-blue-100 rounded-xl flex items-center justify-between">
-              <span className="font-bold text-blue-900">{t('your_score') || 'Your Score'}:</span>
-              <span className="text-xl font-bold text-blue-700">{quizData.score} / {quizData.questions?.length || 20} ({Math.round((quizData.score / (quizData.questions?.length || 20)) * 100)}%)</span>
+            <div className="mb-6 p-4 bg-blue-50 border border-blue-100 rounded-xl">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                  <span className="font-bold text-blue-900">{t('your_score') || 'Your Score'}:</span>
+                  <span className="ml-2 text-xl font-bold text-blue-700">{quizData.score} / {quizData.questions?.length || 20} ({Math.round((quizData.score / (quizData.questions?.length || 20)) * 100)}%)</span>
+                </div>
+                <div className="text-sm text-blue-800 font-semibold">
+                  {t('quiz_complete') || 'Quiz Complete!'}
+                </div>
+              </div>
             </div>
             
             <div className="space-y-4">
@@ -122,7 +155,7 @@ export default function Results() {
                     <div className="grid sm:grid-cols-2 gap-4 mt-4">
                       <div>
                         <span className="block text-xs font-bold text-gray-500 uppercase mb-1">{t('your_answer') || 'Your Answer'}</span>
-                        <div className={`p-2 rounded border ${isCorrect ? 'bg-green-100 border-green-300 text-green-800 font-medium' : 'bg-red-100 border-red-300 text-red-800 font-medium line-through decoration-red-500'}`}>
+                        <div className={`p-2 rounded border ${isCorrect ? 'bg-green-100 border-green-300 text-green-800 font-medium' : 'bg-red-100 border-red-300 text-red-800 font-medium line-through'}`}>
                           {userAnswer || '-'}
                         </div>
                       </div>
@@ -136,6 +169,24 @@ export default function Results() {
                   </div>
                 );
               })}
+            </div>
+
+            {/* Next Level Button Section */}
+            <div className="mt-8 flex gap-4 justify-between">
+              <button 
+                onClick={() => navigate('/quizzes')} 
+                className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-3 px-6 rounded-lg transition-colors shadow-sm"
+              >
+                {t('back_to_quizzes') || 'Back to Quizzes'}
+              </button>
+              {hasNextLevel && (
+                <Link 
+                  to={getNextLevelUrl(selectedQuizKey!)} 
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors shadow-sm flex items-center justify-center gap-2"
+                >
+                  {t('next_quiz_button') || 'Next Quiz →'}
+                </Link>
+              )}
             </div>
           </>
         )}
