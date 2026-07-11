@@ -50,13 +50,15 @@ export default function Quiz() {
     : topic === 'prepositions' ? t('prepositions_quiz')
     : t('personalized_space');
 
+  // Calculate total quizzes based on ACTUAL data
   let totalQuizzes = 0;
   if (topic === 'vocabulary') totalQuizzes = Math.ceil((publicVocabulary.length + publicDbWords.filter((w: any) => w.category === 'vocabulary').length) / WORDS_PER_QUIZ);
   else if (topic === 'phrases') totalQuizzes = Math.ceil((publicPhrases.length + publicDbWords.filter((w: any) => w.category === 'phrases').length) / WORDS_PER_QUIZ);
   else if (topic === 'articles') totalQuizzes = Math.ceil((publicArticles.length + publicDbWords.filter((w: any) => w.category === 'articles').length) / WORDS_PER_QUIZ);
   else if (topic === 'prepositions') totalQuizzes = Math.ceil((publicPrepositions.length + publicDbWords.filter((w: any) => w.category === 'prepositions').length) / WORDS_PER_QUIZ);
 
-  const hasNextQuiz = !isCustom && topic ? quizId < totalQuizzes : false;
+  // CRITICAL FIX: hasNextQuiz should be false if this is the last quiz
+  const hasNextQuiz = !isCustom && topic && quizId > 0 && quizId < totalQuizzes;
 
   let pageTitle = "";
   if (isCustom) {
@@ -68,25 +70,17 @@ export default function Quiz() {
   }
 
   const generateQuestions = (words: any[]) => {
-    // For structured topics, we don't shuffle the outer array, we just take the chunk.
-    // We only shuffle the actual question options.
     const selectedWords = [...words];
 
     return selectedWords.map(word => {
       if (topic === 'articles') { 
-        // Extract the article and base noun from the german string (e.g., "der Mann, die Männer" -> "der" and "Mann, die Männer")
         const match = word.german.match(/^(der|die|das)\s+(.*)/i);
         const baseArticle = match ? match[1].toLowerCase() : "der";
         const baseNoun = match ? match[2].trim() : word.german;
 
         const correctAnswer = baseArticle;
-
-        // Use ONLY 'der', 'die', 'das'
         const allowedArticles = ["der", "die", "das"];
-
-        // Filter out the correct answer to form the distractor pool
         const distractors = allowedArticles.filter(a => a !== correctAnswer);
-
         const options = [...distractors, correctAnswer].sort(() => 0.5 - Math.random());
 
         return {
@@ -116,15 +110,11 @@ export default function Quiz() {
           hungarian: word.hungarian
         };
       } else {
-        // Standard logic for vocabulary and phrases
         const correctAnswer = word.hungarian;
-
-        // Ensure proper wrong answers: exclude empty, short fragments, or those starting with hyphens like "-en"
         const isValidDistractor = (str: string) => typeof str === 'string' && str.trim().length > 1 && !str.trim().startsWith('-');
 
         let distractorPool = Array.from(new Set(words.map(w => w.hungarian))).filter(h => h !== correctAnswer && isValidDistractor(h));
 
-        // If the current batch doesn't have enough unique distractors, pull from the appropriate public database
         if (distractorPool.length < 3) {
           const fallbackSource = topic === 'phrases' ? publicPhrases : publicVocabulary;
           const fallbackPool = Array.from(new Set(fallbackSource.map(w => w.hungarian))).filter(h => h !== correctAnswer && isValidDistractor(h));
@@ -149,14 +139,12 @@ export default function Quiz() {
   };
 
   useEffect(() => {
-    // Check for saved progress first
     const progressKey = user ? `micalingo_quiz_progress_${user.uid}` : 'micalingo_quiz_progress_guest';
     const progressMap = JSON.parse(localStorage.getItem(progressKey) || '{}');
     const quizKey = isCustom ? `custom_${topic || 'general'}_${quizId}` : `${topic || 'custom'}_${quizId}`;
     const savedProgress = progressMap[quizKey];
 
     if (isRedo && savedProgress) {
-      // Clear saved progress if user explicitly clicked Redo
       delete progressMap[quizKey];
       localStorage.setItem(progressKey, JSON.stringify(progressMap));
     } else if (savedProgress && savedProgress.questions && savedProgress.questions.length > 0) {
@@ -165,7 +153,7 @@ export default function Quiz() {
       setScore(savedProgress.score);
       setUserAnswers(savedProgress.userAnswers || []);
       setQuizState('ongoing');
-      return; // Skip new question generation, resume old one instead
+      return;
     }
 
     let sourceData: any[] = [];
@@ -203,18 +191,15 @@ export default function Quiz() {
         }
       }
 
-      // Ensure we don't include any empty words that might have been saved in the public/private db
       sourceData = unique.filter((word: any) => 
         (word.german || '').trim() !== '' && 
         (word.hungarian || '').trim() !== ''
       );
 
-      // Slice the exact 20 words for the current quiz level
       const startIndex = (quizId - 1) * WORDS_PER_QUIZ;
       const endIndex = startIndex + WORDS_PER_QUIZ;
       wordsForQuiz = sourceData.slice(startIndex, endIndex).sort(() => 0.5 - Math.random());
     } else if (userVocabulary) {
-      // Default custom quiz (e.g. from Home page "Start Practice")
       wordsForQuiz = [...userVocabulary].filter((word: any) => 
         (word.german || '').trim() !== '' && 
         (word.hungarian || '').trim() !== ''
@@ -223,7 +208,7 @@ export default function Quiz() {
 
     if ((isCustom || (!topic && userVocabulary)) && wordsForQuiz.length < 4) {
       setQuizState('finished');
-      setQuestions([]); // Clear questions to trigger the special message
+      setQuestions([]);
       return;
     }
 
@@ -235,13 +220,11 @@ export default function Quiz() {
       setQuizState('finished');
       setQuestions([]);
     } else {
-      // No data available for this quiz ID
       setQuizState('no_data');
       setQuestions([]);
     }
   }, [topic, userVocabulary, quizId, isCustom]);
 
-  // Auto-save progress whenever the user advances in the quiz
   useEffect(() => {
     if (quizState === 'ongoing' && questions.length > 0) {
       const progressKey = user ? `micalingo_quiz_progress_${user.uid}` : 'micalingo_quiz_progress_guest';
@@ -260,13 +243,11 @@ export default function Quiz() {
   }, [currentQuestionIndex, score, questions, quizState, topic, quizId, user, isCustom]);
 
   const finishQuiz = async (finalScore: number) => {
-    // Save progress so the Topic Lists checkmarks update correctly
     const key = user ? `micalingo_scores_${user.uid}` : 'micalingo_guest_scores';
     const scores = JSON.parse(localStorage.getItem(key) || '{}');
     const quizKey = isCustom ? `custom_${topic || 'general'}_${quizId}` : `${topic || 'custom'}_${quizId}`;
     const previousScore = scores[quizKey] || 0;
 
-    // Only update and save history if they tied or got a better score!
     if (finalScore >= previousScore) {
       scores[quizKey] = finalScore;
       localStorage.setItem(key, JSON.stringify(scores));
@@ -280,19 +261,20 @@ export default function Quiz() {
       };
       localStorage.setItem(historyKey, JSON.stringify(historyMap));
 
-      // ---> CLOUD SYNC FOR LOGGED IN USERS <---
+      // CLOUD SYNC FOR LOGGED IN USERS - ENSURE SCORES AND HISTORY ARE SAVED
       if (user) {
-        const statsRef = doc(dbCloud, 'user_stats', user.uid);
-        // Use setDoc with merge:true to handle both creation of the document
-        // and updating/adding fields to the nested maps without overwriting them.
-        await setDoc(statsRef, {
-          scores: { [quizKey]: finalScore },
-          history: { [quizKey]: { questions, userAnswers, score: finalScore } }
-        }, { merge: true });
+        try {
+          const statsRef = doc(dbCloud, 'user_stats', user.uid);
+          await setDoc(statsRef, {
+            scores: { [quizKey]: finalScore },
+            history: { [quizKey]: { questions, userAnswers, score: finalScore } }
+          }, { merge: true });
+        } catch (error) {
+          console.error("Error saving to cloud:", error);
+        }
       }
     }
 
-    // Clear saved partial progress for this quiz as it is now fully completed
     const progressKey = user ? `micalingo_quiz_progress_${user.uid}` : 'micalingo_quiz_progress_guest';
     const progressMap = JSON.parse(localStorage.getItem(progressKey) || '{}');
     if (progressMap[quizKey]) {
@@ -308,7 +290,6 @@ export default function Quiz() {
     setSelectedAnswer(answer);
     setIsAnswered(true);
 
-    // Record the user's answer into history
     const newUserAnswers = [...userAnswers];
     newUserAnswers[currentQuestionIndex] = answer;
     setUserAnswers(newUserAnswers);
@@ -318,7 +299,6 @@ export default function Quiz() {
     if (isCorrect) {
       setScore(s => s + 1);
 
-        // Auto-advance: Wait 3 seconds, or 10 seconds if there's an example sentence longer than 20 characters.
       const currentExample = questions[currentQuestionIndex].example;
       const delay = (showExamples && currentExample) ? (currentExample.length > 20 ? 10000 : 3500) : 1000;
       setTimeout(() => {
@@ -339,12 +319,11 @@ export default function Quiz() {
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(i => i + 1);
     } else {
-      finishQuiz(score); // Called manually only on wrong answers, so the score is unchanged
+      finishQuiz(score);
     }
   };
 
   const handleNextQuiz = () => {
-    // Instantly navigate and reset state for the next chunk
     navigate(`/quiz?topic=${topic || ''}&quizId=${quizId + 1}`);
     setQuizState('loading');
     setScore(0);
@@ -413,7 +392,7 @@ export default function Quiz() {
         <h2 className="text-2xl font-bold mb-4">{t('quiz_complete')}</h2>
         <p className="text-lg">{t('your_score')} <span className="font-bold text-blue-600">{score}</span> / {questions.length}</p>
         <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4 flex-wrap">
-          <button onClick={() => navigate(topic && ['vocabulary', 'phrases', 'articles', 'prepositions'].includes(topic || '') ? `/quizzes/${topic}` : '/quizzes')} className="w-full sm:w-auto bg-white border border-gray-300 text-gray-700 font-bold px-6 py-2.5 rounded-lg hover:bg-gray-50 transition-colors">
+          <button onClick={() => navigate(topic && ['vocabulary', 'phrases', 'articles', 'prepositions'].includes(topic || '') ? `/quizzes/${topic}` : '/quizzes')} className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-lg shadow-sm transition-colors">
             {t('back_to_quizzes')}
           </button>
           <button onClick={() => window.location.reload()} className="w-full sm:w-auto bg-gray-100 text-gray-700 font-bold px-6 py-2.5 rounded-lg hover:bg-gray-200 transition-colors">
