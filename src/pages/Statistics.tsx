@@ -10,54 +10,71 @@ export default function Statistics() {
   const { t } = useI18n();
   const [history, setHistory] = useState<Record<string, any>>({});
   const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const historyKey = user ? `micalingo_history_${user.uid}` : 'micalingo_guest_history';
-    setHistory(JSON.parse(localStorage.getItem(historyKey) || '{}'));
     const fetchStats = async () => {
-      const guestHistory = JSON.parse(localStorage.getItem('micalingo_guest_history') || '{}');
-      const guestScores = JSON.parse(localStorage.getItem('micalingo_guest_scores') || '{}');
-
+      setLoading(true);
+      
       if (user) {
         const historyKey = `micalingo_history_${user.uid}`;
         const scoreKey = `micalingo_scores_${user.uid}`;
-        let localHistory = JSON.parse(localStorage.getItem(historyKey) || '{}');
-        let localScores = JSON.parse(localStorage.getItem(scoreKey) || '{}');
-
-        // Merge guest data into user data if they just logged in
-        if (Object.keys(guestHistory).length > 0) {
-          localHistory = { ...localHistory, ...guestHistory };
-          localScores = { ...localScores, ...guestScores };
-          localStorage.removeItem('micalingo_guest_history');
-          localStorage.removeItem('micalingo_guest_scores');
-          localStorage.setItem(historyKey, JSON.stringify(localHistory));
-          localStorage.setItem(scoreKey, JSON.stringify(localScores));
-          
-          try {
-            const statsRef = doc(dbCloud, 'user_stats', user.uid);
-            await setDoc(statsRef, { scores: localScores, history: localHistory }, { merge: true });
-          } catch(e) { console.error(e); }
-        }
-
-        // Fetch from Cloud
+        
         try {
+          // Fetch from Cloud first
           const statsRef = doc(dbCloud, 'user_stats', user.uid);
           const snap = await getDoc(statsRef);
+          
+          let cloudHistory = {};
+          let cloudScores = {};
+          
           if (snap.exists()) {
             const data = snap.data();
-            if (data.history) localHistory = { ...localHistory, ...data.history };
-            if (data.scores) localScores = { ...localScores, ...data.scores };
-            localStorage.setItem(historyKey, JSON.stringify(localHistory));
-            localStorage.setItem(scoreKey, JSON.stringify(localScores));
+            cloudHistory = data.history || {};
+            cloudScores = data.scores || {};
           }
+          
+          // Also check localStorage for local changes
+          let localHistory = JSON.parse(localStorage.getItem(historyKey) || '{}');
+          let localScores = JSON.parse(localStorage.getItem(scoreKey) || '{}');
+          
+          // Merge: Cloud data + local data (local takes priority if both exist)
+          const mergedHistory = { ...cloudHistory, ...localHistory };
+          const mergedScores = { ...cloudScores, ...localScores };
+          
+          // Update localStorage with merged data
+          localStorage.setItem(historyKey, JSON.stringify(mergedHistory));
+          localStorage.setItem(scoreKey, JSON.stringify(mergedScores));
+          
+          // Rebuild history from scores to ensure consistency
+          const historyFromScores: Record<string, any> = {};
+          for (const [quizKey, score] of Object.entries(mergedScores)) {
+            if (mergedHistory[quizKey]) {
+              historyFromScores[quizKey] = mergedHistory[quizKey];
+            } else {
+              // If we have a score but no detailed history, create a minimal entry
+              historyFromScores[quizKey] = {
+                score,
+                questions: [],
+                userAnswers: []
+              };
+            }
+          }
+          
+          setHistory(historyFromScores);
         } catch (error) {
           console.error("Error fetching cloud stats:", error);
+          // Fallback to localStorage only
+          const localHistory = JSON.parse(localStorage.getItem(historyKey) || '{}');
+          setHistory(localHistory);
         }
-
-        setHistory(localHistory);
       } else {
+        // Guest user - use localStorage only
+        const guestHistory = JSON.parse(localStorage.getItem('micalingo_guest_history') || '{}');
         setHistory(guestHistory);
       }
+      
+      setLoading(false);
     };
 
     fetchStats();
@@ -88,11 +105,11 @@ export default function Statistics() {
     localStorage.setItem(historyKey, JSON.stringify(newHistory));
     localStorage.setItem(scoreKey, JSON.stringify(scores));
 
-    // Ensure cloud stays in sync with deletions
+    // Sync deletions to cloud
     if (user) {
       try {
         const statsRef = doc(dbCloud, 'user_stats', user.uid);
-        await setDoc(statsRef, { history: newHistory, scores });
+        await setDoc(statsRef, { history: newHistory, scores }, { merge: true });
       } catch(e) {
         console.error("Failed to delete from cloud:", e);
       }
@@ -129,6 +146,15 @@ export default function Statistics() {
     return `/quiz?topic=${topic}&quizId=${quizId}${isCustom ? '&custom=true' : ''}`;
   };
 
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-4">
+        <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+        <p className="text-gray-500">{t('loading')}</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
@@ -143,7 +169,7 @@ export default function Statistics() {
 
       {!user && (
         <div className="bg-blue-50 border border-blue-200 text-blue-800 p-4 rounded-xl shadow-sm text-sm">
-          {t('guest_warning_stats') || 'As a guest user, your results will appear here until you close the app. If you want to keep your progress saved, log in '} <Link to="/login" className="font-bold underline text-blue-900">{t('guest_warning_stats_link') || 'here'}</Link>.
+          {t('guest_warning_stats') || 'As a guest user, your results will appear here until you close the app. If you want to keep your progress saved, log in '} <Link to="/login" className="font-bold underline">{t('here')}</Link>
         </div>
       )}
 
@@ -159,7 +185,7 @@ export default function Statistics() {
             </button>
           )}
         </div>
-            
+             
         {Object.keys(history).length === 0 ? (
           <div className="text-center text-gray-500 p-8 bg-gray-50 rounded-lg">
             {t('no_quizzes_solved') || 'You haven\'t completed any quizzes yet.'}
@@ -244,7 +270,7 @@ export default function Statistics() {
                             className="text-blue-600 hover:text-blue-800 text-sm font-medium p-2 hover:bg-blue-50 rounded transition-colors"
                             title={t('download_button') || 'Download CSV'}
                           >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 12v9m0 0l-3-3m3 3l3-3"></path></svg>
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                           </button>
                           <Link
                             to={`/results?quizKey=${quizKey}`}
