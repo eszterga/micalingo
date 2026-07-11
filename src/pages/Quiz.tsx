@@ -354,9 +354,9 @@ export default function Quiz() {
 
   if (quizState === 'no_data') {
     return (
-      <div className="text-center bg-white p-8 rounded-xl shadow-sm border border-gray-200">
+      <div className="text-center bg-white p-6 sm:p-8 rounded-xl shadow-sm border border-gray-200 mx-4 sm:mx-0">
         <h2 className="text-2xl font-bold mb-4">{t('quiz_complete') || 'All Quizzes Completed!'}</h2>
-        <p className="text-lg text-gray-600 max-w-md mx-auto">
+        <p className="text-lg text-gray-600 max-w-md mx-auto break-words">
           {t('no_more_quizzes') || `You have completed all available ${topic || 'quiz'} quizzes!`}
         </p>
         <p className="text-gray-500 mt-2">{t('great_job') || 'Great job with your progress!'}</p>
@@ -372,9 +372,9 @@ export default function Quiz() {
   if (quizState === 'finished' || !currentQuestion) {
     if (questions.length === 0 && (isCustom || (!topic && userVocabulary))) {
       return (
-        <div className="text-center bg-white p-8 rounded-xl shadow-sm border border-gray-200">
+        <div className="text-center bg-white p-6 sm:p-8 rounded-xl shadow-sm border border-gray-200 mx-4 sm:mx-0">
           <h2 className="text-2xl font-bold mb-4">{t('not_enough_words')}</h2>
-          <p className="text-lg text-gray-600 max-w-md mx-auto">
+          <p className="text-lg text-gray-600 max-w-md mx-auto break-words">
             {t('not_enough_words_desc', { topic: translatedTopic })}
           </p>
           <p className="text-gray-500 mt-2">{t('need_more_items', { topic: topic || 'custom' })}</p>
@@ -388,10 +388,10 @@ export default function Quiz() {
     }
 
     return (
-      <div className="text-center bg-white p-8 rounded-xl shadow-sm border border-gray-200">
+      <div className="text-center bg-white p-6 sm:p-8 rounded-xl shadow-sm border border-gray-200 mx-4 sm:mx-0">
         <h2 className="text-2xl font-bold mb-4">{t('quiz_complete')}</h2>
         <p className="text-lg">{t('your_score')} <span className="font-bold text-blue-600">{score}</span> / {questions.length}</p>
-        <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4 flex-wrap">
+        <div className="mt-8 flex flex-col sm:flex-row justify-center gap-3 flex-wrap">
           <button onClick={() => navigate(topic && ['vocabulary', 'phrases', 'articles', 'prepositions'].includes(topic || '') ? `/quizzes/${topic}` : '/quizzes')} className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-lg shadow-sm transition-colors">
             {t('back_to_quizzes')}
           </button>
@@ -427,10 +427,10 @@ export default function Quiz() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 px-4 sm:px-0">
       <div>
-        <h1 className="text-3xl font-bold">{pageTitle}</h1>
-        <p className="text-gray-600 mt-1">{t('question_of', { current: currentQuestionIndex + 1, total: questions.length })}</p>
+        <h1 className="text-2xl sm:text-3xl font-bold break-words leading-tight">{pageTitle}</h1>
+        <p className="text-gray-600 mt-1 text-sm sm:text-base">{t('question_of', { current: currentQuestionIndex + 1, total: questions.length })}</p>
         <div className="w-full bg-gray-200 rounded-full h-2.5 mt-3 overflow-hidden">
           <div 
             className="bg-blue-600 h-2.5 rounded-full transition-all duration-500 ease-out" 
@@ -438,17 +438,19 @@ export default function Quiz() {
           ></div>
         </div>
       </div>
-      <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-200">
-        <div className="text-center mb-8">
-          <p className="text-lg text-gray-500 mb-2">{t('choose_correct_one')}</p>
-          <p className="text-4xl font-bold text-gray-900">{currentQuestion.questionText}</p>
+      <div className="bg-white p-4 sm:p-8 rounded-xl shadow-sm border border-gray-200">
+        <div className="text-center mb-6 sm:mb-8">
+          <p className="text-base sm:text-lg text-gray-500 mb-2 sm:mb-3">{t('choose_correct_one')}</p>
+          <p className="text-2xl sm:text-4xl font-bold text-gray-900 break-words leading-snug sm:leading-normal">
+            {currentQuestion.questionText}
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {currentQuestion.options.map((option, index) => {
             const isCorrect = option === currentQuestion.correctAnswer;
             const isSelected = option === selectedAnswer;
-            let buttonClass = "p-4 border-2 rounded-lg text-lg text-left transition-colors font-medium ";
+            let buttonClass = "p-3 sm:p-4 border-2 rounded-lg text-base sm:text-lg text-left transition-colors font-medium break-words leading-snug ";
             if (isAnswered) {
               if (isCorrect) buttonClass += "bg-green-100 border-green-500 text-green-800";
               else if (isSelected) buttonClass += "bg-red-100 border-red-500 text-red-800";
@@ -465,15 +467,15 @@ export default function Quiz() {
         </div>
 
         {isAnswered && showExamples && currentQuestion.example && (
-          <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg text-left transition-all">
-            <p className="text-sm font-bold text-blue-600 uppercase tracking-wider mb-1">{t('example_label')}</p>
-            <p className="text-lg text-blue-900 italic">"{currentQuestion.example}"</p>
+          <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-blue-50 border border-blue-200 rounded-lg text-left transition-all">
+            <p className="text-xs sm:text-sm font-bold text-blue-600 uppercase tracking-wider mb-1">{t('example_label')}</p>
+            <p className="text-sm sm:text-lg text-blue-900 italic break-words leading-relaxed">"{currentQuestion.example}"</p>
           </div>
         )}
 
         {isAnswered && selectedAnswer !== currentQuestion.correctAnswer && (
-          <div className="text-center mt-8">
-            <button onClick={handleNext} className="bg-blue-600 text-white font-bold px-8 py-3 rounded-lg shadow-md hover:bg-blue-700 transition-all animate-pulse hover:animate-none">
+          <div className="text-center mt-6 sm:mt-8">
+            <button onClick={handleNext} className="bg-blue-600 text-white font-bold px-6 sm:px-8 py-2 sm:py-3 rounded-lg shadow-md hover:bg-blue-700 transition-all animate-pulse hover:animate-none text-sm sm:text-base">
               {currentQuestionIndex < questions.length - 1 ? t('next_question') : t('finish_quiz')}
             </button>
           </div>
@@ -481,15 +483,15 @@ export default function Quiz() {
       </div>
 
       {/* Global Quiz Navigation */}
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4">
+      <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 pt-2 sm:pt-4">
         <button 
           onClick={handleBackClick} 
-          className="w-full sm:w-auto justify-center bg-blue-600 text-white font-bold px-6 py-2.5 rounded-lg shadow-sm hover:bg-blue-700 transition-colors flex items-center gap-2"
+          className="w-full sm:w-auto justify-center bg-blue-600 text-white font-bold px-4 sm:px-6 py-2.5 rounded-lg shadow-sm hover:bg-blue-700 transition-colors flex items-center gap-2 text-sm sm:text-base"
         >
           {t('back_to_quizzes')}
         </button>
         {hasNextQuiz && (
-          <button onClick={handleNextQuiz} className="w-full sm:w-auto justify-center bg-blue-600 text-white font-bold px-6 py-2.5 rounded-lg shadow-sm hover:bg-blue-700 transition-colors flex items-center gap-2">
+          <button onClick={handleNextQuiz} className="w-full sm:w-auto justify-center bg-blue-600 text-white font-bold px-4 sm:px-6 py-2.5 rounded-lg shadow-sm hover:bg-blue-700 transition-colors flex items-center gap-2 text-sm sm:text-base">
             {t('next_quiz_button')}
           </button>
         )}
