@@ -34,7 +34,7 @@ export default function Quiz() {
   const [userAnswers, setUserAnswers] = useState<string[]>([]);
   const [isAnswered, setIsAnswered] = useState(false);
   const [score, setScore] = useState(0);
-  const [quizState, setQuizState] = useState<'loading' | 'ongoing' | 'finished'>('loading');
+  const [quizState, setQuizState] = useState<'loading' | 'ongoing' | 'finished' | 'no_data'>('loading');
   const [showQuitModal, setShowQuitModal] = useState(false);
 
   const WORDS_PER_QUIZ = 20;
@@ -230,9 +230,13 @@ export default function Quiz() {
     if (wordsForQuiz.length > 0) {
       const newQuestions = generateQuestions(wordsForQuiz);
       setQuestions(newQuestions);
-      setQuizState(newQuestions.length > 0 ? 'ongoing' : 'loading');
+      setQuizState(newQuestions.length > 0 ? 'ongoing' : 'no_data');
     } else if (isCustom) {
       setQuizState('finished');
+      setQuestions([]);
+    } else {
+      // No data available for this quiz ID
+      setQuizState('no_data');
       setQuestions([]);
     }
   }, [topic, userVocabulary, quizId, isCustom]);
@@ -365,6 +369,23 @@ export default function Quiz() {
       <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-4">
         <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
         <p className="text-gray-500">{t('loading_questions')}</p>
+      </div>
+    );
+  }
+
+  if (quizState === 'no_data') {
+    return (
+      <div className="text-center bg-white p-8 rounded-xl shadow-sm border border-gray-200">
+        <h2 className="text-2xl font-bold mb-4">{t('quiz_complete') || 'All Quizzes Completed!'}</h2>
+        <p className="text-lg text-gray-600 max-w-md mx-auto">
+          {t('no_more_quizzes') || `You have completed all available ${topic || 'quiz'} quizzes!`}
+        </p>
+        <p className="text-gray-500 mt-2">{t('great_job') || 'Great job with your progress!'}</p>
+        <div className="mt-8">
+          <button onClick={() => navigate(topic && ['vocabulary', 'phrases', 'articles', 'prepositions'].includes(topic || '') ? `/quizzes/${topic}` : '/quizzes')} className="bg-blue-600 text-white font-bold px-6 py-2.5 rounded-lg shadow-sm hover:bg-blue-700 transition-colors">
+            {t('back_to_quizzes')}
+          </button>
+        </div>
       </div>
     );
   }
