@@ -3,9 +3,10 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 import { useI18n } from "../I18nContext";
 import { useCloudVocabulary } from "../lib/firestore";
-import { publicVocabulary, publicPhrases, publicArticles, publicPrepositions } from "../lib/public-data";
+import { publicVocabulary, publicPhrases } from "../lib/public-data";
 import { doc, setDoc } from 'firebase/firestore';
 import { dbCloud } from '../lib/firebase';
+import { getCleanedPublicTopicWords, getTotalQuizzesForTopic, WORDS_PER_QUIZ, PUBLIC_TOPICS } from '../lib/quizUtils';
 
 interface Question {
   questionText: string;
@@ -37,8 +38,6 @@ export default function Quiz() {
   const [quizState, setQuizState] = useState<'loading' | 'ongoing' | 'finished' | 'no_data'>('loading');
   const [showQuitModal, setShowQuitModal] = useState(false);
 
-  const WORDS_PER_QUIZ = 20;
-
   const [showExamples] = useState(() => {
     const stored = localStorage.getItem('micalingo_show_examples');
     return stored !== null ? JSON.parse(stored) : true;
@@ -50,35 +49,10 @@ export default function Quiz() {
     : topic === 'prepositions' ? t('prepositions_quiz')
     : t('personalized_space');
 
-  const getCleanedPublicTopicWords = (publicTopic: string) => {
-    let staticSource: any[] = [];
-    if (publicTopic === 'vocabulary') staticSource = publicVocabulary;
-    else if (publicTopic === 'phrases') staticSource = publicPhrases;
-    else if (publicTopic === 'articles') staticSource = publicArticles;
-    else if (publicTopic === 'prepositions') staticSource = publicPrepositions;
-
-    const dbSource = publicDbWords.filter((w: any) => w.category === publicTopic);
-    const combined = [...dbSource, ...staticSource];
-    const seen = new Set<string>();
-
-    return combined.filter((word: any) => {
-      const german = (word?.german || '').trim();
-      const hungarian = (word?.hungarian || '').trim();
-      const germanKey = german.toLowerCase();
-
-      if (!german || !hungarian) return false;
-      if (word?.deleted) return false;
-      if (seen.has(germanKey)) return false;
-
-      seen.add(germanKey);
-      return true;
-    });
-  };
-
-  const publicTopicWords = topic && ['vocabulary', 'phrases', 'articles', 'prepositions'].includes(topic)
-    ? getCleanedPublicTopicWords(topic)
+  const publicTopicWords = topic && PUBLIC_TOPICS.includes(topic)
+    ? getCleanedPublicTopicWords(topic, publicDbWords)
     : [];
-  const totalQuizzes = Math.ceil(publicTopicWords.length / WORDS_PER_QUIZ);
+  const totalQuizzes = getTotalQuizzesForTopic(topic || '', publicDbWords);
 
   // CRITICAL FIX: hasNextQuiz should be false if this is the last quiz
   const hasNextQuiz = !isCustom && topic && quizId > 0 && quizId < totalQuizzes;
@@ -194,7 +168,7 @@ export default function Quiz() {
       );
       wordsForQuiz = [...customSource].sort(() => 0.5 - Math.random()).slice(0, WORDS_PER_QUIZ);
     } else if (topic) {
-      sourceData = getCleanedPublicTopicWords(topic);
+      sourceData = getCleanedPublicTopicWords(topic, publicDbWords);
 
       if (!isCustom && quizId > totalQuizzes) {
         setQuizState('no_data');

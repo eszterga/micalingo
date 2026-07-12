@@ -3,10 +3,7 @@ import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { useI18n } from "../I18nContext";
 import { useAuth } from "../AuthContext";
 import { useCloudVocabulary } from "../lib/firestore";
-import { publicVocabulary, publicPhrases, publicArticles, publicPrepositions } from "../lib/public-data";
-
-const WORDS_PER_QUIZ = 20;
-const PUBLIC_TOPICS = ['vocabulary', 'phrases', 'articles', 'prepositions'];
+import { getTotalQuizzesForTopic, PUBLIC_TOPICS } from "../lib/quizUtils";
 
 export default function Results() {
   const { t } = useI18n();
@@ -74,28 +71,7 @@ export default function Results() {
     // Custom quizzes and non-public topics don't have a navigable sequence
     if (isCustomKey || !PUBLIC_TOPICS.includes(topicName)) return true;
 
-    // Mirror the same deduplication logic used in Quiz.tsx to compute total quizzes
-    let staticSource: any[] = [];
-    if (topicName === 'vocabulary') staticSource = publicVocabulary;
-    else if (topicName === 'phrases') staticSource = publicPhrases;
-    else if (topicName === 'articles') staticSource = publicArticles;
-    else if (topicName === 'prepositions') staticSource = publicPrepositions;
-
-    const dbSource = publicDbWords.filter((w: any) => w.category === topicName);
-    const combined = [...dbSource, ...staticSource];
-    const seen = new Set<string>();
-    const cleanedWords = combined.filter((word: any) => {
-      const german = (word?.german || '').trim();
-      const hungarian = (word?.hungarian || '').trim();
-      const germanKey = german.toLowerCase();
-      if (!german || !hungarian) return false;
-      if (word?.deleted) return false;
-      if (seen.has(germanKey)) return false;
-      seen.add(germanKey);
-      return true;
-    });
-
-    const totalQuizzes = Math.ceil(cleanedWords.length / WORDS_PER_QUIZ);
+    const totalQuizzes = getTotalQuizzesForTopic(topicName, publicDbWords);
     return quizId >= totalQuizzes;
   };
 
