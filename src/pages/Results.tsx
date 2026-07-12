@@ -2,6 +2,16 @@ import { useState, useEffect } from "react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { useI18n } from "../I18nContext";
 import { useAuth } from "../AuthContext";
+import { publicVocabulary, publicPhrases, publicArticles, publicPrepositions } from "../lib/public-data";
+
+const WORDS_PER_QUIZ = 20;
+
+const TOPIC_QUIZ_COUNTS: Record<string, number> = {
+  vocabulary: Math.ceil(publicVocabulary.length / WORDS_PER_QUIZ),
+  phrases: Math.ceil(publicPhrases.length / WORDS_PER_QUIZ),
+  articles: Math.ceil(publicArticles.length / WORDS_PER_QUIZ),
+  prepositions: Math.ceil(publicPrepositions.length / WORDS_PER_QUIZ),
+};
 
 export default function Results() {
   const { t } = useI18n();
@@ -59,14 +69,14 @@ export default function Results() {
   };
 
   const isLastQuiz = (key: string) => {
-    // This checks if there's a next level available
-    // You might want to adjust this based on your actual quiz structure
     const isCustom = key.startsWith('custom_');
-    const stripped = isCustom ? key.replace('custom_', '') : key;
-    const parts = stripped.split('_');
+    if (isCustom) return true; // Can't determine max for custom quizzes; don't show Next
+    const parts = key.split('_');
     const quizId = parseInt(parts.pop() || '0');
-    // Assuming max 10 levels per topic - adjust as needed
-    return quizId >= 10;
+    const topic = parts.join('_');
+    const maxQuizzes = TOPIC_QUIZ_COUNTS[topic];
+    if (maxQuizzes === undefined) return true;
+    return quizId >= maxQuizzes;
   };
 
   const quizData = selectedQuizKey ? history[selectedQuizKey] : null;
