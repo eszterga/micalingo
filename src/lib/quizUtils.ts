@@ -24,9 +24,9 @@ export function getCleanedPublicTopicWords(topicName: string, cloudWords: any[])
   return combined.filter(word => {
     const german = (word?.german || '').trim();
     const hungarian = (word?.hungarian || '').trim();
-    const germanKey = german.toLowerCase();
     if (!german || !hungarian) return false;
     if (word?.deleted) return false;
+    const germanKey = german.toLowerCase();
     if (seen.has(germanKey)) return false;
     seen.add(germanKey);
     return true;

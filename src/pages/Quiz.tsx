@@ -6,7 +6,7 @@ import { useCloudVocabulary } from "../lib/firestore";
 import { publicVocabulary, publicPhrases } from "../lib/public-data";
 import { doc, setDoc } from 'firebase/firestore';
 import { dbCloud } from '../lib/firebase';
-import { getCleanedPublicTopicWords, getTotalQuizzesForTopic, WORDS_PER_QUIZ, PUBLIC_TOPICS } from '../lib/quizUtils';
+import { getCleanedPublicTopicWords, WORDS_PER_QUIZ, PUBLIC_TOPICS } from '../lib/quizUtils';
 
 interface Question {
   questionText: string;
@@ -52,7 +52,7 @@ export default function Quiz() {
   const publicTopicWords = topic && PUBLIC_TOPICS.includes(topic)
     ? getCleanedPublicTopicWords(topic, publicDbWords)
     : [];
-  const totalQuizzes = getTotalQuizzesForTopic(topic || '', publicDbWords);
+  const totalQuizzes = Math.ceil(publicTopicWords.length / WORDS_PER_QUIZ);
 
   // CRITICAL FIX: hasNextQuiz should be false if this is the last quiz
   const hasNextQuiz = !isCustom && topic && quizId > 0 && quizId < totalQuizzes;
@@ -203,7 +203,7 @@ export default function Quiz() {
       setQuizState('no_data');
       setQuestions([]);
     }
-  }, [topic, userVocabulary, quizId, isCustom, totalQuizzes, publicDbWords]);
+  }, [topic, userVocabulary, quizId, isCustom, publicDbWords]);
 
   useEffect(() => {
     if (quizState === 'ongoing' && questions.length > 0) {
