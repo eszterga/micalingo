@@ -2,6 +2,11 @@ import { useState, useEffect } from "react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { useI18n } from "../I18nContext";
 import { useAuth } from "../AuthContext";
+import { useCloudVocabulary } from "../lib/firestore";
+import { publicVocabulary, publicPhrases, publicArticles, publicPrepositions } from "../lib/public-data";
+
+const WORDS_PER_QUIZ = 20;
+const PUBLIC_TOPICS = ['vocabulary', 'phrases', 'articles', 'prepositions'];
 
 export default function Results() {
   const { t } = useI18n();
@@ -10,6 +15,7 @@ export default function Results() {
   const navigate = useNavigate();
   const [history, setHistory] = useState<Record<string, any>>({});
   const [selectedQuizKey, setSelectedQuizKey] = useState<string | null>(searchParams.get("quizKey"));
+  const publicDbWords = useCloudVocabulary("PUBLIC_LIBRARY") || [];
 
   useEffect(() => {
     const historyKey = user ? `micalingo_history_${user.uid}` : 'micalingo_guest_history';
@@ -59,14 +65,38 @@ export default function Results() {
   };
 
   const isLastQuiz = (key: string) => {
-    // This checks if there's a next level available
-    // You might want to adjust this based on your actual quiz structure
-    const isCustom = key.startsWith('custom_');
-    const stripped = isCustom ? key.replace('custom_', '') : key;
+    const isCustomKey = key.startsWith('custom_');
+    const stripped = isCustomKey ? key.replace('custom_', '') : key;
     const parts = stripped.split('_');
     const quizId = parseInt(parts.pop() || '0');
-    // Assuming max 10 levels per topic - adjust as needed
-    return quizId >= 10;
+    const topicName = parts.join('_');
+
+    // Custom quizzes and non-public topics don't have a navigable sequence
+    if (isCustomKey || !PUBLIC_TOPICS.includes(topicName)) return true;
+
+    // Mirror the same deduplication logic used in Quiz.tsx to compute total quizzes
+    let staticSource: any[] = [];
+    if (topicName === 'vocabulary') staticSource = publicVocabulary;
+    else if (topicName === 'phrases') staticSource = publicPhrases;
+    else if (topicName === 'articles') staticSource = publicArticles;
+    else if (topicName === 'prepositions') staticSource = publicPrepositions;
+
+    const dbSource = publicDbWords.filter((w: any) => w.category === topicName);
+    const combined = [...dbSource, ...staticSource];
+    const seen = new Set<string>();
+    const cleanedWords = combined.filter((word: any) => {
+      const german = (word?.german || '').trim();
+      const hungarian = (word?.hungarian || '').trim();
+      const germanKey = german.toLowerCase();
+      if (!german || !hungarian) return false;
+      if (word?.deleted) return false;
+      if (seen.has(germanKey)) return false;
+      seen.add(germanKey);
+      return true;
+    });
+
+    const totalQuizzes = Math.ceil(cleanedWords.length / WORDS_PER_QUIZ);
+    return quizId >= totalQuizzes;
   };
 
   const quizData = selectedQuizKey ? history[selectedQuizKey] : null;
