@@ -70,7 +70,7 @@ export default function Results() {
 
   const isLastQuiz = (key: string) => {
     const isCustom = key.startsWith('custom_');
-    if (isCustom) return true; // Can't determine max for custom quizzes; don't show Next
+    if (isCustom) return true; // Treat custom quizzes as "last" so no Next Quiz button appears
     const parts = key.split('_');
     const quizId = parseInt(parts.pop() || '0');
     const topic = parts.join('_');
