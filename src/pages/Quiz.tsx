@@ -50,12 +50,35 @@ export default function Quiz() {
     : topic === 'prepositions' ? t('prepositions_quiz')
     : t('personalized_space');
 
-  // Calculate total quizzes based on ACTUAL data
-  let totalQuizzes = 0;
-  if (topic === 'vocabulary') totalQuizzes = Math.ceil((publicVocabulary.length + publicDbWords.filter((w: any) => w.category === 'vocabulary').length) / WORDS_PER_QUIZ);
-  else if (topic === 'phrases') totalQuizzes = Math.ceil((publicPhrases.length + publicDbWords.filter((w: any) => w.category === 'phrases').length) / WORDS_PER_QUIZ);
-  else if (topic === 'articles') totalQuizzes = Math.ceil((publicArticles.length + publicDbWords.filter((w: any) => w.category === 'articles').length) / WORDS_PER_QUIZ);
-  else if (topic === 'prepositions') totalQuizzes = Math.ceil((publicPrepositions.length + publicDbWords.filter((w: any) => w.category === 'prepositions').length) / WORDS_PER_QUIZ);
+  const getCleanedPublicTopicWords = (publicTopic: string) => {
+    let staticSource: any[] = [];
+    if (publicTopic === 'vocabulary') staticSource = publicVocabulary;
+    else if (publicTopic === 'phrases') staticSource = publicPhrases;
+    else if (publicTopic === 'articles') staticSource = publicArticles;
+    else if (publicTopic === 'prepositions') staticSource = publicPrepositions;
+
+    const dbSource = publicDbWords.filter((w: any) => w.category === publicTopic);
+    const combined = [...dbSource, ...staticSource];
+    const seen = new Set<string>();
+
+    return combined.filter((word: any) => {
+      const german = (word?.german || '').trim();
+      const hungarian = (word?.hungarian || '').trim();
+      const germanKey = german.toLowerCase();
+
+      if (!german || !hungarian) return false;
+      if (word?.deleted) return false;
+      if (seen.has(germanKey)) return false;
+
+      seen.add(germanKey);
+      return true;
+    });
+  };
+
+  const publicTopicWords = topic && ['vocabulary', 'phrases', 'articles', 'prepositions'].includes(topic)
+    ? getCleanedPublicTopicWords(topic)
+    : [];
+  const totalQuizzes = Math.ceil(publicTopicWords.length / WORDS_PER_QUIZ);
 
   // CRITICAL FIX: hasNextQuiz should be false if this is the last quiz
   const hasNextQuiz = !isCustom && topic && quizId > 0 && quizId < totalQuizzes;
@@ -171,30 +194,13 @@ export default function Quiz() {
       );
       wordsForQuiz = [...customSource].sort(() => 0.5 - Math.random()).slice(0, WORDS_PER_QUIZ);
     } else if (topic) {
-      let staticSource: any[] = [];
-      if (topic === 'vocabulary') staticSource = publicVocabulary;
-      else if (topic === 'phrases') staticSource = publicPhrases;
-      else if (topic === 'articles') staticSource = publicArticles;
-      else if (topic === 'prepositions') staticSource = publicPrepositions;
+      sourceData = getCleanedPublicTopicWords(topic);
 
-      const dbSource = publicDbWords.filter((w: any) => w.category === topic);
-
-      const combined = [...dbSource, ...staticSource];
-      const unique: any[] = [];
-      const seen = new Set<string>();
-
-      for (const word of combined) {
-        const wordKey = ((word as any).german || "").toLowerCase().trim();
-        if (!seen.has(wordKey)) {
-          seen.add(wordKey);
-          if (!(word as any).deleted) unique.push(word);
-        }
+      if (!isCustom && quizId > totalQuizzes) {
+        setQuizState('no_data');
+        setQuestions([]);
+        return;
       }
-
-      sourceData = unique.filter((word: any) => 
-        (word.german || '').trim() !== '' && 
-        (word.hungarian || '').trim() !== ''
-      );
 
       const startIndex = (quizId - 1) * WORDS_PER_QUIZ;
       const endIndex = startIndex + WORDS_PER_QUIZ;
@@ -223,7 +229,7 @@ export default function Quiz() {
       setQuizState('no_data');
       setQuestions([]);
     }
-  }, [topic, userVocabulary, quizId, isCustom]);
+  }, [topic, userVocabulary, quizId, isCustom, totalQuizzes, publicDbWords]);
 
   useEffect(() => {
     if (quizState === 'ongoing' && questions.length > 0) {
