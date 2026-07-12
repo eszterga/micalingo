@@ -203,7 +203,7 @@ export default function Quiz() {
       setQuizState('no_data');
       setQuestions([]);
     }
-  }, [topic, userVocabulary, quizId, isCustom, publicDbWords]);
+  }, [topic, userVocabulary, quizId, isCustom, totalQuizzes, publicDbWords]);
 
   useEffect(() => {
     if (quizState === 'ongoing' && questions.length > 0) {
