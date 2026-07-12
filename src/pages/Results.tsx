@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { useI18n } from "../I18nContext";
 import { useAuth } from "../AuthContext";
+import { getTotalQuizzesForTopic } from "../lib/public-data";
 
 export default function Results() {
   const { t } = useI18n();
@@ -59,14 +60,12 @@ export default function Results() {
   };
 
   const isLastQuiz = (key: string) => {
-    // This checks if there's a next level available
-    // You might want to adjust this based on your actual quiz structure
     const isCustom = key.startsWith('custom_');
     const stripped = isCustom ? key.replace('custom_', '') : key;
     const parts = stripped.split('_');
     const quizId = parseInt(parts.pop() || '0');
-    // Assuming max 10 levels per topic - adjust as needed
-    return quizId >= 10;
+    const topic = parts.join('_');
+    return quizId >= getTotalQuizzesForTopic(topic, isCustom);
   };
 
   const quizData = selectedQuizKey ? history[selectedQuizKey] : null;

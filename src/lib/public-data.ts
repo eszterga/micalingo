@@ -961,3 +961,18 @@ export const publicFalseFriends: PublicWord[] = [
   { german: "der Chef, die Chefs", hungarian: "a főnök", example: "Der Chef ist heute nicht im Büro.", note: "Nem séf/szakács! (szakács = der Koch)" },
   { german: "die Rente, die Renten", hungarian: "a nyugdíj", example: "Mein Großvater bekommt schon Rente.", note: "Nem bérleti díj! (bérleti díj = die Miete)" }
 ];
+
+export const WORDS_PER_QUIZ = 20;
+
+/**
+ * Returns the total number of quizzes available for a given public topic,
+ * based solely on the static data arrays. Custom quizzes return Infinity.
+ */
+export const getTotalQuizzesForTopic = (topic: string, isCustomQuiz: boolean): number => {
+  if (isCustomQuiz) return Infinity;
+  if (topic === 'vocabulary') return Math.ceil(publicVocabulary.length / WORDS_PER_QUIZ);
+  if (topic === 'phrases') return Math.ceil(publicPhrases.length / WORDS_PER_QUIZ);
+  if (topic === 'articles') return Math.ceil(publicArticles.length / WORDS_PER_QUIZ);
+  if (topic === 'prepositions') return Math.ceil(publicPrepositions.length / WORDS_PER_QUIZ);
+  return Infinity;
+};

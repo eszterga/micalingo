@@ -3,7 +3,7 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 import { useI18n } from "../I18nContext";
 import { useCloudVocabulary } from "../lib/firestore";
-import { publicVocabulary, publicPhrases, publicArticles, publicPrepositions } from "../lib/public-data";
+import { publicVocabulary, publicPhrases, publicArticles, publicPrepositions, getTotalQuizzesForTopic } from "../lib/public-data";
 import { doc, setDoc } from 'firebase/firestore';
 import { dbCloud } from '../lib/firebase';
 
@@ -50,15 +50,11 @@ export default function Quiz() {
     : topic === 'prepositions' ? t('prepositions_quiz')
     : t('personalized_space');
 
-  // Calculate total quizzes based on ACTUAL data
-  let totalQuizzes = 0;
-  if (topic === 'vocabulary') totalQuizzes = Math.ceil((publicVocabulary.length + publicDbWords.filter((w: any) => w.category === 'vocabulary').length) / WORDS_PER_QUIZ);
-  else if (topic === 'phrases') totalQuizzes = Math.ceil((publicPhrases.length + publicDbWords.filter((w: any) => w.category === 'phrases').length) / WORDS_PER_QUIZ);
-  else if (topic === 'articles') totalQuizzes = Math.ceil((publicArticles.length + publicDbWords.filter((w: any) => w.category === 'articles').length) / WORDS_PER_QUIZ);
-  else if (topic === 'prepositions') totalQuizzes = Math.ceil((publicPrepositions.length + publicDbWords.filter((w: any) => w.category === 'prepositions').length) / WORDS_PER_QUIZ);
+  // Calculate total quizzes based on static data only (consistent with TopicQuizzes)
+  const totalQuizzes = getTotalQuizzesForTopic(topic || '', isCustom);
 
-  // CRITICAL FIX: hasNextQuiz should be false if this is the last quiz
-  const hasNextQuiz = !isCustom && topic && quizId > 0 && quizId < totalQuizzes;
+  // hasNextQuiz is false if this is the last quiz or beyond
+  const hasNextQuiz = !isCustom && topic !== null && quizId < totalQuizzes;
 
   let pageTitle = "";
   if (isCustom) {
@@ -324,6 +320,7 @@ export default function Quiz() {
   };
 
   const handleNextQuiz = () => {
+    if (!hasNextQuiz) return;
     navigate(`/quiz?topic=${topic || ''}&quizId=${quizId + 1}`);
     setQuizState('loading');
     setScore(0);
