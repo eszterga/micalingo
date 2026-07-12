@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 import { useI18n } from "../I18nContext";
@@ -15,6 +15,9 @@ interface Question {
   german?: string;
   hungarian?: string;
 }
+
+const QUIZ_TOPICS = ["vocabulary", "phrases", "articles", "prepositions"] as const;
+const WORDS_PER_QUIZ = 20;
 
 export default function Quiz() {
   const [searchParams] = useSearchParams();
@@ -37,8 +40,6 @@ export default function Quiz() {
   const [quizState, setQuizState] = useState<'loading' | 'ongoing' | 'finished' | 'no_data'>('loading');
   const [showQuitModal, setShowQuitModal] = useState(false);
 
-  const WORDS_PER_QUIZ = 20;
-
   const [showExamples] = useState(() => {
     const stored = localStorage.getItem('micalingo_show_examples');
     return stored !== null ? JSON.parse(stored) : true;
@@ -50,15 +51,22 @@ export default function Quiz() {
     : topic === 'prepositions' ? t('prepositions_quiz')
     : t('personalized_space');
 
-  // Calculate total quizzes based on ACTUAL data
-  let totalQuizzes = 0;
-  if (topic === 'vocabulary') totalQuizzes = Math.ceil((publicVocabulary.length + publicDbWords.filter((w: any) => w.category === 'vocabulary').length) / WORDS_PER_QUIZ);
-  else if (topic === 'phrases') totalQuizzes = Math.ceil((publicPhrases.length + publicDbWords.filter((w: any) => w.category === 'phrases').length) / WORDS_PER_QUIZ);
-  else if (topic === 'articles') totalQuizzes = Math.ceil((publicArticles.length + publicDbWords.filter((w: any) => w.category === 'articles').length) / WORDS_PER_QUIZ);
-  else if (topic === 'prepositions') totalQuizzes = Math.ceil((publicPrepositions.length + publicDbWords.filter((w: any) => w.category === 'prepositions').length) / WORDS_PER_QUIZ);
+  const totalQuizzes = useMemo(() => {
+    if (!topic || !QUIZ_TOPICS.includes(topic as any)) return 0;
 
-  // CRITICAL FIX: hasNextQuiz should be false if this is the last quiz
-  const hasNextQuiz = !isCustom && topic && quizId > 0 && quizId < totalQuizzes;
+    const staticSource =
+      topic === 'vocabulary' ? publicVocabulary :
+      topic === 'phrases' ? publicPhrases :
+      topic === 'articles' ? publicArticles :
+      publicPrepositions;
+
+    const dbCount = publicDbWords.filter((w: any) => w.category === topic).length;
+    const totalWords = staticSource.length + dbCount;
+    return Math.max(1, Math.ceil(totalWords / WORDS_PER_QUIZ));
+  }, [topic, publicDbWords]);
+
+  const isLastQuiz = !!topic && !isCustom && totalQuizzes > 0 && quizId >= totalQuizzes;
+  const hasNextQuiz = !!topic && !isCustom && quizId > 0 && quizId < totalQuizzes;
 
   let pageTitle = "";
   if (isCustom) {
@@ -73,7 +81,7 @@ export default function Quiz() {
     const selectedWords = [...words];
 
     return selectedWords.map(word => {
-      if (topic === 'articles') { 
+      if (topic === 'articles') {
         const match = word.german.match(/^(der|die|das)\s+(.*)/i);
         const baseArticle = match ? match[1].toLowerCase() : "der";
         const baseNoun = match ? match[2].trim() : word.german;
@@ -164,9 +172,9 @@ export default function Quiz() {
         setQuizState('loading');
         return;
       }
-      const customSource = (userVocabulary || []).filter((word: any) => 
-        word.category === topic && 
-        (word.german || '').trim() !== '' && 
+      const customSource = (userVocabulary || []).filter((word: any) =>
+        word.category === topic &&
+        (word.german || '').trim() !== '' &&
         (word.hungarian || '').trim() !== ''
       );
       wordsForQuiz = [...customSource].sort(() => 0.5 - Math.random()).slice(0, WORDS_PER_QUIZ);
@@ -178,21 +186,20 @@ export default function Quiz() {
       else if (topic === 'prepositions') staticSource = publicPrepositions;
 
       const dbSource = publicDbWords.filter((w: any) => w.category === topic);
-
       const combined = [...dbSource, ...staticSource];
       const unique: any[] = [];
       const seen = new Set<string>();
 
       for (const word of combined) {
-        const wordKey = ((word as any).german || "").toLowerCase().trim();
+        const wordKey = ((word as any).german || '').toLowerCase().trim();
         if (!seen.has(wordKey)) {
           seen.add(wordKey);
           if (!(word as any).deleted) unique.push(word);
         }
       }
 
-      sourceData = unique.filter((word: any) => 
-        (word.german || '').trim() !== '' && 
+      sourceData = unique.filter((word: any) =>
+        (word.german || '').trim() !== '' &&
         (word.hungarian || '').trim() !== ''
       );
 
@@ -200,8 +207,8 @@ export default function Quiz() {
       const endIndex = startIndex + WORDS_PER_QUIZ;
       wordsForQuiz = sourceData.slice(startIndex, endIndex).sort(() => 0.5 - Math.random());
     } else if (userVocabulary) {
-      wordsForQuiz = [...userVocabulary].filter((word: any) => 
-        (word.german || '').trim() !== '' && 
+      wordsForQuiz = [...userVocabulary].filter((word: any) =>
+        (word.german || '').trim() !== '' &&
         (word.hungarian || '').trim() !== ''
       ).sort(() => 0.5 - Math.random()).slice(0, WORDS_PER_QUIZ);
     }
@@ -223,7 +230,7 @@ export default function Quiz() {
       setQuizState('no_data');
       setQuestions([]);
     }
-  }, [topic, userVocabulary, quizId, isCustom]);
+  }, [topic, userVocabulary, quizId, isCustom, publicDbWords]);
 
   useEffect(() => {
     if (quizState === 'ongoing' && questions.length > 0) {
@@ -240,7 +247,7 @@ export default function Quiz() {
 
       localStorage.setItem(progressKey, JSON.stringify(progressMap));
     }
-  }, [currentQuestionIndex, score, questions, quizState, topic, quizId, user, isCustom]);
+  }, [currentQuestionIndex, score, questions, quizState, topic, quizId, user, isCustom, userAnswers]);
 
   const finishQuiz = async (finalScore: number) => {
     const key = user ? `micalingo_scores_${user.uid}` : 'micalingo_guest_scores';
@@ -261,7 +268,6 @@ export default function Quiz() {
       };
       localStorage.setItem(historyKey, JSON.stringify(historyMap));
 
-      // CLOUD SYNC FOR LOGGED IN USERS - ENSURE SCORES AND HISTORY ARE SAVED
       if (user) {
         try {
           const statsRef = doc(dbCloud, 'user_stats', user.uid);
@@ -324,6 +330,7 @@ export default function Quiz() {
   };
 
   const handleNextQuiz = () => {
+    if (!hasNextQuiz) return;
     navigate(`/quiz?topic=${topic || ''}&quizId=${quizId + 1}`);
     setQuizState('loading');
     setScore(0);
@@ -337,7 +344,7 @@ export default function Quiz() {
     if (quizState === 'ongoing') {
       setShowQuitModal(true);
     } else {
-      navigate(topic && ['vocabulary', 'phrases', 'articles', 'prepositions'].includes(topic || '') ? `/quizzes/${topic}` : '/quizzes');
+      navigate(topic && QUIZ_TOPICS.includes(topic as any) ? `/quizzes/${topic}` : '/quizzes');
     }
   };
 
@@ -361,7 +368,7 @@ export default function Quiz() {
         </p>
         <p className="text-gray-500 mt-2">{t('great_job') || 'Great job with your progress!'}</p>
         <div className="mt-8">
-          <button onClick={() => navigate(topic && ['vocabulary', 'phrases', 'articles', 'prepositions'].includes(topic || '') ? `/quizzes/${topic}` : '/quizzes')} className="bg-blue-600 text-white font-bold px-6 py-2.5 rounded-lg shadow-sm hover:bg-blue-700 transition-colors">
+          <button onClick={() => navigate(topic && QUIZ_TOPICS.includes(topic as any) ? `/quizzes/${topic}` : '/quizzes')} className="bg-blue-600 text-white font-bold px-6 py-2.5 rounded-lg shadow-sm hover:bg-blue-700 transition-colors">
             {t('back_to_quizzes')}
           </button>
         </div>
@@ -392,7 +399,7 @@ export default function Quiz() {
         <h2 className="text-2xl font-bold mb-4">{t('quiz_complete')}</h2>
         <p className="text-lg">{t('your_score')} <span className="font-bold text-blue-600">{score}</span> / {questions.length}</p>
         <div className="mt-8 flex flex-col sm:flex-row justify-center gap-3 flex-wrap">
-          <button onClick={() => navigate(topic && ['vocabulary', 'phrases', 'articles', 'prepositions'].includes(topic || '') ? `/quizzes/${topic}` : '/quizzes')} className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-lg shadow-sm transition-colors">
+          <button onClick={() => navigate(topic && QUIZ_TOPICS.includes(topic as any) ? `/quizzes/${topic}` : '/quizzes')} className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-lg shadow-sm transition-colors">
             {t('back_to_quizzes')}
           </button>
           <button onClick={() => window.location.reload()} className="w-full sm:w-auto bg-gray-100 text-gray-700 font-bold px-6 py-2.5 rounded-lg hover:bg-gray-200 transition-colors">
@@ -475,14 +482,13 @@ export default function Quiz() {
 
         {isAnswered && selectedAnswer !== currentQuestion.correctAnswer && (
           <div className="text-center mt-6 sm:mt-8">
-            <button onClick={handleNext} className="bg-blue-600 text-white font-bold px-6 sm:px-8 py-2 sm:py-3 rounded-lg shadow-md hover:bg-blue-700 transition-all animate-pulse hover:animate-none text-sm sm:text-base">
+            <button onClick={handleNext} className="bg-blue-600 text-white font-bold px-6 sm:px-8 py-2 sm:py-3 rounded-lg shadow-md hover:bg-blue-700 transition-all animate-pulse hover:animate-none text-base sm:text-lg">
               {currentQuestionIndex < questions.length - 1 ? t('next_question') : t('finish_quiz')}
             </button>
           </div>
         )}
       </div>
 
-      {/* Global Quiz Navigation */}
       <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 pt-2 sm:pt-4">
         <button 
           onClick={handleBackClick} 
@@ -497,7 +503,6 @@ export default function Quiz() {
         )}
       </div>
 
-      {/* Quit Confirmation Modal */}
       {showQuitModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl p-6 max-w-sm w-full shadow-xl">
@@ -511,7 +516,7 @@ export default function Quiz() {
                 {t('cancel')}
               </button>
               <button 
-                onClick={() => navigate(topic && ['vocabulary', 'phrases', 'articles', 'prepositions'].includes(topic || '') ? `/quizzes/${topic}` : '/quizzes')} 
+                onClick={() => navigate(topic && QUIZ_TOPICS.includes(topic as any) ? `/quizzes/${topic}` : '/quizzes')} 
                 className="px-4 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-colors"
               >
                 {t('quit')}
