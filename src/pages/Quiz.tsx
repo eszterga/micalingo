@@ -60,10 +60,8 @@ export default function Quiz() {
       topic === 'articles' ? publicArticles :
       publicPrepositions;
 
-    const dbCount = publicDbWords.filter((w: any) => w.category === topic).length;
-    const totalWords = staticSource.length + dbCount;
-    return Math.max(1, Math.ceil(totalWords / WORDS_PER_QUIZ));
-  }, [topic, publicDbWords]);
+    return Math.max(1, Math.ceil(staticSource.length / WORDS_PER_QUIZ));
+  }, [topic]);
 
   const isLastQuiz = !!topic && !isCustom && totalQuizzes > 0 && quizId >= totalQuizzes;
   const hasNextQuiz = !!topic && !isCustom && quizId > 0 && quizId < totalQuizzes;
