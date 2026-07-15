@@ -1,0 +1,6 @@
+# robots.txt for MicaLingo
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://eszterga.github.io/micalingo/sitemap.xml
