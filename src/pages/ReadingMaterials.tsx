@@ -109,6 +109,11 @@ export default function ReadingMaterials() {
         )}
 
         <div className="space-y-6 pt-4">
+          <div className="bg-blue-50/80 backdrop-blur-sm border border-blue-200/60 text-blue-900 p-5 rounded-[1.5rem] shadow-sm text-sm font-medium mb-6 flex items-center gap-3">
+            <span className="text-xl">🔖</span>
+            {user ? (t("bookmark_instructions_logged_in") || "Highlight any text while reading to save a bookmark, or save the highlighted text directly to your personal vocabulary database!") : (t("bookmark_instructions_guest") || "Highlight any text while reading to save a bookmark, or save the highlighted text directly to your personal vocabulary database! (This feature is exclusively available for logged-in users. Log in to use it!)")}
+          </div>
+
           {/* Interesting Section */}
           <section className="bg-white/60 backdrop-blur-xl rounded-[2.5rem] border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-6 md:p-8 transition-all duration-300 hover:bg-white/80">
             <button onClick={() => toggleSection('interesting')} className="w-full flex items-center justify-between group outline-none">

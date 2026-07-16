@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { auth } from '../lib/firebase';
 import { useAuth } from '../AuthContext';
@@ -8,20 +8,23 @@ import { useI18n } from '../I18nContext';
 export default function Login() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { t } = useI18n();
 
   useEffect(() => {
-    // If user is already logged in, redirect to home
+    // If user is already logged in, redirect them.
     if (!loading && user) {
-      navigate('/');
+      const redirectUrl = searchParams.get('redirect') || '/';
+      navigate(redirectUrl, { replace: true });
     }
-  }, [user, loading, navigate]);
+  }, [user, loading, navigate, searchParams]);
 
   const handleGoogleLogin = async () => {
     try {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
-      navigate('/'); // Redirect to home on successful login
+      const redirectUrl = searchParams.get('redirect') || '/';
+      navigate(redirectUrl, { replace: true }); // Redirect on successful login
     } catch (error) {
       console.error("Login failed:", error);
       alert(t('alert_login_failed'));

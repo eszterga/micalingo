@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 import { 
   useCloudVocabulary, 
@@ -63,7 +63,6 @@ export default function Vocabulary() {
   }, [publicDbWords]);
 
   const words = personalWords;
-  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState<'library' | 'personal'>('library');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());

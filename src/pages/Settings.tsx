@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useI18n } from "../I18nContext";
 import { useAuth } from "../AuthContext";
@@ -46,18 +46,19 @@ export default function Settings() {
 
   // Fetch settings from Firestore on mount for logged-in users
   useEffect(() => {
+    let mounted = true;
     if (user) {
       const fetchSettings = async () => {
         try {
           const settingsRef = doc(dbCloud, 'user_settings', user.uid);
           const snap = await getDoc(settingsRef);
-          if (snap.exists()) {
+          if (snap.exists() && mounted) {
             const settings = snap.data() as UserSettings;
-            if (settings.language && settings.language !== language) {
+            if (settings.language) {
               setLanguage(settings.language);
               localStorage.setItem('micalingo_language', settings.language);
             }
-            if (settings.showExamples !== undefined && settings.showExamples !== showExamples) {
+            if (settings.showExamples !== undefined) {
               setShowExamples(settings.showExamples);
               localStorage.setItem('micalingo_show_examples', JSON.stringify(settings.showExamples));
             }
@@ -68,8 +69,8 @@ export default function Settings() {
       };
       fetchSettings();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
+    return () => { mounted = false; };
+  }, [user, setLanguage]);
 
   const handleLanguageChange = (lang: 'en' | 'de' | 'hu') => {
     setLanguage(lang);
@@ -99,7 +100,6 @@ export default function Settings() {
   };
 
   async function handleWipePersonalLibrary(event: React.MouseEvent<HTMLButtonElement>): Promise<void> {
-    // eslint-disable-next-line no-alert
     if (window.confirm(t('confirm_reset_library' as any) || 'Are you sure you want to delete all personal library items? This cannot be undone.')) {
       setIsWiping(true);
       try {
@@ -107,12 +107,10 @@ export default function Settings() {
           const ids = personalWords.map(word => word.id).filter((id): id is string => !!id);
           if (ids.length > 0) await bulkDeleteCloudWords(ids);
         }
-        // eslint-disable-next-line no-alert
         window.alert(t('library_wiped' as any) || 'Personal library wiped successfully.');
         window.location.reload();
       } catch (error) {
         console.error('Error wiping personal library:', error);
-        // eslint-disable-next-line no-alert
         window.alert(t('wipe_error' as any) || 'Failed to wipe personal library. Please try again.');
       } finally {
         setIsWiping(false);
@@ -196,14 +194,12 @@ export default function Settings() {
                   </div>
                   <button 
                     onClick={() => {
-                      // eslint-disable-next-line no-alert
                       if (window.confirm(t('confirm_clear_data' as any) || 'Are you sure you want to clear all local progress? This cannot be undone.')) {
                         const lang = localStorage.getItem('micalingo_language');
                         const examples = localStorage.getItem('micalingo_show_examples');
                         localStorage.clear();
                         if (lang) localStorage.setItem('micalingo_language', lang);
                         if (examples) localStorage.setItem('micalingo_show_examples', examples);
-                        // eslint-disable-next-line no-alert
                         window.alert(t('data_cleared' as any) || 'Local progress cleared successfully.');
                         window.location.reload();
                       }
