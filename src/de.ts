@@ -47,6 +47,8 @@ export const de = {
   articles_quiz_subtitle: "Üben Sie der, die, das.",
   phrases_quiz: "Redewendungen und Sätze",
   phrases_quiz_subtitle: "Nützliche alltägliche Redewendungen und Sätze.",
+  phrases_sentences_quiz: "Ausdrücke und Sätze Quiz",
+  vocabulary_to_read: "Wortschatz zum Lesen",
   prepositions_quiz: "Präpositionen",
   prepositions_quiz_subtitle: "Üben Sie Präpositionen und Fälle.",
   create_your_own_quizzes: "Benutzerdefinierte Quizze",

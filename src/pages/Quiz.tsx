@@ -6,6 +6,7 @@ import { useCloudVocabulary } from "../lib/firestore";
 import { publicVocabulary, publicPhrases, publicArticles, publicPrepositions, publicAdjectives } from "../lib/public-data";
 import { doc, setDoc } from 'firebase/firestore';
 import { dbCloud } from '../lib/firebase';
+import * as XLSX from 'xlsx';
 
 interface Question {
   questionText: string;
@@ -66,7 +67,7 @@ export default function Quiz() {
 
   const translatedTopic = topic === 'vocabulary' ? t('vocabulary')
     : topic === 'articles' ? t('articles_quiz')
-    : topic === 'phrases' ? t('phrases_quiz')
+    : topic === 'phrases' ? (t('phrases_sentences_quiz') || 'Phrases and sentences')
     : topic === 'prepositions' ? t('prepositions_quiz')
     : topic === 'adjectives' ? (t('adjectives_quiz') || 'Adjectives')
     : t('personalized_space');
@@ -446,21 +447,24 @@ export default function Quiz() {
               </button>
               <button onClick={() => {
                 const quizKey = isCustom ? `custom_${topic || 'general'}_${quizId}` : `${topic || 'custom'}_${quizId}`;
-                let csv = `German,Hungarian,Example,${t('csv_question') || 'Question'},${t('your_answer') || 'Your Answer'},${t('correct_answer') || 'Correct Answer'},${t('csv_result') || 'Result'}\n`;
-                questions.forEach((q, i) => {
+                const exportData = questions.map((q: any, i: number) => {
                   const userAnswer = userAnswers[i] || '';
                   const isCorrect = userAnswer === q.correctAnswer;
-                  const statusText = isCorrect ? '✅' : '❌';
-                  csv += `"${q.german || ''}","${q.hungarian || ''}","${q.example || ''}","${q.questionText}","${userAnswer}","${q.correctAnswer}","${statusText}"\n`;
+                  return {
+                    [t('csv_question') || 'Question']: q.questionText || '',
+                    [t('your_answer') || 'Your Answer']: userAnswer,
+                    [t('correct_answer') || 'Correct Answer']: isCorrect ? '' : (q.correctAnswer || ''),
+                    [t('csv_result') || 'Result']: isCorrect ? '✅' : '❌'
+                  };
                 });
-                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `${quizKey}_results.csv`;
-                a.click();
+
+                const worksheet = XLSX.utils.json_to_sheet(exportData);
+                worksheet['!cols'] = [{ wch: 50 }, { wch: 30 }, { wch: 30 }, { wch: 15 }];
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, 'Results');
+                XLSX.writeFile(workbook, `${quizKey}_results.xlsx`);
               }} className="w-full sm:w-auto bg-green-100 text-green-700 font-bold py-3 px-8 rounded-xl hover:bg-green-200 transition-colors shadow-sm">
-                {t('download_button') || 'Download CSV'}
+                {t('download_button') || 'Download Excel'}
               </button>
               {hasNextQuiz && (
                 <button onClick={handleNextQuiz} className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl shadow-sm transition-colors">

@@ -4,6 +4,7 @@ import { useI18n } from "../I18nContext";
 import { Link } from "react-router-dom";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { dbCloud } from "../lib/firebase";
+import * as XLSX from 'xlsx';
 
 const BackgroundBlobs = () => (
   <>
@@ -138,22 +139,25 @@ export default function Statistics() {
     setSelectedKeys(new Set());
   };
 
-  const downloadCsv = (key: string, data: any) => {
-    let csv = `German,Hungarian,Example,${t('csv_question') || 'Question'},${t('your_answer') || 'Your Answer'},${t('correct_answer') || 'Correct Answer'},${t('csv_result') || 'Result'}\n`;
-    if (data.questions) {
-      data.questions.forEach((q: any, i: number) => {
-        const userAnswer = data.userAnswers ? data.userAnswers[i] || '' : '';
-        const isCorrect = userAnswer === q.correctAnswer;
-        const statusText = isCorrect ? '✅' : '❌';
-        csv += `"${q.german || ''}","${q.hungarian || ''}","${q.example || ''}","${q.questionText}","${userAnswer}","${q.correctAnswer}","${statusText}"\n`;
-      });
-    }
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${key}_results.csv`;
-    a.click();
+  const downloadResults = (key: string, data: any) => {
+    if (!data.questions) return;
+    
+    const exportData = data.questions.map((q: any, i: number) => {
+      const userAnswer = data.userAnswers ? data.userAnswers[i] || '' : '';
+      const isCorrect = userAnswer === q.correctAnswer;
+      return {
+        [t('csv_question') || 'Question']: q.questionText || '',
+        [t('your_answer') || 'Your Answer']: userAnswer,
+        [t('correct_answer') || 'Correct Answer']: isCorrect ? '' : (q.correctAnswer || ''),
+        [t('csv_result') || 'Result']: isCorrect ? '✅' : '❌'
+      };
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    worksheet['!cols'] = [{ wch: 50 }, { wch: 30 }, { wch: 30 }, { wch: 15 }];
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Results');
+    XLSX.writeFile(workbook, `${key}_results.xlsx`);
   };
 
   const getQuizUrl = (key: string) => {
@@ -288,9 +292,9 @@ export default function Statistics() {
                       <td className="p-3 sm:p-5 text-right">
                         <div className="flex justify-end gap-1 opacity-100 transition-opacity">
                           <button
-                            onClick={() => downloadCsv(quizKey, data)}
+                            onClick={() => downloadResults(quizKey, data)}
                             className="text-blue-600 hover:text-blue-800 text-sm font-medium p-2 hover:bg-blue-50 rounded-lg transition-colors"
-                            title={t('download_button') || 'Download CSV'}
+                            title={t('download_button') || 'Download Excel'}
                           >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                           </button>

@@ -3,6 +3,7 @@ import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { useI18n } from "../I18nContext";
 import { useAuth } from "../AuthContext";
 import { publicVocabulary, publicPhrases, publicArticles, publicPrepositions, publicAdjectives } from "../lib/public-data";
+import * as XLSX from 'xlsx';
 
 const WORDS_PER_QUIZ = 20;
 
@@ -13,6 +14,25 @@ const TOPIC_QUIZ_COUNTS: Record<string, number> = {
   prepositions: Math.ceil(publicPrepositions.length / WORDS_PER_QUIZ),
   adjectives: Math.ceil((publicAdjectives || []).length / WORDS_PER_QUIZ),
 };
+
+const BackgroundBlobs = () => (
+  <>
+    <style>{`
+      @keyframes blob {
+        0% { transform: translate(0px, 0px) scale(1); }
+        33% { transform: translate(30px, -50px) scale(1.1); }
+        66% { transform: translate(-20px, 20px) scale(0.9); }
+        100% { transform: translate(0px, 0px) scale(1); }
+      }
+      .animate-blob { animation: blob 15s infinite alternate; }
+      .animation-delay-2000 { animation-delay: 2s; }
+      .animation-delay-4000 { animation-delay: 4s; }
+    `}</style>
+    <div className="fixed top-[-10%] left-[-10%] w-[50vw] h-[50vw] max-w-[600px] max-h-[600px] bg-blue-300 rounded-full mix-blend-multiply filter blur-[80px] md:blur-[120px] opacity-40 animate-blob pointer-events-none z-0"></div>
+    <div className="fixed top-[10%] right-[-5%] w-[40vw] h-[40vw] max-w-[500px] max-h-[500px] bg-purple-300 rounded-full mix-blend-multiply filter blur-[80px] md:blur-[120px] opacity-40 animate-blob animation-delay-2000 pointer-events-none z-0"></div>
+    <div className="fixed bottom-[-10%] left-[20%] w-[45vw] h-[45vw] max-w-[550px] max-h-[550px] bg-pink-200 rounded-full mix-blend-multiply filter blur-[80px] md:blur-[120px] opacity-40 animate-blob animation-delay-4000 pointer-events-none z-0"></div>
+  </>
+);
 
 export default function Results() {
   const { t } = useI18n();
@@ -32,22 +52,25 @@ export default function Results() {
     }
   }, [user, selectedQuizKey]);
 
-  const downloadCsv = (key: string, data: any) => {
-    let csv = `German,Hungarian,Example,${t('csv_question') || 'Question'},${t('your_answer') || 'Your Answer'},${t('correct_answer') || 'Correct Answer'},${t('csv_result') || 'Result'}\n`;
-    if (data.questions) {
-      data.questions.forEach((q: any, i: number) => {
-        const userAnswer = data.userAnswers ? data.userAnswers[i] || '' : '';
-        const isCorrect = userAnswer === q.correctAnswer;
-        const statusText = isCorrect ? '✅' : '❌';
-        csv += `"${q.german || ''}","${q.hungarian || ''}","${q.example || ''}","${q.questionText}","${userAnswer}","${q.correctAnswer}","${statusText}"\n`;
-      });
-    }
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${key}_results.csv`;
-    a.click();
+  const downloadResults = (key: string, data: any) => {
+    if (!data.questions) return;
+    
+    const exportData = data.questions.map((q: any, i: number) => {
+      const userAnswer = data.userAnswers ? data.userAnswers[i] || '' : '';
+      const isCorrect = userAnswer === q.correctAnswer;
+      return {
+        [t('csv_question') || 'Question']: q.questionText || '',
+        [t('your_answer') || 'Your Answer']: userAnswer,
+        [t('correct_answer') || 'Correct Answer']: isCorrect ? '' : (q.correctAnswer || ''),
+        [t('csv_result') || 'Result']: isCorrect ? '✅' : '❌'
+      };
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    worksheet['!cols'] = [{ wch: 50 }, { wch: 30 }, { wch: 30 }, { wch: 15 }];
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Results');
+    XLSX.writeFile(workbook, `${key}_results.xlsx`);
   };
 
   const getQuizUrl = (key: string) => {
@@ -84,123 +107,126 @@ export default function Results() {
   const hasNextLevel = selectedQuizKey && !isLastQuiz(selectedQuizKey);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <button 
-          onClick={() => window.history.length > 2 ? window.history.back() : navigate('/quizzes')} 
-          className="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium px-4 py-2 rounded-lg shadow-sm transition-colors flex items-center gap-2"
-        >
-          {t('back_button')}
-        </button>
-        <div>
-          <h1 className="text-3xl font-bold">{t('results_page_title') || 'Quiz Results'}</h1>
-          <p className="text-gray-600 mt-1">{t('results_page_subtitle') || 'Review your answers.'}</p>
-        </div>
-      </div>
-
-      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-          <select 
-            value={selectedQuizKey || ''} 
-            onChange={(e) => setSelectedQuizKey(e.target.value)}
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full sm:w-auto p-2.5 capitalize font-medium"
+    <div className="relative min-h-[85vh] w-full flex flex-col pt-4 md:pt-8 pb-12">
+      <BackgroundBlobs />
+      <div className="relative z-10 w-full max-w-7xl mx-auto space-y-8 px-4 md:px-8">
+        <div className="flex items-center gap-4">
+          <button 
+            onClick={() => window.history.length > 2 ? window.history.back() : navigate('/quizzes')} 
+            className="bg-white/70 backdrop-blur-md border border-white text-gray-700 hover:bg-white font-bold px-5 py-2.5 rounded-xl shadow-sm transition-all flex items-center gap-2"
           >
-            {Object.keys(history).length === 0 && <option value="">No quizzes completed yet</option>}
-            {Object.keys(history).map(key => (
-              <option key={key} value={key}>{key.replace(/_/g, ' ')}</option>
-            ))}
-          </select>
-          
-          {quizData && (
-            <div className="flex gap-2 w-full sm:w-auto">
-              <button 
-                onClick={() => downloadCsv(selectedQuizKey!, quizData)} 
-                className="flex-1 sm:flex-none justify-center items-center gap-2 bg-white border border-blue-600 text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg font-bold transition-colors shadow-sm text-sm"
-              >
-                {t('download_button') || 'Download CSV'}
-              </button>
-              <Link 
-                to={getQuizUrl(selectedQuizKey!)} 
-                className="flex-1 sm:flex-none flex justify-center items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-bold transition-colors shadow-sm text-sm"
-              >
-                {t('redo_button') || 'Redo Quiz'}
-              </Link>
-            </div>
-          )}
+            {t('back_button')}
+          </button>
+          <div>
+            <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600 tracking-tight pb-2">{t('results_page_title') || 'Quiz Results'}</h1>
+            <p className="text-lg text-blue-900/70 font-medium mt-1">{t('results_page_subtitle') || 'Review your answers.'}</p>
+          </div>
         </div>
 
-        {!quizData ? (
-          <div className="text-center text-gray-500 p-8 bg-gray-50 rounded-lg">
-            {t('no_quizzes_solved') || 'No quiz data found.'}
+        <div className="bg-white/60 backdrop-blur-xl p-6 md:p-8 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+            <select 
+              value={selectedQuizKey || ''} 
+              onChange={(e) => setSelectedQuizKey(e.target.value)}
+              className="bg-white/80 border border-white text-blue-950 text-sm rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 block w-full sm:w-auto p-3 shadow-sm capitalize font-bold outline-none"
+            >
+              {Object.keys(history).length === 0 && <option value="">No quizzes completed yet</option>}
+              {Object.keys(history).map(key => (
+                <option key={key} value={key}>{key.replace(/_/g, ' ')}</option>
+              ))}
+            </select>
+            
+            {quizData && (
+              <div className="flex gap-3 w-full sm:w-auto">
+                <button 
+                  onClick={() => downloadResults(selectedQuizKey!, quizData)} 
+                  className="flex-1 sm:flex-none justify-center items-center gap-2 bg-white border border-blue-200 text-blue-600 hover:bg-blue-50 px-5 py-2.5 rounded-xl font-bold transition-all shadow-sm text-sm"
+                >
+                  {t('download_button') || 'Download Excel'}
+                </button>
+                <Link 
+                  to={getQuizUrl(selectedQuizKey!)} 
+                  className="flex-1 sm:flex-none flex justify-center items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-sm text-sm"
+                >
+                  {t('redo_button') || 'Redo Quiz'}
+                </Link>
+              </div>
+            )}
           </div>
-        ) : (
-          <>
-            <div className="mb-6 p-4 bg-blue-50 border border-blue-100 rounded-xl">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div>
-                  <span className="font-bold text-blue-900">{t('your_score') || 'Your Score'}:</span>
-                  <span className="ml-2 text-xl font-bold text-blue-700">{quizData.score} / {quizData.questions?.length || 20} ({Math.round((quizData.score / (quizData.questions?.length || 20)) * 100)}%)</span>
-                </div>
-                <div className="text-sm text-blue-800 font-semibold">
-                  {t('quiz_complete') || 'Quiz Complete!'}
+
+          {!quizData ? (
+            <div className="text-center text-blue-900/60 p-12 bg-white/40 rounded-[2rem] border border-dashed border-gray-300 font-medium">
+              {t('no_quizzes_solved') || 'No quiz data found.'}
+            </div>
+          ) : (
+            <>
+              <div className="mb-8 p-6 bg-blue-50/80 backdrop-blur-sm border border-blue-100 rounded-2xl shadow-sm">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div>
+                    <span className="font-bold text-blue-900 text-lg">{t('your_score') || 'Your Score'}:</span>
+                    <span className="ml-3 text-2xl font-extrabold text-blue-700">{quizData.score} / {quizData.questions?.length || 20} <span className="text-blue-600/70 text-lg">({Math.round((quizData.score / (quizData.questions?.length || 20)) * 100)}%)</span></span>
+                  </div>
+                  <div className="px-4 py-2 bg-blue-100/80 text-blue-800 rounded-xl text-sm font-bold uppercase tracking-wider">
+                    {t('quiz_complete') || 'Quiz Complete!'}
+                  </div>
                 </div>
               </div>
-            </div>
-            
-            <div className="space-y-4">
-              {quizData.questions?.map((q: any, i: number) => {
-                const userAnswer = quizData.userAnswers ? quizData.userAnswers[i] : null;
-                const isCorrect = userAnswer === q.correctAnswer;
-                
-                return (
-                  <div key={i} className={`p-4 rounded-xl border-2 ${isCorrect ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
-                    <div className="flex justify-between items-start gap-4 mb-2">
-                      <p className="font-bold text-gray-900 text-lg">{i + 1}. {q.questionText}</p>
-                      {isCorrect ? (
-                        <span className="shrink-0 bg-green-100 text-green-800 text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">✅ {t('csv_correct') || 'Correct'}</span>
-                      ) : (
-                        <span className="shrink-0 bg-red-100 text-red-800 text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">❌ {t('csv_incorrect') || 'Incorrect'}</span>
-                      )}
-                    </div>
-                    
-                    <div className="grid sm:grid-cols-2 gap-4 mt-4">
-                      <div>
-                        <span className="block text-xs font-bold text-gray-500 uppercase mb-1">{t('your_answer') || 'Your Answer'}</span>
-                        <div className={`p-2 rounded border ${isCorrect ? 'bg-green-100 border-green-300 text-green-800 font-medium' : 'bg-red-100 border-red-300 text-red-800 font-medium line-through'}`}>
-                          {userAnswer || '-'}
+              
+              <div className="space-y-6">
+                {quizData.questions?.map((q: any, i: number) => {
+                  const userAnswer = quizData.userAnswers ? quizData.userAnswers[i] : null;
+                  const isCorrect = userAnswer === q.correctAnswer;
+                  
+                  return (
+                    <div key={i} className={`p-6 rounded-2xl border-2 transition-all duration-300 shadow-sm ${isCorrect ? 'bg-green-50/80 border-green-300' : 'bg-red-50/80 border-red-300'}`}>
+                      <div className="flex justify-between items-start gap-4 mb-4">
+                        <p className="font-bold text-gray-900 text-xl">{i + 1}. {q.questionText}</p>
+                        {isCorrect ? (
+                          <span className="shrink-0 bg-green-100 text-green-800 text-xs font-extrabold px-3 py-1.5 rounded-full uppercase tracking-wider shadow-sm">✅ {t('csv_correct') || 'Correct'}</span>
+                        ) : (
+                          <span className="shrink-0 bg-red-100 text-red-800 text-xs font-extrabold px-3 py-1.5 rounded-full uppercase tracking-wider shadow-sm">❌ {t('csv_incorrect') || 'Incorrect'}</span>
+                        )}
+                      </div>
+                      
+                      <div className="grid sm:grid-cols-2 gap-4 mt-4">
+                        <div>
+                          <span className="block text-xs font-bold text-gray-500 uppercase mb-2">{t('your_answer') || 'Your Answer'}</span>
+                          <div className={`p-3.5 rounded-xl border ${isCorrect ? 'bg-green-100/50 border-green-300 text-green-900 font-bold' : 'bg-red-100/50 border-red-300 text-red-900 font-bold line-through'}`}>
+                            {userAnswer || '-'}
+                          </div>
+                        </div>
+                        <div>
+                          <span className="block text-xs font-bold text-gray-500 uppercase mb-2">{t('correct_answer') || 'Correct Answer'}</span>
+                          <div className="p-3.5 rounded-xl border bg-green-100/50 border-green-300 text-green-900 font-bold">
+                            {q.correctAnswer}
+                          </div>
                         </div>
                       </div>
-                      <div>
-                        <span className="block text-xs font-bold text-gray-500 uppercase mb-1">{t('correct_answer') || 'Correct Answer'}</span>
-                        <div className="p-2 rounded border bg-green-100 border-green-300 text-green-800 font-medium">
-                          {q.correctAnswer}
-                        </div>
-                      </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
 
-            {/* Next Level Button Section */}
-            <div className="mt-8 flex gap-4 justify-between">
-              <button 
-                onClick={() => navigate('/quizzes')} 
-                className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-3 px-6 rounded-lg transition-colors shadow-sm"
-              >
-                {t('back_to_quizzes') || 'Back to Quizzes'}
-              </button>
-              {hasNextLevel && (
-                <Link 
-                  to={getNextLevelUrl(selectedQuizKey!)} 
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors shadow-sm flex items-center justify-center gap-2"
+              {/* Next Level Button Section */}
+              <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-between pt-6 border-t border-white/60">
+                <button 
+                  onClick={() => navigate('/quizzes')} 
+                  className="w-full sm:w-auto justify-center bg-white/70 backdrop-blur-md border border-white text-gray-700 font-bold px-6 py-3.5 rounded-xl shadow-sm hover:bg-white transition-all"
                 >
-                  {t('next_quiz_button') || 'Next Quiz →'}
-                </Link>
-              )}
-            </div>
-          </>
-        )}
+                  {t('back_to_quizzes') || 'Back to Quizzes'}
+                </button>
+                {hasNextLevel && (
+                  <Link 
+                    to={getNextLevelUrl(selectedQuizKey!)} 
+                    className="w-full sm:w-auto justify-center bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-3.5 rounded-xl transition-all shadow-sm flex items-center gap-2"
+                  >
+                    {t('next_quiz_button') || 'Next Quiz →'}
+                  </Link>
+                )}
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

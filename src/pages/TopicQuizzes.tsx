@@ -64,7 +64,7 @@ export default function TopicQuizzes() {
     pageTitle = t('vocabulary') || "Vocabulary";
   } else if (topic === 'phrases') {
     sourceData = publicPhrases;
-    pageTitle = t('phrases_quiz') || "Phrases";
+    pageTitle = t('phrases_sentences_quiz') || "Phrases and sentences quiz";
   } else if (topic === 'articles') {
     sourceData = publicArticles;
     pageTitle = t('articles_quiz') || "Articles";
@@ -74,6 +74,9 @@ export default function TopicQuizzes() {
   } else if (topic === 'adjectives') {
     sourceData = publicAdjectives || [];
     pageTitle = t('adjectives_quiz') || "Adjectives";
+  } else if (topic === 'reading') {
+    sourceData = []; // No public data for this category
+    pageTitle = t('vocabulary_to_read') || "Vocabulary to read";
   } else {
     return (
       <div className="relative min-h-[85vh] w-full flex flex-col pt-4 md:pt-8 pb-12">

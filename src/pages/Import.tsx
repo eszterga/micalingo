@@ -532,8 +532,11 @@ export default function Import() {
 
     setSaving(true);
     try {
+      // Check for duplicates based on the German word within the target destination category
       const existingSet = new Set(
-        allItems.map((item: any) => `${(item.german || '').toLowerCase().trim()}|${(item.hungarian || '').toLowerCase().trim()}`)
+        allItems
+          .filter((item: any) => (item.category || 'vocabulary') === destination)
+          .map((item: any) => (item.german || '').toLowerCase().trim())
       );
 
       const itemsToSave: any[] = [];
@@ -545,7 +548,7 @@ export default function Import() {
 
         if (!german || !hungarian) continue; // Skip empty rows silently
 
-        const key = `${german.toLowerCase()}|${hungarian.toLowerCase()}`;
+        const key = german.toLowerCase();
         if (!existingSet.has(key)) {
           existingSet.add(key); // Prevent duplicates within the new batch itself
           itemsToSave.push({
@@ -779,13 +782,11 @@ export default function Import() {
                   onChange={(e) => setDestination(e.target.value)}
                   className="bg-white border border-gray-200 text-gray-900 font-medium rounded-xl focus:ring-2 focus:ring-blue-500 block w-full p-3 shadow-sm outline-none"
                 >
-                  <option value="vocabulary">{t('vocabulary_quiz')}</option>
-                  <option value="articles">{t('articles_quiz')}</option>
-                  <option value="phrases">{t('phrases_quiz')}</option>
-                  <option value="adjectives">{t('adjectives_quiz') || 'Adjectives'}</option>
-                  <option value="prepositions">{t('prepositions_quiz')}</option>
-                  <option value="reading">{t('save_to_reading')}</option>
-                  <option value="listening">{t('save_to_listening')}</option>
+                  <option value="vocabulary">{t('vocabulary_quiz') || 'Vocabulary quiz'}</option>
+                  <option value="reading">{t('vocabulary_to_read') || 'Vocabulary to read'}</option>
+                  <option value="phrases">{t('phrases_sentences_quiz') || 'Phrases and sentences quiz'}</option>
+                  <option value="adjectives">{t('adjectives_quiz') || 'Adjective quiz'}</option>
+                  <option value="prepositions">{t('prepositions_quiz') || 'Prepositions quiz'}</option>
                 </select>
               </div>
             </div>

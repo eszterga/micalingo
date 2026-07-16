@@ -47,6 +47,8 @@ export const en = {
   articles_quiz_subtitle: "Practice der, die, das.",
   phrases_quiz: "Phrases and sentences",
   phrases_quiz_subtitle: "Useful everyday phrases and sentences.",
+  phrases_sentences_quiz: "Phrases and sentences quiz",
+  vocabulary_to_read: "Vocabulary to read",
   prepositions_quiz: "Prepositions",
   prepositions_quiz_subtitle: "Practice prepositions and cases.",
   create_your_own_quizzes: "Custom Quizzes",

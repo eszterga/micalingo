@@ -47,6 +47,8 @@ export const hu = {
   articles_quiz_subtitle: "Gyakorold a der, die, das névelőket.",
   phrases_quiz: "Kifejezések és mondatok",
   phrases_quiz_subtitle: "Hasznos mindennapi kifejezések és mondatok.",
+  phrases_sentences_quiz: "Kifejezések és mondatok kvíz",
+  vocabulary_to_read: "Olvasni való szókincs",
   prepositions_quiz: "Elöljárószavak",
   prepositions_quiz_subtitle: "Gyakorold az elöljárószavakat és eseteket.",
   create_your_own_quizzes: "Saját kvízek",
