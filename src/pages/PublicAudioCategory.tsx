@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { collection, query, where, getDocs, doc, setDoc, deleteDoc } from 'firebase/firestore';
 import { dbCloud } from '../lib/firebase';
 import { useAuth } from '../AuthContext';
 import { useI18n } from '../I18nContext';
+import { addCloudWord } from '../lib/firestore';
 
 const BackgroundBlobs = () => (
   <>
@@ -34,8 +35,10 @@ const MediaPlayer = ({ url, t }: { url: string, t: any }) => {
   } else if (url.includes("spotify.com/")) {
     try {
       const pathname = new URL(url).pathname;
-      return <iframe style={{ borderRadius: "12px" }} src={`https://open.spotify.com/embed${pathname}`} width="100%" height="152" frameBorder="0" allowFullScreen allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" className="shadow-sm" />;
-    } catch {}
+      return <iframe style={{ borderRadius: "12px" }} src={`https://open.spotify.com/embed${pathname}`} width="100%" height="152" frameBorder="0" allowFullScreen allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" className="shadow-sm" title="Spotify player" />;
+    } catch (e) {
+      console.error("Invalid Spotify URL", e);
+    }
   }
   return (
     <a href={url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-md hover:shadow-lg w-full">
@@ -52,11 +55,22 @@ export default function PublicAudioCategory({ type }: { type: 'music' | 'podcast
   
   const [items, setItems] = useState<any[]>([]);
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
+  const [bookmarks, setBookmarks] = useState<Record<string, string>>({});
+  const [bookmarkPopup, setBookmarkPopup] = useState<{ itemId: string, text: string, x: number, y: number } | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editData, setEditData] = useState({ title: "", url: "", source: "", content: "" });
   const contentRef = useRef<HTMLDivElement>(null);
+
+  const [isSaveWordModalOpen, setIsSaveWordModalOpen] = useState(false);
+  const [newGerman, setNewGerman] = useState("");
+  const [newArticle, setNewArticle] = useState("der");
+  const [newNoun, setNewNoun] = useState("");
+  const [newHungarian, setNewHungarian] = useState("");
+  const [newExample, setNewExample] = useState("");
+  const [newNote, setNewNote] = useState("");
+  const [newCategory, setNewCategory] = useState("vocabulary");
 
   const categoryName = t((categoryId || '') as any) || categoryId;
   const sectionName = type === 'music' ? t("music_section" as any) : type === 'podcasts' ? t("podcasts_section" as any) : t("audiobooks_section" as any);
@@ -67,7 +81,24 @@ export default function PublicAudioCategory({ type }: { type: 'music' | 'podcast
     }
   }, [editData.content, isModalOpen]);
 
-  const fetchItems = async () => {
+  useEffect(() => {
+    const fetchBookmarks = async () => {
+      if (user) {
+        try {
+          const q = query(collection(dbCloud, "bookmarks"), where("userId", "==", user.uid), where("categoryId", "==", categoryId));
+          const snapshot = await getDocs(q);
+          const bms: Record<string, string> = {};
+          snapshot.forEach(doc => { bms[doc.data().itemId] = doc.data().snippet; });
+          setBookmarks(bms);
+        } catch (e) {
+          console.error("Error fetching bookmarks:", e);
+        }
+      }
+    };
+    fetchBookmarks();
+  }, [categoryId, user]);
+
+  const fetchItems = useCallback(async () => {
     try {
       const q = query(collection(dbCloud, "audio"), where("categoryId", "==", categoryId));
       const snapshot = await getDocs(q);
@@ -77,11 +108,120 @@ export default function PublicAudioCategory({ type }: { type: 'music' | 'podcast
     } catch (e) {
       console.error("Error fetching audio:", e);
     }
-  };
+  }, [categoryId, user?.uid]);
 
   useEffect(() => {
     fetchItems();
-  }, [categoryId, user, adminMode]);
+  }, [fetchItems, adminMode]);
+
+  useEffect(() => {
+    const handleGlobalClick = (e: MouseEvent | TouchEvent) => {
+      if (!(e.target as Element).closest("#bookmark-popover")) {
+        setBookmarkPopup(null);
+      }
+    };
+    document.addEventListener("mousedown", handleGlobalClick);
+    document.addEventListener("touchstart", handleGlobalClick);
+    return () => {
+      document.removeEventListener("mousedown", handleGlobalClick);
+      document.removeEventListener("touchstart", handleGlobalClick);
+    };
+  }, []);
+
+  const handleMouseUp = (e: React.MouseEvent | React.TouchEvent, itemId: string) => {
+    if (!user) return; // Only allow highlighting features for logged-in users
+    setTimeout(() => {
+      const selection = window.getSelection();
+      const text = selection?.toString().trim();
+      if (text && text.length > 2) {
+        const rect = selection!.getRangeAt(0).getBoundingClientRect();
+        setBookmarkPopup({ itemId, text, x: rect.left + rect.width / 2, y: rect.top - 45 });
+      } else {
+        setBookmarkPopup(null);
+      }
+    }, 150);
+  };
+
+  const saveBookmark = async () => {
+    if (bookmarkPopup && user) {
+      try {
+        const { itemId, text } = bookmarkPopup;
+        await setDoc(doc(dbCloud, "bookmarks", `${user.uid}_${itemId}`), {
+          userId: user.uid, categoryId, itemId, snippet: text, updatedAt: Date.now()
+        });
+        setBookmarks(prev => ({ ...prev, [itemId]: text }));
+        setBookmarkPopup(null);
+        window.getSelection()?.removeAllRanges();
+      } catch (e) {
+        console.error("Error saving bookmark:", e);
+      }
+    }
+  };
+
+  const deleteBookmark = async (e: React.MouseEvent, itemId: string) => {
+    e.stopPropagation();
+    e.preventDefault();
+    if (user) {
+      try {
+        await deleteDoc(doc(dbCloud, "bookmarks", `${user.uid}_${itemId}`));
+        setBookmarks(prev => {
+          const next = { ...prev };
+          delete next[itemId];
+          return next;
+        });
+      } catch (err) {
+        console.error("Error deleting bookmark:", err);
+      }
+    }
+  };
+
+  const handleContinueFrom = (e: React.MouseEvent, itemId: string, snippet: string) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setExpandedItems(prev => new Set(prev).add(itemId));
+    setTimeout(() => {
+      const container = document.getElementById(`article-content-${itemId}`);
+      if (!container) return;
+      const elements = Array.from(container.querySelectorAll("p, h1, h2, h3, h4, h5, h6, li, span, div, b, i, em, strong"));
+      for (const el of elements) {
+        if (el.textContent && el.textContent.includes(snippet)) {
+          const htmlElement = el as HTMLElement;
+          const originalHtml = htmlElement.innerHTML;
+          let highlighted = false;
+          try {
+            const escapedSnippet = snippet.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+            const regex = new RegExp(`(${escapedSnippet})`, "g");
+            if (regex.test(originalHtml)) {
+              htmlElement.innerHTML = originalHtml.replace(regex, '<mark id="temp-highlight" class="bg-yellow-300 text-gray-900 rounded px-1 transition-colors duration-700">$1</mark>');
+              const mark = htmlElement.querySelector("#temp-highlight");
+              if (mark) {
+                mark.scrollIntoView({ behavior: "smooth", block: "center" });
+                setTimeout(() => {
+                  const m = htmlElement.querySelector("#temp-highlight");
+                  if (m) {
+                    m.classList.remove("bg-yellow-300");
+                    m.classList.add("bg-transparent");
+                  }
+                  setTimeout(() => { htmlElement.innerHTML = originalHtml; }, 1000);
+                }, 2000);
+                highlighted = true;
+              }
+            }
+          } catch (err) {
+            console.error("Highlighting error:", err);
+          }
+          if (!highlighted) {
+            htmlElement.scrollIntoView({ behavior: "smooth", block: "center" });
+            const oldBg = htmlElement.style.backgroundColor;
+            htmlElement.style.backgroundColor = "#fef08a";
+            htmlElement.style.transition = "background-color 0.5s";
+            setTimeout(() => { htmlElement.style.backgroundColor = oldBg; }, 2000);
+          }
+          break;
+        }
+      }
+    }, 300);
+  };
 
   const handleFetchAudio = async () => {
     if (editData.url) {
@@ -145,6 +285,40 @@ export default function PublicAudioCategory({ type }: { type: 'music' | 'podcast
     setIsModalOpen(true);
   };
 
+  const openSaveWordModal = () => {
+    if (bookmarkPopup) {
+      const text = bookmarkPopup.text;
+      setNewGerman(text);
+      const match = text.match(/^(der|die|das)\s+(.*)/i);
+      if (match) {
+        setNewArticle(match[1].toLowerCase());
+        setNewNoun(match[2]);
+      } else {
+        setNewArticle("der");
+        setNewNoun(text);
+      }
+      setNewHungarian("");
+      setNewExample("");
+      setNewNote("");
+      setNewCategory("vocabulary");
+      setIsSaveWordModalOpen(true);
+      setBookmarkPopup(null);
+    }
+  };
+
+  const handleSaveWord = async () => {
+    const finalGerman = newCategory === 'articles' ? `${newArticle} ${newNoun.trim()}` : newGerman.trim();
+    if (!finalGerman || !newHungarian.trim() || !user) {
+      alert(t('alert_fill_fields_login'));
+      return;
+    }
+    await addCloudWord({
+      userId: user.uid, german: finalGerman, hungarian: newHungarian.trim(), example: newExample.trim(), note: newCategory === 'false_friends' ? newNote.trim() : "", dateAdded: Date.now(), category: newCategory
+    } as any);
+    setIsSaveWordModalOpen(false);
+    alert(t('saved') || 'Saved!');
+  };
+
   const handleDelete = async (id: string) => {
     if (window.confirm(t("confirm_delete_audio") || "Are you sure you want to delete this audio?")) {
       try {
@@ -206,6 +380,11 @@ export default function PublicAudioCategory({ type }: { type: 'music' | 'podcast
           </div>
         </div>
 
+        <div className="bg-blue-50/80 backdrop-blur-sm border border-blue-200/60 text-blue-900 p-5 rounded-[1.5rem] shadow-sm text-sm font-medium mb-6 flex items-center gap-3">
+          <span className="text-xl">🔖</span>
+          {user ? (t("bookmark_instructions_logged_in") || "Highlight any text while reading to save a bookmark, or save the highlighted text directly to your personal vocabulary database!") : (t("bookmark_instructions_guest") || "Highlight any text while reading to save a bookmark, or save the highlighted text directly to your personal vocabulary database! (This feature is exclusively available for logged-in users. Log in to use it!)")}
+        </div>
+
         {isAdmin && adminMode && (
           <div className="flex justify-end">
             <button onClick={openAddModal} className="w-full sm:w-auto justify-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-xl shadow-sm transition-colors flex items-center gap-2">
@@ -222,17 +401,29 @@ export default function PublicAudioCategory({ type }: { type: 'music' | 'podcast
                 <div key={item.id} className="relative bg-white/80 backdrop-blur-xl p-8 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white transition-all duration-300">
                   {isAdmin && adminMode && (
                     <div className="absolute top-4 right-4 md:top-8 md:right-8 flex items-center gap-1.5 md:gap-2 z-10">
-                      <button onClick={() => openEditModal(item)} className="p-2.5 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 hover:text-blue-700 transition-colors shadow-sm" title={t("edit_audio") || "Edit"}>
+                      <button onClick={() => openEditModal(item)} className="p-2.5 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 hover:text-blue-700 transition-colors shadow-sm" title={t("edit_audio") || "Edit Audio"}>
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                       </button>
-                      <button onClick={() => handleDelete(item.id)} className="p-2.5 bg-red-50 text-red-500 rounded-xl hover:bg-red-100 hover:text-red-600 transition-colors shadow-sm" title={t("delete_audio") || "Delete"}>
+                      <button onClick={() => handleDelete(item.id)} className="p-2.5 bg-red-50 text-red-500 rounded-xl hover:bg-red-100 hover:text-red-600 transition-colors shadow-sm" title={t("delete_audio") || "Delete Audio"}>
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                       </button>
                     </div>
                   )}
                   
                   <button onClick={() => toggleExpand(item.id)} className={`w-full flex items-center justify-between group outline-none text-left ${isAdmin && adminMode ? "pr-20 md:pr-[100px]" : ""}`}>
-                    <h2 className="text-2xl font-extrabold text-blue-950 m-0">{item.title}</h2>
+                    <div className="flex flex-col items-start gap-2 text-left">
+                      <h2 className="text-2xl font-extrabold text-blue-950 m-0">{item.title}</h2>
+                      {bookmarks[item.id] && (
+                        <div className="flex items-center gap-2 mt-1">
+                          <span onClick={(e) => handleContinueFrom(e, item.id, bookmarks[item.id])} className="inline-flex items-center gap-1.5 text-xs font-bold bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-lg hover:bg-yellow-200 transition-colors shadow-sm cursor-pointer border border-yellow-300">
+                            🔖 {t("continue_from") || "Continue from:"} "{bookmarks[item.id].substring(0, 25)}..."
+                          </span>
+                          <button onClick={(e) => deleteBookmark(e, item.id)} className="p-1 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors shadow-sm" title="Delete bookmark">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                          </button>
+                        </div>
+                      )}
+                    </div>
                     <div className={`w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center shadow-sm text-blue-600 transition-transform duration-500 flex-shrink-0 ml-4 ${isExpanded ? "rotate-180" : ""}`}>
                       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"></path></svg>
                     </div>
@@ -272,7 +463,7 @@ export default function PublicAudioCategory({ type }: { type: 'music' | 'podcast
             <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path></svg>
             </div>
-            <h2 className="text-3xl font-extrabold text-blue-950 mb-3">{isAdmin && adminMode ? t("no_audio_yet_admin") : t("no_audio_yet")}</h2>
+            <h2 className="text-3xl font-extrabold text-blue-950 mb-3">{isAdmin && adminMode ? t("no_audio_yet_admin") || "No audio content yet." : t("no_audio_yet") || "No audio content yet."}</h2>
             <p className="text-blue-900/70 text-lg font-medium">{isAdmin && adminMode ? "" : t("check_back_later")}</p>
           </div>
         )}
@@ -291,25 +482,25 @@ export default function PublicAudioCategory({ type }: { type: 'music' | 'podcast
             </div>
             <div className="p-6 md:p-8 overflow-y-auto space-y-6">
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">URL (Optional)</label>
+                <label className="block text-sm font-bold text-gray-700 mb-2">{t("url_optional") || "URL (Optional)"}</label>
                 <div className="flex flex-col sm:flex-row gap-3">
                   <input type="url" value={editData.url} onChange={e => setEditData({ ...editData, url: e.target.value })} placeholder="https://..." className="flex-1 w-full rounded-xl border-gray-200 border p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" />
                   <button onClick={handleFetchAudio} disabled={!editData.url || isFetching} className="w-full sm:w-auto bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 px-6 rounded-xl transition-colors disabled:opacity-50 whitespace-nowrap">
                     {isFetching ? "..." : t("fetch_audio") || "Fetch Content"}
                   </button>
                 </div>
-                <p className="text-xs text-gray-500 mt-2">Note: Fetching works via a proxy. Complex sites might block extraction. You can always paste content manually.</p>
+                <p className="text-xs text-gray-500 mt-2">{t("fetch_note") || "Note: Fetching works via a proxy. Complex sites might block extraction. You can always paste content manually."}</p>
               </div>
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Title</label>
+                <label className="block text-sm font-bold text-gray-700 mb-2">{t("title_label") || "Title"}</label>
                 <input type="text" value={editData.title} onChange={e => setEditData({ ...editData, title: e.target.value })} className="w-full rounded-xl border-gray-200 border p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" />
               </div>
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Source / Artist</label>
+                <label className="block text-sm font-bold text-gray-700 mb-2">{t("source_artist") || "Source / Artist"}</label>
                 <input type="text" value={editData.source} onChange={e => setEditData({ ...editData, source: e.target.value })} placeholder="Original source or artist..." className="w-full rounded-xl border-gray-200 border p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" />
               </div>
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Content</label>
+                <label className="block text-sm font-bold text-gray-700 mb-2">{t("content_label") || "Content"}</label>
                 <div className="w-full rounded-xl border-gray-200 border focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 transition-all overflow-hidden flex flex-col bg-white">
                   <div className="bg-gray-50 border-b border-gray-200 p-2 flex gap-2 flex-wrap">
                     <button type="button" onClick={e => { e.preventDefault(); document.execCommand("bold", false); }} className="px-3 py-1 bg-white border border-gray-300 rounded font-bold hover:bg-gray-200 text-sm transition-colors shadow-sm">B</button>
@@ -328,6 +519,108 @@ export default function PublicAudioCategory({ type }: { type: 'music' | 'podcast
               <button onClick={handleSave} disabled={!editData.title || !editData.content} className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl shadow-sm transition-colors disabled:opacity-50">
                 {editingId ? t("modal_save_changes") : t("save_audio") || "Save Audio"}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {bookmarkPopup && (
+        <div id="bookmark-popover" className="fixed z-50 animate-fade-in-up flex gap-[1px]" style={{ left: window.innerWidth > 768 ? bookmarkPopup.x : "50%", top: window.innerWidth > 768 ? bookmarkPopup.y : "auto", bottom: window.innerWidth > 768 ? "auto" : "30px", transform: "translateX(-50%)" }}>
+          <button onClick={saveBookmark} className="bg-blue-900 text-white font-bold text-sm px-5 py-3 md:px-4 md:py-2 rounded-l-full md:rounded-l-xl shadow-2xl md:shadow-xl flex items-center gap-2 hover:bg-blue-800 transition-all">
+            🔖 {t("save_bookmark") || "Bookmark"}
+          </button>
+          <button onClick={openSaveWordModal} className="bg-green-600 text-white font-bold text-sm px-5 py-3 md:px-4 md:py-2 rounded-r-full md:rounded-r-xl shadow-2xl md:shadow-xl flex items-center gap-2 hover:bg-green-700 transition-all">
+            💾 {t("save_to_vocabulary") || "Save Word"}
+          </button>
+        </div>
+      )}
+
+      {isSaveWordModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-blue-950/40 backdrop-blur-sm transition-opacity">
+          <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-md max-h-[90vh] overflow-hidden flex flex-col animate-fade-in-up">
+            <div className="p-6 md:p-8 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+              <h2 className="text-2xl font-extrabold text-blue-950">{t('modal_add_word_title')}</h2>
+              <button onClick={() => setIsSaveWordModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-full hover:bg-gray-200">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+              </button>
+            </div>
+
+            <div className="p-6 md:p-8 overflow-y-auto space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('modal_category_label') || 'Category'}</label>
+                <select value={newCategory} onChange={(e) => setNewCategory(e.target.value)} className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50">
+                  <option value="vocabulary">{t('vocabulary_quiz') || 'Vocabulary quiz'}</option>
+                  <option value="reading">{t('vocabulary_to_read') || 'Vocabulary to read'}</option>
+                  <option value="phrases">{t('phrases_sentences_quiz') || 'Phrases and sentences quiz'}</option>
+                  <option value="articles">{t('articles_quiz')}</option>
+                  <option value="prepositions">{t('prepositions_quiz')}</option>
+                  <option value="adjectives">{t('adjectives_quiz') || 'Adjectives'}</option>
+                  <option value="false_friends">{t('false_friends') || 'False Friends'}</option>
+                </select>
+              </div>
+
+             {(() => {
+              let germanLabel = t('modal_german_label');
+              let germanPlaceholder = t('modal_german_placeholder');
+              let hungarianPlaceholder = t('modal_hungarian_placeholder');
+              if (newCategory === 'phrases') {
+                germanLabel = t('modal_german_phrase_label') || "German Phrase/Sentence *";
+                germanPlaceholder = t('modal_german_phrase_placeholder') || "e.g. Wie geht es Ihnen?";
+                hungarianPlaceholder = t('modal_hungarian_phrase_placeholder') || "e.g. Hogy van?";
+              } else if (newCategory === 'prepositions') {
+                germanLabel = t('modal_german_prep_label') || "German Preposition *";
+                germanPlaceholder = t('modal_german_prep_placeholder') || "e.g. mit";
+                hungarianPlaceholder = t('modal_hungarian_prep_placeholder') || "e.g. val/vel";
+              } else if (newCategory === 'false_friends') {
+                germanLabel = t('modal_german_ff_label') || "German False Friend *";
+                germanPlaceholder = t('modal_german_ff_placeholder') || "e.g. das Gift, die Gifte";
+                hungarianPlaceholder = t('modal_hungarian_ff_placeholder') || "e.g. a méreg";
+              }
+              return (
+                <div className="space-y-4">
+              {newCategory === 'articles' ? (
+                <div className="flex gap-4">
+                  <div className="w-1/3">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('modal_article_label') || 'Article *'}</label>
+                    <select value={newArticle} onChange={(e) => setNewArticle(e.target.value)} className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                      <option value="der">der</option>
+                      <option value="die">die</option>
+                      <option value="das">das</option>
+                    </select>
+                  </div>
+                  <div className="w-2/3">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('modal_noun_label') || 'Noun (with plural) *'}</label>
+                    <input type="text" value={newNoun} onChange={(e) => setNewNoun(e.target.value)} placeholder={t('modal_noun_placeholder') || 'e.g. Mann, die Männer'} className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" autoFocus />
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{germanLabel}</label>
+                  <input type="text" value={newGerman} onChange={(e) => setNewGerman(e.target.value)} placeholder={germanPlaceholder} className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" autoFocus />
+                </div>
+              )}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('modal_hungarian_label')}</label>
+                <input type="text" value={newHungarian} onChange={(e) => setNewHungarian(e.target.value)} placeholder={hungarianPlaceholder} className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('modal_example_label')}</label>
+                <input type="text" value={newExample} onChange={(e) => setNewExample(e.target.value)} placeholder={t('modal_example_placeholder')} className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+              {newCategory === 'false_friends' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('note') || 'Note'} *</label>
+                  <input type="text" value={newNote} onChange={(e) => setNewNote(e.target.value)} placeholder={t('template_note_header') || 'Note'} className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+              )}
+            </div>
+            );
+          })()}
+            </div>
+
+            <div className="p-6 md:p-8 border-t border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row justify-end gap-3">
+              <button onClick={() => setIsSaveWordModalOpen(false)} className="w-full sm:w-auto px-6 py-3 font-bold text-gray-600 hover:bg-gray-200 rounded-xl transition-colors">{t('cancel')}</button>
+              <button onClick={handleSaveWord} className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl shadow-sm transition-colors">{t('modal_save_word')}</button>
             </div>
           </div>
         </div>

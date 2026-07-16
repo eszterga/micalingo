@@ -50,6 +50,7 @@ export default function App() {
             <Route path="/learning-materials/reading" element={<ReadingMaterials />} />
             <Route path="/learning-materials/reading/false-friends" element={<FalseFriends />} />
             <Route path="/learning-materials/reading/articles/:categoryId" element={<PublicContentCategory type="articles" />} />
+            <Route path="/learning-materials/reading/interesting/:categoryId" element={<PublicContentCategory type="interesting" />} />
             <Route path="/learning-materials/reading/books/:categoryId" element={<PublicContentCategory type="books" />} />
             <Route path="/learning-materials/listening" element={<ListeningMaterials />} />
             <Route path="/learning-materials/listening/music/:categoryId" element={<PublicAudioCategory type="music" />} />

@@ -255,7 +255,7 @@ export default function Vocabulary() {
     setNewHungarian("");
     setNewExample("");
     setNewNote("");
-    setNewCategory("vocabulary");
+    setNewCategory("reading"); // Default to "Vocabulary to read" when adding from this page
     setIsModalOpen(true);
   };
 
@@ -657,21 +657,6 @@ export default function Vocabulary() {
               
               return (
                 <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t('modal_category_label') || 'Category'}</label>
-                <select
-                  value={newCategory}
-                  onChange={(e) => setNewCategory(e.target.value)}
-                  className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
-                >
-                  <option value="vocabulary">{t('vocabulary')}</option>
-                  <option value="phrases">{t('phrases_quiz')}</option>
-                  <option value="articles">{t('articles_quiz')}</option>
-                  <option value="prepositions">{t('prepositions_quiz')}</option>
-                  <option value="adjectives">{t('adjectives_quiz') || 'Adjectives'}</option>
-                  <option value="false_friends">{t('false_friends') || 'False Friends'}</option>
-                </select>
-              </div>
               {newCategory === 'articles' ? (
                 <div className="flex gap-4">
                   <div className="w-1/3">

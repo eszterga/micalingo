@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useI18n } from '../I18nContext';
 import { useAuth } from '../AuthContext';
@@ -35,6 +35,11 @@ export default function ReadingMaterials() {
     setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
   };
 
+  const interestingCategories = [
+    { id: "fun-facts", icon: "🧠", title: t("fun_facts") || "Fun Facts", desc: t("fun_facts_desc") || "Interesting facts and trivia." },
+    { id: "idioms", icon: "💬", title: t("idioms") || "Idioms", desc: t("idioms_desc") || "Common sayings and idioms." }
+  ];
+
   const articlesCategories = [
     { id: "history", icon: "🏛️", title: t("history") || "History", desc: t("history_desc") || "Historical events and figures." },
     { id: "animals", icon: "🦊", title: t("animals") || "Animals", desc: t("animals_desc") || "Wildlife and nature." },
@@ -51,8 +56,9 @@ export default function ReadingMaterials() {
   ];
 
   const allCategories: CategoryOption[] = [
-    ...articlesCategories.map(c => ({ id: c.id, title: `Articles - ${c.title}`, collectionName: 'articles' })),
-    ...booksCategories.map(c => ({ id: c.id, title: `Books - ${c.title}`, collectionName: 'books' }))
+    ...interestingCategories.map(c => ({ id: c.id, title: `${t('interesting_section') || 'Interesting'} - ${c.title}`, collectionName: 'interesting' })),
+    ...articlesCategories.map(c => ({ id: c.id, title: `${t('articles_section') || 'Articles'} - ${c.title}`, collectionName: 'articles' })),
+    ...booksCategories.map(c => ({ id: c.id, title: `${t('books_section') || 'Books'} - ${c.title}`, collectionName: 'books' }))
   ];
 
   const handleSaveContent = async (data: MaterialData) => {
@@ -97,7 +103,7 @@ export default function ReadingMaterials() {
         {isAdmin && adminMode && (
           <div className="flex justify-end pt-2">
             <button onClick={() => setIsEditorOpen(true)} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-xl shadow-sm transition-colors flex items-center gap-2">
-              <span className="text-xl leading-none">+</span> Add Content
+              <span className="text-xl leading-none">+</span> {t('add_content') || 'Add Content'}
             </button>
           </div>
         )}
@@ -124,6 +130,15 @@ export default function ReadingMaterials() {
                       <p className="text-gray-600 font-medium text-sm leading-relaxed">{t("false_friends_desc")}</p>
                     </div>
                   </Link>
+                  {interestingCategories.map(cat => (
+                    <Link key={cat.id} to={`/learning-materials/reading/interesting/${cat.id}`} className="group relative flex flex-col items-start justify-between p-6 md:p-8 rounded-[2rem] bg-white/90 backdrop-blur-xl border border-blue-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500 overflow-hidden">
+                      <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center text-3xl mb-10 group-hover:scale-110 transition-transform duration-500 border border-gray-100">{cat.icon}</div>
+                      <div className="relative z-10 w-full">
+                        <h3 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-2xl drop-shadow-sm mb-1">{cat.title}</h3>
+                        <p className="text-gray-600 font-medium text-sm leading-relaxed">{cat.desc}</p>
+                      </div>
+                    </Link>
+                  ))}
                 </div>
               </div>
             </div>

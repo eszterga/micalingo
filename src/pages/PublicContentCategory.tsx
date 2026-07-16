@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { collection, query, where, getDocs, doc, setDoc, deleteDoc } from 'firebase/firestore';
 import { dbCloud } from '../lib/firebase';
 import { useAuth } from '../AuthContext';
 import { useI18n } from '../I18nContext';
+import { addCloudWord } from '../lib/firestore';
 
 const BackgroundBlobs = () => (
   <>
@@ -24,17 +25,17 @@ const BackgroundBlobs = () => (
   </>
 );
 
-export default function PublicContentCategory({ type }: { type: 'articles' | 'books' }) {
+export default function PublicContentCategory({ type }: { type: 'articles' | 'books' | 'interesting' }) {
   const { categoryId } = useParams<{ categoryId: string }>();
   const { t } = useI18n();
   const { user, isAdmin, adminMode } = useAuth();
   
   const categoryName = t((categoryId || '') as any) || categoryId;
-  const collectionName = type === 'articles' ? 'articles' : 'books';
+  const collectionName = type === 'articles' ? 'articles' : type === 'books' ? 'books' : 'interesting';
   
   const [items, setItems] = useState<any[]>([]);
-  const [bookmarks, setBookmarks] = useState<Record<string, string>>({});
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
+  const [bookmarks, setBookmarks] = useState<Record<string, string>>({});
   const [bookmarkPopup, setBookmarkPopup] = useState<{ itemId: string, text: string, x: number, y: number } | null>(null);
   
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -43,27 +44,39 @@ export default function PublicContentCategory({ type }: { type: 'articles' | 'bo
   const [editData, setEditData] = useState({ title: "", url: "", source: "", content: "" });
   const contentRef = useRef<HTMLDivElement>(null);
 
+  const [isSaveWordModalOpen, setIsSaveWordModalOpen] = useState(false);
+  const [newGerman, setNewGerman] = useState("");
+  const [newArticle, setNewArticle] = useState("der");
+  const [newNoun, setNewNoun] = useState("");
+  const [newHungarian, setNewHungarian] = useState("");
+  const [newExample, setNewExample] = useState("");
+  const [newNote, setNewNote] = useState("");
+  const [newCategory, setNewCategory] = useState("vocabulary");
+
   useEffect(() => {
     if (isModalOpen && contentRef.current && contentRef.current.innerHTML !== editData.content) {
       contentRef.current.innerHTML = editData.content;
     }
   }, [editData.content, isModalOpen]);
 
-  const fetchBookmarks = async () => {
-    if (user) {
-      try {
-        const q = query(collection(dbCloud, "bookmarks"), where("userId", "==", user.uid), where("categoryId", "==", categoryId));
-        const snapshot = await getDocs(q);
-        const bms: Record<string, string> = {};
-        snapshot.forEach(doc => { bms[doc.data().itemId] = doc.data().snippet; });
-        setBookmarks(bms);
-      } catch (e) {
-        console.error("Error fetching bookmarks:", e);
+  useEffect(() => {
+    const fetchBookmarks = async () => {
+      if (user) {
+        try {
+          const q = query(collection(dbCloud, "bookmarks"), where("userId", "==", user.uid), where("categoryId", "==", categoryId));
+          const snapshot = await getDocs(q);
+          const bms: Record<string, string> = {};
+          snapshot.forEach(doc => { bms[doc.data().itemId] = doc.data().snippet; });
+          setBookmarks(bms);
+        } catch (e) {
+          console.error("Error fetching bookmarks:", e);
+        }
       }
-    }
-  };
+    };
+    fetchBookmarks();
+  }, [categoryId, user]);
 
-  const fetchItems = async () => {
+  const fetchItems = useCallback(async () => {
     try {
       const q = query(collection(dbCloud, collectionName), where("categoryId", "==", categoryId));
       const snapshot = await getDocs(q);
@@ -73,12 +86,11 @@ export default function PublicContentCategory({ type }: { type: 'articles' | 'bo
     } catch (e) {
       console.error("Error fetching items:", e);
     }
-  };
+  }, [categoryId, collectionName, user?.uid]);
 
   useEffect(() => {
     fetchItems();
-    fetchBookmarks();
-  }, [categoryId, user, adminMode]);
+  }, [fetchItems, adminMode]);
 
   useEffect(() => {
     const handleGlobalClick = (e: MouseEvent | TouchEvent) => {
@@ -95,7 +107,7 @@ export default function PublicContentCategory({ type }: { type: 'articles' | 'bo
   }, []);
 
   const handleMouseUp = (e: React.MouseEvent | React.TouchEvent, itemId: string) => {
-    if (!user) return;
+    if (!user) return; // Only allow highlighting features for logged-in users
     setTimeout(() => {
       const selection = window.getSelection();
       const text = selection?.toString().trim();
@@ -150,7 +162,7 @@ export default function PublicContentCategory({ type }: { type: 'articles' | 'bo
     e.preventDefault();
     setExpandedItems(prev => new Set(prev).add(itemId));
     setTimeout(() => {
-      const container = document.getElementById(`content-${itemId}`);
+      const container = document.getElementById(`article-content-${itemId}`);
       if (!container) return;
       const elements = Array.from(container.querySelectorAll("p, h1, h2, h3, h4, h5, h6, li, span, div, b, i, em, strong"));
       for (const el of elements) {
@@ -203,12 +215,12 @@ export default function PublicContentCategory({ type }: { type: 'articles' | 'bo
         if (data.contents) {
           const parser = new DOMParser();
           const doc = parser.parseFromString(data.contents, "text/html");
-          const title = doc.querySelector("title")?.innerText || doc.querySelector("h1")?.innerText || "";
+          const title = doc.querySelector("title")?.textContent || doc.querySelector("h1")?.textContent || "";
           const article = doc.querySelector("article") || doc.querySelector("main") || doc.body;
           let content = "";
           if (article) {
             content = Array.from(article.querySelectorAll("p"))
-              .map(p => (p as HTMLElement).innerText.trim())
+              .map(p => (p as HTMLElement).textContent?.trim() || "")
               .filter(t => t.length > 20)
               .map(t => `<p>${t}</p>`)
               .join("");
@@ -258,8 +270,42 @@ export default function PublicContentCategory({ type }: { type: 'articles' | 'bo
     setIsModalOpen(true);
   };
 
+  const openSaveWordModal = () => {
+    if (bookmarkPopup) {
+      const text = bookmarkPopup.text;
+      setNewGerman(text);
+      const match = text.match(/^(der|die|das)\s+(.*)/i);
+      if (match) {
+        setNewArticle(match[1].toLowerCase());
+        setNewNoun(match[2]);
+      } else {
+        setNewArticle("der");
+        setNewNoun(text);
+      }
+      setNewHungarian("");
+      setNewExample("");
+      setNewNote("");
+      setNewCategory("vocabulary");
+      setIsSaveWordModalOpen(true);
+      setBookmarkPopup(null);
+    }
+  };
+
+  const handleSaveWord = async () => {
+    const finalGerman = newCategory === 'articles' ? `${newArticle} ${newNoun.trim()}` : newGerman.trim();
+    if (!finalGerman || !newHungarian.trim() || !user) {
+      alert(t('alert_fill_fields_login'));
+      return;
+    }
+    await addCloudWord({
+      userId: user.uid, german: finalGerman, hungarian: newHungarian.trim(), example: newExample.trim(), note: newCategory === 'false_friends' ? newNote.trim() : "", dateAdded: Date.now(), category: newCategory
+    } as any);
+    setIsSaveWordModalOpen(false);
+    alert(t('saved') || 'Saved!');
+  };
+
   const handleDelete = async (id: string) => {
-    if (window.confirm(t((type === 'articles' ? "confirm_delete_article" : "confirm_delete_book") as any) || "Are you sure you want to delete this item?")) {
+    if (window.confirm(t((type === 'articles' ? "confirm_delete_article" : type === 'books' ? "confirm_delete_book" : "confirm_delete_interesting") as any) || "Are you sure you want to delete this item?")) {
       try {
         await deleteDoc(doc(dbCloud, collectionName, id));
         setItems(prev => prev.filter(i => i.id !== id));
@@ -314,20 +360,20 @@ export default function PublicContentCategory({ type }: { type: 'articles' | 'bo
               {categoryName}
             </h1>
             <p className="text-lg text-blue-900/70 font-medium mt-1">
-              {t((type === 'articles' ? "articles_section" : "books_section") as any)}
+              {t((type === 'articles' ? "articles_section" : type === 'books' ? "books_section" : "interesting_section") as any)}
             </p>
           </div>
         </div>
 
         <div className="bg-blue-50/80 backdrop-blur-sm border border-blue-200/60 text-blue-900 p-5 rounded-[1.5rem] shadow-sm text-sm font-medium mb-6 flex items-center gap-3">
           <span className="text-xl">🔖</span>
-          {user ? (t("bookmark_instructions") || "Highlight any text while reading to save a bookmark. You can continue reading from where you left off.") : (t("bookmark_guest_warning") || "Bookmark option is only available for logged-in users. Log in to save your progress!")}
+          {user ? (t("bookmark_instructions_logged_in") || "Highlight any text while reading to save a bookmark, or save the highlighted text directly to your personal vocabulary database!") : (t("bookmark_instructions_guest") || "Highlight any text while reading to save a bookmark, or save the highlighted text directly to your personal vocabulary database! (This feature is exclusively available for logged-in users. Log in to use it!)")}
         </div>
 
         {isAdmin && adminMode && (
           <div className="flex justify-end">
             <button onClick={openAddModal} className="w-full sm:w-auto justify-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-xl shadow-sm transition-colors flex items-center gap-2">
-              <span className="text-xl leading-none">+</span> {t((type === 'articles' ? "add_article" : "add_book") as any)}
+              <span className="text-xl leading-none">+</span> {t((type === 'articles' ? "add_article" : type === 'books' ? "add_book" : "add_interesting") as any)}
             </button>
           </div>
         )}
@@ -340,10 +386,10 @@ export default function PublicContentCategory({ type }: { type: 'articles' | 'bo
                 <div key={item.id} className="relative bg-white/80 backdrop-blur-xl p-8 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white transition-all duration-300">
                   {isAdmin && adminMode && (
                     <div className="absolute top-4 right-4 md:top-8 md:right-8 flex items-center gap-1.5 md:gap-2 z-10">
-                      <button onClick={() => openEditModal(item)} className="p-2.5 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 hover:text-blue-700 transition-colors shadow-sm" title={t((type === 'articles' ? "edit_article" : "edit_book") as any)}>
+                      <button onClick={() => openEditModal(item)} className="p-2.5 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 hover:text-blue-700 transition-colors shadow-sm" title={t((type === 'articles' ? "edit_article" : type === 'books' ? "edit_book" : "edit_interesting") as any)}>
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                       </button>
-                      <button onClick={() => handleDelete(item.id)} className="p-2.5 bg-red-50 text-red-500 rounded-xl hover:bg-red-100 hover:text-red-600 transition-colors shadow-sm" title={t((type === 'articles' ? "delete_article" : "delete_book") as any)}>
+                      <button onClick={() => handleDelete(item.id)} className="p-2.5 bg-red-50 text-red-500 rounded-xl hover:bg-red-100 hover:text-red-600 transition-colors shadow-sm" title={t((type === 'articles' ? "delete_article" : type === 'books' ? "delete_book" : "delete_interesting") as any)}>
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                       </button>
                     </div>
@@ -376,7 +422,7 @@ export default function PublicContentCategory({ type }: { type: 'articles' | 'bo
                             <span className="bg-blue-100 p-1.5 rounded-lg text-xs shadow-sm">{type === 'articles' ? '📰' : '📚'}</span> {item.source}
                           </p>
                         )}
-                        <div id={`content-${item.id}`} onMouseUp={(e) => handleMouseUp(e, item.id)} onTouchEnd={(e) => handleMouseUp(e, item.id)} className={`prose prose-blue max-w-none text-gray-700 leading-relaxed space-y-4 mb-4 ${item.source ? "" : "mt-4"}`} dangerouslySetInnerHTML={{ __html: item.content }}></div>
+                          <div id={`article-content-${item.id}`} onMouseUp={(e) => handleMouseUp(e, item.id)} onTouchEnd={(e) => handleMouseUp(e, item.id)} className="prose prose-blue max-w-none text-gray-700 leading-relaxed space-y-4 mb-4" dangerouslySetInnerHTML={{ __html: item.content }}></div>
                         {item.url && (
                           <a href={item.url} target="_blank" rel="noopener noreferrer" className="inline-block mt-4 text-blue-600 hover:text-blue-800 font-medium text-sm">
                             {t("original_source") || "Original source"} ↗
@@ -402,7 +448,7 @@ export default function PublicContentCategory({ type }: { type: 'articles' | 'bo
           <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col animate-fade-in-up">
             <div className="p-6 md:p-8 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
               <h2 className="text-2xl font-extrabold text-blue-950">
-                {editingId ? t((type === 'articles' ? "edit_article" : "edit_book") as any) : t((type === 'articles' ? "add_article" : "add_book") as any)}
+                {editingId ? t((type === 'articles' ? "edit_article" : type === 'books' ? "edit_book" : "edit_interesting") as any) : t((type === 'articles' ? "add_article" : type === 'books' ? "add_book" : "add_interesting") as any)}
               </h2>
               <button onClick={closeModal} className="text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-full hover:bg-gray-200">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -410,25 +456,25 @@ export default function PublicContentCategory({ type }: { type: 'articles' | 'bo
             </div>
             <div className="p-6 md:p-8 overflow-y-auto space-y-6">
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">{t((type === 'articles' ? "article_url" : "book_url") as any)}</label>
+                <label className="block text-sm font-bold text-gray-700 mb-2">{t((type === 'articles' ? "article_url" : type === 'books' ? "book_url" : "interesting_url") as any)}</label>
                 <div className="flex flex-col sm:flex-row gap-3">
                   <input type="url" value={editData.url} onChange={e => setEditData({ ...editData, url: e.target.value })} placeholder="https://..." className="flex-1 w-full rounded-xl border-gray-200 border p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" />
                   <button onClick={handleFetchContent} disabled={!editData.url || isFetching} className="w-full sm:w-auto bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 px-6 rounded-xl transition-colors disabled:opacity-50 whitespace-nowrap">
-                    {isFetching ? "..." : t((type === 'articles' ? "fetch_article" : "fetch_book") as any) || "Fetch Content"}
+                    {isFetching ? "..." : t((type === 'articles' ? "fetch_article" : type === 'books' ? "fetch_book" : "fetch_interesting") as any) || "Fetch Content"}
                   </button>
                 </div>
-                <p className="text-xs text-gray-500 mt-2">Note: Fetching works via a proxy. Complex sites might block extraction. You can always paste content manually.</p>
+                <p className="text-xs text-gray-500 mt-2">{t("fetch_note") || "Note: Fetching works via a proxy. Complex sites might block extraction. You can always paste content manually."}</p>
               </div>
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">{t((type === 'articles' ? "article_title" : "book_title") as any)}</label>
+                <label className="block text-sm font-bold text-gray-700 mb-2">{t((type === 'articles' ? "article_title" : type === 'books' ? "book_title" : "interesting_title") as any)}</label>
                 <input type="text" value={editData.title} onChange={e => setEditData({ ...editData, title: e.target.value })} className="w-full rounded-xl border-gray-200 border p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" />
               </div>
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">{t((type === 'articles' ? "article_source" : "book_source") as any)}</label>
-                <input type="text" value={editData.source} onChange={e => setEditData({ ...editData, source: e.target.value })} placeholder={t((type === 'articles' ? "article_source_placeholder" : "book_source_placeholder") as any)} className="w-full rounded-xl border-gray-200 border p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" />
+                <label className="block text-sm font-bold text-gray-700 mb-2">{t((type === 'articles' ? "article_source" : type === 'books' ? "book_source" : "interesting_source") as any)}</label>
+                <input type="text" value={editData.source} onChange={e => setEditData({ ...editData, source: e.target.value })} placeholder={t((type === 'articles' ? "article_source_placeholder" : type === 'books' ? "book_source_placeholder" : "interesting_source_placeholder") as any)} className="w-full rounded-xl border-gray-200 border p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" />
               </div>
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">{t((type === 'articles' ? "article_content" : "book_content") as any)}</label>
+                <label className="block text-sm font-bold text-gray-700 mb-2">{t((type === 'articles' ? "article_content" : type === 'books' ? "book_content" : "interesting_content") as any)}</label>
                 <div className="w-full rounded-xl border-gray-200 border focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 transition-all overflow-hidden flex flex-col bg-white">
                   <div className="bg-gray-50 border-b border-gray-200 p-2 flex gap-2 flex-wrap">
                     <button type="button" onClick={e => { e.preventDefault(); document.execCommand("bold", false); }} className="px-3 py-1 bg-white border border-gray-300 rounded font-bold hover:bg-gray-200 text-sm transition-colors shadow-sm">B</button>
@@ -445,7 +491,7 @@ export default function PublicContentCategory({ type }: { type: 'articles' | 'bo
             <div className="p-6 md:p-8 border-t border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row justify-end gap-3">
               <button onClick={closeModal} className="w-full sm:w-auto px-6 py-3 font-bold text-gray-600 hover:bg-gray-200 rounded-xl transition-colors">{t("cancel")}</button>
               <button onClick={handleSave} disabled={!editData.title || !editData.content} className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl shadow-sm transition-colors disabled:opacity-50">
-                {editingId ? t("modal_save_changes") : t((type === 'articles' ? "save_article" : "save_book") as any)}
+                {editingId ? t("modal_save_changes") : t((type === 'articles' ? "save_article" : type === 'books' ? "save_book" : "save_interesting") as any)}
               </button>
             </div>
           </div>
@@ -453,10 +499,104 @@ export default function PublicContentCategory({ type }: { type: 'articles' | 'bo
       )}
 
       {bookmarkPopup && (
-        <div id="bookmark-popover" className="fixed z-50 animate-fade-in-up" style={{ left: window.innerWidth > 768 ? bookmarkPopup.x : "50%", top: window.innerWidth > 768 ? bookmarkPopup.y : "auto", bottom: window.innerWidth > 768 ? "auto" : "30px", transform: "translateX(-50%)" }}>
-          <button onClick={saveBookmark} className="bg-blue-900 text-white font-bold text-sm px-6 py-3 md:px-4 md:py-2 rounded-full md:rounded-xl shadow-2xl md:shadow-xl flex items-center gap-2 hover:bg-blue-800 transition-all border border-blue-700">
+        <div id="bookmark-popover" className="fixed z-50 animate-fade-in-up flex gap-[1px]" style={{ left: window.innerWidth > 768 ? bookmarkPopup.x : "50%", top: window.innerWidth > 768 ? bookmarkPopup.y : "auto", bottom: window.innerWidth > 768 ? "auto" : "30px", transform: "translateX(-50%)" }}>
+          <button onClick={saveBookmark} className="bg-blue-900 text-white font-bold text-sm px-5 py-3 md:px-4 md:py-2 rounded-l-full md:rounded-l-xl shadow-2xl md:shadow-xl flex items-center gap-2 hover:bg-blue-800 transition-all">
             🔖 {t("save_bookmark") || "Bookmark"}
           </button>
+          <button onClick={openSaveWordModal} className="bg-green-600 text-white font-bold text-sm px-5 py-3 md:px-4 md:py-2 rounded-r-full md:rounded-r-xl shadow-2xl md:shadow-xl flex items-center gap-2 hover:bg-green-700 transition-all">
+            💾 {t("save_to_vocabulary") || "Save Word"}
+          </button>
+        </div>
+      )}
+
+      {isSaveWordModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-blue-950/40 backdrop-blur-sm transition-opacity">
+          <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-md max-h-[90vh] overflow-hidden flex flex-col animate-fade-in-up">
+            <div className="p-6 md:p-8 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+              <h2 className="text-2xl font-extrabold text-blue-950">{t('modal_add_word_title')}</h2>
+              <button onClick={() => setIsSaveWordModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-full hover:bg-gray-200">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+              </button>
+            </div>
+
+            <div className="p-6 md:p-8 overflow-y-auto space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('modal_category_label') || 'Category'}</label>
+                <select value={newCategory} onChange={(e) => setNewCategory(e.target.value)} className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50">
+                  <option value="vocabulary">{t('vocabulary_quiz') || 'Vocabulary quiz'}</option>
+                  <option value="reading">{t('vocabulary_to_read') || 'Vocabulary to read'}</option>
+                  <option value="phrases">{t('phrases_sentences_quiz') || 'Phrases and sentences quiz'}</option>
+                  <option value="articles">{t('articles_quiz')}</option>
+                  <option value="prepositions">{t('prepositions_quiz')}</option>
+                  <option value="adjectives">{t('adjectives_quiz') || 'Adjectives'}</option>
+                  <option value="false_friends">{t('false_friends') || 'False Friends'}</option>
+                </select>
+              </div>
+
+             {(() => {
+              let germanLabel = t('modal_german_label');
+              let germanPlaceholder = t('modal_german_placeholder');
+              let hungarianPlaceholder = t('modal_hungarian_placeholder');
+              if (newCategory === 'phrases') {
+                germanLabel = t('modal_german_phrase_label') || "German Phrase/Sentence *";
+                germanPlaceholder = t('modal_german_phrase_placeholder') || "e.g. Wie geht es Ihnen?";
+                hungarianPlaceholder = t('modal_hungarian_phrase_placeholder') || "e.g. Hogy van?";
+              } else if (newCategory === 'prepositions') {
+                germanLabel = t('modal_german_prep_label') || "German Preposition *";
+                germanPlaceholder = t('modal_german_prep_placeholder') || "e.g. mit";
+                hungarianPlaceholder = t('modal_hungarian_prep_placeholder') || "e.g. val/vel";
+              } else if (newCategory === 'false_friends') {
+                germanLabel = t('modal_german_ff_label') || "German False Friend *";
+                germanPlaceholder = t('modal_german_ff_placeholder') || "e.g. das Gift, die Gifte";
+                hungarianPlaceholder = t('modal_hungarian_ff_placeholder') || "e.g. a méreg";
+              }
+              return (
+                <div className="space-y-4">
+              {newCategory === 'articles' ? (
+                <div className="flex gap-4">
+                  <div className="w-1/3">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('modal_article_label') || 'Article *'}</label>
+                    <select value={newArticle} onChange={(e) => setNewArticle(e.target.value)} className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                      <option value="der">der</option>
+                      <option value="die">die</option>
+                      <option value="das">das</option>
+                    </select>
+                  </div>
+                  <div className="w-2/3">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('modal_noun_label') || 'Noun (with plural) *'}</label>
+                    <input type="text" value={newNoun} onChange={(e) => setNewNoun(e.target.value)} placeholder={t('modal_noun_placeholder') || 'e.g. Mann, die Männer'} className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" autoFocus />
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{germanLabel}</label>
+                  <input type="text" value={newGerman} onChange={(e) => setNewGerman(e.target.value)} placeholder={germanPlaceholder} className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" autoFocus />
+                </div>
+              )}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('modal_hungarian_label')}</label>
+                <input type="text" value={newHungarian} onChange={(e) => setNewHungarian(e.target.value)} placeholder={hungarianPlaceholder} className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('modal_example_label')}</label>
+                <input type="text" value={newExample} onChange={(e) => setNewExample(e.target.value)} placeholder={t('modal_example_placeholder')} className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+              {newCategory === 'false_friends' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('note') || 'Note'} *</label>
+                  <input type="text" value={newNote} onChange={(e) => setNewNote(e.target.value)} placeholder={t('template_note_header') || 'Note'} className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+              )}
+            </div>
+            );
+          })()}
+            </div>
+
+            <div className="p-6 md:p-8 border-t border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row justify-end gap-3">
+              <button onClick={() => setIsSaveWordModalOpen(false)} className="w-full sm:w-auto px-6 py-3 font-bold text-gray-600 hover:bg-gray-200 rounded-xl transition-colors">{t('cancel')}</button>
+              <button onClick={handleSaveWord} className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl shadow-sm transition-colors">{t('modal_save_word')}</button>
+            </div>
+          </div>
         </div>
       )}
     </div>

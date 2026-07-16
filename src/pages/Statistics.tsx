@@ -138,6 +138,24 @@ export default function Statistics() {
     setHistory(newHistory);
     setSelectedKeys(new Set());
   };
+  
+  const formatQuizName = (key: string) => {
+    const isCustom = key.startsWith('custom_');
+    const stripped = isCustom ? key.replace('custom_', '') : key;
+    const parts = stripped.split('_');
+    const quizId = parts.pop();
+    const topic = parts.join('_');
+    
+    let translatedTopic = topic;
+    if (topic === 'vocabulary') translatedTopic = t('vocabulary') || 'Vocabulary';
+    else if (topic === 'articles') translatedTopic = t('articles_quiz') || 'Articles';
+    else if (topic === 'phrases') translatedTopic = t('phrases_sentences_quiz') || 'Phrases';
+    else if (topic === 'prepositions') translatedTopic = t('prepositions_quiz') || 'Prepositions';
+    else if (topic === 'adjectives') translatedTopic = t('adjectives_quiz') || 'Adjectives';
+
+    if (isCustom) return t('quiz_title_custom', { topic: translatedTopic, id: quizId || '' }).trim();
+    return t('quiz_title_public', { topic: translatedTopic, id: quizId || '' }).trim();
+  };
 
   const downloadResults = (key: string, data: any) => {
     if (!data.questions) return;
@@ -269,8 +287,8 @@ export default function Statistics() {
                           className="w-5 h-5 text-blue-600 rounded border-blue-200 focus:ring-blue-500 cursor-pointer"
                         />
                       </td>
-                      <td className="p-3 sm:p-5 font-bold text-blue-950 capitalize whitespace-nowrap">
-                        {quizKey.replace(/_/g, ' ')}
+                      <td className="p-3 sm:p-5 font-bold text-blue-950 whitespace-nowrap">
+                        {formatQuizName(quizKey)}
                       </td>
                       <td className="p-3 sm:p-5">
                         <div className="flex items-center gap-3">

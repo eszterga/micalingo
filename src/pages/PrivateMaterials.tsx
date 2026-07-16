@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { doc, getDoc, setDoc, deleteDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { dbCloud } from '../lib/firebase';
 import { useAuth } from '../AuthContext';
 import { useI18n } from '../I18nContext';
+import { addCloudWord } from '../lib/firestore';
 
 const BackgroundBlobs = () => (
   <>
@@ -34,8 +35,10 @@ const MediaPlayer = ({ url, t }: { url: string, t: any }) => {
   } else if (url.includes("spotify.com/")) {
     try {
       const pathname = new URL(url).pathname;
-      return <iframe style={{ borderRadius: "12px" }} src={`https://open.spotify.com/embed${pathname}`} width="100%" height="152" frameBorder="0" allowFullScreen allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" className="shadow-sm" />;
-    } catch {}
+      return <iframe style={{ borderRadius: "12px" }} src={`https://open.spotify.com/embed${pathname}`} width="100%" height="152" frameBorder="0" allowFullScreen allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" className="shadow-sm" title="Spotify player" />;
+    } catch (e) {
+      console.error("Invalid Spotify URL", e);
+    }
   }
   return (
     <a href={url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-md hover:shadow-lg w-full">
@@ -51,11 +54,11 @@ export default function PrivateMaterials({ type }: { type: 'reading' | 'listenin
   
   const collectionName = type === 'reading' ? 'private_reading' : 'private_listening';
   const defaultIcon = type === 'reading' ? '📂' : '🎧';
-  const defaultCategories = [
+  const defaultCategories = useMemo(() => [
     { id: "cat1", icon: defaultIcon, title: "Category 1", items: [] },
     { id: "cat2", icon: defaultIcon, title: "Category 2", items: [] },
     { id: "cat3", icon: defaultIcon, title: "Category 3", items: [] }
-  ];
+  ], [defaultIcon]);
 
   const [categories, setCategories] = useState<any[]>(defaultCategories);
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
@@ -72,6 +75,15 @@ export default function PrivateMaterials({ type }: { type: 'reading' | 'listenin
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [editData, setEditData] = useState({ title: "", url: "", source: "", content: "" });
   const contentRef = useRef<HTMLDivElement>(null);
+
+  const [isSaveWordModalOpen, setIsSaveWordModalOpen] = useState(false);
+  const [newGerman, setNewGerman] = useState("");
+  const [newArticle, setNewArticle] = useState("der");
+  const [newNoun, setNewNoun] = useState("");
+  const [newHungarian, setNewHungarian] = useState("");
+  const [newExample, setNewExample] = useState("");
+  const [newNote, setNewNote] = useState("");
+  const [newCategory, setNewCategory] = useState("vocabulary");
 
   useEffect(() => {
     const fetchBookmarks = async () => {
@@ -142,7 +154,7 @@ export default function PrivateMaterials({ type }: { type: 'reading' | 'listenin
       }
     };
     loadData();
-  }, [user, collectionName]);
+  }, [user, collectionName, defaultCategories]);
 
   useEffect(() => {
     if (isModalOpen && contentRef.current && contentRef.current.innerHTML !== editData.content) {
@@ -275,6 +287,40 @@ export default function PrivateMaterials({ type }: { type: 'reading' | 'listenin
     setEditingCategory(null);
   };
 
+  const openSaveWordModal = () => {
+    if (bookmarkPopup) {
+      const text = bookmarkPopup.text;
+      setNewGerman(text);
+      const match = text.match(/^(der|die|das)\s+(.*)/i);
+      if (match) {
+        setNewArticle(match[1].toLowerCase());
+        setNewNoun(match[2]);
+      } else {
+        setNewArticle("der");
+        setNewNoun(text);
+      }
+      setNewHungarian("");
+      setNewExample("");
+      setNewNote("");
+      setNewCategory("vocabulary");
+      setIsSaveWordModalOpen(true);
+      setBookmarkPopup(null);
+    }
+  };
+
+  const handleSaveWord = async () => {
+    const finalGerman = newCategory === 'articles' ? `${newArticle} ${newNoun.trim()}` : newGerman.trim();
+    if (!finalGerman || !newHungarian.trim() || !user) {
+      alert(t('alert_fill_fields_login'));
+      return;
+    }
+    await addCloudWord({
+      userId: user.uid, german: finalGerman, hungarian: newHungarian.trim(), example: newExample.trim(), note: newCategory === 'false_friends' ? newNote.trim() : "", dateAdded: Date.now(), category: newCategory
+    } as any);
+    setIsSaveWordModalOpen(false);
+    alert(t('saved') || 'Saved!');
+  };
+
   const openAddModal = (catId: string) => {
     setEditingItemCategory(catId);
     setEditingItemId(null);
@@ -300,12 +346,12 @@ export default function PrivateMaterials({ type }: { type: 'reading' | 'listenin
           if (data.contents) {
             const parser = new DOMParser();
             const doc = parser.parseFromString(data.contents, "text/html");
-            const title = doc.querySelector("title")?.innerText || doc.querySelector("h1")?.innerText || "";
+            const title = doc.querySelector("title")?.textContent || doc.querySelector("h1")?.textContent || "";
             const article = doc.querySelector("article") || doc.querySelector("main") || doc.body;
             let content = "";
             if (article) {
               content = Array.from(article.querySelectorAll("p"))
-                .map(p => (p as HTMLElement).innerText.trim())
+                .map(p => (p as HTMLElement).textContent?.trim() || "")
                 .filter(t => t.length > 20)
                 .map(t => `<p>${t}</p>`)
                 .join("");
@@ -386,7 +432,7 @@ export default function PrivateMaterials({ type }: { type: 'reading' | 'listenin
         <div className="space-y-6 pt-4">
           <div className="bg-blue-50/80 backdrop-blur-sm border border-blue-200/60 text-blue-900 p-5 rounded-[1.5rem] shadow-sm text-sm font-medium mb-6 flex items-center gap-3">
             <span className="text-xl">🔖</span>
-            {t("bookmark_instructions") || "Highlight any text while reading to save a bookmark. You can continue reading from where you left off."}
+            {t("bookmark_instructions_logged_in") || "Highlight any text while reading to save a bookmark, or save the highlighted text directly to your personal vocabulary database!"}
           </div>
 
           {categories.map((cat) => (
@@ -471,7 +517,7 @@ export default function PrivateMaterials({ type }: { type: 'reading' | 'listenin
                                           <div id={`article-content-${item.id}`} onMouseUp={(e) => handleMouseUp(e, item.id)} onTouchEnd={(e) => handleMouseUp(e, item.id)} className="prose prose-blue max-w-none text-gray-700 leading-relaxed space-y-4 mb-4" dangerouslySetInnerHTML={{ __html: item.content }}></div>
                                         </div>
                                         <div className="w-full lg:w-80 flex-shrink-0 lg:sticky lg:top-4 bg-blue-50/50 p-4 rounded-3xl border border-blue-100 shadow-sm order-1 lg:order-2 mb-4 lg:mb-0">
-                                          <div className="text-xs font-bold text-blue-800 uppercase tracking-wider mb-3 px-2">Media Player</div>
+                                          <div className="text-xs font-bold text-blue-800 uppercase tracking-wider mb-3 px-2">{t("media_player") || "Media Player"}</div>
                                           <MediaPlayer url={item.url} t={t} />
                                         </div>
                                       </div>
@@ -514,7 +560,7 @@ export default function PrivateMaterials({ type }: { type: 'reading' | 'listenin
             </div>
             <div className="p-6 md:p-8 overflow-y-auto space-y-6">
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">URL (Optional)</label>
+                <label className="block text-sm font-bold text-gray-700 mb-2">{t("url_optional") || "URL (Optional)"}</label>
                 <div className="flex flex-col sm:flex-row gap-3">
                   <input type="url" value={editData.url} onChange={e => setEditData({ ...editData, url: e.target.value })} className="flex-1 w-full rounded-xl border-gray-200 border p-3 focus:ring-2 focus:ring-blue-500 outline-none" />
                   <button onClick={handleFetchContent} disabled={!editData.url || isFetching} className="w-full sm:w-auto bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 px-6 rounded-xl transition-colors disabled:opacity-50 whitespace-nowrap">
@@ -523,15 +569,15 @@ export default function PrivateMaterials({ type }: { type: 'reading' | 'listenin
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Title</label>
+                <label className="block text-sm font-bold text-gray-700 mb-2">{t("title_label") || "Title"}</label>
                 <input type="text" value={editData.title} onChange={e => setEditData({ ...editData, title: e.target.value })} className="w-full rounded-xl border-gray-200 border p-3 focus:ring-2 focus:ring-blue-500 outline-none" />
               </div>
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Source / Author</label>
+                <label className="block text-sm font-bold text-gray-700 mb-2">{t("source_author") || "Source / Author"}</label>
                 <input type="text" value={editData.source} onChange={e => setEditData({ ...editData, source: e.target.value })} className="w-full rounded-xl border-gray-200 border p-3 focus:ring-2 focus:ring-blue-500 outline-none" />
               </div>
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Content</label>
+                <label className="block text-sm font-bold text-gray-700 mb-2">{t("content_label") || "Content"}</label>
                 <div className="w-full rounded-xl border-gray-200 border focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 transition-all overflow-hidden flex flex-col bg-white">
                   <div className="bg-gray-50 border-b border-gray-200 p-2 flex gap-2 flex-wrap">
                     <button type="button" onClick={e => { e.preventDefault(); document.execCommand("bold", false); }} className="px-3 py-1 bg-white border border-gray-300 rounded font-bold hover:bg-gray-200 text-sm transition-colors shadow-sm">B</button>
@@ -554,10 +600,104 @@ export default function PrivateMaterials({ type }: { type: 'reading' | 'listenin
       )}
 
       {bookmarkPopup && (
-        <div id="bookmark-popover" className="fixed z-50 animate-fade-in-up" style={{ left: window.innerWidth > 768 ? bookmarkPopup.x : "50%", top: window.innerWidth > 768 ? bookmarkPopup.y : "auto", bottom: window.innerWidth > 768 ? "auto" : "30px", transform: "translateX(-50%)" }}>
-          <button onClick={saveBookmark} className="bg-blue-900 text-white font-bold text-sm px-6 py-3 md:px-4 md:py-2 rounded-full md:rounded-xl shadow-2xl md:shadow-xl flex items-center gap-2 hover:bg-blue-800 transition-all border border-blue-700">
+        <div id="bookmark-popover" className="fixed z-50 animate-fade-in-up flex gap-[1px]" style={{ left: window.innerWidth > 768 ? bookmarkPopup.x : "50%", top: window.innerWidth > 768 ? bookmarkPopup.y : "auto", bottom: window.innerWidth > 768 ? "auto" : "30px", transform: "translateX(-50%)" }}>
+          <button onClick={saveBookmark} className="bg-blue-900 text-white font-bold text-sm px-5 py-3 md:px-4 md:py-2 rounded-l-full md:rounded-l-xl shadow-2xl md:shadow-xl flex items-center gap-2 hover:bg-blue-800 transition-all">
             🔖 {t("save_bookmark") || "Bookmark"}
           </button>
+          <button onClick={openSaveWordModal} className="bg-green-600 text-white font-bold text-sm px-5 py-3 md:px-4 md:py-2 rounded-r-full md:rounded-r-xl shadow-2xl md:shadow-xl flex items-center gap-2 hover:bg-green-700 transition-all">
+            💾 {t("save_to_vocabulary") || "Save Word"}
+          </button>
+        </div>
+      )}
+
+      {isSaveWordModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-blue-950/40 backdrop-blur-sm transition-opacity">
+          <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-md max-h-[90vh] overflow-hidden flex flex-col animate-fade-in-up">
+            <div className="p-6 md:p-8 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+              <h2 className="text-2xl font-extrabold text-blue-950">{t('modal_add_word_title')}</h2>
+              <button onClick={() => setIsSaveWordModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-full hover:bg-gray-200">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+              </button>
+            </div>
+
+            <div className="p-6 md:p-8 overflow-y-auto space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('modal_category_label') || 'Category'}</label>
+                <select value={newCategory} onChange={(e) => setNewCategory(e.target.value)} className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50">
+                  <option value="vocabulary">{t('vocabulary_quiz') || 'Vocabulary quiz'}</option>
+                  <option value="reading">{t('vocabulary_to_read') || 'Vocabulary to read'}</option>
+                  <option value="phrases">{t('phrases_sentences_quiz') || 'Phrases and sentences quiz'}</option>
+                  <option value="articles">{t('articles_quiz')}</option>
+                  <option value="prepositions">{t('prepositions_quiz')}</option>
+                  <option value="adjectives">{t('adjectives_quiz') || 'Adjectives'}</option>
+                  <option value="false_friends">{t('false_friends') || 'False Friends'}</option>
+                </select>
+              </div>
+
+             {(() => {
+              let germanLabel = t('modal_german_label');
+              let germanPlaceholder = t('modal_german_placeholder');
+              let hungarianPlaceholder = t('modal_hungarian_placeholder');
+              if (newCategory === 'phrases') {
+                germanLabel = t('modal_german_phrase_label') || "German Phrase/Sentence *";
+                germanPlaceholder = t('modal_german_phrase_placeholder') || "e.g. Wie geht es Ihnen?";
+                hungarianPlaceholder = t('modal_hungarian_phrase_placeholder') || "e.g. Hogy van?";
+              } else if (newCategory === 'prepositions') {
+                germanLabel = t('modal_german_prep_label') || "German Preposition *";
+                germanPlaceholder = t('modal_german_prep_placeholder') || "e.g. mit";
+                hungarianPlaceholder = t('modal_hungarian_prep_placeholder') || "e.g. val/vel";
+              } else if (newCategory === 'false_friends') {
+                germanLabel = t('modal_german_ff_label') || "German False Friend *";
+                germanPlaceholder = t('modal_german_ff_placeholder') || "e.g. das Gift, die Gifte";
+                hungarianPlaceholder = t('modal_hungarian_ff_placeholder') || "e.g. a méreg";
+              }
+              return (
+                <div className="space-y-4">
+              {newCategory === 'articles' ? (
+                <div className="flex gap-4">
+                  <div className="w-1/3">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('modal_article_label') || 'Article *'}</label>
+                    <select value={newArticle} onChange={(e) => setNewArticle(e.target.value)} className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                      <option value="der">der</option>
+                      <option value="die">die</option>
+                      <option value="das">das</option>
+                    </select>
+                  </div>
+                  <div className="w-2/3">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('modal_noun_label') || 'Noun (with plural) *'}</label>
+                    <input type="text" value={newNoun} onChange={(e) => setNewNoun(e.target.value)} placeholder={t('modal_noun_placeholder') || 'e.g. Mann, die Männer'} className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" autoFocus />
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{germanLabel}</label>
+                  <input type="text" value={newGerman} onChange={(e) => setNewGerman(e.target.value)} placeholder={germanPlaceholder} className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" autoFocus />
+                </div>
+              )}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('modal_hungarian_label')}</label>
+                <input type="text" value={newHungarian} onChange={(e) => setNewHungarian(e.target.value)} placeholder={hungarianPlaceholder} className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('modal_example_label')}</label>
+                <input type="text" value={newExample} onChange={(e) => setNewExample(e.target.value)} placeholder={t('modal_example_placeholder')} className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+              {newCategory === 'false_friends' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('note') || 'Note'} *</label>
+                  <input type="text" value={newNote} onChange={(e) => setNewNote(e.target.value)} placeholder={t('template_note_header') || 'Note'} className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+              )}
+            </div>
+            );
+          })()}
+            </div>
+
+            <div className="p-6 md:p-8 border-t border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row justify-end gap-3">
+              <button onClick={() => setIsSaveWordModalOpen(false)} className="w-full sm:w-auto px-6 py-3 font-bold text-gray-600 hover:bg-gray-200 rounded-xl transition-colors">{t('cancel')}</button>
+              <button onClick={handleSaveWord} className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl shadow-sm transition-colors">{t('modal_save_word')}</button>
+            </div>
+          </div>
         </div>
       )}
     </div>

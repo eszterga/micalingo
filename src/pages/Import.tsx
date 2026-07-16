@@ -944,7 +944,7 @@ export default function Import() {
 
             <div className="flex-1 overflow-auto bg-white p-6 md:p-8">
               {editFileItems.length === 0 ? (
-                <p className="text-gray-500 italic text-center py-4">No items left. Save to delete all.</p>
+                <p className="text-gray-500 italic text-center py-4">{t("no_items_left") || "No items left. Save to delete all."}</p>
               ) : (
                 <table className="w-full text-left border-collapse border border-blue-50 rounded-xl min-w-[800px] lg:min-w-full shadow-sm">
                   <thead className="bg-blue-50/80 border-b border-blue-100 sticky top-0 backdrop-blur z-10">

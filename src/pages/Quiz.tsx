@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 import { useI18n } from "../I18nContext";
@@ -97,7 +97,7 @@ export default function Quiz() {
     pageTitle = t('quiz_title_personal');
   }
 
-  const generateQuestions = (words: any[]) => {
+  const generateQuestions = useCallback((words: any[]) => {
     const selectedWords = [...words];
 
     return selectedWords.map(word => {
@@ -164,7 +164,7 @@ export default function Quiz() {
         };
       }
     }).filter(Boolean) as Question[];
-  };
+  }, [topic, isCustom]);
 
   useEffect(() => {
     const progressKey = user ? `micalingo_quiz_progress_${user.uid}` : 'micalingo_quiz_progress_guest';
@@ -251,7 +251,7 @@ export default function Quiz() {
       setQuizState('no_data');
       setQuestions([]);
     }
-  }, [topic, userVocabulary, quizId, isCustom, publicDbWords]);
+  }, [topic, userVocabulary, quizId, isCustom, publicDbWords, isRedo, user, generateQuestions]);
 
   useEffect(() => {
     if (quizState === 'ongoing' && questions.length > 0) {
@@ -327,7 +327,7 @@ export default function Quiz() {
       setScore(s => s + 1);
 
       const currentExample = questions[currentQuestionIndex].example;
-      const delay = (showExamples && currentExample) ? (currentExample.length > 20 ? 10000 : 3500) : 1000;
+      const delay = (showExamples && currentExample) ? (currentExample.length > 20 ? 3300 : 2500) : 1000;
       setTimeout(() => {
         setIsAnswered(false);
         setSelectedAnswer(null);
@@ -430,6 +430,8 @@ export default function Quiz() {
       );
     }
 
+    const quizKey = isCustom ? `custom_${topic || 'general'}_${quizId}` : `${topic || 'custom'}_${quizId}`;
+
     return (
       <div className="relative min-h-[85vh] w-full flex flex-col pt-4 md:pt-8 pb-12">
         <BackgroundBlobs />
@@ -445,8 +447,10 @@ export default function Quiz() {
               <button onClick={() => window.location.reload()} className="w-full sm:w-auto bg-blue-100 text-blue-700 font-bold py-3 px-8 rounded-xl hover:bg-blue-200 transition-colors shadow-sm">
                 {t('retry_quiz')}
               </button>
+              <button onClick={() => navigate(`/results?quizKey=${quizKey}`)} className="w-full sm:w-auto bg-purple-100 text-purple-700 font-bold py-3 px-8 rounded-xl hover:bg-purple-200 transition-colors shadow-sm">
+                {t('review_answers') || 'Review Answers'}
+              </button>
               <button onClick={() => {
-                const quizKey = isCustom ? `custom_${topic || 'general'}_${quizId}` : `${topic || 'custom'}_${quizId}`;
                 const exportData = questions.map((q: any, i: number) => {
                   const userAnswer = userAnswers[i] || '';
                   const isCorrect = userAnswer === q.correctAnswer;

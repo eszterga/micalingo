@@ -105,6 +105,24 @@ export default function Results() {
 
   const quizData = selectedQuizKey ? history[selectedQuizKey] : null;
   const hasNextLevel = selectedQuizKey && !isLastQuiz(selectedQuizKey);
+  
+  const formatQuizName = (key: string) => {
+    const isCustom = key.startsWith('custom_');
+    const stripped = isCustom ? key.replace('custom_', '') : key;
+    const parts = stripped.split('_');
+    const quizId = parts.pop();
+    const topic = parts.join('_');
+    
+    let translatedTopic = topic;
+    if (topic === 'vocabulary') translatedTopic = t('vocabulary') || 'Vocabulary';
+    else if (topic === 'articles') translatedTopic = t('articles_quiz') || 'Articles';
+    else if (topic === 'phrases') translatedTopic = t('phrases_sentences_quiz') || 'Phrases';
+    else if (topic === 'prepositions') translatedTopic = t('prepositions_quiz') || 'Prepositions';
+    else if (topic === 'adjectives') translatedTopic = t('adjectives_quiz') || 'Adjectives';
+
+    if (isCustom) return t('quiz_title_custom', { topic: translatedTopic, id: quizId || '' }).trim();
+    return t('quiz_title_public', { topic: translatedTopic, id: quizId || '' }).trim();
+  };
 
   return (
     <div className="relative min-h-[85vh] w-full flex flex-col pt-4 md:pt-8 pb-12">
@@ -128,11 +146,11 @@ export default function Results() {
             <select 
               value={selectedQuizKey || ''} 
               onChange={(e) => setSelectedQuizKey(e.target.value)}
-              className="bg-white/80 border border-white text-blue-950 text-sm rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 block w-full sm:w-auto p-3 shadow-sm capitalize font-bold outline-none"
+              className="bg-white/80 border border-white text-blue-950 text-sm rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 block w-full sm:w-auto p-3 shadow-sm font-bold outline-none"
             >
               {Object.keys(history).length === 0 && <option value="">No quizzes completed yet</option>}
               {Object.keys(history).map(key => (
-                <option key={key} value={key}>{key.replace(/_/g, ' ')}</option>
+                <option key={key} value={key}>{formatQuizName(key)}</option>
               ))}
             </select>
             
