@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { useI18n } from "../I18nContext";
 import { useAuth } from "../AuthContext";
-import { publicVocabulary, publicPhrases, publicArticles, publicPrepositions } from "../lib/public-data";
+import { publicVocabulary, publicPhrases, publicArticles, publicPrepositions, publicAdjectives } from "../lib/public-data";
 
 const WORDS_PER_QUIZ = 20;
 
@@ -11,6 +11,7 @@ const TOPIC_QUIZ_COUNTS: Record<string, number> = {
   phrases: Math.ceil(publicPhrases.length / WORDS_PER_QUIZ),
   articles: Math.ceil(publicArticles.length / WORDS_PER_QUIZ),
   prepositions: Math.ceil(publicPrepositions.length / WORDS_PER_QUIZ),
+  adjectives: Math.ceil((publicAdjectives || []).length / WORDS_PER_QUIZ),
 };
 
 export default function Results() {

@@ -92,8 +92,6 @@ export const en = {
   format_vocab_phrases: "Column A = German (Phrase/Sentence), Column B = Hungarian (Meaning), Column C = Example (Optional).",
   articles_quiz_label: "Articles Quiz:",
   format_articles: "Column A = Article, Column B = Noun, Column C = Hungarian, Column D = Example.",
-  text_copy_paste: "Text / Copy-Paste:",
-  format_text: "Separate German and Hungarian with a Tab, Semicolon (;), or Comma (,).",
   need_starting_point: "Need a starting point?",
   download_template_desc: "Download an Excel template to easily fill in your data.",
   vocab_template: "Vocabulary Template",
@@ -355,8 +353,6 @@ export const en = {
   // False Friends
   false_friends: "False Friends",
   false_friends_desc: "Words that look or sound similar and sometimes even mean the same both in German and Hungarian. Easy to remember these!",
-  false_friends_label: "False Friends:",
-  format_false_friends: "Column A = German, Column B = Hungarian, Column C = Example, Column D = Note/Meaning.",
   false_friends_template: "False Friends Template",
   template_note_header: "Note (D)",
   note: "Note / Meaning",
@@ -408,5 +404,14 @@ export const en = {
   no_audio_yet_admin: "No content here yet. Click '+ Add Audio' above to add the first track!",
   private_reading_hint: "Create your own reading categories to organize your texts, articles, or books.",
   private_listening_hint: "Create categories like music style or group your favorite songs by artists. Save audiobooks or your favourite podcasts.",
-  edit_category: "Edit Category"
+  edit_category: "Edit Category",
+  adjectives_quiz: 'Adjectives',
+  adjectives_quiz_subtitle: 'Practice German adjectives.',
+  custom_adjectives_desc: 'Your personal adjectives.',
+  template_adjective_header: 'Adjective (mandatory)',
+  template_levels_header: 'Levels (e.g., besser, am besten)',
+  format_adjectives: 'Column A: German, Column B: Hungarian, Column C: Levels (e.g., besser, am besten).',
+  adjectives_template: 'Adjectives Template',
+  adjective: 'Adjective',
+  levels: 'Levels',
 };

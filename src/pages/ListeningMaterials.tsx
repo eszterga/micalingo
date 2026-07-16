@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useI18n } from '../I18nContext';
+import { useAuth } from '../AuthContext';
+import CMSEditorModal, { MaterialData, CategoryOption } from '../components/CMSEditorModal';
+import { collection, doc, setDoc } from 'firebase/firestore';
+import { dbCloud } from '../lib/firebase';
 
 const BackgroundBlobs = () => (
   <>
@@ -23,7 +27,9 @@ const BackgroundBlobs = () => (
 
 export default function ListeningMaterials() {
   const { t } = useI18n();
+  const { user, isAdmin, adminMode } = useAuth();
   const [openSections, setOpenSections] = useState({ music: false, podcasts: false, audiobooks: false });
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
 
   const toggleSection = (section: 'music' | 'podcasts' | 'audiobooks') => {
     setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
@@ -48,6 +54,32 @@ export default function ListeningMaterials() {
     { id: "other-audiobooks", icon: "📚", title: t("other_audiobooks") || "Other", desc: t("other_audiobooks_desc") || "Various other audiobooks." }
   ];
 
+  const allCategories: CategoryOption[] = [
+    ...musicCategories.map(c => ({ id: c.id, title: `Music - ${c.title}`, collectionName: 'audio' })),
+    ...podcastsCategories.map(c => ({ id: c.id, title: `Podcasts - ${c.title}`, collectionName: 'audio' })),
+    ...audiobooksCategories.map(c => ({ id: c.id, title: `Audiobooks - ${c.title}`, collectionName: 'audio' }))
+  ];
+
+  const handleSaveContent = async (data: MaterialData) => {
+    try {
+      const targetCollection = data.collectionName || 'audio';
+      const payload = {
+        title: data.title,
+        content: data.content,
+        url: data.mediaLink || "",
+        source: data.artist || "",
+        categoryId: data.categoryId,
+        userId: isAdmin && adminMode ? "PUBLIC_LIBRARY" : user?.uid,
+        updatedAt: Date.now()
+      };
+      await setDoc(doc(collection(dbCloud, targetCollection)), payload);
+      alert(t("save_success") || "Content added successfully!");
+    } catch (e) {
+      console.error("Error saving content:", e);
+      alert(t("save_error") || "Failed to save content.");
+    }
+  };
+
   return (
     <div className="relative min-h-[85vh] w-full flex flex-col pt-4 md:pt-8 pb-12">
       <BackgroundBlobs />
@@ -65,6 +97,15 @@ export default function ListeningMaterials() {
             </p>
           </div>
         </div>
+
+      {/* Admin Add Content Button */}
+      {isAdmin && adminMode && (
+        <div className="flex justify-end pt-2">
+          <button onClick={() => setIsEditorOpen(true)} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-xl shadow-sm transition-colors flex items-center gap-2">
+            <span className="text-xl leading-none">+</span> Add Content
+          </button>
+        </div>
+      )}
 
         <div className="space-y-6 pt-4">
           {/* Music Section */}
@@ -152,6 +193,14 @@ export default function ListeningMaterials() {
           </section>
         </div>
       </div>
+
+      <CMSEditorModal 
+        isOpen={isEditorOpen} 
+        type="listening" 
+        categories={allCategories}
+        onClose={() => setIsEditorOpen(false)}
+        onSave={handleSaveContent}
+      />
     </div>
   );
 }

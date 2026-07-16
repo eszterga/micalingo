@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useI18n } from '../I18nContext';
+import { useAuth } from '../AuthContext';
+import CMSEditorModal, { MaterialData, CategoryOption } from '../components/CMSEditorModal';
+import { collection, doc, setDoc } from 'firebase/firestore';
+import { dbCloud } from '../lib/firebase';
 
 const BackgroundBlobs = () => (
   <>
@@ -23,7 +27,9 @@ const BackgroundBlobs = () => (
 
 export default function ReadingMaterials() {
   const { t } = useI18n();
+  const { user, isAdmin, adminMode } = useAuth();
   const [openSections, setOpenSections] = useState({ interesting: false, articles: false, books: false });
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
 
   const toggleSection = (section: 'interesting' | 'articles' | 'books') => {
     setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
@@ -44,6 +50,31 @@ export default function ReadingMaterials() {
     { id: "short-stories", icon: "📖", title: t("short_stories") || "Short Stories", desc: t("short_stories_desc") || "Quick reads for daily practice." }
   ];
 
+  const allCategories: CategoryOption[] = [
+    ...articlesCategories.map(c => ({ id: c.id, title: `Articles - ${c.title}`, collectionName: 'articles' })),
+    ...booksCategories.map(c => ({ id: c.id, title: `Books - ${c.title}`, collectionName: 'books' }))
+  ];
+
+  const handleSaveContent = async (data: MaterialData) => {
+    try {
+      const targetCollection = data.collectionName || 'articles';
+      const payload = {
+        title: data.title,
+        content: data.content,
+        url: data.mediaLink || "",
+        source: data.author || "",
+        categoryId: data.categoryId,
+        userId: isAdmin && adminMode ? "PUBLIC_LIBRARY" : user?.uid,
+        updatedAt: Date.now()
+      };
+      await setDoc(doc(collection(dbCloud, targetCollection)), payload);
+      alert(t("save_success") || "Content added successfully!");
+    } catch (e) {
+      console.error("Error saving content:", e);
+      alert(t("save_error") || "Failed to save content.");
+    }
+  };
+
   return (
     <div className="relative min-h-[85vh] w-full flex flex-col pt-4 md:pt-8 pb-12">
       <BackgroundBlobs />
@@ -61,6 +92,15 @@ export default function ReadingMaterials() {
             </p>
           </div>
         </div>
+
+        {/* Admin Add Content Button */}
+        {isAdmin && adminMode && (
+          <div className="flex justify-end pt-2">
+            <button onClick={() => setIsEditorOpen(true)} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-xl shadow-sm transition-colors flex items-center gap-2">
+              <span className="text-xl leading-none">+</span> Add Content
+            </button>
+          </div>
+        )}
 
         <div className="space-y-6 pt-4">
           {/* Interesting Section */}
@@ -146,6 +186,14 @@ export default function ReadingMaterials() {
           </section>
         </div>
       </div>
+
+      <CMSEditorModal 
+        isOpen={isEditorOpen} 
+        type="reading" 
+        categories={allCategories}
+        onClose={() => setIsEditorOpen(false)}
+        onSave={handleSaveContent}
+      />
     </div>
   );
 }

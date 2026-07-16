@@ -4,7 +4,7 @@ import * as XLSX from 'xlsx';
 import FileDropZone from "../components/FileDropZone";
 import { ParsedImport } from "../lib/importParser";
 import { useAuth } from "../AuthContext";
-import { publicVocabulary, publicPhrases, publicArticles, publicPrepositions, publicFalseFriends } from '../lib/public-data';
+import { publicVocabulary, publicPhrases, publicArticles, publicPrepositions, publicFalseFriends, publicAdjectives } from '../lib/public-data';
 import { useCloudVocabulary, bulkAddCloudWords, bulkDeleteCloudWords, updateCloudWord } from "../lib/firestore";
 import { useI18n } from "../I18nContext";
 
@@ -55,6 +55,10 @@ export default function Import() {
   const [isSavingEdit, setIsSavingEdit] = useState(false);
   const [fileSearchTerm, setFileSearchTerm] = useState("");
 
+  useEffect(() => {
+    setSaveToPublic(isAdmin ? adminMode : false);
+  }, [isAdmin, adminMode]);
+
   const allItems = useMemo(() => {
     const cloudItems = existingItems.map((item: any) => ({ ...item, isCloud: true }));
     if (!saveToPublic) return cloudItems;
@@ -83,9 +87,10 @@ export default function Import() {
     pushStatic(publicArticles, 'articles');
     pushStatic(publicPrepositions, 'prepositions');
     pushStatic(publicFalseFriends, 'false_friends');
+    pushStatic(publicAdjectives || [], 'adjectives');
 
     return [...cloudItems.filter((i: any) => !i.deleted), ...staticItems];
-  }, [existingItems, adminMode]);
+  }, [existingItems, saveToPublic]);
 
   useEffect(() => {
     setDestination(initialDestination);
@@ -126,9 +131,11 @@ export default function Import() {
           lowerP0.includes("article (a)") ||
           lowerP0.includes("german (mandatory") ||
           lowerP0.includes("german") ||
+          lowerP0.includes("adjective (mandatory") ||
           lowerP0.includes(t('template_article_header').toLowerCase()) ||
           lowerP0.includes(t('template_german_mandatory_header').toLowerCase()) ||
-          lowerP0.includes(t('template_german_header').toLowerCase())
+          lowerP0.includes(t('template_german_header').toLowerCase()) ||
+          lowerP0.includes((t('template_adjective_header') || "adjective (mandatory)").toLowerCase())
         ) {
           continue;
         }
@@ -143,6 +150,8 @@ export default function Import() {
           items.push({ article: p0, noun: p1, hungarian: p2, example: p3, german: `${p0} ${p1}`.trim() });
         } else if (destination === 'false_friends') {
           items.push({ german: p0, hungarian: p1, example: p2, note: p3 });
+        } else if (destination === 'adjectives') {
+          items.push({ german: p0, hungarian: p1, example: p2 });
         } else {
           items.push({ german: p0, hungarian: p1, example: p2 });
         }
@@ -442,7 +451,7 @@ export default function Import() {
     XLSX.writeFile(workbook, outName);
   };
 
-  const handleDownloadTemplate = (type: 'standard' | 'articles' | 'false_friends') => {
+  const handleDownloadTemplate = (type: 'standard' | 'articles' | 'adjectives') => {
     let templateData: object[];
 
     if (type === 'articles') {
@@ -460,13 +469,17 @@ export default function Import() {
           [t('template_example_header')]: 'Die Frau trinkt einen Kaffee.'
         }
       ];
-    } else if (type === 'false_friends') {
+    } else if (type === 'adjectives') {
       templateData = [
         {
-          [t('template_german_header')]: 'das Gift, die Gifte',
-          [t('template_hungarian_header')]: 'a méreg',
-          [t('template_example_header')]: 'Dieses Tier produziert ein starkes Gift.',
-          [t('template_note_header')]: 'False friend: gift != ajándék'
+          [t('template_adjective_header')]: 'gut',
+          [t('template_hungarian_header')]: 'jó',
+          [t('template_levels_header')]: 'besser, am besten'
+        },
+        {
+          [t('template_adjective_header')]: 'schnell',
+          [t('template_hungarian_header')]: 'gyors',
+          [t('template_levels_header')]: 'schneller, am schnellsten'
         }
       ];
     } else {
@@ -494,20 +507,20 @@ export default function Import() {
     worksheet['!cols'] =
       type === 'articles'
         ? [{ wch: 15 }, { wch: 25 }, { wch: 30 }, { wch: 50 }]
-        : type === 'false_friends'
-        ? [{ wch: 25 }, { wch: 25 }, { wch: 40 }, { wch: 40 }]
+        : type === 'adjectives'
+        ? [{ wch: 25 }, { wch: 25 }, { wch: 40 }]
         : [{ wch: 40 }, { wch: 30 }, { wch: 50 }];
 
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(
       workbook,
       worksheet,
-      `${type === 'articles' ? 'Articles' : type === 'false_friends' ? 'FalseFriends' : 'Vocabulary'}_Template`
+      `${type === 'articles' ? 'Articles' : type === 'adjectives' ? 'Adjectives' : 'Vocabulary'}_Template`
     );
 
     XLSX.writeFile(
       workbook,
-      `MicaLingo_${type === 'articles' ? 'Articles' : type === 'false_friends' ? 'FalseFriends' : 'Import'}_Template.xlsx`
+      `MicaLingo_${type === 'articles' ? 'Articles' : type === 'adjectives' ? 'Adjectives' : 'Import'}_Template.xlsx`
     );
   };
 
@@ -606,9 +619,8 @@ export default function Import() {
         <h2 className="font-bold text-blue-800 mb-2">{t('accepted_format_guide')}</h2>
         <ul className="text-sm text-blue-700 list-disc list-inside space-y-1.5 ml-2">
           <li><strong>{t('vocab_phrases')}</strong> {t('format_vocab_phrases')}</li>
-          <li><strong>{t('false_friends_label')}</strong> {t('format_false_friends')}</li>
-          <li><strong>{t('articles_quiz_label')}</strong> {t('format_articles')}</li>
-          <li><strong>{t('text_copy_paste')}</strong> {t('format_text')}</li>
+          <li><strong>{t('articles_quiz')}</strong> {t('format_articles')}</li>
+          <li><strong>{t('adjectives_quiz')}</strong> {t('format_adjectives')}</li>
         </ul>
 
         {/* Downloadable Template */}
@@ -637,13 +649,13 @@ export default function Import() {
               {t('articles_template')}
             </button>
             <button
-              onClick={() => handleDownloadTemplate('false_friends')}
-                className="whitespace-nowrap px-5 py-2.5 bg-white text-blue-600 border border-blue-200 font-bold rounded-xl hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 shadow-sm w-full sm:w-auto"
+              onClick={() => handleDownloadTemplate('adjectives')}
+              className="whitespace-nowrap px-5 py-2.5 bg-white text-blue-600 border border-blue-200 font-bold rounded-xl hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 shadow-sm w-full sm:w-auto"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M8 12l4 4m0 0l4-4m-4 4V4" />
               </svg>
-              {t('false_friends_template')}
+              {t('adjectives_template')}
             </button>
           </div>
         </div>
@@ -694,6 +706,12 @@ export default function Import() {
                         <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('example')} <span className="text-xs font-normal text-gray-500 block">{t('column_c')}</span></th>
                         <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('note')} <span className="text-xs font-normal text-gray-500 block">{t('column_d')}</span></th>
                       </>
+                    ) : destination === 'adjectives' ? (
+                      <>
+                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('adjective') || 'Adjective'} <span className="text-xs font-normal text-gray-500 block">{t('column_a')}</span></th>
+                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('hungarian')} <span className="text-xs font-normal text-gray-500 block">{t('column_b')}</span></th>
+                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('levels') || 'Levels'} <span className="text-xs font-normal text-gray-500 block">{t('column_c')}</span></th>
+                      </>
                     ) : (
                       <>
                         <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('german')} <span className="text-xs font-normal text-gray-500 block">{t('column_a')}</span></th>
@@ -720,6 +738,12 @@ export default function Import() {
                           <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleItemChange(idx, 'hungarian', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
                           <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.example || ''} onChange={(e) => handleItemChange(idx, 'example', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
                           <td className="p-1 sm:p-2 align-top"><textarea rows={2} value={item.note || ''} onChange={(e) => handleItemChange(idx, 'note', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
+                        </>
+                      ) : destination === 'adjectives' ? (
+                        <>
+                          <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.german || ''} onChange={(e) => handleItemChange(idx, 'german', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
+                          <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleItemChange(idx, 'hungarian', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
+                          <td className="p-1 sm:p-2 align-top"><textarea rows={2} value={item.example || ''} onChange={(e) => handleItemChange(idx, 'example', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
                         </>
                       ) : (
                         <>
@@ -758,7 +782,7 @@ export default function Import() {
                   <option value="vocabulary">{t('vocabulary_quiz')}</option>
                   <option value="articles">{t('articles_quiz')}</option>
                   <option value="phrases">{t('phrases_quiz')}</option>
-                  <option value="false_friends">{t('false_friends')}</option>
+                  <option value="adjectives">{t('adjectives_quiz') || 'Adjectives'}</option>
                   <option value="prepositions">{t('prepositions_quiz')}</option>
                   <option value="reading">{t('save_to_reading')}</option>
                   <option value="listening">{t('save_to_listening')}</option>
@@ -938,6 +962,12 @@ export default function Import() {
                           <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('example')}</th>
                           <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('note')}</th>
                         </>
+                      ) : editingFileCategory === 'adjectives' ? (
+                        <>
+                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('adjective') || 'Adjective'}</th>
+                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('hungarian')}</th>
+                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('levels') || 'Levels'}</th>
+                        </>
                       ) : (
                         <>
                           <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('german')}</th>
@@ -979,6 +1009,18 @@ export default function Import() {
                             </td>
                             <td className="p-1 sm:p-2 align-top">
                               <textarea rows={2} value={item.note || ''} onChange={(e) => handleEditItemChange(idx, 'note', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" />
+                            </td>
+                          </>
+                        ) : editingFileCategory === 'adjectives' ? (
+                          <>
+                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top">
+                              <textarea rows={2} value={item.german || ''} onChange={(e) => handleEditItemChange(idx, 'german', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" />
+                            </td>
+                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top">
+                              <textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleEditItemChange(idx, 'hungarian', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" />
+                            </td>
+                            <td className="p-1 sm:p-2 align-top">
+                              <textarea rows={2} value={item.example || ''} onChange={(e) => handleEditItemChange(idx, 'example', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" />
                             </td>
                           </>
                         ) : (

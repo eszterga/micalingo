@@ -92,8 +92,6 @@ export const hu = {
   format_vocab_phrases: "A oszlop = Német (Kifejezés/Mondat), B oszlop = Magyar (Jelentés), C oszlop = Példa (Opcionális).",
   articles_quiz_label: "Névelők Kvíz:",
   format_articles: "A oszlop = Névelő, B oszlop = Főnév, C oszlop = Magyar, D oszlop = Példa.",
-  text_copy_paste: "Szöveg / Beillesztés:",
-  format_text: "Válaszd el a német és magyar szavakat tabulátorral, pontosvesszővel (;) vagy vesszővel (,).",
   need_starting_point: "Szükséged van egy kiindulópontra?",
   download_template_desc: "Tölts le egy Excel sablont az adatok egyszerű kitöltéséhez.",
   vocab_template: "Szókincs sablon",
@@ -355,8 +353,6 @@ export const hu = {
   // False Friends
   false_friends: "Hamis barátok",
   false_friends_desc: "Olyan szavak, amelyek hasonlóan néznek ki vagy hangzanak, sőt néha ugyanazt is jelentik németül és magyarul. Könnyű megjegyezni őket!",
-  false_friends_label: "Hamis barátok:",
-  format_false_friends: "A oszlop = Német, B oszlop = Magyar, C oszlop = Példa, D oszlop = Megjegyzés/Jelentés.",
   false_friends_template: "Hamis barátok sablon",
   template_note_header: "Megjegyzés (D)",
   note: "Megjegyzés / Jelentés",
@@ -408,5 +404,14 @@ export const hu = {
   no_audio_yet_admin: "Itt még nincsenek tartalmak. Kattintson a fenti '+ Audio hozzáadása' gombra az első zeneszám hozzáadásához!",
   private_reading_hint: "Hozd létre saját olvasási kategóriáidat a szövegek, cikkek vagy könyvek rendszerezéséhez.",
   private_listening_hint: "Hozz létre kategóriákat zenei stílus szerint, vagy csoportosítsd kedvenc dalaidat előadók alapján.",
-  edit_category: "Kategória szerkesztése"
+  edit_category: "Kategória szerkesztése",
+  adjectives_quiz: 'Melléknevek',
+  adjectives_quiz_subtitle: 'Gyakorold a német mellékneveket.',
+  custom_adjectives_desc: 'Saját mellékneveid.',
+  template_adjective_header: 'Melléknév (kötelező)',
+  template_levels_header: 'Fokozás (pl. jobb, legjobb)',
+  format_adjectives: 'A oszlop: Német, B oszlop: Magyar, C oszlop: Fokozás (pl. jobb, legjobb).',
+  adjectives_template: 'Melléknevek Sablon',
+  adjective: 'Melléknév',
+  levels: 'Fokozás',
 };

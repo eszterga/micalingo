@@ -23,12 +23,14 @@ import CreateQuiz from "./pages/CreateQuiz";
 import PublicContentCategory from "./pages/PublicContentCategory";
 import PublicAudioCategory from "./pages/PublicAudioCategory";
 import PrivateMaterials from "./pages/PrivateMaterials";
+import AdminPrompt from "./components/AdminPrompt";
 
 // Main Application Router
 export default function App() {
   return (
     <HashRouter>
       <AuthProvider>
+        <AdminPrompt />
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route element={<Layout />}>

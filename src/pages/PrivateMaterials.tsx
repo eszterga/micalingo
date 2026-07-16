@@ -475,9 +475,16 @@ export default function PrivateMaterials({ type }: { type: 'reading' | 'listenin
                                           <MediaPlayer url={item.url} t={t} />
                                         </div>
                                       </div>
-                                    ) : (
+                                  ) : ( // This is the reading block
+                                    <>
                                       <div id={`article-content-${item.id}`} onMouseUp={(e) => handleMouseUp(e, item.id)} onTouchEnd={(e) => handleMouseUp(e, item.id)} className="prose prose-blue max-w-none text-gray-700 leading-relaxed space-y-4 mb-4" dangerouslySetInnerHTML={{ __html: item.content }}></div>
-                                    )}
+                                      {item.url && (
+                                        <a href={item.url} target="_blank" rel="noopener noreferrer" className="inline-block mt-4 text-blue-600 hover:text-blue-800 font-medium text-sm">
+                                          {t("original_source") || "Original source"} ↗
+                                        </a>
+                                      )}
+                                    </>
+                                  )} 
                                   </div>
                                 </div>
                               </div>

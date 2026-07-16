@@ -11,7 +11,7 @@ import {
 } from "../lib/firestore";
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { auth } from '../lib/firebase';
-import { publicVocabulary, publicPhrases, publicArticles, publicPrepositions, publicFalseFriends } from '../lib/public-data';
+import { publicVocabulary, publicPhrases, publicArticles, publicPrepositions, publicFalseFriends, publicAdjectives } from '../lib/public-data';
 import { useI18n } from "../I18nContext";
 
 const BackgroundBlobs = () => (
@@ -46,7 +46,8 @@ export default function Vocabulary() {
       ...publicPhrases.map(w => ({ ...w, category: 'phrases' })),
       ...publicArticles.map(w => ({ ...w, category: 'articles' })),
       ...publicPrepositions.map(w => ({ ...w, category: 'prepositions' })),
-      ...publicFalseFriends.map(w => ({ ...w, category: 'false_friends' }))
+      ...publicFalseFriends.map(w => ({ ...w, category: 'false_friends' })),
+      ...(publicAdjectives || []).map(w => ({ ...w, category: 'adjectives' }))
     ];
     const unique: any[] = [];
     const seen = new Set<string>();
@@ -667,6 +668,7 @@ export default function Vocabulary() {
                   <option value="phrases">{t('phrases_quiz')}</option>
                   <option value="articles">{t('articles_quiz')}</option>
                   <option value="prepositions">{t('prepositions_quiz')}</option>
+                  <option value="adjectives">{t('adjectives_quiz') || 'Adjectives'}</option>
                   <option value="false_friends">{t('false_friends') || 'False Friends'}</option>
                 </select>
               </div>

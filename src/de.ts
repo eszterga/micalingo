@@ -92,8 +92,6 @@ export const de = {
   format_vocab_phrases: "Spalte A = Deutsch (Phrase/Satz), Spalte B = Ungarisch (Bedeutung), Spalte C = Beispiel (Optional).",
   articles_quiz_label: "Artikel-Quiz:",
   format_articles: "Spalte A = Artikel, Spalte B = Substantiv, Spalte C = Ungarisch, Spalte D = Beispiel.",
-  text_copy_paste: "Text / Kopieren & Einfügen:",
-  format_text: "Trennen Sie Deutsch und Ungarisch mit einem Tabulator, Semikolon (;) oder Komma (,).",
   need_starting_point: "Brauchen Sie einen Ausgangspunkt?",
   download_template_desc: "Laden Sie eine Excel-Vorlage herunter.",
   vocab_template: "Wortschatz-Vorlage",
@@ -355,8 +353,6 @@ export const de = {
   // False Friends
   false_friends: "Falsche Freunde",
   false_friends_desc: "Wörter, die ähnlich aussehen oder klingen.",
-  false_friends_label: "Falsche Freunde:",
-  format_false_friends: "Spalte A = Deutsch, Spalte B = Ungarisch.",
   false_friends_template: "Falsche Freunde Vorlage",
   template_note_header: "Notiz (D)",
   note: "Notiz / Bedeutung",
@@ -408,5 +404,14 @@ export const de = {
   no_audio_yet_admin: "Noch keine Inhalte hier. Klicken Sie oben auf '+ Audio hinzufügen', um den ersten Titel hinzuzufügen!",
   private_reading_hint: "Erstellen Sie Ihre eigenen Lesekategorien, um Ihre Texte, Artikel oder Bücher zu organisieren.",
   private_listening_hint: "Erstellen Sie Kategorien wie Musikstil oder gruppieren Sie Ihre Lieblingslieder nach Künstlern oder Jahren.",
-  edit_category: "Kategorie bearbeiten"
+  edit_category: "Kategorie bearbeiten",
+  adjectives_quiz: 'Adjektive',
+  adjectives_quiz_subtitle: 'Übe deutsche Adjektive.',
+  custom_adjectives_desc: 'Deine persönlichen Adjektive.',
+  template_adjective_header: 'Adjektiv (erforderlich)',
+  template_levels_header: 'Steigerung (z.B. besser, am besten)',
+  format_adjectives: 'Spalte A: Deutsch, Spalte B: Ungarisch, Spalte C: Steigerung (z.B. besser, am besten).',
+  adjectives_template: 'Adjektive Vorlage',
+  adjective: 'Adjektiv',
+  levels: 'Steigerung',
 };
