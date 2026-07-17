@@ -98,7 +98,7 @@ export default function Statistics() {
     };
 
     fetchStats();
-  }, [user]);
+  }, [user?.uid]);
 
   const toggleSelection = (key: string) => {
     const next = new Set(selectedKeys);
@@ -212,7 +212,7 @@ export default function Statistics() {
 
       {!user && (
         <div className="bg-blue-50/80 backdrop-blur-sm border border-blue-200/60 text-blue-900 p-5 rounded-[1.5rem] shadow-sm text-sm font-medium mb-6">
-          {t('guest_warning_stats') || 'As a guest user, your results will appear here until you close the app. If you want to keep your progress saved, log in '} <Link to="/login" className="font-bold underline">{t('here')}</Link>
+          {t('guest_warning_stats') || 'As a guest user, your results will appear here until you close the app. If you want to keep your progress saved, log in '} <Link to="/login" className="font-bold underline">{t('guest_warning_stats_link') || 'here'}</Link>
         </div>
       )}
 

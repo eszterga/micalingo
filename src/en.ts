@@ -248,7 +248,7 @@ export const en = {
   page_under_construction: "This page is currently under construction.",
   check_back_later: "Please check back later!",
   guest_warning_stats: "As a guest user, your results will appear here until you close the website/app. If you want to keep your progress saved, log in ",
-  guest_warning_stats_link: "here",
+  guest_warning_stats_link: "here!",
   quizzes_solved: "Quizzes Solved",
   materials_read: "Materials Read",
   no_quizzes_solved: "You haven't completed any quizzes yet.",

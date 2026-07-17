@@ -248,7 +248,7 @@ export const de = {
   page_under_construction: "Diese Seite befindet sich im Aufbau.",
   check_back_later: "Bitte schauen Sie später wieder vorbei!",
   guest_warning_stats: "Melde dich an, um den Fortschritt zu speichern ",
-  guest_warning_stats_link: "hier",
+  guest_warning_stats_link: "hier!",
   quizzes_solved: "Quizze gelöst",
   materials_read: "Materialien gelesen",
   no_quizzes_solved: "Du hast noch keine Quizze abgeschlossen.",

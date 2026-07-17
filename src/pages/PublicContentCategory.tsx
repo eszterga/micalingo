@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { collection, query, where, getDocs, doc, setDoc, deleteDoc } from 'firebase/firestore';
 import { dbCloud } from '../lib/firebase';
@@ -74,7 +74,7 @@ export default function PublicContentCategory({ type }: { type: 'articles' | 'bo
       }
     };
     fetchBookmarks();
-  }, [categoryId, user]);
+  }, [categoryId, user?.uid]);
 
   const fetchItems = useCallback(async () => {
     try {
@@ -90,7 +90,7 @@ export default function PublicContentCategory({ type }: { type: 'articles' | 'bo
 
   useEffect(() => {
     fetchItems();
-  }, [fetchItems, adminMode]);
+  }, [fetchItems]);
 
   useEffect(() => {
     const handleGlobalClick = (e: MouseEvent | TouchEvent) => {

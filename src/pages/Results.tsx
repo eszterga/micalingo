@@ -50,7 +50,7 @@ export default function Results() {
     if (!selectedQuizKey && Object.keys(h).length > 0) {
       setSelectedQuizKey(Object.keys(h)[Object.keys(h).length - 1]);
     }
-  }, [user, selectedQuizKey]);
+  }, [user?.uid, selectedQuizKey]);
 
   const downloadResults = (key: string, data: any) => {
     if (!data.questions) return;

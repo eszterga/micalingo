@@ -76,14 +76,27 @@ export default function Quiz() {
     if (!topic || !QUIZ_TOPICS.includes(topic as any)) return 0;
 
     const staticSource =
-      topic === 'vocabulary' ? publicVocabulary :
-      topic === 'phrases' ? publicPhrases :
-      topic === 'articles' ? publicArticles :
-      topic === 'adjectives' ? (publicAdjectives || []) :
-      publicPrepositions;
+      topic === 'vocabulary' ? publicVocabulary 
+      : topic === 'phrases' ? publicPhrases 
+      : topic === 'articles' ? publicArticles 
+      : topic === 'adjectives' ? (publicAdjectives || []) 
+      : publicPrepositions;
 
-    return Math.max(1, Math.ceil(staticSource.length / WORDS_PER_QUIZ));
-  }, [topic]);
+    const dbSource = publicDbWords.filter((w: any) => w.category === topic);
+    const combined = [...dbSource, ...staticSource];
+    const unique: any[] = [];
+    const seen = new Set<string>();
+
+    for (const word of combined) {
+      const wordKey = ((word as any).german || '').toLowerCase().trim();
+      if (!seen.has(wordKey)) {
+        seen.add(wordKey);
+        if (!(word as any).deleted) unique.push(word);
+      }
+    }
+
+    return Math.max(1, Math.ceil(unique.length / WORDS_PER_QUIZ));
+  }, [topic, publicDbWords]);
 
   const isLastQuiz = !!topic && !isCustom && totalQuizzes > 0 && quizId >= totalQuizzes;
   const hasNextQuiz = !!topic && !isCustom && quizId > 0 && quizId < totalQuizzes;
@@ -251,7 +264,7 @@ export default function Quiz() {
       setQuizState('no_data');
       setQuestions([]);
     }
-  }, [topic, userVocabulary, quizId, isCustom, publicDbWords, isRedo, user, generateQuestions]);
+  }, [topic, userVocabulary, quizId, isCustom, publicDbWords, isRedo, user?.uid, generateQuestions]);
 
   useEffect(() => {
     if (quizState === 'ongoing' && questions.length > 0) {
@@ -268,7 +281,7 @@ export default function Quiz() {
 
       localStorage.setItem(progressKey, JSON.stringify(progressMap));
     }
-  }, [currentQuestionIndex, score, questions, quizState, topic, quizId, user, isCustom, userAnswers]);
+  }, [currentQuestionIndex, score, questions, quizState, topic, quizId, user?.uid, isCustom, userAnswers]);
 
   const finishQuiz = async (finalScore: number) => {
     const key = user ? `micalingo_scores_${user.uid}` : 'micalingo_guest_scores';

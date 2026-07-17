@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useI18n } from "../I18nContext";
 import { useAuth } from "../AuthContext";
@@ -70,7 +70,7 @@ export default function Settings() {
       fetchSettings();
     }
     return () => { mounted = false; };
-  }, [user, setLanguage]);
+  }, [user?.uid, setLanguage]);
 
   const handleLanguageChange = (lang: 'en' | 'de' | 'hu') => {
     setLanguage(lang);

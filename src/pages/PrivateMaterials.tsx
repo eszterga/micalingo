@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { doc, getDoc, setDoc, deleteDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { dbCloud } from '../lib/firebase';
@@ -100,7 +100,7 @@ export default function PrivateMaterials({ type }: { type: 'reading' | 'listenin
       }
     };
     fetchBookmarks();
-  }, [user, collectionName]);
+  }, [user?.uid, collectionName]);
 
   useEffect(() => {
     const handleGlobalClick = (e: MouseEvent | TouchEvent) => {
@@ -154,7 +154,7 @@ export default function PrivateMaterials({ type }: { type: 'reading' | 'listenin
       }
     };
     loadData();
-  }, [user, collectionName, defaultCategories]);
+  }, [user?.uid, collectionName, defaultCategories]);
 
   useEffect(() => {
     if (isModalOpen && contentRef.current && contentRef.current.innerHTML !== editData.content) {

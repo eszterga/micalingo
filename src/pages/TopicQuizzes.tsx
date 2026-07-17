@@ -34,6 +34,7 @@ export default function TopicQuizzes() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { t } = useI18n();
+  const publicDbWords = useCloudVocabulary("PUBLIC_LIBRARY") || [];
   const userVocabulary = useCloudVocabulary(user?.uid);
   const [scores, setScores] = useState<Record<string, number>>({});
   const [progress, setProgress] = useState<Record<string, any>>({});
@@ -45,7 +46,7 @@ export default function TopicQuizzes() {
 
     const progressKey = user ? `micalingo_quiz_progress_${user.uid}` : 'micalingo_quiz_progress_guest';
     setProgress(JSON.parse(localStorage.getItem(progressKey) || '{}'));
-  }, [user]);
+  }, [user?.uid]);
 
   const handleGoogleLogin = async () => {
     try {
@@ -59,23 +60,41 @@ export default function TopicQuizzes() {
   let sourceData: any[] = [];
   let pageTitle = "";
 
+  const getUniqueSourceData = (staticSource: any[], topic: string) => {
+    const dbSource = publicDbWords.filter((w: any) => w.category === topic);
+    const combined = [...dbSource, ...staticSource];
+    const unique: any[] = [];
+    const seen = new Set<string>();
+
+    for (const word of combined) {
+      const key = (word.german || "").toLowerCase().trim();
+      if (!seen.has(key)) {
+        seen.add(key);
+        if (!word.deleted) {
+          unique.push(word);
+        }
+      }
+    }
+    return unique;
+  };
+
   if (topic === 'vocabulary') {
-    sourceData = publicVocabulary;
+    sourceData = getUniqueSourceData(publicVocabulary, 'vocabulary');
     pageTitle = t('vocabulary') || "Vocabulary";
   } else if (topic === 'phrases') {
-    sourceData = publicPhrases;
+    sourceData = getUniqueSourceData(publicPhrases, 'phrases');
     pageTitle = t('phrases_sentences_quiz') || "Phrases and sentences quiz";
   } else if (topic === 'articles') {
-    sourceData = publicArticles;
+    sourceData = getUniqueSourceData(publicArticles, 'articles');
     pageTitle = t('articles_quiz') || "Articles";
   } else if (topic === 'prepositions') {
-    sourceData = publicPrepositions;
+    sourceData = getUniqueSourceData(publicPrepositions, 'prepositions');
     pageTitle = t('prepositions_quiz') || "Prepositions";
   } else if (topic === 'adjectives') {
-    sourceData = publicAdjectives || [];
+    sourceData = getUniqueSourceData(publicAdjectives || [], 'adjectives');
     pageTitle = t('adjectives_quiz') || "Adjectives";
   } else if (topic === 'reading') {
-    sourceData = []; // No public data for this category
+    sourceData = getUniqueSourceData([], 'reading');
     pageTitle = t('vocabulary_to_read') || "Vocabulary to read";
   } else {
     return (
