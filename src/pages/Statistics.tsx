@@ -152,6 +152,7 @@ export default function Statistics() {
     else if (topic === 'phrases') translatedTopic = t('phrases_sentences_quiz') || 'Phrases';
     else if (topic === 'prepositions') translatedTopic = t('prepositions_quiz') || 'Prepositions';
     else if (topic === 'adjectives') translatedTopic = t('adjectives_quiz') || 'Adjectives';
+    else if (topic === 'verbs') translatedTopic = t('verbs_quiz') || 'Verbs';
 
     if (isCustom) return t('quiz_title_custom', { topic: translatedTopic, id: quizId || '' }).trim();
     return t('quiz_title_public', { topic: translatedTopic, id: quizId || '' }).trim();

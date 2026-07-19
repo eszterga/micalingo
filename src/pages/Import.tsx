@@ -150,6 +150,8 @@ export default function Import() {
           items.push({ article: p0, noun: p1, hungarian: p2, example: p3, german: `${p0} ${p1}`.trim() });
         } else if (destination === 'false_friends') {
           items.push({ german: p0, hungarian: p1, example: p2, note: p3 });
+        } else if (destination === 'verbs') {
+          items.push({ german: p0, hungarian: p1, example: p2 });
         } else if (destination === 'adjectives') {
           items.push({ german: p0, hungarian: p1, example: p2 });
         } else {
@@ -451,7 +453,7 @@ export default function Import() {
     XLSX.writeFile(workbook, outName);
   };
 
-  const handleDownloadTemplate = (type: 'standard' | 'articles' | 'adjectives') => {
+  const handleDownloadTemplate = (type: 'standard' | 'articles' | 'adjectives' | 'verbs') => {
     let templateData: object[];
 
     if (type === 'articles') {
@@ -482,6 +484,19 @@ export default function Import() {
           [t('template_levels_header')]: 'schneller, am schnellsten'
         }
       ];
+    } else if (type === 'verbs') {
+      templateData = [
+        {
+          [t('template_german_header') || 'German']: 'machen',
+          [t('template_hungarian_header') || 'Hungarian']: 'csinálni',
+          [t('template_example_header') || 'Example (or hint)']: 'machte, hat gemacht'
+        },
+        {
+          [t('template_german_header') || 'German']: 'gehen',
+          [t('template_hungarian_header') || 'Hungarian']: 'menni',
+          [t('template_example_header') || 'Example (or hint)']: 'ging, ist gegangen'
+        }
+      ];
     } else {
       templateData = [
         {
@@ -509,18 +524,18 @@ export default function Import() {
         ? [{ wch: 15 }, { wch: 25 }, { wch: 30 }, { wch: 50 }]
         : type === 'adjectives'
         ? [{ wch: 25 }, { wch: 25 }, { wch: 40 }]
-        : [{ wch: 40 }, { wch: 30 }, { wch: 50 }];
+        : [{ wch: 30 }, { wch: 30 }, { wch: 50 }];
 
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(
       workbook,
       worksheet,
-      `${type === 'articles' ? 'Articles' : type === 'adjectives' ? 'Adjectives' : 'Vocabulary'}_Template`
+      `${type === 'articles' ? 'Articles' : type === 'adjectives' ? 'Adjectives' : type === 'verbs' ? 'Verbs' : 'Vocabulary'}_Template`
     );
 
     XLSX.writeFile(
       workbook,
-      `MicaLingo_${type === 'articles' ? 'Articles' : type === 'adjectives' ? 'Adjectives' : 'Import'}_Template.xlsx`
+      `MicaLingo_${type === 'articles' ? 'Articles' : type === 'adjectives' ? 'Adjectives' : type === 'verbs' ? 'Verbs' : 'Import'}_Template.xlsx`
     );
   };
 
@@ -660,6 +675,15 @@ export default function Import() {
               </svg>
               {t('adjectives_template')}
             </button>
+            <button
+              onClick={() => handleDownloadTemplate('verbs')}
+              className="whitespace-nowrap px-5 py-2.5 bg-white text-blue-600 border border-blue-200 font-bold rounded-xl hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 shadow-sm w-full sm:w-auto"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M8 12l4 4m0 0l4-4m-4 4V4" />
+              </svg>
+              {t('verbs_template') || 'Verbs Template'}
+            </button>
           </div>
         </div>
         </div>
@@ -715,6 +739,12 @@ export default function Import() {
                         <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('hungarian')} <span className="text-xs font-normal text-gray-500 block">{t('column_b')}</span></th>
                         <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('levels') || 'Levels'} <span className="text-xs font-normal text-gray-500 block">{t('column_c')}</span></th>
                       </>
+                    ) : destination === 'verbs' ? (
+                      <>
+                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('german')} <span className="text-xs font-normal text-gray-500 block">{t('column_a')}</span></th>
+                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('hungarian')} <span className="text-xs font-normal text-gray-500 block">{t('column_b')}</span></th>
+                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('hint') || 'Hint / Past Form'} <span className="text-xs font-normal text-gray-500 block">{t('column_c')}</span></th>
+                      </>
                     ) : (
                       <>
                         <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('german')} <span className="text-xs font-normal text-gray-500 block">{t('column_a')}</span></th>
@@ -743,6 +773,12 @@ export default function Import() {
                           <td className="p-1 sm:p-2 align-top"><textarea rows={2} value={item.note || ''} onChange={(e) => handleItemChange(idx, 'note', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
                         </>
                       ) : destination === 'adjectives' ? (
+                        <>
+                          <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.german || ''} onChange={(e) => handleItemChange(idx, 'german', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
+                          <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleItemChange(idx, 'hungarian', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
+                          <td className="p-1 sm:p-2 align-top"><textarea rows={2} value={item.example || ''} onChange={(e) => handleItemChange(idx, 'example', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
+                        </>
+                      ) : destination === 'verbs' ? (
                         <>
                           <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.german || ''} onChange={(e) => handleItemChange(idx, 'german', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
                           <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleItemChange(idx, 'hungarian', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
@@ -782,11 +818,13 @@ export default function Import() {
                   onChange={(e) => setDestination(e.target.value)}
                   className="bg-white border border-gray-200 text-gray-900 font-medium rounded-xl focus:ring-2 focus:ring-blue-500 block w-full p-3 shadow-sm outline-none"
                 >
-                  <option value="vocabulary">{t('vocabulary_quiz') || 'Vocabulary quiz'}</option>
-                  <option value="reading">{t('vocabulary_to_read') || 'Vocabulary to read'}</option>
-                  <option value="phrases">{t('phrases_sentences_quiz') || 'Phrases and sentences quiz'}</option>
-                  <option value="adjectives">{t('adjectives_quiz') || 'Adjective quiz'}</option>
-                  <option value="prepositions">{t('prepositions_quiz') || 'Prepositions quiz'}</option>
+                  <option value="vocabulary">{t('dropdown_vocabulary') || 'Vocabulary quiz'}</option>
+                  <option value="reading">{t('dropdown_reading') || 'Vocabulary (to read)'}</option>
+                  <option value="articles">{t('dropdown_articles') || 'Articles quiz'}</option>
+                  <option value="phrases">{t('dropdown_phrases') || 'Phrases and sentences quiz'}</option>
+                  <option value="prepositions">{t('dropdown_prepositions') || 'Prepositions quiz'}</option>
+                  <option value="adjectives">{t('dropdown_adjectives') || 'Adjectives quiz'}</option>
+                  <option value="verbs">{t('dropdown_verbs') || 'Verbs quiz'}</option>
                 </select>
               </div>
             </div>
@@ -968,6 +1006,12 @@ export default function Import() {
                           <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('adjective') || 'Adjective'}</th>
                           <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('hungarian')}</th>
                           <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('levels') || 'Levels'}</th>
+                        </>
+                      ) : editingFileCategory === 'verbs' ? (
+                        <>
+                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('german')}</th>
+                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('hungarian')}</th>
+                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('hint') || 'Hint / Past Form'}</th>
                         </>
                       ) : (
                         <>

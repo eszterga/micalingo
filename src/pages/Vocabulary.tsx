@@ -78,6 +78,8 @@ export default function Vocabulary() {
   const [newCategory, setNewCategory] = useState("vocabulary");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingStaticWord, setEditingStaticWord] = useState<any>(null);
+  const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
+  const [moveTargetCategory, setMoveTargetCategory] = useState("vocabulary");
 
 
   const handleGoogleLogin = async () => {
@@ -146,6 +148,84 @@ export default function Vocabulary() {
         }
       }
       setSelectedIds(new Set());
+    }
+  };
+
+  const handleBulkMoveSubmit = async () => {
+    if (selectedIds.size === 0) return;
+
+    const idsToMove = Array.from(selectedIds).filter(id => !id.startsWith('static_'));
+    const staticToMove = Array.from(selectedIds).filter(id => id.startsWith('static_'));
+    
+    const duplicatesFound: { german: string, category: string }[] = [];
+    const nonDuplicateStaticToMove: string[] = [];
+    const nonDuplicateIdsToMove: string[] = [];
+
+    // Check for duplicates when copying static (public) words to personal library
+    if (user && (!adminMode || activeTab !== 'library')) {
+      for (const staticId of staticToMove) {
+        const word = allPublicWords.find(w => `static_${w.german}` === staticId);
+        if (word) {
+          const duplicate = personalWords?.find(w => (w.german || '').toLowerCase().trim() === (word.german || '').toLowerCase().trim());
+          if (duplicate) {
+                const catKey = duplicate.category || 'vocabulary';
+                let catName = t(`dropdown_${catKey}`);
+                if (catName === `dropdown_${catKey}`) catName = catKey;
+                duplicatesFound.push({ german: word.german, category: catName });
+          } else {
+            nonDuplicateStaticToMove.push(staticId);
+          }
+        }
+      }
+    } else {
+      nonDuplicateStaticToMove.push(...staticToMove);
+    }
+
+    // Check for duplicates when moving personal words between categories
+    for (const id of idsToMove) {
+      const wordToMove = personalWords?.find(w => w.id === id);
+      if (wordToMove) {
+        const isDuplicateInTarget = personalWords?.some(w => w.category === moveTargetCategory && (w.german || '').toLowerCase().trim() === (wordToMove.german || '').toLowerCase().trim() && w.id !== id);
+        if (isDuplicateInTarget) {
+              const catKey = moveTargetCategory || 'vocabulary';
+              let catName = t(`dropdown_${catKey}`);
+              if (catName === `dropdown_${catKey}`) catName = catKey;
+              duplicatesFound.push({ german: wordToMove.german, category: catName });
+        } else {
+          nonDuplicateIdsToMove.push(id);
+        }
+      }
+    }
+
+    if (duplicatesFound.length > 0) {
+      const message = duplicatesFound.map(d => `"${d.german}" (${t('alert_word_exists', { category: d.category })})`).join('\n');
+      alert(`${t('duplicates_found_title')}\n\n${message}\n\n${t('duplicates_found_subtitle')}`);
+    }
+
+    let itemsProcessed = 0;
+    for (const id of nonDuplicateIdsToMove) {
+      await updateCloudWord(id, { category: moveTargetCategory } as any);
+      itemsProcessed++;
+    }
+
+    for (const staticId of nonDuplicateStaticToMove) {
+      const word = allPublicWords.find(w => `static_${w.german}` === staticId);
+      if (word) {
+        if (adminMode && activeTab === 'library') {
+          await addCloudWord({ ...word, userId: "PUBLIC_LIBRARY", deleted: true, dateAdded: Date.now() } as any);
+          await addCloudWord({ ...word, category: moveTargetCategory, userId: "PUBLIC_LIBRARY", dateAdded: Date.now() } as any);
+          itemsProcessed++;
+        } else if (user) {
+          await addCloudWord({ userId: user.uid, german: word.german, hungarian: word.hungarian, example: word.example || "", note: word.note || "", category: moveTargetCategory, dateAdded: Date.now() } as any);
+          itemsProcessed++;
+        }
+      }
+    }
+
+    setSelectedIds(new Set());
+    setIsMoveModalOpen(false);
+    if (itemsProcessed > 0) {
+      alert(t('saved') || 'Saved successfully!');
     }
   };
 
@@ -254,7 +334,7 @@ export default function Vocabulary() {
     setNewHungarian("");
     setNewExample("");
     setNewNote("");
-    setNewCategory("reading"); // Default to "Vocabulary to read" when adding from this page
+    setNewCategory("vocabulary");
     setIsModalOpen(true);
   };
 
@@ -289,6 +369,18 @@ export default function Vocabulary() {
 
     if (!finalGerman || !newHungarian.trim() || !user) {
       alert(t('alert_fill_fields_login'));
+      return;
+    }
+
+    const duplicate = personalWords?.find((w: any) => 
+      (w.german || '').toLowerCase().trim() === finalGerman.toLowerCase().trim() && w.id !== editingId
+    );
+
+    if (duplicate) {
+          const catKey = duplicate.category || 'vocabulary';
+          let catName = t(`dropdown_${catKey}`);
+          if (catName === `dropdown_${catKey}`) catName = catKey;
+      alert(t('alert_word_exists', { category: catName }));
       return;
     }
 
@@ -395,15 +487,24 @@ export default function Vocabulary() {
       {activeTab === 'library' && (
         <div className="space-y-4">
           {adminMode && selectedIds.size > 0 && (
-            <div className="bg-red-50/90 backdrop-blur border border-red-200 p-4 rounded-2xl flex items-center justify-between shadow-sm">
-              <span className="text-red-800 font-medium">{t('words_selected', { count: selectedIds.size })}</span>
-              <button
-                onClick={handleBulkDelete}
-                className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 rounded-xl font-bold transition-colors shadow-sm"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                {t('delete_selected_words')}
-              </button>
+            <div className="bg-blue-50/90 backdrop-blur border border-blue-200 p-4 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
+              <span className="text-blue-800 font-medium">{t('words_selected', { count: selectedIds.size })}</span>
+              <div className="flex gap-2 w-full sm:w-auto">
+                <button
+                  onClick={() => setIsMoveModalOpen(true)}
+                  className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-bold transition-colors shadow-sm"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
+                  {t('save_to') || 'Save to...'}
+                </button>
+                <button
+                  onClick={handleBulkDelete}
+                  className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 rounded-xl font-bold transition-colors shadow-sm"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                  {t('delete_selected_words')}
+                </button>
+              </div>
             </div>
           )}
 
@@ -517,15 +618,24 @@ export default function Vocabulary() {
           ) : (
           <div className="space-y-4">
             {selectedIds.size > 0 && (
-              <div className="bg-red-50/90 backdrop-blur border border-red-200 p-4 rounded-2xl flex items-center justify-between shadow-sm">
-                <span className="text-red-800 font-medium">{t('words_selected', { count: selectedIds.size })}</span>
-                <button
-                  onClick={handleBulkDelete}
-                  className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 rounded-xl font-bold transition-colors shadow-sm"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                  {t('delete_selected_words')}
-                </button>
+              <div className="bg-blue-50/90 backdrop-blur border border-blue-200 p-4 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
+                <span className="text-blue-800 font-medium">{t('words_selected', { count: selectedIds.size })}</span>
+                <div className="flex gap-2 w-full sm:w-auto">
+                  <button
+                    onClick={() => setIsMoveModalOpen(true)}
+                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-bold transition-colors shadow-sm"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
+                    {t('save_to') || 'Save to...'}
+                  </button>
+                  <button
+                    onClick={handleBulkDelete}
+                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 rounded-xl font-bold transition-colors shadow-sm"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    {t('delete_selected_words')}
+                  </button>
+                </div>
               </div>
             )}
 
@@ -648,6 +758,10 @@ export default function Vocabulary() {
                 germanLabel = t('modal_german_prep_label') || "German Preposition *";
                 germanPlaceholder = t('modal_german_prep_placeholder') || "e.g. mit";
                 hungarianPlaceholder = t('modal_hungarian_prep_placeholder') || "e.g. val/vel";
+              } else if (newCategory === 'verbs') {
+                germanLabel = t('modal_german_verb_label') || "German Verb *";
+                germanPlaceholder = t('modal_german_verb_placeholder') || "e.g. machen";
+                hungarianPlaceholder = t('modal_hungarian_verb_placeholder') || "e.g. csinálni";
               } else if (newCategory === 'false_friends') {
                 germanLabel = t('modal_german_ff_label') || "German False Friend *";
                 germanPlaceholder = t('modal_german_ff_placeholder') || "e.g. das Gift, die Gifte";
@@ -735,6 +849,38 @@ export default function Vocabulary() {
             <div className="p-6 md:p-8 border-t border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row justify-end gap-3">
               <button onClick={() => setIsModalOpen(false)} className="w-full sm:w-auto px-6 py-3 font-bold text-gray-600 hover:bg-gray-200 rounded-xl transition-colors">{t('cancel')}</button>
               <button onClick={handleSaveWord} className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl shadow-sm transition-colors">{editingId ? t('modal_save_changes') : t('modal_save_word')}</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Move Selected / Save To Modal */}
+      {isMoveModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-blue-950/40 backdrop-blur-sm transition-opacity">
+          <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-md max-h-[90vh] overflow-hidden flex flex-col animate-fade-in-up">
+            <div className="p-6 md:p-8 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+              <h2 className="text-2xl font-extrabold text-blue-950">{t('save_to') || 'Save to...'}</h2>
+              <button onClick={() => setIsMoveModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-full hover:bg-gray-200">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+              </button>
+            </div>
+            <div className="p-6 md:p-8 overflow-y-auto space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('modal_category_label') || 'Target Category'}</label>
+                <select value={moveTargetCategory} onChange={(e) => setMoveTargetCategory(e.target.value)} className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50">
+                  <option value="vocabulary">{t('dropdown_vocabulary') || 'Vocabulary quiz'}</option>
+                  <option value="reading">{t('dropdown_reading') || 'Vocabulary (to read)'}</option>
+                  <option value="articles">{t('dropdown_articles') || 'Articles quiz'}</option>
+                  <option value="phrases">{t('dropdown_phrases') || 'Phrases and sentences quiz'}</option>
+                  <option value="prepositions">{t('dropdown_prepositions') || 'Prepositions quiz'}</option>
+                  <option value="adjectives">{t('dropdown_adjectives') || 'Adjectives quiz'}</option>
+                  <option value="verbs">{t('dropdown_verbs') || 'Verbs quiz'}</option>
+                </select>
+              </div>
+            </div>
+            <div className="p-6 md:p-8 border-t border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row justify-end gap-3">
+              <button onClick={() => setIsMoveModalOpen(false)} className="w-full sm:w-auto px-6 py-3 font-bold text-gray-600 hover:bg-gray-200 rounded-xl transition-colors">{t('cancel') || 'Cancel'}</button>
+              <button onClick={handleBulkMoveSubmit} className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl shadow-sm transition-colors">{t('save_button') || 'Save'}</button>
             </div>
           </div>
         </div>

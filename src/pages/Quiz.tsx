@@ -17,7 +17,7 @@ interface Question {
   hungarian?: string;
 }
 
-const QUIZ_TOPICS = ["vocabulary", "phrases", "articles", "prepositions", "adjectives"] as const;
+const QUIZ_TOPICS = ["vocabulary", "phrases", "articles", "prepositions", "adjectives", "verbs"] as const;
 const WORDS_PER_QUIZ = 20;
 
 const BackgroundBlobs = () => (
@@ -70,6 +70,7 @@ export default function Quiz() {
     : topic === 'phrases' ? (t('phrases_sentences_quiz') || 'Phrases and sentences')
     : topic === 'prepositions' ? t('prepositions_quiz')
     : topic === 'adjectives' ? (t('adjectives_quiz') || 'Adjectives')
+    : topic === 'verbs' ? (t('verbs_quiz') || 'Verbs')
     : t('personalized_space');
 
   const totalQuizzes = useMemo(() => {
@@ -80,6 +81,7 @@ export default function Quiz() {
       : topic === 'phrases' ? publicPhrases 
       : topic === 'articles' ? publicArticles 
       : topic === 'adjectives' ? (publicAdjectives || []) 
+      : topic === 'verbs' ? [] 
       : publicPrepositions;
 
     const dbSource = publicDbWords.filter((w: any) => w.category === topic);
@@ -132,7 +134,7 @@ export default function Quiz() {
           german: word.german,
           hungarian: word.hungarian
         };
-      } else if (topic === 'prepositions' || (isCustom && topic === 'prepositions')) {
+      } else if (topic === 'prepositions' && !isCustom) {
         const correctAnswer = word.case || "Akkusativ";
         const allCases = ["Akkusativ", "Dativ", "Genitiv", "Akkusativ oder Dativ"];
 
@@ -210,13 +212,18 @@ export default function Quiz() {
         (word.german || '').trim() !== '' &&
         (word.hungarian || '').trim() !== ''
       );
-      wordsForQuiz = [...customSource].sort(() => 0.5 - Math.random()).slice(0, WORDS_PER_QUIZ);
+      // Ensure stable sorting before slicing so levels are deterministic
+      const sortedSource = [...customSource].sort((a, b) => (a.german || '').localeCompare(b.german || ''));
+      const startIndex = (quizId - 1) * WORDS_PER_QUIZ;
+      const endIndex = startIndex + WORDS_PER_QUIZ;
+      wordsForQuiz = sortedSource.slice(startIndex, endIndex).sort(() => 0.5 - Math.random());
     } else if (topic) {
       let staticSource: any[] = [];
       if (topic === 'vocabulary') staticSource = publicVocabulary;
       else if (topic === 'phrases') staticSource = publicPhrases;
       else if (topic === 'articles') staticSource = publicArticles;
       else if (topic === 'adjectives') staticSource = publicAdjectives || [];
+      else if (topic === 'verbs') staticSource = [];
       else if (topic === 'prepositions') staticSource = publicPrepositions;
 
       const dbSource = publicDbWords.filter((w: any) => w.category === topic);

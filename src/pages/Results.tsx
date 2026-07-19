@@ -3,17 +3,10 @@ import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { useI18n } from "../I18nContext";
 import { useAuth } from "../AuthContext";
 import { publicVocabulary, publicPhrases, publicArticles, publicPrepositions, publicAdjectives } from "../lib/public-data";
+import { useCloudVocabulary } from "../lib/firestore";
 import * as XLSX from 'xlsx';
 
 const WORDS_PER_QUIZ = 20;
-
-const TOPIC_QUIZ_COUNTS: Record<string, number> = {
-  vocabulary: Math.ceil(publicVocabulary.length / WORDS_PER_QUIZ),
-  phrases: Math.ceil(publicPhrases.length / WORDS_PER_QUIZ),
-  articles: Math.ceil(publicArticles.length / WORDS_PER_QUIZ),
-  prepositions: Math.ceil(publicPrepositions.length / WORDS_PER_QUIZ),
-  adjectives: Math.ceil((publicAdjectives || []).length / WORDS_PER_QUIZ),
-};
 
 const BackgroundBlobs = () => (
   <>
@@ -41,6 +34,7 @@ export default function Results() {
   const navigate = useNavigate();
   const [history, setHistory] = useState<Record<string, any>>({});
   const [selectedQuizKey, setSelectedQuizKey] = useState<string | null>(searchParams.get("quizKey"));
+  const publicDbWords = useCloudVocabulary("PUBLIC_LIBRARY") || [];
 
   useEffect(() => {
     const historyKey = user ? `micalingo_history_${user.uid}` : 'micalingo_guest_history';
@@ -95,11 +89,33 @@ export default function Results() {
   const isLastQuiz = (key: string) => {
     const isCustom = key.startsWith('custom_');
     if (isCustom) return true; // Treat custom quizzes as "last" so no Next Quiz button appears
+    
     const parts = key.split('_');
     const quizId = parseInt(parts.pop() || '0');
     const topic = parts.join('_');
-    const maxQuizzes = TOPIC_QUIZ_COUNTS[topic];
-    if (maxQuizzes === undefined) return true;
+    
+    const staticSource =
+      topic === 'vocabulary' ? publicVocabulary 
+      : topic === 'phrases' ? publicPhrases 
+      : topic === 'articles' ? publicArticles 
+      : topic === 'adjectives' ? (publicAdjectives || []) 
+      : topic === 'verbs' ? [] 
+      : publicPrepositions;
+
+    const dbSource = publicDbWords.filter((w: any) => w.category === topic);
+    const combined = [...dbSource, ...staticSource];
+    const unique: any[] = [];
+    const seen = new Set<string>();
+
+    for (const word of combined) {
+      const wordKey = ((word as any).german || '').toLowerCase().trim();
+      if (!seen.has(wordKey)) {
+        seen.add(wordKey);
+        if (!(word as any).deleted) unique.push(word);
+      }
+    }
+
+    const maxQuizzes = Math.max(1, Math.ceil(unique.length / WORDS_PER_QUIZ));
     return quizId >= maxQuizzes;
   };
 
@@ -119,6 +135,7 @@ export default function Results() {
     else if (topic === 'phrases') translatedTopic = t('phrases_sentences_quiz') || 'Phrases';
     else if (topic === 'prepositions') translatedTopic = t('prepositions_quiz') || 'Prepositions';
     else if (topic === 'adjectives') translatedTopic = t('adjectives_quiz') || 'Adjectives';
+    else if (topic === 'verbs') translatedTopic = t('verbs_quiz') || 'Verbs';
 
     if (isCustom) return t('quiz_title_custom', { topic: translatedTopic, id: quizId || '' }).trim();
     return t('quiz_title_public', { topic: translatedTopic, id: quizId || '' }).trim();

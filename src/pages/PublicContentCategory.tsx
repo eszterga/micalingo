@@ -4,7 +4,7 @@ import { collection, query, where, getDocs, doc, setDoc, deleteDoc } from 'fireb
 import { dbCloud } from '../lib/firebase';
 import { useAuth } from '../AuthContext';
 import { useI18n } from '../I18nContext';
-import { addCloudWord } from '../lib/firestore';
+import { addCloudWord, useCloudVocabulary } from '../lib/firestore';
 
 const BackgroundBlobs = () => (
   <>
@@ -29,6 +29,7 @@ export default function PublicContentCategory({ type }: { type: 'articles' | 'bo
   const { categoryId } = useParams<{ categoryId: string }>();
   const { t } = useI18n();
   const { user, isAdmin, adminMode } = useAuth();
+  const userVocabulary = useCloudVocabulary(user?.uid) || [];
   
   const categoryName = t((categoryId || '') as any) || categoryId;
   const collectionName = type === 'articles' ? 'articles' : type === 'books' ? 'books' : 'interesting';
@@ -65,15 +66,15 @@ export default function PublicContentCategory({ type }: { type: 'articles' | 'bo
         try {
           const q = query(collection(dbCloud, "bookmarks"), where("userId", "==", user.uid), where("categoryId", "==", categoryId));
           const snapshot = await getDocs(q);
-          const bms: Record<string, string> = {};
-          snapshot.forEach(doc => { bms[doc.data().itemId] = doc.data().snippet; });
-          setBookmarks(bms);
-        } catch (e) {
-          console.error("Error fetching bookmarks:", e);
-        }
-      }
-    };
-    fetchBookmarks();
+                  const bms: Record<string, string> = {};
+                  snapshot.forEach(doc => { bms[doc.data().itemId] = doc.data().snippet; });
+                  setBookmarks(bms);
+                } catch (e) {
+                  console.error("Error fetching bookmarks:", e);
+                }
+              }
+            };
+            fetchBookmarks();
   }, [categoryId, user?.uid]);
 
   const fetchItems = useCallback(async () => {
@@ -297,6 +298,19 @@ export default function PublicContentCategory({ type }: { type: 'articles' | 'bo
       alert(t('alert_fill_fields_login'));
       return;
     }
+
+    const duplicate = userVocabulary.find((w: any) => 
+      (w.german || '').toLowerCase().trim() === finalGerman.toLowerCase().trim()
+    );
+
+    if (duplicate) {
+          const catKey = duplicate.category || 'vocabulary';
+          let catName = t(`dropdown_${catKey}`);
+          if (catName === `dropdown_${catKey}`) catName = catKey;
+      alert(t('alert_word_exists', { category: catName }));
+      return;
+    }
+
     await addCloudWord({
       userId: user.uid, german: finalGerman, hungarian: newHungarian.trim(), example: newExample.trim(), note: newCategory === 'false_friends' ? newNote.trim() : "", dateAdded: Date.now(), category: newCategory
     } as any);
@@ -523,13 +537,13 @@ export default function PublicContentCategory({ type }: { type: 'articles' | 'bo
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">{t('modal_category_label') || 'Category'}</label>
                 <select value={newCategory} onChange={(e) => setNewCategory(e.target.value)} className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50">
-                  <option value="vocabulary">{t('vocabulary_quiz') || 'Vocabulary quiz'}</option>
-                  <option value="reading">{t('vocabulary_to_read') || 'Vocabulary to read'}</option>
-                  <option value="phrases">{t('phrases_sentences_quiz') || 'Phrases and sentences quiz'}</option>
-                  <option value="articles">{t('articles_quiz')}</option>
-                  <option value="prepositions">{t('prepositions_quiz')}</option>
-                  <option value="adjectives">{t('adjectives_quiz') || 'Adjectives'}</option>
-                  <option value="false_friends">{t('false_friends') || 'False Friends'}</option>
+                  <option value="vocabulary">{t('dropdown_vocabulary') || 'Vocabulary quiz'}</option>
+                  <option value="reading">{t('dropdown_reading') || 'Vocabulary (to read)'}</option>
+                  <option value="articles">{t('dropdown_articles') || 'Articles quiz'}</option>
+                  <option value="phrases">{t('dropdown_phrases') || 'Phrases and sentences quiz'}</option>
+                  <option value="prepositions">{t('dropdown_prepositions') || 'Prepositions quiz'}</option>
+                  <option value="adjectives">{t('dropdown_adjectives') || 'Adjectives quiz'}</option>
+                  <option value="verbs">{t('dropdown_verbs') || 'Verbs quiz'}</option>
                 </select>
               </div>
 
@@ -545,6 +559,10 @@ export default function PublicContentCategory({ type }: { type: 'articles' | 'bo
                 germanLabel = t('modal_german_prep_label') || "German Preposition *";
                 germanPlaceholder = t('modal_german_prep_placeholder') || "e.g. mit";
                 hungarianPlaceholder = t('modal_hungarian_prep_placeholder') || "e.g. val/vel";
+              } else if (newCategory === 'verbs') {
+                germanLabel = t('modal_german_verb_label') || "German Verb *";
+                germanPlaceholder = t('modal_german_verb_placeholder') || "e.g. machen";
+                hungarianPlaceholder = t('modal_hungarian_verb_placeholder') || "e.g. csinálni";
               } else if (newCategory === 'false_friends') {
                 germanLabel = t('modal_german_ff_label') || "German False Friend *";
                 germanPlaceholder = t('modal_german_ff_placeholder') || "e.g. das Gift, die Gifte";

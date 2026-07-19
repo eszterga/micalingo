@@ -41,6 +41,19 @@ export default function TopicQuizzes() {
   const [activeTab, setActiveTab] = useState<'default' | 'custom'>(searchParams.get('tab') === 'custom' ? 'custom' : 'default');
 
   useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab === 'custom') setActiveTab('custom');
+    else if (tab === 'default') setActiveTab('default');
+  }, [searchParams]);
+
+  const handleTabChange = (tab: 'default' | 'custom') => {
+    setActiveTab(tab);
+    const newParams = new URLSearchParams(searchParams);
+    newParams.set('tab', tab);
+    navigate(`?${newParams.toString()}`, { replace: true });
+  };
+
+  useEffect(() => {
     const key = user ? `micalingo_scores_${user.uid}` : 'micalingo_guest_scores';
     setScores(JSON.parse(localStorage.getItem(key) || '{}'));
 
@@ -93,9 +106,9 @@ export default function TopicQuizzes() {
   } else if (topic === 'adjectives') {
     sourceData = getUniqueSourceData(publicAdjectives || [], 'adjectives');
     pageTitle = t('adjectives_quiz') || "Adjectives";
-  } else if (topic === 'reading') {
-    sourceData = getUniqueSourceData([], 'reading');
-    pageTitle = t('vocabulary_to_read') || "Vocabulary to read";
+  } else if (topic === 'verbs') {
+    sourceData = getUniqueSourceData([], 'verbs'); // No default public words for verbs exist yet 
+    pageTitle = t('verbs_quiz') || "Verbs";
   } else {
     return (
       <div className="relative min-h-[85vh] w-full flex flex-col pt-4 md:pt-8 pb-12">
@@ -133,13 +146,13 @@ export default function TopicQuizzes() {
 
       <div className="flex overflow-x-auto whitespace-nowrap border-b border-white/60">
         <button
-          onClick={() => setActiveTab('default')}
+          onClick={() => handleTabChange('default')}
           className={`py-3 px-6 font-bold text-sm border-b-2 transition-colors ${activeTab === 'default' ? 'border-blue-600 text-blue-700' : 'border-transparent text-blue-900/50 hover:text-blue-900/80'}`}
         >
           {t('open_library') || 'Open Library'}
         </button>
         <button
-          onClick={() => setActiveTab('custom')}
+          onClick={() => handleTabChange('custom')}
           className={`py-3 px-6 font-bold text-sm border-b-2 transition-colors ${activeTab === 'custom' ? 'border-blue-600 text-blue-700' : 'border-transparent text-blue-900/50 hover:text-blue-900/80'}`}
         >
           {t('personalized_space') || 'Private Space'}
@@ -257,6 +270,11 @@ export default function TopicQuizzes() {
                   {t('login_with_google')}
                 </button>
               </div>
+            </div>
+          ) : userVocabulary === undefined ? (
+            <div className="bg-white/70 backdrop-blur-xl p-12 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white text-center">
+              <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="text-blue-900/70 font-medium">{t('loading') || 'Loading...'}</p>
             </div>
           ) : customQuizzes.length === 0 ? (
             <div className="bg-white/70 backdrop-blur-xl p-12 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white text-center">

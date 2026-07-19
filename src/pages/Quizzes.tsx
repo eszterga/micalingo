@@ -102,6 +102,11 @@ export default function Quizzes() {
               <h3 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-xl mb-1">{t('adjectives_quiz') || 'Adjectives'}</h3>
               <p className="text-gray-600 font-medium text-sm">{t('adjectives_quiz_subtitle') || 'Practice German adjectives.'}</p>
             </Link>
+            <Link to="/quizzes/verbs" className="group relative flex flex-col items-start p-6 rounded-[2rem] bg-white/90 backdrop-blur-xl border border-blue-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500">
+              <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform duration-500">🏃</div>
+              <h3 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-xl mb-1">{t('verbs_quiz') || 'Verbs'}</h3>
+              <p className="text-gray-600 font-medium text-sm">{t('verbs_quiz_subtitle') || 'Practice German verbs and past forms.'}</p>
+            </Link>
           </div>
         </div>
       )}
@@ -156,6 +161,11 @@ export default function Quizzes() {
                   <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform duration-500">✨</div>
                   <h3 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-xl mb-1">{t('adjectives_quiz') || 'Adjectives'}</h3>
                   <p className="text-gray-600 font-medium text-sm">{t('custom_adjectives_desc') || 'Your personal adjectives.'}</p>
+                </Link>
+                <Link to="/quizzes/verbs?tab=custom" className="group relative flex flex-col items-start p-6 rounded-[2rem] bg-white/90 backdrop-blur-xl border border-blue-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500">
+                  <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform duration-500">🏃</div>
+                  <h3 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-xl mb-1">{t('verbs_quiz') || 'Verbs'}</h3>
+                  <p className="text-gray-600 font-medium text-sm">{t('custom_verbs_desc') || 'Your personal verbs.'}</p>
                 </Link>
               </div>
             </div>
