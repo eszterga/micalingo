@@ -34,7 +34,8 @@ export default function TopicQuizzes() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { t } = useI18n();
-  const publicDbWords = useCloudVocabulary("PUBLIC_LIBRARY") || [];
+  const publicDbWordsRaw = useCloudVocabulary("PUBLIC_LIBRARY");
+  const publicDbWords = publicDbWordsRaw || [];
   const userVocabulary = useCloudVocabulary(user?.uid);
   const [scores, setScores] = useState<Record<string, number>>({});
   const [progress, setProgress] = useState<Record<string, any>>({});
@@ -161,6 +162,12 @@ export default function TopicQuizzes() {
 
       {activeTab === 'default' && (
         <div className="bg-white/60 backdrop-blur-xl p-6 md:p-8 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white">
+          {publicDbWordsRaw === undefined ? (
+            <div className="flex flex-col items-center justify-center py-12 space-y-4">
+              <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+              <p className="text-blue-900/70 font-medium">{t('loading') || 'Loading...'}</p>
+            </div>
+          ) : (
           <div className="flex flex-col gap-4">
             {quizzes.map((quizId) => {
               const scoreKey = `${topic}_${quizId}`;
@@ -249,6 +256,7 @@ export default function TopicQuizzes() {
               );
             })}
           </div>
+          )}
         </div>
       )}
 

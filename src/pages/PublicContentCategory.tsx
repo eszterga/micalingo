@@ -66,15 +66,15 @@ export default function PublicContentCategory({ type }: { type: 'articles' | 'bo
         try {
           const q = query(collection(dbCloud, "bookmarks"), where("userId", "==", user.uid), where("categoryId", "==", categoryId));
           const snapshot = await getDocs(q);
-                  const bms: Record<string, string> = {};
-                  snapshot.forEach(doc => { bms[doc.data().itemId] = doc.data().snippet; });
-                  setBookmarks(bms);
-                } catch (e) {
-                  console.error("Error fetching bookmarks:", e);
-                }
-              }
-            };
-            fetchBookmarks();
+          const bms: Record<string, string> = {};
+          snapshot.forEach(doc => { bms[doc.data().itemId] = doc.data().snippet; });
+          setBookmarks(bms);
+        } catch (e) {
+          console.error("Error fetching bookmarks:", e);
+        }
+      }
+    };
+    fetchBookmarks();
   }, [categoryId, user?.uid]);
 
   const fetchItems = useCallback(async () => {

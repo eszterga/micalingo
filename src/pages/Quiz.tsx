@@ -40,7 +40,7 @@ const BackgroundBlobs = () => (
 );
 
 export default function Quiz() {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { t } = useI18n();
@@ -49,7 +49,8 @@ export default function Quiz() {
   const isCustom = searchParams.get("custom") === 'true';
   const isRedo = searchParams.get("redo") === 'true';
   const userVocabulary = useCloudVocabulary(user?.uid);
-  const publicDbWords = useCloudVocabulary("PUBLIC_LIBRARY") || [];
+  const publicDbWordsRaw = useCloudVocabulary("PUBLIC_LIBRARY");
+  const publicDbWords = publicDbWordsRaw || [];
 
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -182,9 +183,29 @@ export default function Quiz() {
   }, [topic, isCustom]);
 
   useEffect(() => {
+    const quizKey = isCustom ? `custom_${topic || 'general'}_${quizId}` : `${topic || 'custom'}_${quizId}`;
+
+    const isFinished = searchParams.get('finished') === 'true';
+    if (isFinished) {
+      const historyKey = user ? `micalingo_history_${user.uid}` : 'micalingo_guest_history';
+      const historyMap = JSON.parse(localStorage.getItem(historyKey) || '{}');
+      const savedHistory = historyMap[quizKey];
+      if (savedHistory) {
+        setQuestions(savedHistory.questions || []);
+        setScore(savedHistory.score || 0);
+        setUserAnswers(savedHistory.userAnswers || []);
+        setQuizState('finished');
+        return;
+      }
+    }
+
+    if (publicDbWordsRaw === undefined) {
+      setQuizState('loading');
+      return;
+    }
+
     const progressKey = user ? `micalingo_quiz_progress_${user.uid}` : 'micalingo_quiz_progress_guest';
     const progressMap = JSON.parse(localStorage.getItem(progressKey) || '{}');
-    const quizKey = isCustom ? `custom_${topic || 'general'}_${quizId}` : `${topic || 'custom'}_${quizId}`;
     const savedProgress = progressMap[quizKey];
 
     if (isRedo && savedProgress) {
@@ -271,7 +292,7 @@ export default function Quiz() {
       setQuizState('no_data');
       setQuestions([]);
     }
-  }, [topic, userVocabulary, quizId, isCustom, publicDbWords, isRedo, user?.uid, generateQuestions]);
+  }, [topic, userVocabulary, quizId, isCustom, publicDbWordsRaw, publicDbWords, isRedo, user?.uid, generateQuestions]);
 
   useEffect(() => {
     if (quizState === 'ongoing' && questions.length > 0) {
@@ -330,6 +351,10 @@ export default function Quiz() {
     }
 
     setQuizState('finished');
+    setSearchParams(prev => {
+      prev.set('finished', 'true');
+      return prev;
+    }, { replace: true });
   };
 
   const handleAnswer = (answer: string) => {
@@ -343,6 +368,7 @@ export default function Quiz() {
 
     const isCorrect = answer === questions[currentQuestionIndex].correctAnswer;
 
+    
     if (isCorrect) {
       setScore(s => s + 1);
 

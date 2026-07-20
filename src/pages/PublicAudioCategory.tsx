@@ -452,7 +452,7 @@ export default function PublicAudioCategory({ type }: { type: 'music' | 'podcast
                               <span className="bg-blue-100 p-1.5 rounded-lg text-xs shadow-sm">🎧</span> {item.source}
                             </p>
                           )}
-uld                          <div id={`article-content-${item.id}`} onMouseUp={(e) => handleMouseUp(e, item.id)} onTouchEnd={(e) => handleMouseUp(e, item.id)} className="prose prose-blue max-w-none text-gray-700 leading-relaxed space-y-4 mb-4" dangerouslySetInnerHTML={{ __html: item.content }}></div>
+                          <div id={`article-content-${item.id}`} onMouseUp={(e) => handleMouseUp(e, item.id)} onTouchEnd={(e) => handleMouseUp(e, item.id)} className="prose prose-blue max-w-none text-gray-700 leading-relaxed space-y-4 mb-4" dangerouslySetInnerHTML={{ __html: item.content }}></div>
                         {item.url && (
                           <a href={item.url} target="_blank" rel="noopener noreferrer" className="inline-block mt-4 text-blue-600 hover:text-blue-800 font-medium text-sm">
                             {t("original_source") || "Original source"} ↗
