@@ -4,9 +4,7 @@ import react from '@vitejs/plugin-react'
 export default defineConfig(({ command }) => {
   return {
     plugins: [react()],
-    // 💡 If we are running locally ('serve'), use './' so local files resolve.
-    // Otherwise, use '/micalingo/' for production builds.
-    base: command === 'serve' ? './' : '/micalingo/',
+    base: '/',
     server: {
       port: 8080,
       strictPort: true

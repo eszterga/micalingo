@@ -28,17 +28,23 @@ const BackgroundBlobs = () => (
 export default function ReadingMaterials() {
   const { t } = useI18n();
   const { user, isAdmin, adminMode } = useAuth();
-  const [openSections, setOpenSections] = useState({ interesting: false, articles: false, books: false });
+  const [openSections, setOpenSections] = useState<{ interesting: boolean; articles: boolean; books: boolean }>(() => {
+    try {
+      const saved = sessionStorage.getItem('micalingo_reading_sections');
+      return saved ? JSON.parse(saved) : { interesting: false, articles: false, books: false };
+    } catch (e) {
+      return { interesting: false, articles: false, books: false };
+    }
+  });
   const [isEditorOpen, setIsEditorOpen] = useState(false);
 
   const toggleSection = (section: 'interesting' | 'articles' | 'books') => {
-    setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
+    setOpenSections(prev => {
+      const next = { ...prev, [section]: !prev[section] };
+      sessionStorage.setItem('micalingo_reading_sections', JSON.stringify(next));
+      return next;
+    });
   };
-
-  const interestingCategories = [
-    { id: "fun-facts", icon: "🧠", title: t("fun_facts") || "Fun Facts", desc: t("fun_facts_desc") || "Interesting facts and trivia." },
-    { id: "idioms", icon: "💬", title: t("idioms") || "Idioms", desc: t("idioms_desc") || "Common sayings and idioms." }
-  ];
 
   const articlesCategories = [
     { id: "history", icon: "🏛️", title: t("history") || "History", desc: t("history_desc") || "Historical events and figures." },
@@ -56,7 +62,6 @@ export default function ReadingMaterials() {
   ];
 
   const allCategories: CategoryOption[] = [
-    ...interestingCategories.map(c => ({ id: c.id, title: `${t('interesting_section') || 'Interesting'} - ${c.title}`, collectionName: 'interesting' })),
     ...articlesCategories.map(c => ({ id: c.id, title: `${t('articles_section') || 'Articles'} - ${c.title}`, collectionName: 'articles' })),
     ...booksCategories.map(c => ({ id: c.id, title: `${t('books_section') || 'Books'} - ${c.title}`, collectionName: 'books' }))
   ];
@@ -111,7 +116,7 @@ export default function ReadingMaterials() {
         <div className="space-y-6 pt-4">
           <div className="bg-blue-50/80 backdrop-blur-sm border border-blue-200/60 text-blue-900 p-5 rounded-[1.5rem] shadow-sm text-sm font-medium mb-6 flex items-center gap-3">
             <span className="text-xl">🔖</span>
-            {user ? (t("bookmark_instructions_logged_in") || "Highlight any text while reading to save a bookmark, or save the highlighted text directly to your personal vocabulary database!") : (t("bookmark_instructions_guest") || "Highlight any text while reading to save a bookmark, or save the highlighted text directly to your personal vocabulary database! (This feature is exclusively available for logged-in users. Log in to use it!)")}
+            {user ? (t("bookmark_instructions_logged_in") || "Highlight any text while reading to save a bookmark, or save the highlighted text directly to your personal vocabulary database or into your quizzes!") : (t("bookmark_instructions_guest") || "Highlight any text while reading to save a bookmark, or save the highlighted text directly to your personal vocabulary database or into your quizzes! (This feature is exclusively available for logged-in users. Log in to use it!)")}
           </div>
 
           {/* Interesting Section */}
@@ -135,15 +140,13 @@ export default function ReadingMaterials() {
                       <p className="text-gray-600 font-medium text-sm leading-relaxed">{t("false_friends_desc")}</p>
                     </div>
                   </Link>
-                  {interestingCategories.map(cat => (
-                    <Link key={cat.id} to={`/learning-materials/reading/interesting/${cat.id}`} className="group relative flex flex-col items-start justify-between p-6 md:p-8 rounded-[2rem] bg-white/90 backdrop-blur-xl border border-blue-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500 overflow-hidden">
-                      <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center text-3xl mb-10 group-hover:scale-110 transition-transform duration-500 border border-gray-100">{cat.icon}</div>
-                      <div className="relative z-10 w-full">
-                        <h3 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-2xl drop-shadow-sm mb-1">{cat.title}</h3>
-                        <p className="text-gray-600 font-medium text-sm leading-relaxed">{cat.desc}</p>
-                      </div>
-                    </Link>
-                  ))}
+                  <Link to="/learning-materials/reading/idioms" className="group relative flex flex-col items-start justify-between p-6 md:p-8 rounded-[2rem] bg-white/90 backdrop-blur-xl border border-blue-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500 overflow-hidden">
+                    <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center text-3xl mb-10 group-hover:scale-110 transition-transform duration-500 border border-gray-100">💬</div>
+                    <div className="relative z-10 w-full">
+                      <h3 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-2xl drop-shadow-sm mb-1">{t("idioms") || "Idioms"}</h3>
+                      <p className="text-gray-600 font-medium text-sm leading-relaxed">{t("idioms_desc") || "Common sayings and idioms."}</p>
+                    </div>
+                  </Link>
                 </div>
               </div>
             </div>

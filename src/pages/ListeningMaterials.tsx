@@ -28,11 +28,22 @@ const BackgroundBlobs = () => (
 export default function ListeningMaterials() {
   const { t } = useI18n();
   const { user, isAdmin, adminMode } = useAuth();
-  const [openSections, setOpenSections] = useState({ music: false, podcasts: false, audiobooks: false });
+  const [openSections, setOpenSections] = useState<{ music: boolean; podcasts: boolean; audiobooks: boolean }>(() => {
+    try {
+      const saved = sessionStorage.getItem('micalingo_listening_sections');
+      return saved ? JSON.parse(saved) : { music: false, podcasts: false, audiobooks: false };
+    } catch (e) {
+      return { music: false, podcasts: false, audiobooks: false };
+    }
+  });
   const [isEditorOpen, setIsEditorOpen] = useState(false);
 
   const toggleSection = (section: 'music' | 'podcasts' | 'audiobooks') => {
-    setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
+    setOpenSections(prev => {
+      const next = { ...prev, [section]: !prev[section] };
+      sessionStorage.setItem('micalingo_listening_sections', JSON.stringify(next));
+      return next;
+    });
   };
 
   const musicCategories = [
@@ -110,7 +121,7 @@ export default function ListeningMaterials() {
         <div className="space-y-6 pt-4">
           <div className="bg-blue-50/80 backdrop-blur-sm border border-blue-200/60 text-blue-900 p-5 rounded-[1.5rem] shadow-sm text-sm font-medium mb-6 flex items-center gap-3">
             <span className="text-xl">🔖</span>
-            {user ? (t("bookmark_instructions_logged_in") || "Highlight any text while reading to save a bookmark, or save the highlighted text directly to your personal vocabulary database!") : (t("bookmark_instructions_guest") || "Highlight any text while reading to save a bookmark, or save the highlighted text directly to your personal vocabulary database! (This feature is exclusively available for logged-in users. Log in to use it!)")}
+            {user ? (t("bookmark_instructions_logged_in") || "Highlight any text while reading to save a bookmark, or save the highlighted text directly to your personal vocabulary database or into your quizzes!") : (t("bookmark_instructions_guest") || "Highlight any text while reading to save a bookmark, or save the highlighted text directly to your personal vocabulary database or into your quizzes! (This feature is exclusively available for logged-in users. Log in to use it!)")}
           </div>
 
           {/* Music Section */}

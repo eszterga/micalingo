@@ -61,9 +61,10 @@ export default function Layout() {
               </svg>
             </button>
           )}
-          <h1 className="text-xl font-bold tracking-wider">
-            <Link to="/">MicaLingo</Link>
-          </h1>
+          <Link to="/" className="flex items-center gap-2">
+            <img src="/logo.png" alt="MicaLingo Logo" className="w-7 h-7 object-contain" />
+            <h1 className="text-xl font-bold tracking-wider">MicaLingo</h1>
+          </Link>
         </div>
         <div className="flex items-center gap-3">
           <div className="relative">
@@ -116,9 +117,12 @@ export default function Layout() {
       {isMobileMenuOpen && (
         <div className="md:hidden fixed inset-0 z-50 flex">
           <div className="fixed inset-0 bg-black bg-opacity-50" onClick={() => setIsMobileMenuOpen(false)} />
-          <div className="relative flex flex-col w-64 max-w-xs bg-blue-900 text-blue-100 h-full shadow-xl">
+          <div className="relative flex flex-col w-64 max-w-xs bg-blue-900 text-blue-100 h-full shadow-xl animate-fade-in-left">
             <div className="p-6 flex items-center justify-between">
-              <h1 className="text-xl font-bold text-white tracking-wider">MicaLingo</h1>
+              <div className="flex items-center gap-2">
+                <img src="/logo.png" alt="MicaLingo Logo" className="w-7 h-7 object-contain bg-white/90 rounded-full p-0.5" />
+                <h1 className="text-xl font-bold text-white tracking-wider">MicaLingo</h1>
+              </div>
               <button onClick={() => setIsMobileMenuOpen(false)} className="text-blue-300 hover:text-white">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
@@ -144,9 +148,10 @@ export default function Layout() {
       <div className="flex-1 flex flex-col h-screen overflow-hidden">
         {/* Desktop Header */}
         <header className="hidden md:flex justify-between items-center px-8 py-4 bg-white/30 backdrop-blur-lg border-b border-white/40 shadow-sm z-50 relative">
-          <h1 className="text-2xl font-extrabold text-blue-900 tracking-wider hover:scale-105 transition-transform">
-            <Link to="/">MicaLingo</Link>
-          </h1>
+          <Link to="/" className="flex items-center gap-3 hover:scale-105 transition-transform">
+            <img src="/logo.png" alt="MicaLingo Logo" className="w-9 h-9 object-contain drop-shadow-sm" />
+            <h1 className="text-2xl font-extrabold text-blue-900 tracking-wider">MicaLingo</h1>
+          </Link>
           <div className="flex items-center gap-6">
             <div className="relative">
               <button onClick={() => setIsDesktopLangMenuOpen(!isDesktopLangMenuOpen)} className="flex items-center gap-2 p-2 text-gray-700 hover:text-gray-900 transition-colors rounded-lg hover:bg-white/60 font-medium" title={t('language_preferences') || 'Language Preferences'}>

@@ -148,7 +148,7 @@ export default function Import() {
           }
           // Store article and noun separately for the preview, but also combine them for the quiz engine
           items.push({ article: p0, noun: p1, hungarian: p2, example: p3, german: `${p0} ${p1}`.trim() });
-        } else if (destination === 'false_friends') {
+        } else if (destination === 'false_friends' || destination === 'idioms') {
           items.push({ german: p0, hungarian: p1, example: p2, note: p3 });
         } else if (destination === 'verbs') {
           items.push({ german: p0, hungarian: p1, example: p2 });
@@ -453,7 +453,7 @@ export default function Import() {
     XLSX.writeFile(workbook, outName);
   };
 
-  const handleDownloadTemplate = (type: 'standard' | 'articles' | 'adjectives' | 'verbs') => {
+  const handleDownloadTemplate = (type: 'standard' | 'articles' | 'adjectives' | 'verbs' | 'false_friends' | 'idioms') => {
     let templateData: object[];
 
     if (type === 'articles') {
@@ -497,6 +497,15 @@ export default function Import() {
           [t('template_example_header') || 'Example (or hint)']: 'ging, ist gegangen'
         }
       ];
+    } else if (type === 'false_friends' || type === 'idioms') {
+      templateData = [
+        {
+          [t('template_german_header') || 'German']: type === 'idioms' ? 'Ich verstehe nur Bahnhof' : 'das Gift, die Gifte',
+          [t('template_hungarian_header') || 'Hungarian']: type === 'idioms' ? 'Nekem ez kínai' : 'a méreg',
+          [t('template_example_header') || 'Example']: type === 'idioms' ? 'Als er über Quantenphysik sprach, verstand ich nur Bahnhof.' : 'Dieses Tier produziert ein starkes Gift.',
+          [t('note') || 'Note']: type === 'idioms' ? 'Literal meaning: I only understand train station.' : 'False friend: gift != ajándék'
+        }
+      ];
     } else {
       templateData = [
         {
@@ -524,18 +533,22 @@ export default function Import() {
         ? [{ wch: 15 }, { wch: 25 }, { wch: 30 }, { wch: 50 }]
         : type === 'adjectives'
         ? [{ wch: 25 }, { wch: 25 }, { wch: 40 }]
+        : type === 'false_friends' || type === 'idioms'
+        ? [{ wch: 30 }, { wch: 30 }, { wch: 50 }, { wch: 40 }]
         : [{ wch: 30 }, { wch: 30 }, { wch: 50 }];
+        
+    const sheetName = type === 'articles' ? 'Articles' : type === 'adjectives' ? 'Adjectives' : type === 'verbs' ? 'Verbs' : type === 'false_friends' ? 'False_Friends' : type === 'idioms' ? 'Idioms' : 'Vocabulary';
 
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(
       workbook,
       worksheet,
-      `${type === 'articles' ? 'Articles' : type === 'adjectives' ? 'Adjectives' : type === 'verbs' ? 'Verbs' : 'Vocabulary'}_Template`
+      `${sheetName}_Template`
     );
 
     XLSX.writeFile(
       workbook,
-      `MicaLingo_${type === 'articles' ? 'Articles' : type === 'adjectives' ? 'Adjectives' : type === 'verbs' ? 'Verbs' : 'Import'}_Template.xlsx`
+      `MicaLingo_${sheetName}_Template.xlsx`
     );
   };
 
@@ -684,6 +697,24 @@ export default function Import() {
               </svg>
               {t('verbs_template') || 'Verbs Template'}
             </button>
+            <button
+              onClick={() => handleDownloadTemplate('false_friends')}
+              className="whitespace-nowrap px-5 py-2.5 bg-white text-blue-600 border border-blue-200 font-bold rounded-xl hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 shadow-sm w-full sm:w-auto"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M8 12l4 4m0 0l4-4m-4 4V4" />
+              </svg>
+              {t('false_friends') || 'False Friends Template'}
+            </button>
+            <button
+              onClick={() => handleDownloadTemplate('idioms')}
+              className="whitespace-nowrap px-5 py-2.5 bg-white text-blue-600 border border-blue-200 font-bold rounded-xl hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 shadow-sm w-full sm:w-auto"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M8 12l4 4m0 0l4-4m-4 4V4" />
+              </svg>
+              {t('idioms') || 'Idioms Template'}
+            </button>
           </div>
         </div>
         </div>
@@ -716,7 +747,7 @@ export default function Import() {
 
           {previewItems.length > 0 ? (
             <div className="bg-white border border-blue-50 rounded-2xl shadow-sm max-h-[400px] overflow-auto">
-              <table className="w-full text-left border-collapse">
+              <table className="w-full text-left border-collapse table-fixed">
                 <thead className="bg-blue-50/50 border-b border-blue-100 sticky top-0 backdrop-blur-md z-10">
                   <tr>
                     {destination === 'articles' ? (
@@ -726,7 +757,7 @@ export default function Import() {
                         <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('hungarian')} <span className="text-xs font-normal text-gray-500 block">{t('column_c')}</span></th>
                         <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('example')} <span className="text-xs font-normal text-gray-500 block">{t('column_d')}</span></th>
                       </>
-                    ) : destination === 'false_friends' ? (
+                    ) : destination === 'false_friends' || destination === 'idioms' ? (
                       <>
                         <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('german')} <span className="text-xs font-normal text-gray-500 block">{t('column_a')}</span></th>
                         <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('hungarian')} <span className="text-xs font-normal text-gray-500 block">{t('column_b')}</span></th>
@@ -765,7 +796,7 @@ export default function Import() {
                           <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleItemChange(idx, 'hungarian', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
                           <td className="p-1 sm:p-2 align-top"><textarea rows={2} value={item.example || ''} onChange={(e) => handleItemChange(idx, 'example', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
                         </>
-                      ) : destination === 'false_friends' ? (
+                      ) : destination === 'false_friends' || destination === 'idioms' ? (
                         <>
                           <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.german || ''} onChange={(e) => handleItemChange(idx, 'german', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
                           <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleItemChange(idx, 'hungarian', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
@@ -825,6 +856,8 @@ export default function Import() {
                   <option value="prepositions">{t('dropdown_prepositions') || 'Prepositions quiz'}</option>
                   <option value="adjectives">{t('dropdown_adjectives') || 'Adjectives quiz'}</option>
                   <option value="verbs">{t('dropdown_verbs') || 'Verbs quiz'}</option>
+                  <option value="false_friends">{t('false_friends') || 'False Friends'}</option>
+                  <option value="idioms">{t('idioms') || 'Idioms'}</option>
                 </select>
               </div>
             </div>
@@ -913,7 +946,7 @@ export default function Import() {
               <tbody className="divide-y divide-gray-100">
                 {filteredImportedFiles.map((file: ImportedFilePreview) => (
                   <tr key={file.fileName} className="hover:bg-gray-50 transition-colors">
-                    <td className="p-2 sm:p-4 text-center">
+                    <td className="p-3 sm:p-4 text-center">
                       <input
                         type="checkbox"
                         checked={selectedFiles.has(file.fileName)}
@@ -921,14 +954,14 @@ export default function Import() {
                         className="w-5 h-5 text-blue-600 rounded border-blue-200 cursor-pointer"
                       />
                     </td>
-                    <td className="p-3 sm:p-5 font-bold text-blue-950 break-words">{file.fileName}</td>
+                    <td className="p-3 sm:p-5 font-bold text-blue-950 break-all">{file.fileName}</td>
                     <td className="p-3 sm:p-5 text-gray-600 uppercase text-sm font-bold">{file.fileType}</td>
                     <td className="p-3 sm:p-5">
                       <span className="px-2.5 py-1 text-xs font-bold rounded-full bg-blue-100 text-blue-800 uppercase tracking-wider">{file.destination}</span>
                     </td>
                     <td className="p-3 sm:p-5 text-gray-700 font-medium">{file.itemCount}</td>
                     <td className="p-3 sm:p-5 text-right">
-                      <div className="flex items-center justify-end gap-1 sm:gap-2">
+                      <div className="flex flex-wrap items-center justify-end gap-1 sm:gap-2">
                         <button
                           onClick={() => handleEditFile(file)}
                           disabled={saving}
@@ -984,7 +1017,7 @@ export default function Import() {
               {editFileItems.length === 0 ? (
                 <p className="text-gray-500 italic text-center py-4">{t("no_items_left") || "No items left. Save to delete all."}</p>
               ) : (
-                <table className="w-full text-left border-collapse border border-blue-50 rounded-xl min-w-[800px] lg:min-w-full shadow-sm">
+                <table className="w-full text-left border-collapse table-fixed border border-blue-50 rounded-xl shadow-sm">
                   <thead className="bg-blue-50/80 border-b border-blue-100 sticky top-0 backdrop-blur z-10">
                     <tr>
                       {editingFileCategory === 'articles' ? (
@@ -994,7 +1027,7 @@ export default function Import() {
                           <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('hungarian')}</th>
                           <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('example')}</th>
                         </>
-                      ) : editingFileCategory === 'false_friends' ? (
+                      ) : editingFileCategory === 'false_friends' || editingFileCategory === 'idioms' ? (
                         <>
                           <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('german')}</th>
                           <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('hungarian')}</th>
@@ -1041,7 +1074,7 @@ export default function Import() {
                               <textarea rows={2} value={item.example || ''} onChange={(e) => handleEditItemChange(idx, 'example', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" />
                             </td>
                           </>
-                        ) : editingFileCategory === 'false_friends' ? (
+                        ) : editingFileCategory === 'false_friends' || editingFileCategory === 'idioms' ? (
                           <>
                             <td className="p-1 sm:p-2 border-r border-gray-100 align-top">
                               <textarea rows={2} value={item.german || ''} onChange={(e) => handleEditItemChange(idx, 'german', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" />

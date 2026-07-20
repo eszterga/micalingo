@@ -25,14 +25,14 @@ const BackgroundBlobs = () => (
   </>
 );
 
-export default function PublicContentCategory({ type }: { type: 'articles' | 'books' | 'interesting' }) {
+export default function GrammarCategory() {
   const { categoryId } = useParams<{ categoryId: string }>();
   const { t } = useI18n();
   const { user, isAdmin, adminMode } = useAuth();
   const userVocabulary = useCloudVocabulary(user?.uid) || [];
   
-  const categoryName = t((categoryId || '') as any) || categoryId;
-  const collectionName = type === 'articles' ? 'articles' : type === 'books' ? 'books' : 'interesting';
+  const categoryName = t(`grammar_${categoryId}` as any) || categoryId?.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || "Grammar";
+  const collectionName = 'grammar_materials';
   
   const [items, setItems] = useState<any[]>([]);
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
@@ -108,7 +108,7 @@ export default function PublicContentCategory({ type }: { type: 'articles' | 'bo
   }, []);
 
   const handleMouseUp = (e: React.MouseEvent | React.TouchEvent, itemId: string) => {
-    if (!user) return; // Only allow highlighting features for logged-in users
+    if (!user) return;
     setTimeout(() => {
       const selection = window.getSelection();
       const text = selection?.toString().trim();
@@ -226,13 +226,13 @@ export default function PublicContentCategory({ type }: { type: 'articles' | 'bo
               .map(t => `<p>${t}</p>`)
               .join("");
           }
-          const finalContent = content || "<p>Could not automatically extract clean content (site might be blocking). Please paste manually.</p>";
+          const finalContent = content || "<p>Could not automatically extract clean content. Please paste manually.</p>";
           setEditData(prev => ({ ...prev, title, content: finalContent }));
           if (contentRef.current) contentRef.current.innerHTML = finalContent;
         }
       } catch (e) {
         console.error("Error fetching content:", e);
-        alert(`Failed to fetch ${type === 'articles' ? 'article' : 'book'}. Please check the URL or paste manually.`);
+        alert(`Failed to fetch grammar rule. Please check the URL or paste manually.`);
       } finally {
         setIsFetching(false);
       }
@@ -260,7 +260,7 @@ export default function PublicContentCategory({ type }: { type: 'articles' | 'bo
         await fetchItems();
       } catch (e) {
         console.error("Error saving item:", e);
-        alert(`Failed to save ${type === 'articles' ? 'article' : 'book'}. Make sure you are logged in.`);
+        alert(`Failed to save grammar rule. Make sure you are logged in.`);
       }
     }
   };
@@ -319,7 +319,7 @@ export default function PublicContentCategory({ type }: { type: 'articles' | 'bo
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm(t((type === 'articles' ? "confirm_delete_article" : type === 'books' ? "confirm_delete_book" : "confirm_delete_interesting") as any) || "Are you sure you want to delete this item?")) {
+    if (window.confirm(t("confirm_delete_grammar") || "Are you sure you want to delete this grammar rule?")) {
       try {
         await deleteDoc(doc(dbCloud, collectionName, id));
         setItems(prev => prev.filter(i => i.id !== id));
@@ -366,7 +366,7 @@ export default function PublicContentCategory({ type }: { type: 'articles' | 'bo
       <BackgroundBlobs />
       <div className="relative z-10 w-full max-w-7xl mx-auto space-y-8 px-4 md:px-8">
         <div className="flex items-center gap-4">
-          <Link to="/learning-materials/reading" className="bg-white/70 backdrop-blur-md border border-white text-gray-700 hover:bg-white font-bold px-5 py-2.5 rounded-xl shadow-sm transition-all flex items-center gap-2">
+          <Link to="/grammar" className="bg-white/70 backdrop-blur-md border border-white text-gray-700 hover:bg-white font-bold px-5 py-2.5 rounded-xl shadow-sm transition-all flex items-center gap-2">
             {t("back_button")}
           </Link>
           <div>
@@ -374,7 +374,7 @@ export default function PublicContentCategory({ type }: { type: 'articles' | 'bo
               {categoryName}
             </h1>
             <p className="text-lg text-blue-900/70 font-medium mt-1">
-              {t((type === 'articles' ? "articles_section" : type === 'books' ? "books_section" : "interesting_section") as any)}
+              {t("grammar_page_subtitle") || "Grammar rules and explanations"}
             </p>
           </div>
         </div>
@@ -387,23 +387,23 @@ export default function PublicContentCategory({ type }: { type: 'articles' | 'bo
         {isAdmin && adminMode && (
           <div className="flex justify-end">
             <button onClick={openAddModal} className="w-full sm:w-auto justify-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-xl shadow-sm transition-colors flex items-center gap-2">
-              <span className="text-xl leading-none">+</span> {t((type === 'articles' ? "add_article" : type === 'books' ? "add_book" : "add_interesting") as any)}
+              <span className="text-xl leading-none">+</span> {t("add_grammar_rule") || "Add Grammar Rule"}
             </button>
           </div>
         )}
 
         {items.length > 0 ? (
           <div className="space-y-8">
-            {items.map((item, index) => {
+            {items.map((item) => {
               const isExpanded = expandedItems.has(item.id);
               return (
                 <div key={item.id} className="relative bg-white/80 backdrop-blur-xl p-8 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white transition-all duration-300">
                   {isAdmin && adminMode && (
                     <div className="absolute top-4 right-4 md:top-8 md:right-8 flex items-center gap-1.5 md:gap-2 z-10">
-                      <button onClick={() => openEditModal(item)} className="p-2.5 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 hover:text-blue-700 transition-colors shadow-sm" title={t((type === 'articles' ? "edit_article" : type === 'books' ? "edit_book" : "edit_interesting") as any)}>
+                      <button onClick={() => openEditModal(item)} className="p-2.5 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 hover:text-blue-700 transition-colors shadow-sm" title={t("edit_grammar_rule") || "Edit Rule"}>
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                       </button>
-                      <button onClick={() => handleDelete(item.id)} className="p-2.5 bg-red-50 text-red-500 rounded-xl hover:bg-red-100 hover:text-red-600 transition-colors shadow-sm" title={t((type === 'articles' ? "delete_article" : type === 'books' ? "delete_book" : "delete_interesting") as any)}>
+                      <button onClick={() => handleDelete(item.id)} className="p-2.5 bg-red-50 text-red-500 rounded-xl hover:bg-red-100 hover:text-red-600 transition-colors shadow-sm" title={t("delete_grammar_rule") || "Delete Rule"}>
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                       </button>
                     </div>
@@ -433,7 +433,7 @@ export default function PublicContentCategory({ type }: { type: 'articles' | 'bo
                       <div className="pt-2 border-t border-blue-50/50 mt-2">
                         {item.source && (
                           <p className="text-sm font-bold text-blue-600 mt-4 mb-6 flex items-center gap-2">
-                            <span className="bg-blue-100 p-1.5 rounded-lg text-xs shadow-sm">{type === 'articles' ? '📰' : '📚'}</span> {item.source}
+                            <span className="bg-blue-100 p-1.5 rounded-lg text-xs shadow-sm">✍️</span> {item.source}
                           </p>
                         )}
                           <div id={`article-content-${item.id}`} onMouseUp={(e) => handleMouseUp(e, item.id)} onTouchEnd={(e) => handleMouseUp(e, item.id)} className="prose prose-blue max-w-none text-gray-700 leading-relaxed space-y-4 mb-4" dangerouslySetInnerHTML={{ __html: item.content }}></div>
@@ -462,7 +462,7 @@ export default function PublicContentCategory({ type }: { type: 'articles' | 'bo
           <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col animate-fade-in-up">
             <div className="p-6 md:p-8 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
               <h2 className="text-2xl font-extrabold text-blue-950">
-                {editingId ? t((type === 'articles' ? "edit_article" : type === 'books' ? "edit_book" : "edit_interesting") as any) : t((type === 'articles' ? "add_article" : type === 'books' ? "add_book" : "add_interesting") as any)}
+                {editingId ? t("edit_grammar_rule") || "Edit Grammar Rule" : t("add_grammar_rule") || "Add Grammar Rule"}
               </h2>
               <button onClick={closeModal} className="text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-full hover:bg-gray-200">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -470,25 +470,25 @@ export default function PublicContentCategory({ type }: { type: 'articles' | 'bo
             </div>
             <div className="p-6 md:p-8 overflow-y-auto space-y-6">
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">{t((type === 'articles' ? "article_url" : type === 'books' ? "book_url" : "interesting_url") as any)}</label>
+                <label className="block text-sm font-bold text-gray-700 mb-2">{t("url_optional") || "URL (Optional)"}</label>
                 <div className="flex flex-col sm:flex-row gap-3">
                   <input type="url" value={editData.url} onChange={e => setEditData({ ...editData, url: e.target.value })} placeholder="https://..." className="flex-1 w-full rounded-xl border-gray-200 border p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" />
                   <button onClick={handleFetchContent} disabled={!editData.url || isFetching} className="w-full sm:w-auto bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 px-6 rounded-xl transition-colors disabled:opacity-50 whitespace-nowrap">
-                    {isFetching ? "..." : t((type === 'articles' ? "fetch_article" : type === 'books' ? "fetch_book" : "fetch_interesting") as any) || "Fetch Content"}
+                    {isFetching ? "..." : t("fetch_content") || "Fetch Content"}
                   </button>
                 </div>
                 <p className="text-xs text-gray-500 mt-2">{t("fetch_note") || "Note: Fetching works via a proxy. Complex sites might block extraction. You can always paste content manually."}</p>
               </div>
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">{t((type === 'articles' ? "article_title" : type === 'books' ? "book_title" : "interesting_title") as any)}</label>
+                <label className="block text-sm font-bold text-gray-700 mb-2">{t("grammar_rule_title") || "Rule Title"}</label>
                 <input type="text" value={editData.title} onChange={e => setEditData({ ...editData, title: e.target.value })} className="w-full rounded-xl border-gray-200 border p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" />
               </div>
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">{t((type === 'articles' ? "article_source" : type === 'books' ? "book_source" : "interesting_source") as any)}</label>
-                <input type="text" value={editData.source} onChange={e => setEditData({ ...editData, source: e.target.value })} placeholder={t((type === 'articles' ? "article_source_placeholder" : type === 'books' ? "book_source_placeholder" : "interesting_source_placeholder") as any)} className="w-full rounded-xl border-gray-200 border p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" />
+                <label className="block text-sm font-bold text-gray-700 mb-2">{t("source_author") || "Source / Author"}</label>
+                <input type="text" value={editData.source} onChange={e => setEditData({ ...editData, source: e.target.value })} placeholder="Original source or author..." className="w-full rounded-xl border-gray-200 border p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" />
               </div>
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">{t((type === 'articles' ? "article_content" : type === 'books' ? "book_content" : "interesting_content") as any)}</label>
+                <label className="block text-sm font-bold text-gray-700 mb-2">{t("grammar_rule_content") || "Grammar Explanation"}</label>
                 <div className="w-full rounded-xl border-gray-200 border focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 transition-all overflow-hidden flex flex-col bg-white">
                   <div className="bg-gray-50 border-b border-gray-200 p-2 flex gap-2 flex-wrap">
                     <button type="button" onClick={e => { e.preventDefault(); document.execCommand("bold", false); }} className="px-3 py-1 bg-white border border-gray-300 rounded font-bold hover:bg-gray-200 text-sm transition-colors shadow-sm">B</button>
@@ -508,7 +508,7 @@ export default function PublicContentCategory({ type }: { type: 'articles' | 'bo
             <div className="p-6 md:p-8 border-t border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row justify-end gap-3">
               <button onClick={closeModal} className="w-full sm:w-auto px-6 py-3 font-bold text-gray-600 hover:bg-gray-200 rounded-xl transition-colors">{t("cancel")}</button>
               <button onClick={handleSave} disabled={!editData.title || !editData.content} className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl shadow-sm transition-colors disabled:opacity-50">
-                {editingId ? t("modal_save_changes") : t((type === 'articles' ? "save_article" : type === 'books' ? "save_book" : "save_interesting") as any)}
+                {editingId ? t("modal_save_changes") : t("save_button") || "Save Content"}
               </button>
             </div>
           </div>

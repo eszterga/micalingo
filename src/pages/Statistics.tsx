@@ -237,7 +237,7 @@ export default function Statistics() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse border-t border-blue-50/50 min-w-[600px]">
+            <table className="w-full text-left border-collapse table-fixed border-t border-blue-50/50">
               <thead className="bg-blue-50/30">
                 <tr>
                   <th className="p-3 sm:p-5 w-10 text-center">
@@ -288,7 +288,7 @@ export default function Statistics() {
                           className="w-5 h-5 text-blue-600 rounded border-blue-200 focus:ring-blue-500 cursor-pointer"
                         />
                       </td>
-                      <td className="p-3 sm:p-5 font-bold text-blue-950 whitespace-nowrap">
+                      <td className="p-3 sm:p-5 font-bold text-blue-950 break-words">
                         {formatQuizName(quizKey)}
                       </td>
                       <td className="p-3 sm:p-5">
@@ -309,7 +309,7 @@ export default function Statistics() {
                         </span>
                       </td>
                       <td className="p-3 sm:p-5 text-right">
-                        <div className="flex justify-end gap-1 opacity-100 transition-opacity">
+                        <div className="flex flex-wrap justify-end gap-1 opacity-100 transition-opacity">
                           <button
                             onClick={() => downloadResults(quizKey, data)}
                             className="text-blue-600 hover:text-blue-800 text-sm font-medium p-2 hover:bg-blue-50 rounded-lg transition-colors"

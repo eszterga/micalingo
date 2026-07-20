@@ -19,9 +19,11 @@ import LearningMaterials from "./pages/LearningMaterials";
 import ReadingMaterials from "./pages/ReadingMaterials";
 import ListeningMaterials from "./pages/ListeningMaterials";
 import FalseFriends from "./pages/FalseFriends";
+import Idioms from "./pages/Idioms";
 import CreateQuiz from "./pages/CreateQuiz";
 import PublicContentCategory from "./pages/PublicContentCategory";
 import PublicAudioCategory from "./pages/PublicAudioCategory";
+import GrammarCategory from "./pages/GrammarCategory";
 import PrivateMaterials from "./pages/PrivateMaterials";
 import AdminPrompt from "./components/AdminPrompt";
 
@@ -41,6 +43,7 @@ export default function App() {
             <Route path="/quiz" element={<Quiz />} />
             <Route path="/results" element={<Results />} />
             <Route path="/grammar" element={<Grammar />} />
+            <Route path="/grammar/:categoryId" element={<GrammarCategory />} />
             <Route path="/quizzes" element={<Quizzes />} />
             <Route path="/quizzes/:topic" element={<TopicQuizzes />} />
             <Route path="/statistics" element={<Statistics />} />
@@ -49,6 +52,7 @@ export default function App() {
             <Route path="/learning-materials" element={<LearningMaterials />} />
             <Route path="/learning-materials/reading" element={<ReadingMaterials />} />
             <Route path="/learning-materials/reading/false-friends" element={<FalseFriends />} />
+            <Route path="/learning-materials/reading/idioms" element={<Idioms />} />
             <Route path="/learning-materials/reading/articles/:categoryId" element={<PublicContentCategory type="articles" />} />
             <Route path="/learning-materials/reading/interesting/:categoryId" element={<PublicContentCategory type="interesting" />} />
             <Route path="/learning-materials/reading/books/:categoryId" element={<PublicContentCategory type="books" />} />

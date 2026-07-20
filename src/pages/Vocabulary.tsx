@@ -529,12 +529,12 @@ export default function Vocabulary() {
 
                 {isOpen && (
                   <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse border-t border-blue-50/50">
+                  <table className="w-full text-left border-collapse table-fixed border-t border-blue-50/50">
                     <thead className="bg-blue-50/30">
                       <tr>
-                        <th className="p-3 sm:p-5 font-bold text-sm text-blue-900/60 w-1/3 uppercase tracking-wider">{t('german')}</th>
-                        <th className="p-3 sm:p-5 font-bold text-sm text-blue-900/60 w-1/3 uppercase tracking-wider">{t('hungarian')}</th>
-                        <th className="p-3 sm:p-5 font-bold text-sm text-blue-900/60 w-1/3 uppercase tracking-wider">{t('example')}</th>
+                        <th className="p-3 sm:p-5 font-bold text-sm text-blue-900/60 uppercase tracking-wider">{t('german')}</th>
+                        <th className="p-3 sm:p-5 font-bold text-sm text-blue-900/60 uppercase tracking-wider">{t('hungarian')}</th>
+                        <th className="p-3 sm:p-5 font-bold text-sm text-blue-900/60 uppercase tracking-wider">{t('example')}</th>
                         {adminMode && <th className="p-2 sm:p-4 w-16 sm:w-24"></th>}
                         {adminMode && <th className="p-2 sm:p-4 w-10 sm:w-12"></th>}
                       </tr>
@@ -542,12 +542,12 @@ export default function Vocabulary() {
                     <tbody className="divide-y divide-blue-50/50">
                       {wordsInGroup.map((word, idx) => (
                         <tr key={word.id || `static_${word.german}_${idx}`} className="hover:bg-white/60 transition-colors group">
-                          <td className="p-3 sm:p-5 font-bold text-blue-950 w-1/3 break-words">{word.german}</td>
-                          <td className="p-3 sm:p-5 text-gray-700 w-1/3 break-words">{word.hungarian}</td>
-                          <td className="p-3 sm:p-5 text-gray-500 text-sm italic w-1/3 break-words">{word.example}</td>
+                          <td className="p-3 sm:p-5 font-bold text-blue-950 break-all">{word.german}</td>
+                          <td className="p-3 sm:p-5 text-gray-700 break-all">{word.hungarian}</td>
+                          <td className="p-3 sm:p-5 text-gray-500 text-sm italic break-all">{word.example}</td>
                           {adminMode && (
                             <td className="p-2 sm:p-4 text-center w-16 sm:w-24">
-                              <div className="flex justify-center items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <div className="flex justify-center items-center gap-2 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
                                 <button
                                   onClick={() => handleEditClick(word)}
                                   className="text-blue-500 hover:text-blue-700 p-2 rounded-lg hover:bg-blue-50 transition-colors"
@@ -660,11 +660,11 @@ export default function Vocabulary() {
 
                   {isOpen && (
                     <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse border-t border-blue-50/50">
+                    <table className="w-full text-left border-collapse table-fixed border-t border-blue-50/50">
                       <tbody className="divide-y divide-blue-50/50">
                         {wordsInGroup.map((word: any, idx: number) => (
                           <tr key={word.id || `static_${word.german}_${idx}`} className="hover:bg-white/60 transition-colors group">
-                            <td className="p-3 sm:p-5 font-bold text-blue-950 w-1/3 break-words">
+                            <td className="p-3 sm:p-5 font-bold text-blue-950 break-all">
                               {word.german}
                               {word.category && word.category !== 'vocabulary' && (
                                 <span className="ml-2 px-2 py-0.5 text-[10px] uppercase font-bold bg-blue-100 text-blue-800 rounded">
@@ -672,10 +672,10 @@ export default function Vocabulary() {
                                 </span>
                               )}
                             </td>
-                            <td className="p-3 sm:p-5 text-gray-700 w-1/3 break-words">{word.hungarian}</td>
-                            <td className="p-3 sm:p-5 text-gray-500 text-sm italic w-1/3 break-words">{word.example}</td>
+                            <td className="p-3 sm:p-5 text-gray-700 break-all">{word.hungarian}</td>
+                            <td className="p-3 sm:p-5 text-gray-500 text-sm italic break-all">{word.example}</td>
                             <td className="p-2 sm:p-4 text-center w-16 sm:w-24">
-                              <div className="flex justify-center items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <div className="flex justify-center items-center gap-2 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
                                 <button
                                   onClick={() => handleEditClick(word)}
                                   className="text-blue-500 hover:text-blue-700 p-2 rounded-lg hover:bg-blue-50 transition-colors"

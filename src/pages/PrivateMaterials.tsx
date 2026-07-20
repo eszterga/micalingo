@@ -56,13 +56,22 @@ export default function PrivateMaterials({ type }: { type: 'reading' | 'listenin
   const collectionName = type === 'reading' ? 'private_reading' : 'private_listening';
   const defaultIcon = type === 'reading' ? '📂' : '🎧';
   const defaultCategories = useMemo(() => [
-    { id: "cat1", icon: defaultIcon, title: "Category 1", items: [] },
-    { id: "cat2", icon: defaultIcon, title: "Category 2", items: [] },
-    { id: "cat3", icon: defaultIcon, title: "Category 3", items: [] }
+    { id: "cat1", icon: defaultIcon, title: t('private_category_1') || "Category 1", items: [] },
+    { id: "cat2", icon: defaultIcon, title: t('private_category_2') || "Category 2", items: [] },
+    { id: "cat3", icon: defaultIcon, title: t('private_category_3') || "Category 3", items: [] },
+    { id: "cat4", icon: defaultIcon, title: t('private_category_4') || "Category 4", items: [] },
+    { id: "cat5", icon: defaultIcon, title: t('private_category_5') || "Category 5", items: [] }
   ], [defaultIcon]);
 
   const [categories, setCategories] = useState<any[]>(defaultCategories);
-  const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
+  const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>(() => {
+    try {
+      const saved = sessionStorage.getItem(`micalingo_private_${type}_sections`);
+      return saved ? JSON.parse(saved) : {};
+    } catch (e) {
+      return {};
+    }
+  });
   const [editingCategory, setEditingCategory] = useState<string | null>(null);
   const [categoryTitleInput, setCategoryTitleInput] = useState("");
   
@@ -85,6 +94,15 @@ export default function PrivateMaterials({ type }: { type: 'reading' | 'listenin
   const [newExample, setNewExample] = useState("");
   const [newNote, setNewNote] = useState("");
   const [newCategory, setNewCategory] = useState("vocabulary");
+
+  useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem(`micalingo_private_${type}_sections`);
+      setExpandedCategories(saved ? JSON.parse(saved) : {});
+    } catch (e) {
+      setExpandedCategories({});
+    }
+  }, [type]);
 
   useEffect(() => {
     const fetchBookmarks = async () => {
@@ -175,7 +193,11 @@ export default function PrivateMaterials({ type }: { type: 'reading' | 'listenin
     }
   };
 
-  const toggleCategory = (id: string) => setExpandedCategories(prev => ({ ...prev, [id]: !prev[id] }));
+  const toggleCategory = (id: string) => setExpandedCategories(prev => {
+    const next = { ...prev, [id]: !prev[id] };
+    sessionStorage.setItem(`micalingo_private_${type}_sections`, JSON.stringify(next));
+    return next;
+  });
   
   const handleMouseUp = (e: React.MouseEvent | React.TouchEvent, itemId: string) => {
     if (!user) return;
@@ -407,9 +429,9 @@ export default function PrivateMaterials({ type }: { type: 'reading' | 'listenin
     const next = categories.map(c => {
       if (c.id === editingItemCategory) {
         if (editingItemId) {
-          return { ...c, items: c.items.map((i: any) => i.id === editingItemId ? { ...editData, id: editingItemId } : i) };
+          return { ...c, items: (c.items || []).map((i: any) => i.id === editingItemId ? { ...editData, id: editingItemId } : i) };
         } else {
-          return { ...c, items: [{ ...editData, id: Date.now().toString() }, ...c.items] };
+          return { ...c, items: [{ ...editData, id: Date.now().toString() }, ...(c.items || [])] };
         }
       }
       return c;
@@ -421,7 +443,7 @@ export default function PrivateMaterials({ type }: { type: 'reading' | 'listenin
 
   const handleDeleteItem = (catId: string, itemId: string) => {
     if (!confirm(t("delete") || "Are you sure you want to delete this item?")) return;
-    const next = categories.map(c => c.id === catId ? { ...c, items: c.items.filter((i: any) => i.id !== itemId) } : c);
+    const next = categories.map(c => c.id === catId ? { ...c, items: (c.items || []).filter((i: any) => i.id !== itemId) } : c);
     saveCategories(next);
   };
 
@@ -446,7 +468,7 @@ export default function PrivateMaterials({ type }: { type: 'reading' | 'listenin
         <div className="space-y-6 pt-4">
           <div className="bg-blue-50/80 backdrop-blur-sm border border-blue-200/60 text-blue-900 p-5 rounded-[1.5rem] shadow-sm text-sm font-medium mb-6 flex items-center gap-3">
             <span className="text-xl">🔖</span>
-            {t("bookmark_instructions_logged_in") || "Highlight any text while reading to save a bookmark, or save the highlighted text directly to your personal vocabulary database!"}
+            {t("bookmark_instructions_logged_in") || "Highlight any text while reading to save a bookmark, or save the highlighted text directly to your personal vocabulary database or into your quizzes!"}
           </div>
 
           {categories.map((cat) => (
@@ -479,21 +501,21 @@ export default function PrivateMaterials({ type }: { type: 'reading' | 'listenin
                         <span className="text-xl leading-none">+</span> {t((type === 'reading' ? "add_article" : "add_audio") as any)}
                       </button>
                     </div>
-                    {cat.items.length === 0 ? (
+                        {!cat.items || cat.items.length === 0 ? (
                       <div className="text-center py-8 text-gray-500 bg-white/40 rounded-xl border border-dashed border-gray-300">
                         No items yet.
                       </div>
                     ) : (
                       <div className="space-y-6 pt-2 pb-2">
-                        {cat.items.map((item: any) => {
+                            {cat.items?.map((item: any) => {
                           const isItemExpanded = expandedItems.has(item.id);
                           return (
                             <div key={item.id} className="relative bg-white/90 backdrop-blur-xl p-6 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-blue-50 transition-all duration-300 group/item">
                               <div className="absolute top-4 right-4 md:top-6 md:right-6 flex items-center gap-1.5 md:gap-2 z-10">
-                                <button onClick={(e) => { e.stopPropagation(); openEditModal(cat.id, item); }} className="p-2 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 hover:text-blue-700 transition-colors shadow-sm opacity-100 md:opacity-0 md:group-hover/item:opacity-100" title={t((type === 'reading' ? "edit_article" : "edit_audio") as any)}>
+                                <button onClick={(e) => { e.stopPropagation(); openEditModal(cat.id, item); }} className="p-2 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 hover:text-blue-700 transition-colors shadow-sm" title={t((type === 'reading' ? "edit_article" : "edit_audio") as any)}>
                                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                                 </button>
-                                <button onClick={(e) => { e.stopPropagation(); handleDeleteItem(cat.id, item.id); }} className="p-2 bg-red-50 text-red-500 rounded-xl hover:bg-red-100 hover:text-red-600 transition-colors shadow-sm opacity-100 md:opacity-0 md:group-hover/item:opacity-100" title={t("delete")}>
+                                <button onClick={(e) => { e.stopPropagation(); handleDeleteItem(cat.id, item.id); }} className="p-2 bg-red-50 text-red-500 rounded-xl hover:bg-red-100 hover:text-red-600 transition-colors shadow-sm" title={t("delete")}>
                                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                 </button>
                               </div>
@@ -522,7 +544,7 @@ export default function PrivateMaterials({ type }: { type: 'reading' | 'listenin
                                   <div className="pt-2 border-t border-blue-50/50 mt-2">
                                     {item.source && (
                                       <p className="text-sm font-bold text-blue-600 mt-4 mb-6 flex items-center gap-2">
-                                        <span className="bg-blue-100 p-1.5 rounded-lg text-xs shadow-sm">{type === 'reading' ? '📰' : '🎧'}</span> {item.source}
+                                        <span className="bg-blue-100 p-1.5 rounded-lg text-xs shadow-sm">{type === 'reading' ? '📰' : type === 'listening' ? '🎧' : '✍️'}</span> {item.source}
                                       </p>
                                     )}
                                     {type === 'listening' && item.url ? (
@@ -578,7 +600,7 @@ export default function PrivateMaterials({ type }: { type: 'reading' | 'listenin
                 <div className="flex flex-col sm:flex-row gap-3">
                   <input type="url" value={editData.url} onChange={e => setEditData({ ...editData, url: e.target.value })} className="flex-1 w-full rounded-xl border-gray-200 border p-3 focus:ring-2 focus:ring-blue-500 outline-none" />
                   <button onClick={handleFetchContent} disabled={!editData.url || isFetching} className="w-full sm:w-auto bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 px-6 rounded-xl transition-colors disabled:opacity-50 whitespace-nowrap">
-                    {isFetching ? "..." : t((type === 'reading' ? "fetch_article" : "fetch_audio") as any) || "Fetch Content"}
+                    {isFetching ? "..." : t((type === 'reading' ? "fetch_article" : type === 'listening' ? "fetch_audio" : "fetch_content") as any) || "Fetch Content"}
                   </button>
                 </div>
               </div>
@@ -600,6 +622,9 @@ export default function PrivateMaterials({ type }: { type: 'reading' | 'listenin
                     <button type="button" onClick={e => { e.preventDefault(); document.execCommand("formatBlock", false, "H2"); }} className="px-3 py-1 bg-white border border-gray-300 rounded font-bold hover:bg-gray-200 text-sm text-gray-700 transition-colors shadow-sm">H2</button>
                     <button type="button" onClick={e => { e.preventDefault(); document.execCommand("formatBlock", false, "H3"); }} className="px-3 py-1 bg-white border border-gray-300 rounded font-bold hover:bg-gray-200 text-sm text-gray-700 transition-colors shadow-sm">H3</button>
                     <button type="button" onClick={e => { e.preventDefault(); document.execCommand("formatBlock", false, "P"); }} className="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-sm text-gray-700 transition-colors shadow-sm">P</button>
+                    <div className="w-px h-6 bg-gray-300 self-center mx-1"></div>
+                    <button type="button" onClick={e => { e.preventDefault(); document.execCommand("insertUnorderedList", false); }} className="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-sm text-gray-700 transition-colors shadow-sm font-medium">• Bullet List</button>
+                    <button type="button" onClick={e => { e.preventDefault(); document.execCommand("undo", false); }} className="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-sm text-gray-700 transition-colors shadow-sm font-medium">↩ Undo</button>
                   </div>
                   <div ref={contentRef} contentEditable onInput={e => setEditData({ ...editData, content: e.currentTarget.innerHTML })} className="p-4 min-h-[200px] max-h-[50vh] overflow-y-auto outline-none prose prose-blue max-w-none focus:bg-blue-50/10 transition-colors bg-white"></div>
                 </div>
