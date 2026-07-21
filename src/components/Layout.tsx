@@ -29,6 +29,7 @@ export default function Layout() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDesktopLangMenuOpen, setIsDesktopLangMenuOpen] = useState(false);
   const [isMobileLangMenuOpen, setIsMobileLangMenuOpen] = useState(false);
+  const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
 
   const languages = [
     { code: 'en', label: 'English', flag: 'EN' },
@@ -62,7 +63,7 @@ export default function Layout() {
             </button>
           )}
           <Link to="/" className="flex items-center gap-2">
-            <img src="/logo.png" alt="MicaLingo Logo" className="w-7 h-7 object-contain" />
+            <img src="/logo.png" alt="MicaLingo Logo" className="w-7 h-7 object-contain mix-blend-multiply" />
             <h1 className="text-xl font-bold tracking-wider">MicaLingo</h1>
           </Link>
         </div>
@@ -120,7 +121,7 @@ export default function Layout() {
           <div className="relative flex flex-col w-64 max-w-xs bg-blue-900 text-blue-100 h-full shadow-xl animate-fade-in-left">
             <div className="p-6 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <img src="/logo.png" alt="MicaLingo Logo" className="w-7 h-7 object-contain bg-white/90 rounded-full p-0.5" />
+                <img src="/logo.png" alt="MicaLingo Logo" className="w-7 h-7 object-contain bg-white/90 rounded-full p-0.5 mix-blend-multiply" />
                 <h1 className="text-xl font-bold text-white tracking-wider">MicaLingo</h1>
               </div>
               <button onClick={() => setIsMobileMenuOpen(false)} className="text-blue-300 hover:text-white">
@@ -149,7 +150,7 @@ export default function Layout() {
         {/* Desktop Header */}
         <header className="hidden md:flex justify-between items-center px-8 py-4 bg-white/30 backdrop-blur-lg border-b border-white/40 shadow-sm z-50 relative">
           <Link to="/" className="flex items-center gap-3 hover:scale-105 transition-transform">
-            <img src="/logo.png" alt="MicaLingo Logo" className="w-9 h-9 object-contain drop-shadow-sm" />
+            <img src="/logo.png" alt="MicaLingo Logo" className="w-9 h-9 object-contain drop-shadow-sm mix-blend-multiply" />
             <h1 className="text-2xl font-extrabold text-blue-900 tracking-wider">MicaLingo</h1>
           </Link>
           <div className="flex items-center gap-6">
@@ -212,6 +213,52 @@ export default function Layout() {
           </div>
         </main>
       </div>
+
+      <button 
+        onClick={() => setIsSupportModalOpen(true)}
+        className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold rounded-full shadow-lg hover:scale-105 hover:shadow-xl transition-all duration-300"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
+        </svg>
+        {t('support_micalingo') || 'Support MicaLingo'}
+      </button>
+
+      {isSupportModalOpen && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-blue-950/40 backdrop-blur-sm transition-opacity">
+          <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm overflow-hidden flex flex-col animate-fade-in-up border border-white">
+            <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+              <h2 className="text-xl font-extrabold text-blue-950 flex items-center gap-2">
+                <span className="text-2xl">💖</span> {t('support_micalingo') || 'Support MicaLingo'}
+              </h2>
+              <button onClick={() => setIsSupportModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-full hover:bg-gray-200">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+            <div className="p-6 flex flex-col gap-3">
+              <p className="text-gray-600 text-center font-medium mb-3 text-sm">
+                {t('support_desc') || 'Choose an amount to support our project. Every contribution helps!'}
+              </p>
+              <a onClick={() => setIsSupportModalOpen(false)} href="https://donate.stripe.com/5kQ6oAcYegUV77K5GQ4Ja00" target="_blank" rel="noopener noreferrer" className="w-full flex items-center justify-between px-6 py-3.5 bg-blue-50 hover:bg-blue-100 text-blue-800 font-bold rounded-xl transition-colors border border-blue-200">
+                <span>{t('support_tier_1') || 'Coffee Tier'}</span>
+                <span>€2</span>
+              </a>
+              <a onClick={() => setIsSupportModalOpen(false)} href="https://donate.stripe.com/28EcMYcYecEFcs4d9i4Ja01" target="_blank" rel="noopener noreferrer" className="w-full flex items-center justify-between px-6 py-3.5 bg-blue-50 hover:bg-blue-100 text-blue-800 font-bold rounded-xl transition-colors border border-blue-200">
+                <span>{t('support_tier_2') || 'Snack Tier'}</span>
+                <span>€5</span>
+              </a>
+              <a onClick={() => setIsSupportModalOpen(false)} href="https://donate.stripe.com/9B6bIU8HYeMN1Nq0mw4Ja02" target="_blank" rel="noopener noreferrer" className="w-full flex items-center justify-between px-6 py-3.5 bg-blue-50 hover:bg-blue-100 text-blue-800 font-bold rounded-xl transition-colors border border-blue-200">
+                <span>{t('support_tier_3') || 'Lunch Tier'}</span>
+                <span>€8</span>
+              </a>
+              <a onClick={() => setIsSupportModalOpen(false)} href="https://donate.stripe.com/9B67sE5vMawxfEgb1a4Ja03" target="_blank" rel="noopener noreferrer" className="w-full flex items-center justify-between px-6 py-3.5 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-bold rounded-xl transition-all shadow-md">
+                <span>{t('support_tier_4') || 'Hero Tier 🚀'}</span>
+                <span>€10</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

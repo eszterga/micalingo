@@ -75,6 +75,12 @@ export const hu = {
   sign_out: "Kijelentkezés",
   login: "Bejelentkezés",
   vocabulary_short: "Szótár",
+  support_micalingo: "Támogasd a MicaLingot",
+  support_desc: "Válassz egy összeget a projekt támogatásához. Minden hozzájárulás sokat segít!",
+  support_tier_1: "Egy kávé",
+  support_tier_2: "Egy nasi",
+  support_tier_3: "Egy ebéd",
+  support_tier_4: "Hős 🚀",
 
   // Home
   welcome_back: "Üdvözlünk, jó, hogy itt vagy!",

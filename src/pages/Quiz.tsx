@@ -311,6 +311,35 @@ export default function Quiz() {
     }
   }, [currentQuestionIndex, score, questions, quizState, topic, quizId, user?.uid, isCustom, userAnswers]);
 
+  // Intercept browser back button and page reloads during an active quiz
+  useEffect(() => {
+    if (quizState === 'ongoing') {
+      // Push a dummy state to trap the back button without changing the URL
+      if (!window.history.state?.quizTrap) {
+        window.history.pushState({ ...window.history.state, quizTrap: true }, '', window.location.href);
+      }
+
+      const handlePopState = () => {
+        setShowQuitModal(true);
+        // Push the state again to ensure the user remains trapped on the page if they cancel
+        window.history.pushState({ ...window.history.state, quizTrap: true }, '', window.location.href);
+      };
+
+      const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+        e.preventDefault();
+        e.returnValue = ''; // Triggers the standard browser "Leave Site?" prompt
+      };
+
+      window.addEventListener('popstate', handlePopState);
+      window.addEventListener('beforeunload', handleBeforeUnload);
+
+      return () => {
+        window.removeEventListener('popstate', handlePopState);
+        window.removeEventListener('beforeunload', handleBeforeUnload);
+      };
+    }
+  }, [quizState]);
+
   const finishQuiz = async (finalScore: number) => {
     const key = user ? `micalingo_scores_${user.uid}` : 'micalingo_guest_scores';
     const scores = JSON.parse(localStorage.getItem(key) || '{}');
@@ -612,7 +641,7 @@ export default function Quiz() {
               <p className="text-gray-600 mb-8 text-center font-medium">{t('quit_quiz_desc')}</p>
               <div className="flex flex-col gap-3">
                 <button 
-                  onClick={() => navigate(topic && QUIZ_TOPICS.includes(topic as any) ? `/quizzes/${topic}` : '/quizzes')} 
+                  onClick={() => navigate(topic && QUIZ_TOPICS.includes(topic as any) ? `/quizzes/${topic}` : '/quizzes', { replace: true })} 
                   className="w-full py-3.5 bg-red-500 text-white font-bold rounded-xl hover:bg-red-600 transition-colors shadow-sm"
                 >
                   {t('quit')}

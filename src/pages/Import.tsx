@@ -697,24 +697,28 @@ export default function Import() {
               </svg>
               {t('verbs_template') || 'Verbs Template'}
             </button>
-            <button
-              onClick={() => handleDownloadTemplate('false_friends')}
-              className="whitespace-nowrap px-5 py-2.5 bg-white text-blue-600 border border-blue-200 font-bold rounded-xl hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 shadow-sm w-full sm:w-auto"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M8 12l4 4m0 0l4-4m-4 4V4" />
-              </svg>
-              {t('false_friends') || 'False Friends Template'}
-            </button>
-            <button
-              onClick={() => handleDownloadTemplate('idioms')}
-              className="whitespace-nowrap px-5 py-2.5 bg-white text-blue-600 border border-blue-200 font-bold rounded-xl hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 shadow-sm w-full sm:w-auto"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M8 12l4 4m0 0l4-4m-4 4V4" />
-              </svg>
-              {t('idioms') || 'Idioms Template'}
-            </button>
+            {isAdmin && adminMode && (
+              <>
+                <button
+                  onClick={() => handleDownloadTemplate('false_friends')}
+                  className="whitespace-nowrap px-5 py-2.5 bg-white text-blue-600 border border-blue-200 font-bold rounded-xl hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 shadow-sm w-full sm:w-auto"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M8 12l4 4m0 0l4-4m-4 4V4" />
+                  </svg>
+                  {t('false_friends') || 'False Friends Template'}
+                </button>
+                <button
+                  onClick={() => handleDownloadTemplate('idioms')}
+                  className="whitespace-nowrap px-5 py-2.5 bg-white text-blue-600 border border-blue-200 font-bold rounded-xl hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 shadow-sm w-full sm:w-auto"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M8 12l4 4m0 0l4-4m-4 4V4" />
+                  </svg>
+                  {t('idioms') || 'Idioms Template'}
+                </button>
+              </>
+            )}
           </div>
         </div>
         </div>
@@ -856,8 +860,12 @@ export default function Import() {
                   <option value="prepositions">{t('dropdown_prepositions') || 'Prepositions quiz'}</option>
                   <option value="adjectives">{t('dropdown_adjectives') || 'Adjectives quiz'}</option>
                   <option value="verbs">{t('dropdown_verbs') || 'Verbs quiz'}</option>
-                  <option value="false_friends">{t('false_friends') || 'False Friends'}</option>
-                  <option value="idioms">{t('idioms') || 'Idioms'}</option>
+                  {isAdmin && adminMode && (
+                    <>
+                      <option value="false_friends">{t('false_friends') || 'False Friends'}</option>
+                      <option value="idioms">{t('idioms') || 'Idioms'}</option>
+                    </>
+                  )}
                 </select>
               </div>
             </div>

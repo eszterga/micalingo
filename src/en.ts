@@ -75,6 +75,12 @@ export const en = {
   sign_out: "Sign Out",
   login: "Log in",
   vocabulary_short: "Vocab",
+  support_micalingo: "Support MicaLingo",
+  support_desc: "Choose an amount to support our project. Every contribution helps!",
+  support_tier_1: "Coffee Tier",
+  support_tier_2: "Snack Tier",
+  support_tier_3: "Lunch Tier",
+  support_tier_4: "Hero Tier 🚀",
 
   // Home
   welcome_back: "Welcome, nice to see you here!",

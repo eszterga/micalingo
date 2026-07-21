@@ -75,6 +75,12 @@ export const de = {
   sign_out: "Abmelden",
   login: "Anmelden",
   vocabulary_short: "Vokabeln",
+  support_micalingo: "MicaLingo unterstützen",
+  support_desc: "Wähle einen Betrag, um unser Projekt zu unterstützen. Jeder Beitrag hilft!",
+  support_tier_1: "Kaffee",
+  support_tier_2: "Snack",
+  support_tier_3: "Mittagessen",
+  support_tier_4: "Held 🚀",
 
   // Home
   welcome_back: "Willkommen, schön dich hier zu sehen!",
