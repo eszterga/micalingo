@@ -1,38 +1,47 @@
 import { HashRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "./AuthContext";
+import React, { Suspense } from "react";
 import Layout from "./components/Layout";
-import ProtectedRoute from "./components/ProtectedRoute";
-import Login from "./pages/Login";
-import Home from "./pages/Home";
-import Import from "./pages/Import";
-import Vocabulary from "./pages/Vocabulary";
-import Practice from "./pages/Practice";
-import TopicQuizzes from "./pages/TopicQuizzes";
-import Quiz from "./pages/Quiz";
-import Results from "./pages/Results";
-import Quizzes from "./pages/Quizzes";
-import Grammar from "./pages/Grammar";
-import Statistics from "./pages/Statistics";
-import Settings from "./pages/Settings";
-import Library from "./pages/Library";
-import LearningMaterials from "./pages/LearningMaterials";
-import ReadingMaterials from "./pages/ReadingMaterials";
-import ListeningMaterials from "./pages/ListeningMaterials";
-import FalseFriends from "./pages/FalseFriends";
-import Idioms from "./pages/Idioms";
-import CreateQuiz from "./pages/CreateQuiz";
-import PublicContentCategory from "./pages/PublicContentCategory";
-import PublicAudioCategory from "./pages/PublicAudioCategory";
-import GrammarCategory from "./pages/GrammarCategory";
-import PrivateMaterials from "./pages/PrivateMaterials";
 import AdminPrompt from "./components/AdminPrompt";
+
+// Create a simple loading component for lazy-loaded pages
+const PageLoader = () => (
+  <div className="w-full h-screen flex items-center justify-center">
+    <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+  </div>
+);
+
+// Lazy load all the pages for route-based code splitting
+const Login = React.lazy(() => import("./pages/Login"));
+const Home = React.lazy(() => import("./pages/Home"));
+const Import = React.lazy(() => import("./pages/Import"));
+const Vocabulary = React.lazy(() => import("./pages/Vocabulary"));
+const Practice = React.lazy(() => import("./pages/Practice"));
+const TopicQuizzes = React.lazy(() => import("./pages/TopicQuizzes"));
+const Quiz = React.lazy(() => import("./pages/Quiz"));
+const Results = React.lazy(() => import("./pages/Results"));
+const Quizzes = React.lazy(() => import("./pages/Quizzes"));
+const Grammar = React.lazy(() => import("./pages/Grammar"));
+const Statistics = React.lazy(() => import("./pages/Statistics"));
+const Settings = React.lazy(() => import("./pages/Settings"));
+const Library = React.lazy(() => import("./pages/Library"));
+const LearningMaterials = React.lazy(() => import("./pages/LearningMaterials"));
+const ReadingMaterials = React.lazy(() => import("./pages/ReadingMaterials"));
+const ListeningMaterials = React.lazy(() => import("./pages/ListeningMaterials"));
+const FalseFriends = React.lazy(() => import("./pages/FalseFriends"));
+const Idioms = React.lazy(() => import("./pages/Idioms"));
+const CreateQuiz = React.lazy(() => import("./pages/CreateQuiz"));
+const PublicContentCategory = React.lazy(() => import("./pages/PublicContentCategory"));
+const PublicAudioCategory = React.lazy(() => import("./pages/PublicAudioCategory"));
+const GrammarCategory = React.lazy(() => import("./pages/GrammarCategory"));
+const PrivateMaterials = React.lazy(() => import("./pages/PrivateMaterials"));
+const ProtectedRoute = React.lazy(() => import("./components/ProtectedRoute"));
 
 // Main Application Router
 export default function App() {
   return (
     <HashRouter>
-      <AuthProvider>
-        <AdminPrompt />
+      <AdminPrompt />
+      <Suspense fallback={<PageLoader />}>
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route element={<Layout />}>
@@ -71,7 +80,7 @@ export default function App() {
             </Route>
           </Route>
         </Routes>
-      </AuthProvider>
+      </Suspense>
     </HashRouter>
   );
 }

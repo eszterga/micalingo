@@ -116,6 +116,29 @@ export default function Quiz() {
   const generateQuestions = useCallback((words: any[]) => {
     const selectedWords = [...words];
 
+    // Build a set of all known German terms to prevent bad data (German words in Hungarian column) from being used as distractors
+    const allGermanTerms = new Set<string>();
+    const addToSet = (german?: string) => {
+      if (!german) return;
+      const lower = german.toLowerCase().trim();
+      allGermanTerms.add(lower);
+      allGermanTerms.add(lower.replace(/^(der|die|das)\s+/i, '').trim());
+      allGermanTerms.add(lower.replace(/^sich\s+/i, '').trim());
+    };
+
+    // Add ALL possible German words to our dictionary to be absolutely sure
+    selectedWords.forEach(w => addToSet(w.german));
+    publicDbWords.forEach((w: any) => addToSet(w.german));
+    if (userVocabulary) userVocabulary.forEach((w: any) => addToSet(w.german));
+    publicVocabulary.forEach((w: any) => addToSet(w.german));
+    publicPhrases.forEach((w: any) => addToSet(w.german));
+    publicArticles.forEach((w: any) => addToSet(w.german));
+    publicPrepositions.forEach((w: any) => addToSet(w.german));
+    if (publicAdjectives) publicAdjectives.forEach((w: any) => addToSet(w.german));
+
+    // Catch any known stragglers that don't match exactly
+    allGermanTerms.add("verhalten");
+
     return selectedWords.map(word => {
       if (topic === 'articles') {
         const match = word.german.match(/^(der|die|das)\s+(.*)/i);
@@ -155,12 +178,23 @@ export default function Quiz() {
         };
       } else {
         const correctAnswer = word.hungarian;
-        const isValidDistractor = (str: string) => typeof str === 'string' && str.trim().length > 1 && !str.trim().startsWith('-');
+        const isValidDistractor = (str: string) => {
+          if (typeof str !== 'string' || str.trim().length <= 1 || str.trim().startsWith('-')) return false;
+          const lowerStr = str.toLowerCase().trim();
+          // Allow if it's the correct answer itself
+          if (lowerStr === (correctAnswer || '').toLowerCase().trim()) return true;
+          // Otherwise, reject if it's a known German word (prevents data entry errors leaking into Hungarian options)
+          return !allGermanTerms.has(lowerStr);
+        };
 
         let distractorPool = Array.from(new Set(words.map(w => w.hungarian))).filter(h => h !== correctAnswer && isValidDistractor(h));
 
         if (distractorPool.length < 3) {
-          const fallbackSource = topic === 'phrases' ? publicPhrases : publicVocabulary;
+          let fallbackSource = topic === 'phrases' ? publicPhrases : publicVocabulary;
+          // Filter out invalid vocabulary entries (like articles) from being used as distractors.
+          if (topic === 'vocabulary') {
+            fallbackSource = fallbackSource.filter(w => !['der', 'die', 'das'].includes((w.german || '').trim().toLowerCase()));
+          }
           const fallbackPool = Array.from(new Set(fallbackSource.map(w => w.hungarian))).filter(h => h !== correctAnswer && isValidDistractor(h));
           distractorPool = Array.from(new Set([...distractorPool, ...fallbackPool]));
         }
@@ -180,7 +214,7 @@ export default function Quiz() {
         };
       }
     }).filter(Boolean) as Question[];
-  }, [topic, isCustom]);
+  }, [topic, isCustom, publicDbWords, userVocabulary]);
 
   useEffect(() => {
     const quizKey = isCustom ? `custom_${topic || 'general'}_${quizId}` : `${topic || 'custom'}_${quizId}`;
@@ -265,9 +299,15 @@ export default function Quiz() {
         (word.hungarian || '').trim() !== ''
       );
 
+      let finalSourceData = sourceData;
+      // For vocabulary quizzes, filter out entries that are just articles, as they are not valid questions.
+      if (topic === 'vocabulary') {
+        finalSourceData = sourceData.filter(word => !['der', 'die', 'das'].includes((word.german || '').trim().toLowerCase()));
+      }
+
       const startIndex = (quizId - 1) * WORDS_PER_QUIZ;
       const endIndex = startIndex + WORDS_PER_QUIZ;
-      wordsForQuiz = sourceData.slice(startIndex, endIndex).sort(() => 0.5 - Math.random());
+      wordsForQuiz = finalSourceData.slice(startIndex, endIndex).sort(() => 0.5 - Math.random());
     } else if (userVocabulary) {
       wordsForQuiz = [...userVocabulary].filter((word: any) =>
         (word.german || '').trim() !== '' &&
@@ -379,6 +419,17 @@ export default function Quiz() {
       localStorage.setItem(progressKey, JSON.stringify(progressMap));
     }
 
+    // Trigger support prompt after 2nd quiz completion in a session
+    const completions = parseInt(sessionStorage.getItem('micalingo_session_quiz_completions') || '0', 10) + 1;
+    sessionStorage.setItem('micalingo_session_quiz_completions', completions.toString());
+
+    if (completions === 2) {
+      const dismissed = sessionStorage.getItem('micalingo_support_prompt_dismissed');
+      if (!dismissed) {
+        window.dispatchEvent(new CustomEvent('showSupportPrompt'));
+      }
+    }
+
     setQuizState('finished');
     setSearchParams(prev => {
       prev.set('finished', 'true');
@@ -481,7 +532,7 @@ export default function Quiz() {
     );
   }
 
-  if (quizState === 'finished' || !currentQuestion) {
+  if (quizState === 'finished') {
     if (questions.length === 0 && (isCustom || (!topic && userVocabulary))) {
       return (
         <div className="relative min-h-[85vh] w-full flex flex-col pt-4 md:pt-8 pb-12">
@@ -552,6 +603,17 @@ export default function Quiz() {
               )}
             </div>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!currentQuestion) {
+    return (
+      <div className="relative min-h-[85vh] w-full flex flex-col pt-4 md:pt-8 pb-12">
+        <BackgroundBlobs />
+        <div className="relative z-10 w-full max-w-7xl mx-auto flex flex-col items-center justify-center min-h-[50vh] space-y-4 px-4 md:px-8">
+          <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
         </div>
       </div>
     );

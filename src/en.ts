@@ -81,6 +81,10 @@ export const en = {
   support_tier_2: "Snack Tier",
   support_tier_3: "Lunch Tier",
   support_tier_4: "Hero Tier 🚀",
+  enjoying_micalingo_title: "Enjoying MicaLingo?",
+  consider_donation_desc: "Please consider supporting the project to keep it running and ad-free.",
+  yes_support: "Yes, show me how!",
+  maybe_later: "Maybe later",
 
   // Home
   welcome_back: "Welcome, nice to see you here!",

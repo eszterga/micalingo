@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { useI18n } from '../I18nContext';
@@ -30,6 +30,7 @@ export default function Layout() {
   const [isDesktopLangMenuOpen, setIsDesktopLangMenuOpen] = useState(false);
   const [isMobileLangMenuOpen, setIsMobileLangMenuOpen] = useState(false);
   const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
+  const [showConsiderSupport, setShowConsiderSupport] = useState(false);
 
   const languages = [
     { code: 'en', label: 'English', flag: 'EN' },
@@ -49,6 +50,21 @@ export default function Layout() {
 
   const currentLanguageFlag = languages.find(l => l.code === language)?.flag || 'EN';
 
+  useEffect(() => {
+    const handleShowSupportPrompt = () => {
+      const dismissed = sessionStorage.getItem('micalingo_support_prompt_dismissed');
+      if (!dismissed) {
+        setShowConsiderSupport(true);
+      }
+    };
+  
+    window.addEventListener('showSupportPrompt', handleShowSupportPrompt);
+  
+    return () => {
+      window.removeEventListener('showSupportPrompt', handleShowSupportPrompt);
+    };
+  }, []);
+
   return (
     <div className="flex h-screen bg-gradient-to-br from-blue-100 via-blue-50 to-white text-gray-800 flex-col relative overflow-hidden">
       <BackgroundBlobs />
@@ -63,7 +79,7 @@ export default function Layout() {
             </button>
           )}
           <Link to="/" className="flex items-center gap-2">
-            <img src="/logo.png" alt="MicaLingo Logo" className="w-7 h-7 object-contain mix-blend-multiply" />
+            <img src="/logo.png" alt="MicaLingo Logo" className="w-7 h-7 object-contain mix-blend-multiply" width="28" height="28" />
             <h1 className="text-xl font-bold tracking-wider">MicaLingo</h1>
           </Link>
         </div>
@@ -121,7 +137,7 @@ export default function Layout() {
           <div className="relative flex flex-col w-64 max-w-xs bg-blue-900 text-blue-100 h-full shadow-xl animate-fade-in-left">
             <div className="p-6 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <img src="/logo.png" alt="MicaLingo Logo" className="w-7 h-7 object-contain bg-white/90 rounded-full p-0.5 mix-blend-multiply" />
+                <img src="/logo.png" alt="MicaLingo Logo" className="w-7 h-7 object-contain bg-white/90 rounded-full p-0.5 mix-blend-multiply" width="28" height="28" />
                 <h1 className="text-xl font-bold text-white tracking-wider">MicaLingo</h1>
               </div>
               <button onClick={() => setIsMobileMenuOpen(false)} className="text-blue-300 hover:text-white">
@@ -150,7 +166,7 @@ export default function Layout() {
         {/* Desktop Header */}
         <header className="hidden md:flex justify-between items-center px-8 py-4 bg-white/30 backdrop-blur-lg border-b border-white/40 shadow-sm z-50 relative">
           <Link to="/" className="flex items-center gap-3 hover:scale-105 transition-transform">
-            <img src="/logo.png" alt="MicaLingo Logo" className="w-9 h-9 object-contain drop-shadow-sm mix-blend-multiply" />
+            <img src="/logo.png" alt="MicaLingo Logo" className="w-9 h-9 object-contain drop-shadow-sm mix-blend-multiply" width="36" height="36" />
             <h1 className="text-2xl font-extrabold text-blue-900 tracking-wider">MicaLingo</h1>
           </Link>
           <div className="flex items-center gap-6">
@@ -216,12 +232,12 @@ export default function Layout() {
 
       <button 
         onClick={() => setIsSupportModalOpen(true)}
-        className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold rounded-full shadow-lg hover:scale-105 hover:shadow-xl transition-all duration-300"
+        className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-40 flex items-center gap-2 p-3 md:px-4 md:py-2 bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold rounded-full shadow-lg hover:scale-105 hover:shadow-xl transition-all duration-300"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 md:h-5 md:w-5" viewBox="0 0 20 20" fill="currentColor">
           <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
         </svg>
-        {t('support_micalingo') || 'Support MicaLingo'}
+        <span className="hidden md:inline">{t('support_micalingo') || 'Support MicaLingo'}</span>
       </button>
 
       {isSupportModalOpen && (
@@ -255,6 +271,39 @@ export default function Layout() {
                 <span>{t('support_tier_4') || 'Hero Tier 🚀'}</span>
                 <span>€10</span>
               </a>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showConsiderSupport && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-blue-950/40 backdrop-blur-sm transition-opacity">
+          <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm overflow-hidden flex flex-col animate-fade-in-up border border-white text-center p-6 md:p-8">
+            <div className="w-16 h-16 bg-pink-100 text-pink-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
+              💖
+            </div>
+            <h2 className="text-2xl font-extrabold text-blue-950 mb-2">
+              {t('enjoying_micalingo_title') || 'Enjoying MicaLingo?'}
+            </h2>
+            <p className="text-gray-600 mb-8 font-medium">
+              {t('consider_donation_desc') || 'Please consider supporting the project to keep it running and ad-free.'}
+            </p>
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={() => {
+                  setShowConsiderSupport(false);
+                  setIsSupportModalOpen(true);
+                }}
+                className="w-full py-3.5 bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold rounded-xl hover:shadow-lg transition-all"
+              >
+                {t('yes_support') || 'Yes, show me how!'}
+              </button>
+              <button
+                onClick={() => { setShowConsiderSupport(false); sessionStorage.setItem('micalingo_support_prompt_dismissed', 'true'); }}
+                className="w-full py-3.5 text-gray-600 font-bold hover:bg-gray-100 rounded-xl transition-colors"
+              >
+                {t('maybe_later') || 'Maybe later'}
+              </button>
             </div>
           </div>
         </div>

@@ -81,6 +81,10 @@ export const de = {
   support_tier_2: "Snack",
   support_tier_3: "Mittagessen",
   support_tier_4: "Held 🚀",
+  enjoying_micalingo_title: "Gefällt dir MicaLingo?",
+  consider_donation_desc: "Bitte erwäge, das Projekt zu unterstützen, damit es weiterlaufen kann und werbefrei bleibt.",
+  yes_support: "Ja, zeig es mir!",
+  maybe_later: "Vielleicht später",
 
   // Home
   welcome_back: "Willkommen, schön dich hier zu sehen!",

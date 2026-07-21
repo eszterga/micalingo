@@ -81,6 +81,10 @@ export const hu = {
   support_tier_2: "Egy nasi",
   support_tier_3: "Egy ebéd",
   support_tier_4: "Hős 🚀",
+  enjoying_micalingo_title: "Tetszik a MicaLingo?",
+  consider_donation_desc: "Kérjük, fontold meg a projekt támogatását, hogy továbbra is működhessen és reklámmentes maradhasson.",
+  yes_support: "Igen, mutasd!",
+  maybe_later: "Talán később",
 
   // Home
   welcome_back: "Üdvözlünk, jó, hogy itt vagy!",
