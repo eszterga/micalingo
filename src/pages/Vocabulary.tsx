@@ -372,8 +372,11 @@ export default function Vocabulary() {
       return;
     }
 
-    const duplicate = personalWords?.find((w: any) => 
-      (w.german || '').toLowerCase().trim() === finalGerman.toLowerCase().trim() && w.id !== editingId
+    const isPublicSave = adminMode && activeTab === 'library';
+    const targetVocabulary = isPublicSave ? allPublicWords : personalWords;
+
+    const duplicate = targetVocabulary?.find((w: any) => 
+      w.category === newCategory && (w.german || '').toLowerCase().trim() === finalGerman.toLowerCase().trim() && w.id !== editingId
     );
 
     if (duplicate) {
@@ -384,50 +387,59 @@ export default function Vocabulary() {
       return;
     }
 
-    if (editingId) {
-      await updateCloudWord(editingId, {
-        german: finalGerman,
-        hungarian: newHungarian.trim(),
-        example: newExample.trim(),
-        note: newCategory === 'false_friends' ? newNote.trim() : "",
-        category: newCategory
-      } as any);
-    } else {
-      if (adminMode && editingStaticWord && editingStaticWord.german.toLowerCase().trim() !== finalGerman.toLowerCase()) {
-         // Tombstone the old static word since the german key changed
-         await addCloudWord({
-           userId: "PUBLIC_LIBRARY",
-           german: editingStaticWord.german,
-           hungarian: editingStaticWord.hungarian,
-           category: editingStaticWord.category || "vocabulary",
-           deleted: true,
-           dateAdded: Date.now()
-         } as any);
+    try {
+      if (editingId) {
+        await updateCloudWord(editingId, {
+          german: finalGerman,
+          hungarian: newHungarian.trim(),
+          example: newExample.trim(),
+          note: newCategory === 'false_friends' ? newNote.trim() : "",
+          category: newCategory
+        } as any);
+      } else {
+        if (adminMode && editingStaticWord && editingStaticWord.german.toLowerCase().trim() !== finalGerman.toLowerCase()) {
+           // Tombstone the old static word since the german key changed
+           await addCloudWord({
+             userId: "PUBLIC_LIBRARY",
+             german: editingStaticWord.german,
+             hungarian: editingStaticWord.hungarian,
+             category: editingStaticWord.category || "vocabulary",
+             deleted: true,
+             dateAdded: Date.now()
+           } as any);
+        }
+
+        const payload: any = {
+          userId: (adminMode && activeTab === 'library') ? "PUBLIC_LIBRARY" : user.uid,
+          german: finalGerman,
+          hungarian: newHungarian.trim(),
+          example: newExample.trim(),
+          note: newCategory === 'false_friends' ? newNote.trim() : "",
+          dateAdded: Date.now(),
+          category: newCategory,
+        };
+
+        if (editingStaticWord?.sourceFile) payload.sourceFile = editingStaticWord.sourceFile;
+        if (editingStaticWord?.sourceType) payload.sourceType = editingStaticWord.sourceType;
+
+        await addCloudWord(payload);
       }
 
-      await addCloudWord({
-        userId: (adminMode && activeTab === 'library') ? "PUBLIC_LIBRARY" : user.uid,
-        german: finalGerman,
-        hungarian: newHungarian.trim(),
-        example: newExample.trim(),
-        note: newCategory === 'false_friends' ? newNote.trim() : "",
-        dateAdded: Date.now(),
-        category: newCategory,
-        sourceFile: editingStaticWord?.sourceFile || undefined,
-        sourceType: editingStaticWord?.sourceType || undefined
-      } as any);
+      // Clear form and close modal
+      setNewGerman("");
+      setNewArticle("der");
+      setNewNoun("");
+      setNewHungarian("");
+      setNewExample("");
+      setNewNote("");
+      setEditingId(null);
+      setEditingStaticWord(null);
+      setIsModalOpen(false);
+      alert(t('saved') || 'Saved!');
+    } catch (e) {
+      console.error("Failed to save word:", e);
+      alert("Failed to save word. Please try again.");
     }
-
-    // Clear form and close modal
-    setNewGerman("");
-    setNewArticle("der");
-    setNewNoun("");
-    setNewHungarian("");
-    setNewExample("");
-    setNewNote("");
-    setEditingId(null);
-    setEditingStaticWord(null);
-    setIsModalOpen(false);
   };
 
   return (

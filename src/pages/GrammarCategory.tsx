@@ -30,6 +30,7 @@ export default function GrammarCategory() {
   const { t } = useI18n();
   const { user, isAdmin, adminMode } = useAuth();
   const userVocabulary = useCloudVocabulary(user?.uid) || [];
+  const publicVocabulary = useCloudVocabulary("PUBLIC_LIBRARY") || [];
   
   const categoryName = t(`grammar_${categoryId}` as any) || categoryId?.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || "Grammar";
   const collectionName = 'grammar_materials';
@@ -292,15 +293,19 @@ export default function GrammarCategory() {
     }
   };
 
-  const handleSaveWord = async () => {
+  const handleSaveWord = useCallback(async () => {
     const finalGerman = newCategory === 'articles' ? `${newArticle} ${newNoun.trim()}` : newGerman.trim();
     if (!finalGerman || !newHungarian.trim() || !user) {
       alert(t('alert_fill_fields_login'));
       return;
     }
 
-    const duplicate = userVocabulary.find((w: any) => 
-      (w.german || '').toLowerCase().trim() === finalGerman.toLowerCase().trim()
+    const isPublicSave = isAdmin && adminMode;
+    const targetUserId = isPublicSave ? "PUBLIC_LIBRARY" : user.uid;
+    const targetVocabulary = isPublicSave ? publicVocabulary : userVocabulary;
+
+    const duplicate = targetVocabulary.find((w: any) => 
+      w.category === newCategory && (w.german || '').toLowerCase().trim() === finalGerman.toLowerCase().trim()
     );
 
     if (duplicate) {
@@ -312,11 +317,11 @@ export default function GrammarCategory() {
     }
 
     await addCloudWord({
-      userId: user.uid, german: finalGerman, hungarian: newHungarian.trim(), example: newExample.trim(), note: newCategory === 'false_friends' ? newNote.trim() : "", dateAdded: Date.now(), category: newCategory
+      userId: targetUserId, german: finalGerman, hungarian: newHungarian.trim(), example: newExample.trim(), note: newCategory === 'false_friends' ? newNote.trim() : "", dateAdded: Date.now(), category: newCategory
     } as any);
     setIsSaveWordModalOpen(false);
     alert(t('saved') || 'Saved!');
-  };
+  }, [newCategory, newArticle, newNoun, newGerman, newHungarian, user, t, userVocabulary, publicVocabulary, isAdmin, adminMode, newExample, newNote]);
 
   const handleDelete = async (id: string) => {
     if (window.confirm(t("confirm_delete_grammar") || "Are you sure you want to delete this grammar rule?")) {

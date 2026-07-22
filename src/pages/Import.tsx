@@ -54,6 +54,10 @@ export default function Import() {
   const [deletedEditItemIds, setDeletedEditItemIds] = useState<string[]>([]);
   const [isSavingEdit, setIsSavingEdit] = useState(false);
   const [fileSearchTerm, setFileSearchTerm] = useState("");
+  const [isFilesListOpen, setIsFilesListOpen] = useState(false);
+  const [modalSearchTerm, setModalSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   useEffect(() => {
     setSaveToPublic(isAdmin ? adminMode : false);
@@ -212,6 +216,18 @@ export default function Import() {
     });
   }, [importedFiles, allItems, fileSearchTerm]);
 
+  const totalPages = Math.max(1, Math.ceil(filteredImportedFiles.length / itemsPerPage));
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [fileSearchTerm]);
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [totalPages, currentPage]);
+
   const toggleFileSelection = (fileName: string) => {
     setSelectedFiles(prev => {
       const next = new Set(prev);
@@ -227,6 +243,7 @@ export default function Import() {
     setEditingFileCategory(file.destination);
     setEditingFile(file.fileName);
     setDeletedEditItemIds([]);
+    setModalSearchTerm(fileSearchTerm);
   };
 
   const handleEditItemChange = (index: number, field: string, value: string) => {
@@ -892,25 +909,39 @@ export default function Import() {
 
       {/* IMPORTED FILES MANAGER */}
       {importedFiles.length > 0 && (
-        <div className="bg-white/80 backdrop-blur-xl p-6 md:p-8 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white space-y-6 mt-8">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
+        <div className="bg-white/80 backdrop-blur-xl rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white mt-8 overflow-hidden transition-all duration-300">
+          <div 
+            className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-6 md:p-8 gap-4 cursor-pointer hover:bg-white/50 transition-colors"
+            onClick={() => setIsFilesListOpen(!isFilesListOpen)}
+          >
+            <div className="flex-1 text-left">
               <h2 className="text-2xl font-extrabold text-blue-950">
                 {t('manage_imported_files')} {isAdmin && <span className="text-purple-600 ml-2">({saveToPublic ? 'Public' : 'Private'})</span>}
               </h2>
-              <p className="text-gray-600 text-sm">{t('manage_imported_files_desc')}</p>
+              <p className="text-gray-600 text-sm mt-1">{t('manage_imported_files_desc')}</p>
             </div>
-            <div className="w-full sm:w-64">
-              <input
-                type="text"
-                placeholder={t('search_files') || 'Search files or keywords...'}
-                value={fileSearchTerm}
-                onChange={(e) => setFileSearchTerm(e.target.value)}
-                className="w-full px-5 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
-              />
+            <div className="flex items-center gap-4 w-full sm:w-auto">
+              <div className="w-full sm:w-64" onClick={e => e.stopPropagation()}>
+                <input
+                  type="text"
+                  placeholder={t('search_files') || 'Search files or keywords...'}
+                  value={fileSearchTerm}
+                  onChange={(e) => {
+                    setFileSearchTerm(e.target.value);
+                    if (e.target.value) setIsFilesListOpen(true);
+                  }}
+                  className="w-full px-5 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                />
+              </div>
+              <div className={`w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-sm text-blue-600 transition-transform duration-500 flex-shrink-0 ${isFilesListOpen ? "rotate-180" : ""}`}>
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"></path></svg>
+              </div>
             </div>
           </div>
 
+          <div className={`grid transition-[grid-template-rows,opacity] duration-500 ease-in-out ${isFilesListOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}>
+            <div className="overflow-hidden">
+              <div className="px-6 pb-6 md:px-8 md:pb-8 pt-2 border-t border-blue-50/50 space-y-6">
           {selectedFiles.size > 0 && (
             <div className="bg-blue-50 border border-blue-200 p-4 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
               <span className="text-blue-800 font-medium text-center sm:text-left">{t('files_selected', { count: selectedFiles.size })}</span>
@@ -952,7 +983,7 @@ export default function Import() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {filteredImportedFiles.map((file: ImportedFilePreview) => (
+                {filteredImportedFiles.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((file: ImportedFilePreview) => (
                   <tr key={file.fileName} className="hover:bg-gray-50 transition-colors">
                     <td className="p-3 sm:p-4 text-center">
                       <input
@@ -1007,6 +1038,31 @@ export default function Import() {
               </tbody>
             </table>
           </div>
+          
+          {totalPages > 1 && (
+            <div className="flex justify-between items-center pt-6 px-2">
+              <button
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-blue-600 font-bold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-50 transition-colors shadow-sm flex items-center gap-2"
+              >
+                &larr; <span className="hidden sm:inline">Previous</span>
+              </button>
+              <span className="text-gray-600 font-medium text-sm bg-white px-4 py-2 rounded-xl border border-gray-100 shadow-sm">
+                Page {currentPage} of {totalPages}
+              </span>
+              <button
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-blue-600 font-bold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-50 transition-colors shadow-sm flex items-center gap-2"
+              >
+                <span className="hidden sm:inline">Next</span> &rarr;
+              </button>
+            </div>
+          )}
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
@@ -1014,8 +1070,19 @@ export default function Import() {
       {editingFile && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-blue-950/40 backdrop-blur-sm transition-opacity">
           <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col animate-fade-in-up">
-            <div className="p-6 md:p-8 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+            <div className="p-6 md:p-8 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 flex-wrap gap-4">
               <h2 className="text-2xl font-extrabold text-blue-950">{t('preview_filename', { filename: editingFile || '' })} (Edit Mode)</h2>
+              
+              <div className="flex-1 max-w-md mx-auto w-full">
+                 <input
+                   type="text"
+                   placeholder="Highlight specific word..."
+                   value={modalSearchTerm}
+                   onChange={e => setModalSearchTerm(e.target.value)}
+                   className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                 />
+              </div>
+
               <button onClick={() => setEditingFile(null)} className="text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-full hover:bg-gray-200">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
               </button>
@@ -1065,8 +1132,19 @@ export default function Import() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
-                    {editFileItems.map((item: any, idx: number) => (
-                      <tr key={item.id || idx} className="hover:bg-gray-50 transition-colors">
+                    {editFileItems.map((item: any, idx: number) => {
+                      const term = modalSearchTerm.toLowerCase();
+                      const matches = !term || (
+                        (item.german || '').toLowerCase().includes(term) ||
+                        (item.hungarian || '').toLowerCase().includes(term) ||
+                        (item.example || '').toLowerCase().includes(term) ||
+                        (item.note || '').toLowerCase().includes(term)
+                      );
+                      
+                      if (!matches) return null;
+                      
+                      return (
+                      <tr key={item.id || idx} className={`transition-colors ${term ? 'bg-yellow-50' : 'hover:bg-gray-50'}`}>
                         {editingFileCategory === 'articles' ? (
                           <>
                             <td className="p-1 sm:p-2 border-r border-gray-100 align-top">
@@ -1130,7 +1208,8 @@ export default function Import() {
                           </button>
                         </td>
                       </tr>
-                    ))}
+                      );
+                    })}
                   </tbody>
                 </table>
               )}

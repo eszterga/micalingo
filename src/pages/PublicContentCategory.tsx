@@ -30,6 +30,7 @@ export default function PublicContentCategory({ type }: { type: 'articles' | 'bo
   const { t } = useI18n();
   const { user, isAdmin, adminMode } = useAuth();
   const userVocabulary = useCloudVocabulary(user?.uid) || [];
+  const publicVocabulary = useCloudVocabulary("PUBLIC_LIBRARY") || [];
   
   const categoryName = t((categoryId || '') as any) || categoryId;
   const collectionName = type === 'articles' ? 'articles' : type === 'books' ? 'books' : 'interesting';
@@ -299,8 +300,12 @@ export default function PublicContentCategory({ type }: { type: 'articles' | 'bo
       return;
     }
 
-    const duplicate = userVocabulary.find((w: any) => 
-      (w.german || '').toLowerCase().trim() === finalGerman.toLowerCase().trim()
+    const isPublicSave = isAdmin && adminMode;
+    const targetUserId = isPublicSave ? "PUBLIC_LIBRARY" : user.uid;
+    const targetVocabulary = isPublicSave ? publicVocabulary : userVocabulary;
+
+    const duplicate = targetVocabulary.find((w: any) => 
+      w.category === newCategory && (w.german || '').toLowerCase().trim() === finalGerman.toLowerCase().trim()
     );
 
     if (duplicate) {
@@ -312,7 +317,7 @@ export default function PublicContentCategory({ type }: { type: 'articles' | 'bo
     }
 
     await addCloudWord({
-      userId: user.uid, german: finalGerman, hungarian: newHungarian.trim(), example: newExample.trim(), note: newCategory === 'false_friends' ? newNote.trim() : "", dateAdded: Date.now(), category: newCategory
+      userId: targetUserId, german: finalGerman, hungarian: newHungarian.trim(), example: newExample.trim(), note: newCategory === 'false_friends' ? newNote.trim() : "", dateAdded: Date.now(), category: newCategory
     } as any);
     setIsSaveWordModalOpen(false);
     alert(t('saved') || 'Saved!');
