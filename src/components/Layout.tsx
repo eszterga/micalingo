@@ -44,7 +44,7 @@ export default function Layout() {
     { path: '/library', label: t('library') || 'Library' },
     { path: '/grammar', label: t('grammar') || 'Grammar' },
     { path: '/statistics', label: t('statistics') || 'Statistics' },
-    { path: '/import', label: t('import') || 'Import' },
+    ...(user ? [{ path: '/import', label: t('import') || 'Import' }] : []),
     { path: '/settings', label: t('settings') || 'Settings' }
   ];
 

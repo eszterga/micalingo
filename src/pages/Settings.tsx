@@ -44,6 +44,13 @@ export default function Settings() {
     return stored !== null ? JSON.parse(stored) : true;
   });
 
+  // State for advanced cleanup modal
+  const [isCleanupModalOpen, setIsCleanupModalOpen] = useState(false);
+  const [sources, setSources] = useState<{ name: string; count: number }[]>([]);
+  const [selectedSources, setSelectedSources] = useState<Set<string>>(new Set());
+  const [isCleaning, setIsCleaning] = useState(false);
+
+
   // Fetch settings from Firestore on mount for logged-in users
   useEffect(() => {
     let mounted = true;
@@ -117,6 +124,53 @@ export default function Settings() {
       }
     }
   }
+
+  const openCleanupModal = () => {
+    const sourceMap = new Map<string, number>();
+    personalWords.forEach(word => {
+      const sourceName = word.sourceFile || 'Legacy Import (No File Name)';
+      sourceMap.set(sourceName, (sourceMap.get(sourceName) || 0) + 1);
+    });
+    const sourcesArray = Array.from(sourceMap.entries()).map(([name, count]) => ({ name, count }));
+    sourcesArray.sort((a, b) => a.name.localeCompare(b.name));
+    setSources(sourcesArray);
+    setSelectedSources(new Set());
+    setIsCleanupModalOpen(true);
+  };
+
+  const handleSourceSelection = (sourceName: string) => {
+    setSelectedSources(prev => {
+      const next = new Set(prev);
+      if (next.has(sourceName)) next.delete(sourceName);
+      else next.add(sourceName);
+      return next;
+    });
+  };
+
+  const handleBulkDeleteFromSources = async () => {
+    if (selectedSources.size === 0) return;
+    const totalWordsToDelete = sources.filter(s => selectedSources.has(s.name)).reduce((acc, s) => acc + s.count, 0);
+
+    if (!confirm(`Are you sure you want to permanently delete all ${totalWordsToDelete} words from the ${selectedSources.size} selected sources? This cannot be undone.`)) return;
+
+    setIsCleaning(true);
+    try {
+      const idsToDelete = personalWords
+        .filter(word => selectedSources.has(word.sourceFile || 'Legacy Import (No File Name)'))
+        .map(word => word.id)
+        .filter((id): id is string => !!id);
+      
+      if (idsToDelete.length > 0) await bulkDeleteCloudWords(idsToDelete);
+      alert(`${idsToDelete.length} words have been deleted. The page will now reload.`);
+      window.location.reload();
+    } catch (error) {
+      console.error("Error during cleanup:", error);
+      alert("An error occurred during cleanup. Please try again.");
+    } finally {
+      setIsCleaning(false);
+      setIsCleanupModalOpen(false);
+    }
+  };
 
   return (
     <div className="relative min-h-[85vh] w-full flex flex-col pt-4 md:pt-8 pb-12">
@@ -224,6 +278,20 @@ export default function Settings() {
                     {isWiping ? (t('wiping_data' as any) || 'Wiping...') : (t('hard_reset_database' as any) || 'Wipe Library')}
                   </button>
                 </div>
+
+                {/* Advanced Cleanup */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between p-5 bg-yellow-50/50 rounded-2xl border border-yellow-100 shadow-sm">
+                  <div className="mb-3 sm:mb-0 sm:mr-4">
+                    <h3 className="font-bold text-yellow-800">Advanced Cleanup</h3>
+                    <p className="text-sm text-yellow-600 mt-1 font-medium">Manually delete words from specific imported files, including old or "ghost" files.</p>
+                  </div>
+                  <button 
+                    onClick={openCleanupModal}
+                    className="whitespace-nowrap bg-yellow-400 text-yellow-900 hover:bg-yellow-500 font-bold py-2.5 px-6 rounded-xl transition-colors text-sm shadow-sm"
+                  >
+                    Manage Sources...
+                  </button>
+                </div>
               </div>
             </div>
           </>
@@ -246,6 +314,60 @@ export default function Settings() {
           </button>
         </div>
       </div>
+
+      {isCleanupModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-blue-950/40 backdrop-blur-sm">
+          <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col animate-fade-in-up">
+            <div className="p-6 md:p-8 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+              <h2 className="text-2xl font-extrabold text-blue-950">Manage Data Sources</h2>
+              <button onClick={() => setIsCleanupModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-full hover:bg-gray-200">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+              </button>
+            </div>
+            <div className="p-6 md:p-8 overflow-y-auto space-y-4">
+              <p className="text-sm text-gray-600">Select the file sources you want to permanently delete all associated words from. This is useful for cleaning up old or "ghost" imports.</p>
+              <div className="bg-white rounded-2xl shadow-sm border border-blue-50 max-h-96 overflow-y-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead className="bg-blue-50/50 border-b border-blue-100 sticky top-0">
+                    <tr>
+                      <th className="p-4 w-12 text-center"></th>
+                      <th className="p-4 font-bold text-sm text-blue-900/60 uppercase tracking-wider">Source File</th>
+                      <th className="p-4 font-bold text-sm text-blue-900/60 uppercase tracking-wider text-right">Words</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {sources.map(source => (
+                      <tr key={source.name} className="hover:bg-gray-50">
+                        <td className="p-4 text-center">
+                          <input
+                            type="checkbox"
+                            checked={selectedSources.has(source.name)}
+                            onChange={() => handleSourceSelection(source.name)}
+                            className="w-5 h-5 text-blue-600 rounded border-blue-200 cursor-pointer"
+                          />
+                        </td>
+                        <td className="p-4 font-bold text-blue-950 break-all">{source.name}</td>
+                        <td className="p-4 text-gray-700 font-medium text-right">{source.count}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div className="p-6 md:p-8 border-t border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row justify-between items-center gap-3">
+              <span className="text-sm font-medium text-red-600">
+                {selectedSources.size > 0 ? `Selected ${selectedSources.size} sources to delete.` : 'No sources selected.'}
+              </span>
+              <div className="flex gap-3 w-full sm:w-auto">
+                <button onClick={() => setIsCleanupModalOpen(false)} className="w-full sm:w-auto px-6 py-3 font-bold text-gray-600 hover:bg-gray-200 rounded-xl transition-colors">Cancel</button>
+                <button onClick={handleBulkDeleteFromSources} disabled={selectedSources.size === 0 || isCleaning} className="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-xl shadow-sm transition-colors disabled:opacity-50">
+                  {isCleaning ? 'Deleting...' : 'Delete Selected'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       </div>
     </div>
   );

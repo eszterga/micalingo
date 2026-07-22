@@ -5,7 +5,7 @@ import FileDropZone from "../components/FileDropZone";
 import { ParsedImport } from "../lib/importParser";
 import { useAuth } from "../AuthContext";
 import { publicVocabulary, publicPhrases, publicArticles, publicPrepositions, publicFalseFriends, publicAdjectives } from '../lib/public-data';
-import { useCloudVocabulary, bulkAddCloudWords, bulkDeleteCloudWords, updateCloudWord } from "../lib/firestore";
+import { useCloudVocabulary, addCloudWord, bulkAddCloudWords, bulkDeleteCloudWords, updateCloudWord } from "../lib/firestore";
 import { useI18n } from "../I18nContext";
 
 interface ImportedFilePreview {
@@ -38,7 +38,12 @@ const BackgroundBlobs = () => (
 export default function Import() {
   const { user, isAdmin, adminMode } = useAuth();
   const [saveToPublic, setSaveToPublic] = useState(isAdmin ? adminMode : false);
-  const existingItems = useCloudVocabulary(saveToPublic ? "PUBLIC_LIBRARY" : user?.uid) || [];
+  
+  // Keep personal and public items completely isolated to prevent false duplicates when toggling
+  const personalItems = useCloudVocabulary(user?.uid) || [];
+  const publicItems = useCloudVocabulary("PUBLIC_LIBRARY") || [];
+  const existingItems = saveToPublic ? publicItems : personalItems;
+  
   const [data, setData] = useState<ParsedImport | null>(null);
   const [saving, setSaving] = useState(false);
   const [searchParams] = useSearchParams();
@@ -58,6 +63,21 @@ export default function Import() {
   const [modalSearchTerm, setModalSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+
+  // State for the "Add Content" modal
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [newGerman, setNewGerman] = useState("");
+  const [newArticle, setNewArticle] = useState("der");
+  const [newNoun, setNewNoun] = useState("");
+  const [newHungarian, setNewHungarian] = useState("");
+  const [newExample, setNewExample] = useState("");
+  const [newNote, setNewNote] = useState("");
+  const [newCategory, setNewCategory] = useState("vocabulary");
+
+  // State for overwrite confirmation
+  const [isOverwriteModalOpen, setIsOverwriteModalOpen] = useState(false);
+  const [itemsToOverwrite, setItemsToOverwrite] = useState<any[]>([]);
+  const [itemsToAddNew, setItemsToAddNew] = useState<any[]>([]);
 
   useEffect(() => {
     setSaveToPublic(isAdmin ? adminMode : false);
@@ -114,20 +134,52 @@ export default function Import() {
       const cleanLine = line.trim();
       if (!cleanLine) continue;
 
-      // Detect columns: Tab (Excel paste), Semicolon (CSV), or Comma (CSV)
-      let parts = cleanLine.split('\t');
-      // Use regex to split by semicolon or comma, but securely ignore them if they are inside double quotes!
-      if (parts.length < 2) parts = cleanLine.split(/;(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-      if (parts.length < 2) parts = cleanLine.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+      let parts: string[] = [];
+      
+      // Robust state machine to parse CSV correctly, handling commas inside quotes natively
+      const parseCSVLine = (lineStr: string, delimiter: string) => {
+        const result = [];
+        let current = '';
+        let inQuotes = false;
+        for (let i = 0; i < lineStr.length; i++) {
+          const char = lineStr[i];
+          if (char === '"') {
+            if (inQuotes && lineStr[i + 1] === '"') {
+              current += '"';
+              i++; // Skip escaped quote
+            } else {
+              inQuotes = !inQuotes;
+            }
+          } else if (char === delimiter && !inQuotes) {
+            result.push(current.trim());
+            current = '';
+          } else {
+            current += char;
+          }
+        }
+        result.push(current.trim());
+        return result;
+      };
+
+      if (cleanLine.includes('\t')) {
+        parts = cleanLine.split('\t').map(p => {
+          let str = p.trim();
+          if (str.startsWith('"') && str.endsWith('"')) {
+            str = str.substring(1, str.length - 1).replace(/""/g, '"');
+          }
+          return str;
+        });
+      } else {
+        const semiParts = parseCSVLine(cleanLine, ';');
+        const commaParts = parseCSVLine(cleanLine, ',');
+        parts = semiParts.length >= commaParts.length ? semiParts : commaParts;
+      }
 
       if (parts.length >= 2) {
-        // Helper to remove surrounding quotes that Excel/CSV sometimes adds
-        const stripQuotes = (str: string | undefined) => str ? str.trim().replace(/^"|"$/g, '').trim() : "";
-
-        const p0 = stripQuotes(parts[0]);
-        const p1 = stripQuotes(parts[1]);
-        const p2 = stripQuotes(parts[2]);
-        const p3 = stripQuotes(parts[3]);
+        const p0 = parts[0] || "";
+        const p1 = parts[1] || "";
+        const p2 = parts[2] || "";
+        const p3 = parts[3] || "";
 
         // Skip template header rows
         const lowerP0 = p0.toLowerCase();
@@ -145,19 +197,18 @@ export default function Import() {
         }
 
         if (destination === 'articles') {
-          // Validate that article and noun are not empty
-          if (!p0.trim() || !p1.trim()) {
-            console.warn(`Skipping incomplete article row: article="${p0}" | noun="${p1}"`);
+          // Per user request, strictly parse 3 columns for articles: Article, Noun, Hungarian.
+          if (!p0.trim() || !p1.trim() || !p2.trim()) {
+            console.warn(`Skipping incomplete article row: article="${p0}" | noun="${p1}" | hungarian="${p2}"`);
             continue;
           }
-          // Store article and noun separately for the preview, but also combine them for the quiz engine
-          items.push({ article: p0, noun: p1, hungarian: p2, example: p3, german: `${p0} ${p1}`.trim() });
+          items.push({ article: p0, noun: p1, hungarian: p2, example: '', german: `${p0} ${p1}`.trim() });
         } else if (destination === 'false_friends' || destination === 'idioms') {
           items.push({ german: p0, hungarian: p1, example: p2, note: p3 });
         } else if (destination === 'verbs') {
-          items.push({ german: p0, hungarian: p1, example: p2 });
+          items.push({ german: p0, hungarian: p1, hint: p2 });
         } else if (destination === 'adjectives') {
-          items.push({ german: p0, hungarian: p1, example: p2 });
+          items.push({ german: p0, hungarian: p1, levels: p2 });
         } else {
           items.push({ german: p0, hungarian: p1, example: p2 });
         }
@@ -304,17 +355,27 @@ export default function Import() {
           (orig.german !== item.german ||
             orig.hungarian !== item.hungarian ||
             orig.example !== item.example ||
-            (orig as any).note !== item.note)
+            (orig as any).note !== item.note ||
+            (orig as any).levels !== item.levels ||
+            (orig as any).hint !== item.hint ||
+            (orig as any).article !== item.article ||
+            (orig as any).noun !== item.noun)
         ) {
           if (orig.isCloud) {
+            const updatePayload: any = {
+              german: item.german?.trim() || '',
+              hungarian: item.hungarian?.trim() || '',
+            };
+            if (item.example !== undefined) updatePayload.example = item.example.trim();
+            if (item.note !== undefined) updatePayload.note = item.note.trim();
+            if (item.levels !== undefined) updatePayload.levels = item.levels.trim();
+            if (item.hint !== undefined) updatePayload.hint = item.hint.trim();
+            if (item.article !== undefined) updatePayload.article = item.article.trim();
+            if (item.noun !== undefined) updatePayload.noun = item.noun.trim();
+
             await updateCloudWord(
               item.id,
-              {
-                german: item.german?.trim() || '',
-                hungarian: item.hungarian?.trim() || '',
-                example: item.example?.trim() || '',
-                note: item.note?.trim() || ''
-              } as any
+              updatePayload
             );
           } else {
             // Static item modified! Tombstone old + create new cloud item
@@ -326,17 +387,23 @@ export default function Import() {
               deleted: true,
               dateAdded: Date.now()
             });
-            newCloudItems.push({
+            const newCloudItem: any = {
               userId: 'PUBLIC_LIBRARY',
               german: item.german?.trim() || '',
               hungarian: item.hungarian?.trim() || '',
-              example: item.example?.trim() || '',
-              note: item.note?.trim() || '',
               category: orig.category || 'vocabulary',
               dateAdded: Date.now(),
               sourceFile: orig.sourceFile,
               sourceType: orig.sourceType
-            });
+            };
+            if (item.example !== undefined) newCloudItem.example = item.example.trim();
+            if (item.note !== undefined) newCloudItem.note = item.note.trim();
+            if (item.levels !== undefined) newCloudItem.levels = item.levels.trim();
+            if (item.hint !== undefined) newCloudItem.hint = item.hint.trim();
+            if (item.article !== undefined) newCloudItem.article = item.article.trim();
+            if (item.noun !== undefined) newCloudItem.noun = item.noun.trim();
+            
+            newCloudItems.push(newCloudItem);
           }
         }
       }
@@ -355,15 +422,24 @@ export default function Import() {
     }
   };
 
-  const handleDeleteFile = async (fileName: string, wordIds: string[]) => {
-    if (!confirm(t('confirm_delete_file', { fileName, count: wordIds.length }))) return;
+  const handleDeleteFile = async (fileName: string) => {
+    const fileInfo = importedFiles.find(f => f.fileName === fileName);
+    if (!fileInfo) return;
+
+    if (!confirm(t('confirm_delete_file', { fileName, count: fileInfo.itemCount }))) return;
 
     setSaving(true);
     try {
-      const cloudDeletes = wordIds.filter((id: string) => !id.startsWith('static_'));
-      const staticDeletes = wordIds.filter((id: string) => id.startsWith('static_'));
+      // Re-determine the items to delete at the moment of action to avoid stale state.
+      const itemsInFile = allItems.filter((item: any) => (item.sourceFile || "Legacy Import (No File Name)") === fileName);
+      const wordIdsToDelete = itemsInFile.map((item: any) => item.id).filter(Boolean);
 
-      if (cloudDeletes.length > 0) await bulkDeleteCloudWords(cloudDeletes);
+      const cloudDeletes = wordIdsToDelete.filter((id: string) => !id.startsWith('static_'));
+      const staticDeletes = wordIdsToDelete.filter((id: string) => id.startsWith('static_'));
+
+      if (cloudDeletes.length > 0) {
+        await bulkDeleteCloudWords(cloudDeletes);
+      }
 
       if (staticDeletes.length > 0) {
         const tombstones = staticDeletes.map((id: string) => {
@@ -401,13 +477,19 @@ export default function Import() {
 
     setSaving(true);
     try {
-      const idsToDelete: string[] = [];
+      let allIdsToDelete: string[] = [];
       importedFiles.forEach((f: ImportedFilePreview) => {
-        if (selectedFiles.has(f.fileName)) idsToDelete.push(...f.wordIds);
+        if (selectedFiles.has(f.fileName)) {
+          // Re-calculate IDs to ensure freshness
+          const itemsInFile = allItems.filter((item: any) => (item.sourceFile || "Legacy Import (No File Name)") === f.fileName);
+          const wordIds = itemsInFile.map((item: any) => item.id).filter(Boolean);
+          allIdsToDelete.push(...wordIds);
+        }
       });
+      allIdsToDelete = Array.from(new Set(allIdsToDelete)); // Ensure uniqueness
 
-      const cloudDeletes = idsToDelete.filter((id: string) => !id.startsWith('static_'));
-      const staticDeletes = idsToDelete.filter((id: string) => id.startsWith('static_'));
+      const cloudDeletes = allIdsToDelete.filter((id: string) => !id.startsWith('static_'));
+      const staticDeletes = allIdsToDelete.filter((id: string) => id.startsWith('static_'));
 
       if (cloudDeletes.length > 0) await bulkDeleteCloudWords(cloudDeletes);
 
@@ -569,64 +651,161 @@ export default function Import() {
     );
   };
 
-  const handleSave = async () => {
+  const handleSave = () => {
     if (previewItems.length === 0 || !user || !data) {
       alert(t('no_items_save'));
       return;
     }
 
-    setSaving(true);
-    try {
-      // Check for duplicates based on the German word within the target destination category
-      const existingSet = new Set(
-        allItems
-          .filter((item: any) => (item.category || 'vocabulary') === destination)
-          .map((item: any) => (item.german || '').toLowerCase().trim())
-      );
+    const newItems: any[] = [];
+    const duplicates: any[] = [];
+    const existingSet = new Map(
+      allItems
+        .filter((item: any) => (item.category || 'vocabulary') === destination)
+        .map((item: any) => [(item.german || '').toLowerCase().trim(), item])
+    );
 
-      const itemsToSave: any[] = [];
-      let duplicateCount = 0;
+    for (const item of previewItems) {
+      const german = item.german?.trim() || '';
+      const hungarian = item.hungarian?.trim() || '';
+      if (!german || !hungarian) continue;
 
-      for (const item of previewItems) {
-        const german = item.german?.trim() || '';
-        const hungarian = item.hungarian?.trim() || '';
+      const key = german.toLowerCase();
+      const existingItem = existingSet.get(key);
 
-        if (!german || !hungarian) continue; // Skip empty rows silently
-
-        const key = german.toLowerCase();
-        if (!existingSet.has(key)) {
-          existingSet.add(key); // Prevent duplicates within the new batch itself
-          itemsToSave.push({
-            ...item,
-            userId: saveToPublic ? 'PUBLIC_LIBRARY' : user.uid,
-            dateAdded: Date.now(),
-            category: destination,
-            sourceFile: data.fileName,
-            sourceType: data.fileType
-          });
-        } else {
-          duplicateCount++;
-        }
-      }
-
-      if (itemsToSave.length > 0) {
-        await bulkAddCloudWords(itemsToSave as any[]);
-      }
-      setData(null); // Clear preview after saving
-
-      if (duplicateCount > 0) {
-        alert(t('import_success_with_duplicates', { saved: itemsToSave.length, duplicates: duplicateCount }));
+      if (existingItem) {
+        duplicates.push({ ...item, idToUpdate: existingItem.id, isStatic: !existingItem.isCloud });
       } else {
-        alert(t('import_success', { saved: itemsToSave.length }));
+        newItems.push(item);
       }
+    }
+
+    setItemsToAddNew(newItems);
+    setItemsToOverwrite(duplicates);
+
+    if (duplicates.length > 0) {
+      setIsOverwriteModalOpen(true);
+    } else {
+      // No duplicates, proceed to save directly.
+      executeSave(false);
+    }
+  };
+
+  const executeSave = async (overwrite = false) => {
+    setSaving(true);
+    setIsOverwriteModalOpen(false);
+
+    try {
+      let savedCount = 0;
+      let overwrittenCount = 0;
+
+      // 1. Save brand new items
+      if (itemsToAddNew.length > 0) {
+        const newItemsPayload = itemsToAddNew.map(item => {
+          const payload: any = { ...item, userId: saveToPublic ? 'PUBLIC_LIBRARY' : user?.uid, dateAdded: Date.now(), category: destination };
+          if (data?.fileName) payload.sourceFile = data.fileName;
+          if (data?.fileType) payload.sourceType = data.fileType;
+          Object.keys(payload).forEach(k => payload[k] === undefined && delete payload[k]);
+          return payload;
+        });
+        await bulkAddCloudWords(newItemsPayload);
+        savedCount = newItemsPayload.length;
+      }
+
+      // 2. Handle duplicates if overwrite is true
+      if (overwrite && itemsToOverwrite.length > 0) {
+        const cloudUpdates: Promise<void>[] = [];
+        const newCloudItems: any[] = [];
+
+        for (const item of itemsToOverwrite) {
+          const { idToUpdate, isStatic, ...newItemData } = item;
+          
+          const payload: any = { ...newItemData, userId: saveToPublic ? 'PUBLIC_LIBRARY' : user?.uid, updatedAt: Date.now(), category: destination };
+          if (data?.fileName) payload.sourceFile = data.fileName;
+          if (data?.fileType) payload.sourceType = data.fileType;
+          Object.keys(payload).forEach(k => payload[k] === undefined && delete payload[k]);
+
+          if (isStatic) {
+            newCloudItems.push(payload);
+          } else if (idToUpdate) {
+            cloudUpdates.push(updateCloudWord(idToUpdate, payload));
+          }
+        }
+
+        if (newCloudItems.length > 0) await bulkAddCloudWords(newCloudItems);
+        if (cloudUpdates.length > 0) await Promise.all(cloudUpdates);
+        overwrittenCount = itemsToOverwrite.length;
+      }
+
+      setData(null);
+      let alertMessage = t('import_success', { saved: savedCount });
+      if (overwrittenCount > 0) {
+        alertMessage += `\n${t('import_overwritten', { count: overwrittenCount })}`;
+      } else if (itemsToOverwrite.length > 0) {
+        alertMessage += `\n${t('import_skipped', { count: itemsToOverwrite.length })}`;
+      }
+      alert(alertMessage);
+
     } catch (error) {
       console.error('Failed to save vocabulary:', error);
-
       const message = error instanceof Error ? error.message : JSON.stringify(error);
-
       alert(`Database error:\n${message}`);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const openAddContentModal = () => {
+    setNewGerman("");
+    setNewArticle("der");
+    setNewNoun("");
+    setNewHungarian("");
+    setNewExample("");
+    setNewNote("");
+    setNewCategory(destination); // Default to the currently selected import destination
+    setIsAddModalOpen(true);
+  };
+
+  const handleSaveNewWord = async () => {
+    const finalGerman = newCategory === 'articles' ? `${newArticle} ${newNoun.trim()}` : newGerman.trim();
+
+    if (!finalGerman || !newHungarian.trim()) {
+      alert(t('alert_fill_fields_login'));
+      return;
+    }
+
+    // The `existingItems` hook already correctly points to the public or private library
+    const duplicate = existingItems?.find((w: any) => 
+      w.category === newCategory && (w.german || '').toLowerCase().trim() === finalGerman.toLowerCase().trim()
+    );
+
+    if (duplicate) {
+      const catKey = duplicate.category || 'vocabulary';
+      let catName = t(`dropdown_${catKey}`);
+      if (catName === `dropdown_${catKey}`) catName = catKey;
+      alert(t('alert_word_exists', { category: catName }));
+      return;
+    }
+
+    try {
+        const payload: any = {
+          userId: saveToPublic ? "PUBLIC_LIBRARY" : user?.uid,
+          german: finalGerman,
+          hungarian: newHungarian.trim(),
+          example: newExample.trim(),
+          note: newCategory === 'false_friends' || newCategory === 'idioms' ? newNote.trim() : "",
+          dateAdded: Date.now(),
+          category: newCategory,
+          sourceFile: "Manual CMS Entry",
+          sourceType: "cms"
+        };
+
+        await addCloudWord(payload);
+        setIsAddModalOpen(false);
+        alert(t('saved') || 'Saved!');
+    } catch (e) {
+      console.error("Failed to save word:", e);
+      alert("Failed to save word. Please try again.");
     }
   };
 
@@ -668,7 +847,8 @@ export default function Import() {
         <ul className="text-sm text-blue-700 list-disc list-inside space-y-1.5 ml-2">
           <li><strong>{t('vocab_phrases')}</strong> {t('format_vocab_phrases')}</li>
           <li><strong>{t('articles_quiz')}</strong> {t('format_articles')}</li>
-          <li><strong>{t('adjectives_quiz')}</strong> {t('format_adjectives')}</li>
+          <li><strong>{t('verbs_quiz_format_title') || 'Verbs Quiz:'}</strong> {t('verbs_quiz_format_desc') || 'Column A = German (verb), Column B = Hungarian (Meaning), Column C = Past forms or Examples.'}</li>
+          <li><strong>{t('adjectives_quiz') || 'Adjectives Quiz'}:</strong> {t('format_adjectives') || 'Column A: German, Column B: Hungarian, Column C: Levels (e.g., besser, am besten).'}</li>
         </ul>
 
         {/* Downloadable Template */}
@@ -739,6 +919,7 @@ export default function Import() {
           </div>
         </div>
         </div>
+      </div>
 
       {/* DROP ZONE CENTER AREA */}
       <div className="relative border-2 border-dashed border-blue-300 rounded-[2rem] bg-white/50 hover:bg-blue-50/50 backdrop-blur-md transition-all duration-300 flex flex-col items-center justify-center text-center shadow-inner group py-8">
@@ -754,6 +935,15 @@ export default function Import() {
         <div className="absolute inset-0 opacity-0 cursor-pointer flex items-stretch justify-stretch [&>*]:flex-grow [&>*]:w-full [&>*]:h-full">
           <FileDropZone onFileParsed={setData} />
         </div>
+      </div>
+
+      {/* MANUAL ADD CONTENT BUTTON */}
+      <div className="flex justify-end mt-4 mb-2">
+        {user && (
+          <button onClick={openAddContentModal} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-xl shadow-sm transition-colors flex items-center gap-2">
+            <span className="text-xl leading-none">+</span> {t('add_content') || 'Add Content'}
+          </button>
+        )}
       </div>
 
       {/* OUTPUT */}
@@ -776,7 +966,6 @@ export default function Import() {
                         <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('article')} <span className="text-xs font-normal text-gray-500 block">{t('column_a')}</span></th>
                         <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('noun')} <span className="text-xs font-normal text-gray-500 block">{t('column_b')}</span></th>
                         <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('hungarian')} <span className="text-xs font-normal text-gray-500 block">{t('column_c')}</span></th>
-                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('example')} <span className="text-xs font-normal text-gray-500 block">{t('column_d')}</span></th>
                       </>
                     ) : destination === 'false_friends' || destination === 'idioms' ? (
                       <>
@@ -815,7 +1004,6 @@ export default function Import() {
                           <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.article || ''} onChange={(e) => handleItemChange(idx, 'article', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
                           <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.noun || ''} onChange={(e) => handleItemChange(idx, 'noun', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
                           <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleItemChange(idx, 'hungarian', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
-                          <td className="p-1 sm:p-2 align-top"><textarea rows={2} value={item.example || ''} onChange={(e) => handleItemChange(idx, 'example', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
                         </>
                       ) : destination === 'false_friends' || destination === 'idioms' ? (
                         <>
@@ -828,13 +1016,13 @@ export default function Import() {
                         <>
                           <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.german || ''} onChange={(e) => handleItemChange(idx, 'german', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
                           <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleItemChange(idx, 'hungarian', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
-                          <td className="p-1 sm:p-2 align-top"><textarea rows={2} value={item.example || ''} onChange={(e) => handleItemChange(idx, 'example', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
+                          <td className="p-1 sm:p-2 align-top"><textarea rows={2} value={item.levels || ''} onChange={(e) => handleItemChange(idx, 'levels', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
                         </>
                       ) : destination === 'verbs' ? (
                         <>
                           <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.german || ''} onChange={(e) => handleItemChange(idx, 'german', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
                           <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleItemChange(idx, 'hungarian', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
-                          <td className="p-1 sm:p-2 align-top"><textarea rows={2} value={item.example || ''} onChange={(e) => handleItemChange(idx, 'example', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
+                          <td className="p-1 sm:p-2 align-top"><textarea rows={2} value={item.hint || ''} onChange={(e) => handleItemChange(idx, 'hint', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
                         </>
                       ) : (
                         <>
@@ -905,7 +1093,173 @@ export default function Import() {
           </div>
         </div>
       )}
-      </div>
+
+      {/* ADD CONTENT MODAL */}
+      {isAddModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-blue-950/40 backdrop-blur-sm transition-opacity">
+          <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-md max-h-[90vh] overflow-hidden flex flex-col animate-fade-in-up">
+            <div className="p-6 md:p-8 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+              <h2 className="text-2xl font-extrabold text-blue-950">{t('modal_add_word_title')}</h2>
+              <button onClick={() => setIsAddModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-full hover:bg-gray-200">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+              </button>
+            </div>
+
+            <div className="p-6 md:p-8 overflow-y-auto space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('modal_category_label') || 'Category'}</label>
+                <select value={newCategory} onChange={(e) => setNewCategory(e.target.value)} className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50">
+                  <option value="vocabulary">{t('dropdown_vocabulary') || 'Vocabulary quiz'}</option>
+                  <option value="reading">{t('dropdown_reading') || 'Vocabulary (to read)'}</option>
+                  <option value="articles">{t('dropdown_articles') || 'Articles quiz'}</option>
+                  <option value="phrases">{t('dropdown_phrases') || 'Phrases and sentences quiz'}</option>
+                  <option value="prepositions">{t('dropdown_prepositions') || 'Prepositions quiz'}</option>
+                  <option value="adjectives">{t('dropdown_adjectives') || 'Adjectives quiz'}</option>
+                  <option value="verbs">{t('dropdown_verbs') || 'Verbs quiz'}</option>
+                  {isAdmin && adminMode && (
+                    <>
+                      <option value="false_friends">{t('false_friends') || 'False Friends'}</option>
+                      <option value="idioms">{t('idioms') || 'Idioms'}</option>
+                    </>
+                  )}
+                </select>
+              </div>
+             {(() => {
+              let germanLabel = t('modal_german_label');
+              let germanPlaceholder = t('modal_german_placeholder');
+              let hungarianPlaceholder = t('modal_hungarian_placeholder');
+
+              if (newCategory === 'phrases') {
+                germanLabel = t('modal_german_phrase_label') || "German Phrase/Sentence *";
+                germanPlaceholder = t('modal_german_phrase_placeholder') || "e.g. Wie geht es Ihnen?";
+                hungarianPlaceholder = t('modal_hungarian_phrase_placeholder') || "e.g. Hogy van?";
+              } else if (newCategory === 'prepositions') {
+                germanLabel = t('modal_german_prep_label') || "German Preposition *";
+                germanPlaceholder = t('modal_german_prep_placeholder') || "e.g. mit";
+                hungarianPlaceholder = t('modal_hungarian_prep_placeholder') || "e.g. val/vel";
+              } else if (newCategory === 'verbs') {
+                germanLabel = t('modal_german_verb_label') || "German Verb *";
+                germanPlaceholder = t('modal_german_verb_placeholder') || "e.g. machen";
+                hungarianPlaceholder = t('modal_hungarian_verb_placeholder') || "e.g. csinálni";
+              } else if (newCategory === 'false_friends' || newCategory === 'idioms') {
+                germanLabel = t('modal_german_ff_label') || "German False Friend *";
+                germanPlaceholder = t('modal_german_ff_placeholder') || "e.g. das Gift, die Gifte";
+                hungarianPlaceholder = t('modal_hungarian_ff_placeholder') || "e.g. a méreg";
+              }
+              return (
+                <div className="space-y-4">
+              {newCategory === 'articles' ? (
+                <div className="flex gap-4">
+                  <div className="w-1/3">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('modal_article_label') || 'Article *'}</label>
+                    <select
+                      value={newArticle}
+                      onChange={(e) => setNewArticle(e.target.value)}
+                      className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                    >
+                      <option value="der">der</option>
+                      <option value="die">die</option>
+                      <option value="das">das</option>
+                    </select>
+                  </div>
+                  <div className="w-2/3">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('modal_noun_label') || 'Noun (with plural) *'}</label>
+                    <input
+                      type="text"
+                      value={newNoun}
+                      onChange={(e) => setNewNoun(e.target.value)}
+                      placeholder={t('modal_noun_placeholder') || 'e.g. Mann, die Männer'}
+                      className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      autoFocus
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{germanLabel}</label>
+                  <input
+                    type="text"
+                    value={newGerman}
+                    onChange={(e) => setNewGerman(e.target.value)}
+                    placeholder={germanPlaceholder}
+                    className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    autoFocus
+                  />
+                </div>
+              )}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('modal_hungarian_label')}</label>
+                <input
+                  type="text"
+                  value={newHungarian}
+                  onChange={(e) => setNewHungarian(e.target.value)}
+                  placeholder={hungarianPlaceholder}
+                  className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('modal_example_label')}</label>
+                <input
+                  type="text"
+                  value={newExample}
+                  onChange={(e) => setNewExample(e.target.value)}
+                  placeholder={t('modal_example_placeholder')}
+                  className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              {(newCategory === 'false_friends' || newCategory === 'idioms') && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('note') || 'Note'} *</label>
+                  <input
+                    type="text"
+                    value={newNote}
+                    onChange={(e) => setNewNote(e.target.value)}
+                    placeholder={t('template_note_header') || 'Note'}
+                    className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              )}
+            </div>
+              );
+            })()}
+            </div>
+
+            <div className="p-6 md:p-8 border-t border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row justify-end gap-3">
+              <button onClick={() => setIsAddModalOpen(false)} className="w-full sm:w-auto px-6 py-3 font-bold text-gray-600 hover:bg-gray-200 rounded-xl transition-colors">{t('cancel')}</button>
+              <button onClick={handleSaveNewWord} className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl shadow-sm transition-colors">{t('modal_save_word')}</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Overwrite Confirmation Modal */}
+      {isOverwriteModalOpen && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-blue-950/40 backdrop-blur-sm transition-opacity">
+          <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-md max-h-[90vh] overflow-hidden flex flex-col animate-fade-in-up">
+            <div className="p-6 md:p-8 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+              <h2 className="text-2xl font-extrabold text-blue-950">{t('overwrite_confirm_title') || 'Overwrite Duplicates?'}</h2>
+              <button onClick={() => setIsOverwriteModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-full hover:bg-gray-200">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+              </button>
+            </div>
+            <div className="p-6 md:p-8 text-center">
+              <div className="w-16 h-16 bg-yellow-50 text-yellow-500 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">⚠️</div>
+              <p className="text-gray-600 font-medium">
+                {t('overwrite_confirm_desc', { count: itemsToOverwrite.length })}
+              </p>
+            </div>
+            <div className="p-6 md:p-8 border-t border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row justify-end gap-3">
+              <button onClick={() => setIsOverwriteModalOpen(false)} className="w-full sm:w-auto px-6 py-3 font-bold text-gray-600 hover:bg-gray-200 rounded-xl transition-colors">{t('cancel')}</button>
+              <button onClick={() => executeSave(false)} className="w-full sm:w-auto px-6 py-3 font-bold text-blue-700 bg-blue-100 hover:bg-blue-200 rounded-xl transition-colors">
+                {t('skip_button') || 'Skip Duplicates'}
+              </button>
+              <button onClick={() => executeSave(true)} className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl shadow-sm transition-colors">
+                {t('overwrite_button') || 'Overwrite'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* IMPORTED FILES MANAGER */}
       {importedFiles.length > 0 && (
@@ -1022,7 +1376,7 @@ export default function Import() {
                           <span className="hidden sm:inline">{t('download')}</span>
                         </button>
                         <button
-                          onClick={() => handleDeleteFile(file.fileName, file.wordIds)}
+                          onClick={() => handleDeleteFile(file.fileName)}
                           disabled={saving}
                           className="flex items-center text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50 font-bold text-sm"
                         >
@@ -1184,7 +1538,7 @@ export default function Import() {
                               <textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleEditItemChange(idx, 'hungarian', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" />
                             </td>
                             <td className="p-1 sm:p-2 align-top">
-                              <textarea rows={2} value={item.example || ''} onChange={(e) => handleEditItemChange(idx, 'example', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" />
+                              <textarea rows={2} value={item.levels || ''} onChange={(e) => handleEditItemChange(idx, 'levels', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" />
                             </td>
                           </>
                         ) : (
@@ -1196,7 +1550,7 @@ export default function Import() {
                               <textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleEditItemChange(idx, 'hungarian', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" />
                             </td>
                             <td className="p-1 sm:p-2 align-top">
-                              <textarea rows={2} value={item.example || ''} onChange={(e) => handleEditItemChange(idx, 'example', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" />
+                              <textarea rows={2} value={item.hint || item.example || ''} onChange={(e) => handleEditItemChange(idx, editingFileCategory === 'verbs' ? 'hint' : 'example', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" />
                             </td>
                           </>
                         )}

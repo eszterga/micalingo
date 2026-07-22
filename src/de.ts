@@ -94,6 +94,7 @@ export const de = {
   login_required: "Anmeldung erforderlich",
   to_create_new_quizzes_login_required: "Anmeldung erforderlich, um benutzerdefinierte Quizze zu erstellen",
   learn_new_words_from_library: "Durchsuche die Bibliothek oder deine eigenen Wörter.",
+  login_to_create_quizzes_desc: "Wenn du deinen eigenen Wortschatz und eigene Quizze erstellen möchtest, melde dich bitte an!",
   for_extending_login_required: "Anmeldung für ein persönliches Wörterbuch erforderlich",
   coming_soon: "Demnächst",
   review_grammar_topics: "Grammatikregeln und Erklärungen.",
@@ -102,8 +103,10 @@ export const de = {
   // Import
   import_title: "Dateien importieren",
   accepted_format_guide: "Akzeptierte Formate",
-  vocab_phrases: "Wortschatz / Redewendungen und Sätze:",
+  vocab_phrases: "Wortschatz / Redewendungen / Präpositionen:",
   format_vocab_phrases: "Spalte A = Deutsch (Phrase/Satz), Spalte B = Ungarisch (Bedeutung), Spalte C = Beispiel (Optional).",
+  verbs_quiz_format_title: "Verben-Quiz:",
+  verbs_quiz_format_desc: "Spalte A = Deutsch (Verb), Spalte B = Ungarisch (Bedeutung), Spalte C = Vergangenheitsformen oder Beispiele.",
   articles_quiz_label: "Artikel-Quiz:",
   format_articles: "Spalte A = Artikel, Spalte B = Substantiv, Spalte C = Ungarisch, Spalte D = Beispiel.",
   need_starting_point: "Brauchen Sie einen Ausgangspunkt?",
@@ -144,6 +147,12 @@ export const de = {
   no_items_save: "Keine gültigen Vokabeln zum Speichern oder Benutzer nicht angemeldet.",
   import_success_with_duplicates: "Import abgeschlossen! {saved} neue Elemente gespeichert. {duplicates} Duplikate übersprungen.",
   import_success: "Import abgeschlossen! {saved} neue Elemente gespeichert.",
+  import_overwritten: "{count} vorhandene Elemente überschrieben.",
+  import_skipped: "{count} doppelte Elemente übersprungen.",
+  overwrite_confirm_title: "Duplikate überschreiben?",
+  overwrite_confirm_desc: "{count} bereits vorhandene Elemente gefunden. Möchten Sie sie mit den Daten aus Ihrer Datei überschreiben?",
+  overwrite_button: "Überschreiben",
+  skip_button: "Duplikate überspringen",
   error_saving_db: "Beim Speichern in der Datenbank ist ein Fehler aufgetreten.",
 
   // Vocabulary Page
@@ -266,8 +275,8 @@ export const de = {
   template_hungarian_header: "Ungarisch (C)",
   template_example_header: "Beispiel (D)",
   template_german_header: "Deutsch",
-  template_german_mandatory_header: "Deutsch (Kötelező)",
-  template_hungarian_mandatory_header: "Ungarisch (Kötelező)",
+  template_german_mandatory_header: "Deutsch (Erforderlich, z.B. mit Artikel/Plural)",
+  template_hungarian_mandatory_header: "Ungarisch (Erforderlich)",
   template_example_optional_header: "Beispiel (Optional)",
 
   // Grammar & Statistics
@@ -465,7 +474,7 @@ export const de = {
   custom_adjectives_desc: 'Deine persönlichen Adjektive.',
   template_adjective_header: 'Adjektiv (erforderlich)',
   template_levels_header: 'Steigerung (z.B. besser, am besten)',
-  format_adjectives: 'Spalte A: Deutsch, Spalte B: Ungarisch, Spalte C: Steigerung (z.B. besser, am besten).',
+  format_adjectives: 'Spalte A: Deutsch, Spalte B: Ungarisch, Spalte C: Steigerung (z.B. besser, am besten) oder Beispielsatz.',
   adjectives_template: 'Adjektive Vorlage',
   adjective: 'Adjektiv',
   levels: 'Steigerung',

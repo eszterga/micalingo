@@ -545,11 +545,13 @@ export default function Quiz() {
                 {t('not_enough_words_desc', { topic: translatedTopic })}
               </p>
               <p className="text-gray-500 mt-2 font-medium">{t('need_more_items', { topic: topic || 'custom' })}</p>
-              <div className="mt-8">
-                <button onClick={() => navigate(`/import?destination=${topic}`)} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl shadow-sm transition-colors">
-                  {t('import_more_words')}
-                </button>
-              </div>
+              {user && (
+                <div className="mt-8">
+                  <button onClick={() => navigate(`/import?destination=${topic}`)} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl shadow-sm transition-colors">
+                    {t('import_more_words')}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>

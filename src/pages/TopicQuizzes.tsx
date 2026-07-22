@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { Link, useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { publicVocabulary, publicPhrases, publicArticles, publicPrepositions, publicAdjectives } from "../lib/public-data";
 import { useAuth } from "../AuthContext";
@@ -71,11 +71,8 @@ export default function TopicQuizzes() {
     }
   };
 
-  let sourceData: any[] = [];
-  let pageTitle = "";
-
-  const getUniqueSourceData = (staticSource: any[], topic: string) => {
-    const dbSource = publicDbWords.filter((w: any) => w.category === topic);
+  const getUniqueSourceData = useCallback((staticSource: any[], currentTopic: string) => {
+    const dbSource = publicDbWords.filter((w: any) => w.category === currentTopic);
     const combined = [...dbSource, ...staticSource];
     const unique: any[] = [];
     const seen = new Set<string>();
@@ -90,39 +87,32 @@ export default function TopicQuizzes() {
       }
     }
     return unique;
-  };
+  }, [publicDbWords]);
 
-  if (topic === 'vocabulary') {
-    sourceData = getUniqueSourceData(publicVocabulary, 'vocabulary');
-    pageTitle = t('vocabulary') || "Vocabulary";
-  } else if (topic === 'phrases') {
-    sourceData = getUniqueSourceData(publicPhrases, 'phrases');
-    pageTitle = t('phrases_sentences_quiz') || "Phrases and sentences quiz";
-  } else if (topic === 'articles') {
-    sourceData = getUniqueSourceData(publicArticles, 'articles');
-    pageTitle = t('articles_quiz') || "Articles";
-  } else if (topic === 'prepositions') {
-    sourceData = getUniqueSourceData(publicPrepositions, 'prepositions');
-    pageTitle = t('prepositions_quiz') || "Prepositions";
-  } else if (topic === 'adjectives') {
-    sourceData = getUniqueSourceData(publicAdjectives || [], 'adjectives');
-    pageTitle = t('adjectives_quiz') || "Adjectives";
-  } else if (topic === 'verbs') {
-    sourceData = getUniqueSourceData([], 'verbs'); // No default public words for verbs exist yet 
-    pageTitle = t('verbs_quiz') || "Verbs";
-  } else {
-    return (
-      <div className="relative min-h-[85vh] w-full flex flex-col pt-4 md:pt-8 pb-12">
-        <BackgroundBlobs />
-        <div className="relative z-10 w-full max-w-7xl mx-auto space-y-8 px-4 md:px-8">
-            <div className="text-center bg-white/70 backdrop-blur-xl p-12 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white">
-                <h1 className="text-3xl font-extrabold text-blue-950 mb-3">{t('topic_not_found') || 'Topic not found'}</h1>
-                <button onClick={() => navigate('/quizzes')} className="mt-4 text-blue-600 hover:underline font-bold">Return to Quizzes</button>
-            </div>
-        </div>
-      </div>
-    );
-  }
+  const { sourceData, pageTitle } = useMemo(() => {
+    if (!topic) return { sourceData: [], pageTitle: "" };
+
+    const staticSource =
+      topic === 'vocabulary' ? publicVocabulary
+      : topic === 'phrases' ? publicPhrases
+      : topic === 'articles' ? publicArticles
+      : topic === 'adjectives' ? (publicAdjectives || [])
+      : topic === 'verbs' ? []
+      : topic === 'prepositions' ? publicPrepositions
+      : [];
+    
+    const data = getUniqueSourceData(staticSource, topic);
+
+    const title = topic === 'vocabulary' ? t('vocabulary') || "Vocabulary"
+      : topic === 'phrases' ? t('phrases_sentences_quiz') || "Phrases and sentences quiz"
+      : topic === 'articles' ? t('articles_quiz') || "Articles"
+      : topic === 'prepositions' ? t('prepositions_quiz') || "Prepositions"
+      : topic === 'adjectives' ? t('adjectives_quiz') || "Adjectives"
+      : topic === 'verbs' ? t('verbs_quiz') || "Verbs"
+      : "";
+
+    return { sourceData: data, pageTitle: title };
+  }, [topic, getUniqueSourceData, t]);
 
   const totalQuizzes = Math.ceil(sourceData.length / WORDS_PER_QUIZ);
   const quizzes = Array.from({ length: totalQuizzes }, (_, i) => i + 1);
@@ -130,6 +120,20 @@ export default function TopicQuizzes() {
   const customSourceData = (userVocabulary || []).filter((word: any) => word.category === topic && word.german && word.hungarian);
   const totalCustomQuizzes = Math.ceil(customSourceData.length / WORDS_PER_QUIZ);
   const customQuizzes = Array.from({ length: totalCustomQuizzes }, (_, i) => i + 1);
+
+  if (!topic || !pageTitle) {
+    return (
+      <div className="relative min-h-[85vh] w-full flex flex-col pt-4 md:pt-8 pb-12">
+        <BackgroundBlobs />
+        <div className="relative z-10 w-full max-w-7xl mx-auto space-y-8 px-4 md:px-8">
+            <div className="text-center bg-white/70 backdrop-blur-xl p-12 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white">
+                <h1 className="text-3xl font-extrabold text-blue-950 mb-3">{t('topic_not_found') || 'Topic not found'}</h1>
+                <button onClick={() => navigate('/quizzes')} className="mt-4 text-blue-600 hover:underline font-bold">{t('return_to_quizzes') || 'Return to Quizzes'}</button>
+            </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative min-h-[85vh] w-full flex flex-col pt-4 md:pt-8 pb-12">

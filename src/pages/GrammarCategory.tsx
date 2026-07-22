@@ -366,6 +366,27 @@ export default function GrammarCategory() {
     }
   };
 
+  const handleInsertList = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const selection = window.getSelection();
+    if (!selection?.rangeCount) {
+      document.execCommand("insertUnorderedList", false);
+      return;
+    }
+
+    const selectedText = selection.toString();
+    if (selectedText.trim() === '') {
+      document.execCommand("insertUnorderedList", false);
+      return;
+    }
+
+    const lines = selectedText.split('\n').filter(line => line.trim() !== '');
+    if (lines.length > 0) {
+      const listHtml = '<ul>' + lines.map(line => `<li>${line}</li>`).join('') + '</ul>';
+      document.execCommand('insertHTML', false, listHtml);
+    }
+  };
+
   return (
     <div className="relative min-h-[85vh] w-full flex flex-col pt-4 md:pt-8 pb-12">
       <BackgroundBlobs />
@@ -503,7 +524,7 @@ export default function GrammarCategory() {
                     <button type="button" onClick={e => { e.preventDefault(); document.execCommand("formatBlock", false, "H3"); }} className="px-3 py-1 bg-white border border-gray-300 rounded font-bold hover:bg-gray-200 text-sm text-gray-700 transition-colors shadow-sm">H3</button>
                     <button type="button" onClick={e => { e.preventDefault(); document.execCommand("formatBlock", false, "P"); }} className="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-sm text-gray-700 transition-colors shadow-sm">P</button>
                     <div className="w-px h-6 bg-gray-300 self-center mx-1"></div>
-                    <button type="button" onClick={e => { e.preventDefault(); document.execCommand("insertUnorderedList", false); }} className="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-sm text-gray-700 transition-colors shadow-sm font-medium">• Bullet List</button>
+                    <button type="button" onClick={handleInsertList} className="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-sm text-gray-700 transition-colors shadow-sm font-medium">• Bullet List</button>
                     <button type="button" onClick={e => { e.preventDefault(); document.execCommand("undo", false); }} className="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-sm text-gray-700 transition-colors shadow-sm font-medium">↩ Undo</button>
                   </div>
                   <div ref={contentRef} contentEditable onInput={e => setEditData({ ...editData, content: e.currentTarget.innerHTML })} onPaste={handlePaste} className="p-4 min-h-[200px] max-h-[50vh] overflow-y-auto outline-none prose prose-blue max-w-none focus:bg-blue-50/10 transition-colors"></div>
