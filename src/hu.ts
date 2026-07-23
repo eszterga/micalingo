@@ -340,8 +340,8 @@ _items_save: "Nincsenek érvényes szavak a mentéshez, vagy nem vagy bejelentke
 
   // Library & Learning Materials
   library: "Könyvtár",
-  library_subtitle: "Férj hozzá a szótáradhoz és a tananyagaidhoz.",
-  learning_materials: "Tananyagok",
+  library_subtitle: "Férj hozzá a szótáradhoz és a segédanyagaidhoz.",
+  learning_materials: "Segédanyagok",
   learning_materials_subtitle: "Olvass szövegeket, hallgass hanganyagokat és egyebeket.",
   read_materials: "Olvasás",
   read_materials_desc: "Olvass szövegeket, cikkeket és történeteket.",
@@ -503,4 +503,16 @@ _items_save: "Nincsenek érvényes szavak a mentéshez, vagy nem vagy bejelentke
   idioms_desc: "Gyakori mondások és szólások.",
   save_to_vocabulary: "Szó mentése",
   add_content: "Tartalom hozzáadása",
+  explanation_label: "Magyarázat",
+  explanation_placeholder: "Magyarázat",
+  add_idiom: "Szólás hozzáadása",
+  edit_idiom: "Szólás szerkesztése",
+  idiom_german_label: "Német szólás *",
+  idiom_german_placeholder: "pl. Ich verstehe nur Bahnhof",
+  idiom_hungarian_label: "Magyar jelentés *",
+  idiom_hungarian_placeholder: "pl. Nekem ez kínai",
+  idiom_note_label: "Megjegyzés (Magyarázat)",
+  idiom_note_placeholder: "Szó szerinti jelentés...",
+  save_content: "Tartalom mentése",
+  confirm_delete_idiom: "Biztosan törölni szeretnéd ezt a szólást?",
 };

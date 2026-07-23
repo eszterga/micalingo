@@ -83,6 +83,15 @@ export default function Import() {
     setSaveToPublic(isAdmin ? adminMode : false);
   }, [isAdmin, adminMode]);
 
+  useEffect(() => {
+    if (!saveToPublic && (destination === 'false_friends' || destination === 'idioms')) {
+      setDestination('vocabulary');
+    }
+    if (!saveToPublic && (newCategory === 'false_friends' || newCategory === 'idioms')) {
+      setNewCategory('vocabulary');
+    }
+  }, [saveToPublic, destination, newCategory]);
+
   const allItems = useMemo(() => {
     const cloudItems = existingItems.map((item: any) => ({ ...item, isCloud: true }));
     if (!saveToPublic) return cloudItems;
@@ -601,7 +610,7 @@ export default function Import() {
         {
           [t('template_german_header') || 'German']: type === 'idioms' ? 'Ich verstehe nur Bahnhof' : 'das Gift, die Gifte',
           [t('template_hungarian_header') || 'Hungarian']: type === 'idioms' ? 'Nekem ez kínai' : 'a méreg',
-          [t('template_example_header') || 'Example']: type === 'idioms' ? 'Als er über Quantenphysik sprach, verstand ich nur Bahnhof.' : 'Dieses Tier produziert ein starkes Gift.',
+          [type === 'idioms' ? (t('explanation_label') || 'Explanation') : (t('template_example_header') || 'Example')]: type === 'idioms' ? 'Als er über Quantenphysik sprach, verstand ich nur Bahnhof.' : 'Dieses Tier produziert ein starkes Gift.',
           [t('note') || 'Note']: type === 'idioms' ? 'Literal meaning: I only understand train station.' : 'False friend: gift != ajándék'
         }
       ];
@@ -969,10 +978,10 @@ export default function Import() {
                       </>
                     ) : destination === 'false_friends' || destination === 'idioms' ? (
                       <>
-                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('german')} <span className="text-xs font-normal text-gray-500 block">{t('column_a')}</span></th>
-                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('hungarian')} <span className="text-xs font-normal text-gray-500 block">{t('column_b')}</span></th>
-                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('example')} <span className="text-xs font-normal text-gray-500 block">{t('column_c')}</span></th>
-                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('note')} <span className="text-xs font-normal text-gray-500 block">{t('column_d')}</span></th>
+                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{destination === 'idioms' ? (t('idiom_german_label') || 'German Idiom') : t('german')} <span className="text-xs font-normal text-gray-500 block">{t('column_a')}</span></th>
+                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{destination === 'idioms' ? (t('idiom_hungarian_label') || 'Hungarian Meaning') : t('hungarian')} <span className="text-xs font-normal text-gray-500 block">{t('column_b')}</span></th>
+                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{destination === 'idioms' ? (t('explanation_label') || 'Explanation') : t('example')} <span className="text-xs font-normal text-gray-500 block">{t('column_c')}</span></th>
+                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{destination === 'idioms' ? (t('idiom_note_label') || 'Note (Explanation)') : t('note')} <span className="text-xs font-normal text-gray-500 block">{t('column_d')}</span></th>
                       </>
                     ) : destination === 'adjectives' ? (
                       <>
@@ -1065,7 +1074,7 @@ export default function Import() {
                   <option value="prepositions">{t('dropdown_prepositions') || 'Prepositions quiz'}</option>
                   <option value="adjectives">{t('dropdown_adjectives') || 'Adjectives quiz'}</option>
                   <option value="verbs">{t('dropdown_verbs') || 'Verbs quiz'}</option>
-                  {isAdmin && adminMode && (
+                  {isAdmin && adminMode && saveToPublic && (
                     <>
                       <option value="false_friends">{t('false_friends') || 'False Friends'}</option>
                       <option value="idioms">{t('idioms') || 'Idioms'}</option>
@@ -1116,7 +1125,7 @@ export default function Import() {
                   <option value="prepositions">{t('dropdown_prepositions') || 'Prepositions quiz'}</option>
                   <option value="adjectives">{t('dropdown_adjectives') || 'Adjectives quiz'}</option>
                   <option value="verbs">{t('dropdown_verbs') || 'Verbs quiz'}</option>
-                  {isAdmin && adminMode && (
+                  {isAdmin && adminMode && saveToPublic && (
                     <>
                       <option value="false_friends">{t('false_friends') || 'False Friends'}</option>
                       <option value="idioms">{t('idioms') || 'Idioms'}</option>
@@ -1141,10 +1150,14 @@ export default function Import() {
                 germanLabel = t('modal_german_verb_label') || "German Verb *";
                 germanPlaceholder = t('modal_german_verb_placeholder') || "e.g. machen";
                 hungarianPlaceholder = t('modal_hungarian_verb_placeholder') || "e.g. csinálni";
-              } else if (newCategory === 'false_friends' || newCategory === 'idioms') {
+              } else if (newCategory === 'false_friends') {
                 germanLabel = t('modal_german_ff_label') || "German False Friend *";
                 germanPlaceholder = t('modal_german_ff_placeholder') || "e.g. das Gift, die Gifte";
                 hungarianPlaceholder = t('modal_hungarian_ff_placeholder') || "e.g. a méreg";
+              } else if (newCategory === 'idioms') {
+                germanLabel = t('idiom_german_label') || "German Idiom *";
+                germanPlaceholder = t('idiom_german_placeholder') || "e.g. Ich verstehe nur Bahnhof";
+                hungarianPlaceholder = t('idiom_hungarian_placeholder') || "e.g. Nekem ez kínai";
               }
               return (
                 <div className="space-y-4">
@@ -1188,7 +1201,7 @@ export default function Import() {
                 </div>
               )}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t('modal_hungarian_label')}</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{newCategory === 'idioms' ? (t('idiom_hungarian_label') || 'Hungarian Meaning *') : t('modal_hungarian_label')}</label>
                 <input
                   type="text"
                   value={newHungarian}
@@ -1198,23 +1211,23 @@ export default function Import() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t('modal_example_label')}</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{newCategory === 'idioms' ? (t('explanation_label') || 'Explanation') : t('modal_example_label')}</label>
                 <input
                   type="text"
                   value={newExample}
                   onChange={(e) => setNewExample(e.target.value)}
-                  placeholder={t('modal_example_placeholder')}
+                  placeholder={newCategory === 'idioms' ? (t('explanation_placeholder') || 'Explanation') : t('modal_example_placeholder')}
                   className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               {(newCategory === 'false_friends' || newCategory === 'idioms') && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('note') || 'Note'} *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{newCategory === 'idioms' ? (t('idiom_note_label') || 'Note (Explanation)') : (t('note') || 'Note')} *</label>
                   <input
                     type="text"
                     value={newNote}
                     onChange={(e) => setNewNote(e.target.value)}
-                    placeholder={t('template_note_header') || 'Note'}
+                    placeholder={newCategory === 'idioms' ? (t('idiom_note_placeholder') || 'Literal meaning...') : (t('template_note_header') || 'Note')}
                     className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
@@ -1458,10 +1471,10 @@ export default function Import() {
                         </>
                       ) : editingFileCategory === 'false_friends' || editingFileCategory === 'idioms' ? (
                         <>
-                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('german')}</th>
-                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('hungarian')}</th>
-                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('example')}</th>
-                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('note')}</th>
+                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{editingFileCategory === 'idioms' ? (t('idiom_german_label') || 'German Idiom') : t('german')}</th>
+                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{editingFileCategory === 'idioms' ? (t('idiom_hungarian_label') || 'Hungarian Meaning') : t('hungarian')}</th>
+                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{editingFileCategory === 'idioms' ? (t('explanation_label') || 'Explanation') : t('example')}</th>
+                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{editingFileCategory === 'idioms' ? (t('idiom_note_label') || 'Note (Explanation)') : t('note')}</th>
                         </>
                       ) : editingFileCategory === 'adjectives' ? (
                         <>
