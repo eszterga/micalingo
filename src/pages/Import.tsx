@@ -619,7 +619,7 @@ export default function Import() {
     } else if (type === 'prepositions') {
       templateData = [
         {
-          [t('template_german_verb_header') || 'German Verb + Hungarian']: 'Verzichten (lemondani, felhagyni valamivel)',
+          [t('template_german_verb_header') || 'German Verb + Hungarian']: 'verzichten, lemondani, felhagyni valamivel',
           [t('template_prep_case_header') || 'Preposition + Case']: 'auf + Akk.',
           [t('template_meaning_example_header') || 'Example Sentence']: 'Ich verzichte auf das Angebot.'
         }
@@ -867,10 +867,9 @@ export default function Import() {
         <h2 className="font-bold text-blue-800 mb-2">{t('accepted_format_guide')}</h2>
         <ul className="text-sm text-blue-700 list-disc list-inside space-y-1.5 ml-2">
           <li><strong>{t('vocab_phrases')}</strong> {t('format_vocab_phrases')}</li>
-          <li><strong>{t('articles_quiz')}</strong> {t('format_articles')}</li>
+          <li><strong>{t('articles_quiz_label') || 'Articles Quiz:'}</strong> {t('format_articles')}</li>
           <li><strong>{t('verbs_quiz_format_title') || 'Verbs Quiz:'}</strong> {t('verbs_quiz_format_desc') || 'Column A = German (verb), Column B = Hungarian (Meaning), Column C = Past forms or Examples.'}</li>
-          <li><strong>{t('adjectives_quiz') || 'Adjectives Quiz'}:</strong> {t('format_adjectives') || 'Column A: German, Column B: Hungarian, Column C: Levels (e.g., besser, am besten).'}</li>
-          <li><strong>{t('prepositions_quiz_format_title') || 'Prepositions Quiz:'}</strong> {t('prepositions_quiz_format_desc') || 'Column A = German verb, Column B = Preposition + case, Column C = Hungarian meaning with an Example sentence together, divided by comma.'}</li>
+          <li><strong>{t('adjectives_quiz_label') || 'Adjectives Quiz:'}</strong> {t('format_adjectives') || 'Column A: German, Column B: Hungarian, Column C: Levels (e.g., besser, am besten).'}</li>
           <li><strong>{t('prepositions_quiz_format_title') || 'Prepositions Quiz:'}</strong> {t('prepositions_quiz_format_desc') || 'Column A = German verb + Hungarian meaning, Column B = Preposition + case, Column C = Example sentence.'}</li>
         </ul>
 
@@ -1051,7 +1050,7 @@ export default function Import() {
                         </>
                       ) : destination === 'prepositions' ? (
                         <>
-                          <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.german || ''} onChange={(e) => handleItemChange(idx, 'german', e.target.value)} placeholder={t('modal_german_prep_verb_placeholder') || "e.g. Verzichten (lemondani, felhagyni valamivel)"} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
+                          <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.german || ''} onChange={(e) => handleItemChange(idx, 'german', e.target.value)} placeholder={t('modal_german_prep_verb_placeholder') || "e.g. verzichten, lemondani, felhagyni valamivel"} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
                           <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleItemChange(idx, 'hungarian', e.target.value)} placeholder={t('modal_prep_case_placeholder') || "e.g. auf + Akk."} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
                           <td className="p-1 sm:p-2 align-top"><textarea rows={2} value={item.example || ''} onChange={(e) => handleItemChange(idx, 'example', e.target.value)} placeholder={t('meaning_example_placeholder') || "e.g. Ich verzichte auf das Angebot."} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
                         </>
@@ -1185,7 +1184,7 @@ export default function Import() {
                 hungarianPlaceholder = t('modal_hungarian_phrase_placeholder') || "e.g. Hogy van?";
               } else if (newCategory === 'prepositions') {
                 germanLabel = t('modal_german_prep_verb_label') || "German Verb + Hungarian *";
-                germanPlaceholder = t('modal_german_prep_verb_placeholder') || "e.g. Verzichten (lemondani, felhagyni valamivel)";
+                germanPlaceholder = t('modal_german_prep_verb_placeholder') || "e.g. verzichten, lemondani, felhagyni valamivel";
                 hungarianPlaceholder = t('modal_prep_case_placeholder') || "e.g. auf + Akk.";
               } else if (newCategory === 'verbs') {
                 germanLabel = t('modal_german_verb_label') || "German Verb *";
@@ -1577,7 +1576,7 @@ export default function Import() {
                         ) : editingFileCategory === 'prepositions' ? (
                           <>
                             <td className="p-1 sm:p-2 border-r border-gray-100 align-top">
-                              <textarea rows={2} value={item.german || ''} onChange={(e) => handleEditItemChange(idx, 'german', e.target.value)} placeholder={t('modal_german_prep_verb_placeholder') || "e.g. Verzichten (lemondani, felhagyni valamivel)"} className="w-full border border-gray-200 rounded p-2 text-sm" />
+                              <textarea rows={2} value={item.german || ''} onChange={(e) => handleEditItemChange(idx, 'german', e.target.value)} placeholder={t('modal_german_prep_verb_placeholder') || "e.g. verzichten, lemondani, felhagyni valamivel"} className="w-full border border-gray-200 rounded p-2 text-sm" />
                             </td>
                             <td className="p-1 sm:p-2 border-r border-gray-100 align-top">
                               <textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleEditItemChange(idx, 'hungarian', e.target.value)} placeholder={t('modal_prep_case_placeholder') || "e.g. auf + Akk."} className="w-full border border-gray-200 rounded p-2 text-sm" />

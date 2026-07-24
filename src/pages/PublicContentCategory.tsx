@@ -260,7 +260,7 @@ export default function PublicContentCategory({ type }: { type: 'articles' | 'bo
         if (editingId) {
           await setDoc(doc(dbCloud, collectionName, editingId), payload, { merge: true });
         } else {
-          payload.userId = (isAdmin && adminMode && saveToPublic) ? "PUBLIC_LIBRARY" : user?.uid;
+          payload.userId = isAdmin && adminMode ? "PUBLIC_LIBRARY" : user?.uid;
           await setDoc(doc(collection(dbCloud, collectionName)), payload);
         }
         closeModal();
@@ -683,9 +683,9 @@ export default function PublicContentCategory({ type }: { type: 'articles' | 'bo
                 germanPlaceholder = t('modal_german_phrase_placeholder') || "e.g. Wie geht es Ihnen?";
                 hungarianPlaceholder = t('modal_hungarian_phrase_placeholder') || "e.g. Hogy van?";
               } else if (newCategory === 'prepositions') {
-                germanLabel = t('modal_german_prep_label') || "German Preposition *";
-                germanPlaceholder = t('modal_german_prep_placeholder') || "e.g. mit";
-                hungarianPlaceholder = t('modal_hungarian_prep_placeholder') || "e.g. val/vel";
+                germanLabel = t('modal_german_prep_verb_label') || "German Verb + Hungarian *";
+                germanPlaceholder = t('modal_german_prep_verb_placeholder') || "e.g. verzichten, lemondani valamiről/felhagyni valamivel";
+                hungarianPlaceholder = t('modal_prep_case_placeholder') || "e.g. auf + Akk.";
               } else if (newCategory === 'verbs') {
                 germanLabel = t('modal_german_verb_label') || "German Verb *";
                 germanPlaceholder = t('modal_german_verb_placeholder') || "e.g. machen";
@@ -719,12 +719,12 @@ export default function PublicContentCategory({ type }: { type: 'articles' | 'bo
                 </div>
               )}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t('modal_hungarian_label')}</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{newCategory === 'prepositions' ? (t('prep_case_label') || 'Preposition + Case *') : t('modal_hungarian_label')}</label>
                 <input type="text" value={newHungarian} onChange={(e) => setNewHungarian(e.target.value)} placeholder={hungarianPlaceholder} className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t('modal_example_label')}</label>
-                <input type="text" value={newExample} onChange={(e) => setNewExample(e.target.value)} placeholder={t('modal_example_placeholder')} className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                <label className="block text-sm font-medium text-gray-700 mb-1">{newCategory === 'prepositions' ? (t('meaning_example_label') || 'Example Sentence') : t('modal_example_label')}</label>
+                <input type="text" value={newExample} onChange={(e) => setNewExample(e.target.value)} placeholder={newCategory === 'prepositions' ? (t('meaning_example_placeholder') || 'e.g. Ich verzichte auf das Angebot.') : t('modal_example_placeholder')} className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" />
               </div>
               {newCategory === 'false_friends' && (
                 <div>

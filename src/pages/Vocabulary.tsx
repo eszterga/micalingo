@@ -768,7 +768,7 @@ export default function Vocabulary() {
                 hungarianPlaceholder = t('modal_hungarian_phrase_placeholder') || "e.g. Hogy van?";
               } else if (newCategory === 'prepositions') {
                 germanLabel = t('modal_german_prep_verb_label') || "German Verb + Hungarian *";
-                germanPlaceholder = t('modal_german_prep_verb_placeholder') || "e.g. Verzichten (lemondani, felhagyni valamivel)";
+                germanPlaceholder = t('modal_german_prep_verb_placeholder') || "e.g. verzichten, lemondani valamiről/felhagyni valamivel";
                 hungarianPlaceholder = t('modal_prep_case_placeholder') || "e.g. auf + Akk.";
               } else if (newCategory === 'verbs') {
                 germanLabel = t('modal_german_verb_label') || "German Verb *";
