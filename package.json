@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --force --port 3000 --strictPort --open",
-    "build": "tsc && vite build && copy dist\\index.html dist\\404.html",
+    "build": "tsc && vite build && node -e \"require('fs').copyFileSync('dist/index.html', 'dist/404.html')\"",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "predeploy": "npm run build",

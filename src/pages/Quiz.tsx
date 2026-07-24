@@ -159,17 +159,29 @@ export default function Quiz() {
           hungarian: word.hungarian
         };
       } else if (topic === 'prepositions') {
-        const correctAnswer = word.hungarian;
-        let distractorPool = Array.from(new Set(words.map(w => w.hungarian))).filter(h => h !== correctAnswer);
+        const correctAnswer = word.hungarian || '';
+        const normalize = (s: string) => (s || '').toLowerCase().replace(/\s+/g, '');
+        const normalizedCorrect = normalize(correctAnswer);
 
-        if (distractorPool.length < 3) {
-          const fallbackPool = ["auf + Akkusativ", "an + Dativ", "mit + Dativ", "für + Akkusativ", "über + Akkusativ", "von + Dativ", "zu + Dativ", "bei + Dativ", "aus + Dativ", "nach + Dativ"];
-          distractorPool = Array.from(new Set([...distractorPool, ...fallbackPool])).filter(h => h !== correctAnswer);
-        }
+        let distractorPool = words.map(w => w.hungarian).filter(Boolean);
+        const fallbackPool = ["auf + Akk.", "an + Dat.", "mit + Dat.", "für + Akk.", "über + Akk.", "von + Dat.", "zu + Dat.", "bei + Dat.", "aus + Dat.", "nach + Dat."];
+        distractorPool = [...distractorPool, ...fallbackPool];
+
+        const uniqueDistractors: string[] = [];
+        const seenNormalized = new Set<string>([normalizedCorrect]);
 
         distractorPool.sort(() => 0.5 - Math.random());
-        const distractors = distractorPool.slice(0, 3);
-        const options = [...distractors, correctAnswer].sort(() => 0.5 - Math.random());
+        
+        for (const d of distractorPool) {
+          const normD = normalize(d);
+          if (!seenNormalized.has(normD)) {
+            seenNormalized.add(normD);
+            uniqueDistractors.push(d);
+          }
+          if (uniqueDistractors.length === 3) break;
+        }
+
+        const options = [...uniqueDistractors, correctAnswer].sort(() => 0.5 - Math.random());
 
         return {
           questionText: word.german,

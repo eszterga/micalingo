@@ -731,7 +731,7 @@ export default function Vocabulary() {
                   <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mb-4">
                     <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
                   </div>
-                  <h2 className="text-3xl font-extrabold text-blue-950 mb-3">{t('personalized_space')} is Empty</h2>
+                  <h2 className="text-3xl font-extrabold text-blue-950 mb-3">{t('personalized_space_empty') || 'Your Private Space is Empty'}</h2>
                   <p className="text-blue-900/70 text-lg font-medium mb-8 max-w-md">{t('personalized_space_description')}</p>
                   <div className="flex flex-col sm:flex-row gap-4">
                     <Link to="/import" className="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold shadow-sm hover:bg-blue-700 transition-colors">{t('import_data')}</Link>
@@ -767,9 +767,9 @@ export default function Vocabulary() {
                 germanPlaceholder = t('modal_german_phrase_placeholder') || "e.g. Wie geht es Ihnen?";
                 hungarianPlaceholder = t('modal_hungarian_phrase_placeholder') || "e.g. Hogy van?";
               } else if (newCategory === 'prepositions') {
-                germanLabel = t('modal_german_prep_label') || "German Preposition *";
-                germanPlaceholder = t('modal_german_prep_placeholder') || "e.g. mit";
-                hungarianPlaceholder = t('modal_hungarian_prep_placeholder') || "e.g. val/vel";
+                germanLabel = t('modal_german_prep_verb_label') || "German Verb + Hungarian *";
+                germanPlaceholder = t('modal_german_prep_verb_placeholder') || "e.g. Verzichten (lemondani, felhagyni valamivel)";
+                hungarianPlaceholder = t('modal_prep_case_placeholder') || "e.g. auf + Akk.";
               } else if (newCategory === 'verbs') {
                 germanLabel = t('modal_german_verb_label') || "German Verb *";
                 germanPlaceholder = t('modal_german_verb_placeholder') || "e.g. machen";
@@ -822,7 +822,7 @@ export default function Vocabulary() {
                 </div>
               )}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{newCategory === 'idioms' ? (t('idiom_hungarian_label') || 'Hungarian Meaning *') : t('modal_hungarian_label')}</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{newCategory === 'idioms' ? (t('idiom_hungarian_label') || 'Hungarian Meaning *') : newCategory === 'prepositions' ? (t('prep_case_label') || 'Preposition + Case *') : t('modal_hungarian_label')}</label>
                 <input
                   type="text"
                   value={newHungarian}
@@ -832,12 +832,12 @@ export default function Vocabulary() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{newCategory === 'idioms' ? (t('explanation_label') || 'Explanation') : t('modal_example_label')}</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{newCategory === 'idioms' ? (t('explanation_label') || 'Explanation') : newCategory === 'prepositions' ? (t('meaning_example_label') || 'Example Sentence') : t('modal_example_label')}</label>
                 <input
                   type="text"
                   value={newExample}
                   onChange={(e) => setNewExample(e.target.value)}
-                  placeholder={newCategory === 'idioms' ? (t('explanation_placeholder') || 'Explanation') : t('modal_example_placeholder')}
+                  placeholder={newCategory === 'idioms' ? (t('explanation_placeholder') || 'Explanation') : newCategory === 'prepositions' ? (t('meaning_example_placeholder') || 'e.g. Ich verzichte auf das Angebot.') : t('modal_example_placeholder')}
                   className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>

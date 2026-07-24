@@ -602,9 +602,9 @@ export default function PrivateMaterials({ type }: { type: 'reading' | 'listenin
                         <span className="text-xl leading-none">+</span> {t((type === 'reading' ? "add_article" : "add_audio") as any)}
                       </button>
                     </div>
-                        {!cat.items || cat.items.length === 0 ? (
+                    {!cat.items || cat.items.length === 0 ? (
                       <div className="text-center py-8 text-gray-500 bg-white/40 rounded-xl border border-dashed border-gray-300">
-                        No items yet.
+                        {t("no_items") || "No items yet."}
                       </div>
                     ) : (
                       <div className="space-y-6 pt-2 pb-2">
