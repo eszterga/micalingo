@@ -1,0 +1,21 @@
+{
+  "name": "MicaLingo - German Exam Preparation",
+  "short_name": "MicaLingo",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#eff6ff",
+  "theme_color": "#3b82f6",
+  "description": "Improve your German skills with MicaLingo. Create custom quizzes, practice vocabulary, learn grammar, and prepare for your German exams effectively.",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

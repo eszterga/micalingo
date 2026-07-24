@@ -79,8 +79,8 @@ export default function Layout() {
             </button>
           )}
           <Link to="/" className="flex items-center gap-2">
-            <img src="/logo.png" alt="MicaLingo Logo" className="w-7 h-7 object-contain mix-blend-multiply" width="28" height="28" />
-            <h1 className="text-xl font-bold tracking-wider">MicaLingo</h1>
+            <img src="/logo.png" alt="MicaLingo Logo" className="w-10 h-10 object-contain mt-1" width="40" height="40" />
+            <h1 className="text-2xl font-extrabold tracking-wider">MicaLingo</h1>
           </Link>
         </div>
         <div className="flex items-center gap-3">
@@ -137,8 +137,8 @@ export default function Layout() {
           <div className="relative flex flex-col w-64 max-w-xs bg-blue-900 text-blue-100 h-full shadow-xl animate-fade-in-left">
             <div className="p-6 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <img src="/logo.png" alt="MicaLingo Logo" className="w-7 h-7 object-contain bg-white/90 rounded-full p-0.5 mix-blend-multiply" width="28" height="28" />
-                <h1 className="text-xl font-bold text-white tracking-wider">MicaLingo</h1>
+                <img src="/logo.png" alt="MicaLingo Logo" className="w-10 h-10 object-contain bg-white/90 rounded-full p-1 mt-1" width="40" height="40" />
+                <h1 className="text-2xl font-extrabold text-white tracking-wider">MicaLingo</h1>
               </div>
               <button onClick={() => setIsMobileMenuOpen(false)} className="text-blue-300 hover:text-white">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -166,8 +166,8 @@ export default function Layout() {
         {/* Desktop Header */}
         <header className="hidden md:flex justify-between items-center px-8 py-4 bg-white/30 backdrop-blur-lg border-b border-white/40 shadow-sm z-50 relative">
           <Link to="/" className="flex items-center gap-3 hover:scale-105 transition-transform">
-            <img src="/logo.png" alt="MicaLingo Logo" className="w-9 h-9 object-contain drop-shadow-sm mix-blend-multiply" width="36" height="36" />
-            <h1 className="text-2xl font-extrabold text-blue-900 tracking-wider">MicaLingo</h1>
+            <img src="/logo.png" alt="MicaLingo Logo" className="w-12 h-12 object-contain drop-shadow-sm mt-1.5" width="48" height="48" />
+            <h1 className="text-3xl font-extrabold text-blue-900 tracking-wider">MicaLingo</h1>
           </Link>
           <div className="flex items-center gap-6">
             <div className="relative">

@@ -166,7 +166,7 @@ export default function Vocabulary() {
       for (const staticId of staticToMove) {
         const word = allPublicWords.find(w => `static_${w.german}` === staticId);
         if (word) {
-          const duplicate = personalWords?.find(w => (w.german || '').toLowerCase().trim() === (word.german || '').toLowerCase().trim());
+          const duplicate = personalWords?.find(w => w.category === moveTargetCategory && (w.german || '').toLowerCase().trim() === (word.german || '').toLowerCase().trim());
           if (duplicate) {
                 const catKey = duplicate.category || 'vocabulary';
                 let catName = t(`dropdown_${catKey}`);
@@ -822,7 +822,7 @@ export default function Vocabulary() {
                 </div>
               )}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t('modal_hungarian_label')}</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{newCategory === 'idioms' ? (t('idiom_hungarian_label') || 'Hungarian Meaning *') : t('modal_hungarian_label')}</label>
                 <input
                   type="text"
                   value={newHungarian}
@@ -832,12 +832,12 @@ export default function Vocabulary() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t('modal_example_label')}</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{newCategory === 'idioms' ? (t('explanation_label') || 'Explanation') : t('modal_example_label')}</label>
                 <input
                   type="text"
                   value={newExample}
                   onChange={(e) => setNewExample(e.target.value)}
-                  placeholder={t('modal_example_placeholder')}
+                  placeholder={newCategory === 'idioms' ? (t('explanation_placeholder') || 'Explanation') : t('modal_example_placeholder')}
                   className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>

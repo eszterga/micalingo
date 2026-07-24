@@ -561,7 +561,7 @@ export default function Import() {
     XLSX.writeFile(workbook, outName);
   };
 
-  const handleDownloadTemplate = (type: 'standard' | 'articles' | 'adjectives' | 'verbs' | 'false_friends' | 'idioms') => {
+  const handleDownloadTemplate = (type: 'standard' | 'articles' | 'adjectives' | 'verbs' | 'false_friends' | 'idioms' | 'prepositions') => {
     let templateData: object[];
 
     if (type === 'articles') {
@@ -614,6 +614,14 @@ export default function Import() {
           [t('note') || 'Note']: type === 'idioms' ? 'Literal meaning: I only understand train station.' : 'False friend: gift != ajándék'
         }
       ];
+    } else if (type === 'prepositions') {
+      templateData = [
+        {
+          [t('template_german_verb_header') || 'German Verb']: 'verzichten',
+          [t('template_prep_case_header') || 'Preposition + Case']: 'auf + Akkusativ',
+          [t('template_meaning_example_header') || 'Meaning & Example']: 'lemondani valamiről, Ich verzichte auf das Angebot.'
+        }
+      ];
     } else {
       templateData = [
         {
@@ -643,9 +651,11 @@ export default function Import() {
         ? [{ wch: 25 }, { wch: 25 }, { wch: 40 }]
         : type === 'false_friends' || type === 'idioms'
         ? [{ wch: 30 }, { wch: 30 }, { wch: 50 }, { wch: 40 }]
+        : type === 'prepositions'
+        ? [{ wch: 30 }, { wch: 30 }, { wch: 60 }]
         : [{ wch: 30 }, { wch: 30 }, { wch: 50 }];
         
-    const sheetName = type === 'articles' ? 'Articles' : type === 'adjectives' ? 'Adjectives' : type === 'verbs' ? 'Verbs' : type === 'false_friends' ? 'False_Friends' : type === 'idioms' ? 'Idioms' : 'Vocabulary';
+    const sheetName = type === 'articles' ? 'Articles' : type === 'adjectives' ? 'Adjectives' : type === 'verbs' ? 'Verbs' : type === 'false_friends' ? 'False_Friends' : type === 'idioms' ? 'Idioms' : type === 'prepositions' ? 'Prepositions' : 'Vocabulary';
 
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(
@@ -696,11 +706,11 @@ export default function Import() {
       setIsOverwriteModalOpen(true);
     } else {
       // No duplicates, proceed to save directly.
-      executeSave(false);
+      executeSave(false, newItems, duplicates);
     }
   };
 
-  const executeSave = async (overwrite = false) => {
+  const executeSave = async (overwrite = false, currentNewItems = itemsToAddNew, currentDuplicates = itemsToOverwrite) => {
     setSaving(true);
     setIsOverwriteModalOpen(false);
 
@@ -709,8 +719,8 @@ export default function Import() {
       let overwrittenCount = 0;
 
       // 1. Save brand new items
-      if (itemsToAddNew.length > 0) {
-        const newItemsPayload = itemsToAddNew.map(item => {
+      if (currentNewItems.length > 0) {
+        const newItemsPayload = currentNewItems.map(item => {
           const payload: any = { ...item, userId: saveToPublic ? 'PUBLIC_LIBRARY' : user?.uid, dateAdded: Date.now(), category: destination };
           if (data?.fileName) payload.sourceFile = data.fileName;
           if (data?.fileType) payload.sourceType = data.fileType;
@@ -722,11 +732,11 @@ export default function Import() {
       }
 
       // 2. Handle duplicates if overwrite is true
-      if (overwrite && itemsToOverwrite.length > 0) {
+      if (overwrite && currentDuplicates.length > 0) {
         const cloudUpdates: Promise<void>[] = [];
         const newCloudItems: any[] = [];
 
-        for (const item of itemsToOverwrite) {
+        for (const item of currentDuplicates) {
           const { idToUpdate, isStatic, ...newItemData } = item;
           
           const payload: any = { ...newItemData, userId: saveToPublic ? 'PUBLIC_LIBRARY' : user?.uid, updatedAt: Date.now(), category: destination };
@@ -743,15 +753,15 @@ export default function Import() {
 
         if (newCloudItems.length > 0) await bulkAddCloudWords(newCloudItems);
         if (cloudUpdates.length > 0) await Promise.all(cloudUpdates);
-        overwrittenCount = itemsToOverwrite.length;
+        overwrittenCount = currentDuplicates.length;
       }
 
       setData(null);
       let alertMessage = t('import_success', { saved: savedCount });
       if (overwrittenCount > 0) {
         alertMessage += `\n${t('import_overwritten', { count: overwrittenCount })}`;
-      } else if (itemsToOverwrite.length > 0) {
-        alertMessage += `\n${t('import_skipped', { count: itemsToOverwrite.length })}`;
+      } else if (currentDuplicates.length > 0) {
+        alertMessage += `\n${t('import_skipped', { count: currentDuplicates.length })}`;
       }
       alert(alertMessage);
 
@@ -858,6 +868,7 @@ export default function Import() {
           <li><strong>{t('articles_quiz')}</strong> {t('format_articles')}</li>
           <li><strong>{t('verbs_quiz_format_title') || 'Verbs Quiz:'}</strong> {t('verbs_quiz_format_desc') || 'Column A = German (verb), Column B = Hungarian (Meaning), Column C = Past forms or Examples.'}</li>
           <li><strong>{t('adjectives_quiz') || 'Adjectives Quiz'}:</strong> {t('format_adjectives') || 'Column A: German, Column B: Hungarian, Column C: Levels (e.g., besser, am besten).'}</li>
+          <li><strong>{t('prepositions_quiz_format_title') || 'Prepositions Quiz:'}</strong> {t('prepositions_quiz_format_desc') || 'Column A = German verb, Column B = Preposition + case, Column C = Hungarian meaning with an Example sentence together, divided by comma.'}</li>
         </ul>
 
         {/* Downloadable Template */}
@@ -903,6 +914,15 @@ export default function Import() {
               </svg>
               {t('verbs_template') || 'Verbs Template'}
             </button>
+            <button
+              onClick={() => handleDownloadTemplate('prepositions')}
+              className="whitespace-nowrap px-5 py-2.5 bg-white text-blue-600 border border-blue-200 font-bold rounded-xl hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 shadow-sm w-full sm:w-auto"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M8 12l4 4m0 0l4-4m-4 4V4" />
+              </svg>
+              {t('prepositions_template') || 'Prepositions Template'}
+            </button>
             {isAdmin && adminMode && (
               <>
                 <button
@@ -931,6 +951,7 @@ export default function Import() {
       </div>
 
       {/* DROP ZONE CENTER AREA */}
+      {user ? (
       <div className="relative border-2 border-dashed border-blue-300 rounded-[2rem] bg-white/50 hover:bg-blue-50/50 backdrop-blur-md transition-all duration-300 flex flex-col items-center justify-center text-center shadow-inner group py-8">
         <div className="p-10 pointer-events-none flex flex-col items-center">
           <div className="mb-4 bg-blue-100 p-4 rounded-full text-blue-600 group-hover:scale-110 transition-transform">
@@ -945,6 +966,11 @@ export default function Import() {
           <FileDropZone onFileParsed={setData} />
         </div>
       </div>
+      ) : (
+        <div className="bg-blue-50/80 p-6 rounded-[2rem] text-center border border-blue-200 mt-4">
+          <p className="text-blue-800 font-medium">{t('login_required_import') || 'Please log in to import data or add manual entries.'}</p>
+        </div>
+      )}
 
       {/* MANUAL ADD CONTENT BUTTON */}
       <div className="flex justify-end mt-4 mb-2">
@@ -982,6 +1008,12 @@ export default function Import() {
                         <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{destination === 'idioms' ? (t('idiom_hungarian_label') || 'Hungarian Meaning') : t('hungarian')} <span className="text-xs font-normal text-gray-500 block">{t('column_b')}</span></th>
                         <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{destination === 'idioms' ? (t('explanation_label') || 'Explanation') : t('example')} <span className="text-xs font-normal text-gray-500 block">{t('column_c')}</span></th>
                         <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{destination === 'idioms' ? (t('idiom_note_label') || 'Note (Explanation)') : t('note')} <span className="text-xs font-normal text-gray-500 block">{t('column_d')}</span></th>
+                      </>
+                    ) : destination === 'prepositions' ? (
+                      <>
+                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('modal_german_verb_label') || 'German Verb'} <span className="text-xs font-normal text-gray-500 block">{t('column_a')}</span></th>
+                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('prep_case_label') || 'Preposition + Case'} <span className="text-xs font-normal text-gray-500 block">{t('column_b')}</span></th>
+                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('meaning_example_label') || 'Meaning & Example'} <span className="text-xs font-normal text-gray-500 block">{t('column_c')}</span></th>
                       </>
                     ) : destination === 'adjectives' ? (
                       <>
@@ -1143,9 +1175,9 @@ export default function Import() {
                 germanPlaceholder = t('modal_german_phrase_placeholder') || "e.g. Wie geht es Ihnen?";
                 hungarianPlaceholder = t('modal_hungarian_phrase_placeholder') || "e.g. Hogy van?";
               } else if (newCategory === 'prepositions') {
-                germanLabel = t('modal_german_prep_label') || "German Preposition *";
-                germanPlaceholder = t('modal_german_prep_placeholder') || "e.g. mit";
-                hungarianPlaceholder = t('modal_hungarian_prep_placeholder') || "e.g. val/vel";
+                germanLabel = t('modal_german_verb_label') || "German Verb *";
+                germanPlaceholder = t('modal_german_verb_placeholder') || "e.g. verzichten";
+                hungarianPlaceholder = t('modal_prep_case_placeholder') || "e.g. auf + Akkusativ";
               } else if (newCategory === 'verbs') {
                 germanLabel = t('modal_german_verb_label') || "German Verb *";
                 germanPlaceholder = t('modal_german_verb_placeholder') || "e.g. machen";
@@ -1201,7 +1233,7 @@ export default function Import() {
                 </div>
               )}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{newCategory === 'idioms' ? (t('idiom_hungarian_label') || 'Hungarian Meaning *') : t('modal_hungarian_label')}</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{newCategory === 'idioms' ? (t('idiom_hungarian_label') || 'Hungarian Meaning *') : newCategory === 'prepositions' ? (t('prep_case_label') || 'Preposition + Case *') : t('modal_hungarian_label')}</label>
                 <input
                   type="text"
                   value={newHungarian}
@@ -1211,12 +1243,12 @@ export default function Import() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{newCategory === 'idioms' ? (t('explanation_label') || 'Explanation') : t('modal_example_label')}</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{newCategory === 'idioms' ? (t('explanation_label') || 'Explanation') : newCategory === 'prepositions' ? (t('meaning_example_label') || 'Meaning & Example') : t('modal_example_label')}</label>
                 <input
                   type="text"
                   value={newExample}
                   onChange={(e) => setNewExample(e.target.value)}
-                  placeholder={newCategory === 'idioms' ? (t('explanation_placeholder') || 'Explanation') : t('modal_example_placeholder')}
+                  placeholder={newCategory === 'idioms' ? (t('explanation_placeholder') || 'Explanation') : newCategory === 'prepositions' ? (t('meaning_example_placeholder') || 'e.g. lemondani valamiről, Ich verzichte...') : t('modal_example_placeholder')}
                   className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -1475,6 +1507,12 @@ export default function Import() {
                           <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{editingFileCategory === 'idioms' ? (t('idiom_hungarian_label') || 'Hungarian Meaning') : t('hungarian')}</th>
                           <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{editingFileCategory === 'idioms' ? (t('explanation_label') || 'Explanation') : t('example')}</th>
                           <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{editingFileCategory === 'idioms' ? (t('idiom_note_label') || 'Note (Explanation)') : t('note')}</th>
+                        </>
+                      ) : editingFileCategory === 'prepositions' ? (
+                        <>
+                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('modal_german_verb_label') || 'German Verb'}</th>
+                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('prep_case_label') || 'Preposition + Case'}</th>
+                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('meaning_example_label') || 'Meaning & Example'}</th>
                         </>
                       ) : editingFileCategory === 'adjectives' ? (
                         <>

@@ -158,18 +158,21 @@ export default function Quiz() {
           german: word.german,
           hungarian: word.hungarian
         };
-      } else if (topic === 'prepositions' && !isCustom) {
-        const correctAnswer = word.case || "Akkusativ";
-        const allCases = ["Akkusativ", "Dativ", "Genitiv", "Akkusativ oder Dativ"];
+      } else if (topic === 'prepositions') {
+        const correctAnswer = word.hungarian;
+        let distractorPool = Array.from(new Set(words.map(w => w.hungarian))).filter(h => h !== correctAnswer);
 
-        let distractorPool = allCases.filter(c => c !== correctAnswer);
+        if (distractorPool.length < 3) {
+          const fallbackPool = ["auf + Akkusativ", "an + Dativ", "mit + Dativ", "für + Akkusativ", "über + Akkusativ", "von + Dativ", "zu + Dativ", "bei + Dativ", "aus + Dativ", "nach + Dativ"];
+          distractorPool = Array.from(new Set([...distractorPool, ...fallbackPool])).filter(h => h !== correctAnswer);
+        }
+
         distractorPool.sort(() => 0.5 - Math.random());
         const distractors = distractorPool.slice(0, 3);
-
         const options = [...distractors, correctAnswer].sort(() => 0.5 - Math.random());
 
         return {
-          questionText: `${word.german} (${word.hungarian})`,
+          questionText: word.german,
           options,
           correctAnswer,
           example: word.example,

@@ -33,6 +33,7 @@ export default function Grammar() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'public' | 'private'>(searchParams.get("tab") === "private" ? "private" : "public");
   const userVocabulary = useCloudVocabulary(user?.uid) || [];
+  const publicVocabulary = useCloudVocabulary("PUBLIC_LIBRARY") || [];
 
   // Tab synchronization
   useEffect(() => {
@@ -106,6 +107,7 @@ export default function Grammar() {
   const [editingContext, setEditingContext] = useState<{ isPublic: boolean; catId: string; itemId: string | null } | null>(null);
   const [editData, setEditData] = useState({ title: "", url: "", source: "", content: "" });
   const contentRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Bookmarks & Vocabulary Add
   const [bookmarks, setBookmarks] = useState<Record<string, string>>({});
@@ -118,6 +120,11 @@ export default function Grammar() {
   const [newExample, setNewExample] = useState("");
   const [newNote, setNewNote] = useState("");
   const [newCategory, setNewCategory] = useState("vocabulary");
+  const [saveToPublic, setSaveToPublic] = useState(isAdmin ? adminMode : false);
+
+  useEffect(() => {
+    setSaveToPublic(isAdmin ? adminMode : false);
+  }, [isAdmin, adminMode]);
 
   // Google Login
   const handleGoogleLogin = async () => {
@@ -267,7 +274,60 @@ export default function Grammar() {
     setEditingCategory(null);
   }, [privateCategories, categoryTitleInput, savePrivateData]);
 
+  const processImageFile = (file: File) => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 800;
+        const MAX_HEIGHT = 800;
+        let width = img.width;
+        let height = img.height;
+        if (width > height) {
+          if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+        } else {
+          if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, width, height);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+        const imgHtml = `<br><img src="${dataUrl}" alt="Image" style="max-width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px;" /><br>`;
+        if (contentRef.current) {
+          contentRef.current.focus();
+          document.execCommand("insertHTML", false, imgHtml);
+          setEditData(prev => ({ ...prev, content: contentRef.current!.innerHTML }));
+        }
+      };
+      img.src = event.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      processImageFile(file);
+      e.target.value = '';
+    }
+  };
+
   const handlePaste = (e: React.ClipboardEvent) => {
+    const items = e.clipboardData.items;
+    let hasImage = false;
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.indexOf('image') !== -1) {
+        hasImage = true;
+        const blob = items[i].getAsFile();
+        if (blob) processImageFile(blob);
+        e.preventDefault();
+        break;
+      }
+    }
+    if (hasImage) return;
+
     const html = e.clipboardData.getData("text/html");
     const text = e.clipboardData.getData("text/plain");
     if (!html && text) {
@@ -365,12 +425,31 @@ export default function Grammar() {
 
   const handleSaveWord = useCallback(async () => {
     const finalGerman = newCategory === 'articles' ? `${newArticle} ${newNoun.trim()}` : newGerman.trim();
-    if (!finalGerman || !newHungarian.trim() || !user) { alert(t('alert_fill_fields_login')); return; }
-    const dup = userVocabulary.find((w: any) => (w.german || '').toLowerCase().trim() === finalGerman.toLowerCase().trim());
-    if (dup) { alert(t('alert_word_exists', { category: dup.category || 'vocabulary' })); return; }
-    await addCloudWord({ userId: user.uid, german: finalGerman, hungarian: newHungarian.trim(), example: newExample.trim(), note: newCategory === 'false_friends' ? newNote.trim() : "", dateAdded: Date.now(), category: newCategory } as any);
-    setIsSaveWordModalOpen(false); alert(t('saved') || 'Saved!');
-  }, [newCategory, newArticle, newNoun, newGerman, newHungarian, user, t, userVocabulary, newExample, newNote]);
+    if (!finalGerman || !newHungarian.trim() || !user) {
+      alert(t('alert_fill_fields_login'));
+      return;
+    }
+
+    const isPublicSave = isAdmin && adminMode && saveToPublic;
+    const targetUserId = isPublicSave ? "PUBLIC_LIBRARY" : user.uid;
+    const targetVocabulary = isPublicSave ? publicVocabulary : userVocabulary;
+
+    const duplicate = targetVocabulary.find((w: any) => 
+      w.category === newCategory && (w.german || '').toLowerCase().trim() === finalGerman.toLowerCase().trim()
+    );
+
+    if (duplicate) {
+      const catKey = duplicate.category || 'vocabulary';
+      let catName = t(`dropdown_${catKey}`);
+      if (catName === `dropdown_${catKey}`) catName = catKey;
+      alert(t('alert_word_exists', { category: catName }));
+      return;
+    }
+
+    await addCloudWord({ userId: targetUserId, german: finalGerman, hungarian: newHungarian.trim(), example: newExample.trim(), note: newCategory === 'false_friends' ? newNote.trim() : "", dateAdded: Date.now(), category: newCategory } as any);
+    setIsSaveWordModalOpen(false);
+    alert(t('saved') || 'Saved!');
+  }, [newCategory, newArticle, newNoun, newGerman, newHungarian, user, t, userVocabulary, publicVocabulary, isAdmin, adminMode, saveToPublic, newExample, newNote]);
 
   return (
     <div className="relative min-h-[85vh] w-full flex flex-col pt-4 md:pt-8 pb-12">
@@ -634,6 +713,11 @@ export default function Grammar() {
                     <div className="w-px h-6 bg-gray-300 self-center mx-1"></div>
                     <button type="button" onClick={e => { e.preventDefault(); document.execCommand("insertUnorderedList", false); }} className="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-sm font-medium shadow-sm">{t("bullet_list") || "• Bullet List"}</button>
                     <button type="button" onClick={e => { e.preventDefault(); document.execCommand("undo", false); }} className="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-sm font-medium shadow-sm">{t("undo_button") || "↩ Undo"}</button>
+                    <div className="w-px h-6 bg-gray-300 self-center mx-1"></div>
+                    <button type="button" onClick={() => fileInputRef.current?.click()} className="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-sm text-gray-700 transition-colors shadow-sm font-medium flex items-center gap-1">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg> {t('add_image') || 'Add Image'}
+                    </button>
+                    <input type="file" accept="image/*" ref={fileInputRef} onChange={handleImageUpload} className="hidden" />
                   </div>
                   <div ref={contentRef} contentEditable onInput={e => setEditData({ ...editData, content: e.currentTarget.innerHTML })} onPaste={handlePaste} className="p-4 min-h-[200px] max-h-[50vh] overflow-y-auto outline-none prose prose-blue max-w-none bg-white"></div>
                 </div>
@@ -664,6 +748,23 @@ export default function Grammar() {
               <button onClick={() => setIsSaveWordModalOpen(false)} className="text-gray-400 hover:text-gray-600 p-2 rounded-full hover:bg-gray-200"><svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
             </div>
             <div className="p-6 md:p-8 overflow-y-auto space-y-6">
+              {isAdmin && adminMode && (
+                <div className="flex items-center gap-2 bg-purple-50 px-4 py-2 rounded-xl border border-purple-200 shadow-sm w-full mb-4">
+                  <span className="text-sm font-bold text-purple-900 mr-2">Admin Target:</span>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      className="sr-only peer"
+                      checked={saveToPublic}
+                      onChange={(e) => setSaveToPublic(e.target.checked)}
+                    />
+                    <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600" />
+                    <span className="ml-3 text-sm font-medium text-purple-800">
+                      {saveToPublic ? 'Public Library' : 'Personal Library'}
+                    </span>
+                  </label>
+                </div>
+              )}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">{t('modal_category_label') || 'Category'}</label>
                 <select value={newCategory} onChange={(e) => setNewCategory(e.target.value)} className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50">
@@ -684,8 +785,8 @@ export default function Grammar() {
               ) : (
                 <div><label className="block text-sm font-medium text-gray-700 mb-1">{newCategory === 'phrases' ? (t('modal_german_phrase_label') || 'German Phrase *') : newCategory === 'prepositions' ? (t('modal_german_prep_label') || 'German Preposition *') : newCategory === 'verbs' ? (t('modal_german_verb_label') || 'German Verb *') : newCategory === 'false_friends' ? (t('modal_german_ff_label') || 'German False Friend *') : t('modal_german_label')}</label><input type="text" value={newGerman} onChange={(e) => setNewGerman(e.target.value)} className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500" autoFocus /></div>
               )}
-              <div><label className="block text-sm font-medium text-gray-700 mb-1">{t('modal_hungarian_label')}</label><input type="text" value={newHungarian} onChange={(e) => setNewHungarian(e.target.value)} className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500" /></div>
-              <div><label className="block text-sm font-medium text-gray-700 mb-1">{t('modal_example_label')}</label><input type="text" value={newExample} onChange={(e) => setNewExample(e.target.value)} className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500" /></div>
+              <div><label className="block text-sm font-medium text-gray-700 mb-1">{newCategory === 'idioms' ? (t('idiom_hungarian_label') || 'Hungarian Meaning *') : t('modal_hungarian_label')}</label><input type="text" value={newHungarian} onChange={(e) => setNewHungarian(e.target.value)} className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500" /></div>
+              <div><label className="block text-sm font-medium text-gray-700 mb-1">{newCategory === 'idioms' ? (t('explanation_label') || 'Explanation') : t('modal_example_label')}</label><input type="text" value={newExample} onChange={(e) => setNewExample(e.target.value)} className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500" /></div>
               {newCategory === 'false_friends' && <div><label className="block text-sm font-medium text-gray-700 mb-1">{t('note') || 'Note'} *</label><input type="text" value={newNote} onChange={(e) => setNewNote(e.target.value)} className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500" /></div>}
             </div>
             <div className="p-6 md:p-8 border-t border-gray-100 bg-gray-50/50 flex justify-end gap-3">
