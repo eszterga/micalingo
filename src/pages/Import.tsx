@@ -619,7 +619,7 @@ export default function Import() {
     } else if (type === 'prepositions') {
       templateData = [
         {
-          [t('template_german_verb_header') || 'German Verb + Hungarian']: 'verzichten, lemondani, felhagyni valamivel',
+          [t('template_german_verb_header') || 'German Verb + Hungarian']: 'verzichten, lemondani valamiről/felhagyni valamivel',
           [t('template_prep_case_header') || 'Preposition + Case']: 'auf + Akk.',
           [t('template_meaning_example_header') || 'Example Sentence']: 'Ich verzichte auf das Angebot.'
         }
