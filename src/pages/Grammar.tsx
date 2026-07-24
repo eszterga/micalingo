@@ -108,6 +108,96 @@ export default function Grammar() {
   const [editData, setEditData] = useState({ title: "", url: "", source: "", content: "" });
   const contentRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [selectedImage, setSelectedImage] = useState<HTMLImageElement | null>(null);
+  const [selectedTable, setSelectedTable] = useState<HTMLTableElement | null>(null);
+
+  const applyTableStyle = (action: string, value?: string) => {
+    if (!selectedTable) return;
+    if (action === 'align') {
+      if (value === 'center') {
+        selectedTable.style.marginLeft = 'auto';
+        selectedTable.style.marginRight = 'auto';
+        selectedTable.style.float = 'none';
+      } else if (value === 'left') {
+        selectedTable.style.marginLeft = '0';
+        selectedTable.style.marginRight = 'auto';
+        selectedTable.style.float = 'left';
+      } else if (value === 'right') {
+        selectedTable.style.marginLeft = 'auto';
+        selectedTable.style.marginRight = '0';
+        selectedTable.style.float = 'right';
+      }
+    } else if (action === 'width') {
+      selectedTable.style.width = value!;
+    } else if (action === 'addRow') {
+      const rowCount = selectedTable.rows.length;
+      const colCount = rowCount > 0 ? selectedTable.rows[0].cells.length : 1;
+      const newRow = selectedTable.insertRow();
+      for (let i = 0; i < colCount; i++) {
+        const cell = newRow.insertCell();
+        cell.innerHTML = '&nbsp;';
+        cell.style.border = '1px solid #ccc';
+        cell.style.padding = '8px';
+      }
+    } else if (action === 'addColumn') {
+      for (let i = 0; i < selectedTable.rows.length; i++) {
+        const cell = selectedTable.rows[i].insertCell();
+        cell.innerHTML = '&nbsp;';
+        cell.style.border = '1px solid #ccc';
+        cell.style.padding = '8px';
+      }
+    }
+    if (contentRef.current) {
+      setEditData(prev => ({ ...prev, content: contentRef.current!.innerHTML }));
+    }
+  };
+
+  const handleInsertTable = () => {
+    const dims = window.prompt("Enter table dimensions (rows,columns) e.g., '3,3'", "3,3");
+    if (!dims) return;
+    const [rows, cols] = dims.split(',').map(Number);
+    if (!rows || !cols || rows <= 0 || cols <= 0) return;
+    
+    let html = '<table style="width: 100%; border-collapse: collapse; margin-bottom: 1rem;"><tbody>';
+    for (let i = 0; i < rows; i++) {
+      html += '<tr>';
+      for (let j = 0; j < cols; j++) {
+        html += '<td style="border: 1px solid #ccc; padding: 8px;">&nbsp;</td>';
+      }
+      html += '</tr>';
+    }
+    html += '</tbody></table><p><br></p>';
+    
+    if (contentRef.current) {
+      contentRef.current.focus();
+      document.execCommand('insertHTML', false, html);
+      setEditData(prev => ({ ...prev, content: contentRef.current!.innerHTML }));
+    }
+  };
+
+  const applyImageStyle = (action: string, value: string) => {
+    if (!selectedImage) return;
+    if (action === 'align') {
+      if (value === 'center') {
+        selectedImage.style.display = 'block';
+        selectedImage.style.float = 'none';
+        selectedImage.style.margin = '8px auto';
+      } else if (value === 'left') {
+        selectedImage.style.display = 'inline-block';
+        selectedImage.style.float = 'left';
+        selectedImage.style.margin = '8px 16px 8px 0';
+      } else if (value === 'right') {
+        selectedImage.style.display = 'inline-block';
+        selectedImage.style.float = 'right';
+        selectedImage.style.margin = '8px 0 8px 16px';
+      }
+    } else if (action === 'width') {
+      selectedImage.style.width = value;
+    }
+    if (contentRef.current) {
+      setEditData(prev => ({ ...prev, content: contentRef.current!.innerHTML }));
+    }
+  };
 
   // Bookmarks & Vocabulary Add
   const [bookmarks, setBookmarks] = useState<Record<string, string>>({});
@@ -717,9 +807,49 @@ export default function Grammar() {
                     <button type="button" onClick={() => fileInputRef.current?.click()} className="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-sm text-gray-700 transition-colors shadow-sm font-medium flex items-center gap-1">
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg> {t('add_image') || 'Add Image'}
                     </button>
+                    <div className="w-px h-6 bg-gray-300 self-center mx-1"></div>
+                    <select onChange={(e) => { document.execCommand("fontSize", false, e.target.value); e.target.value = ""; }} className="px-2 py-1 bg-white border border-gray-300 rounded text-sm shadow-sm outline-none cursor-pointer">
+                      <option value="">Size</option><option value="1">Small</option><option value="3">Normal</option><option value="5">Large</option><option value="7">Huge</option>
+                    </select>
+                    <div className="flex items-center border border-gray-300 rounded bg-white shadow-sm px-1" title="Text Color">
+                      <span className="text-xs text-gray-500 px-1 font-serif">A</span><input type="color" onChange={(e) => document.execCommand("foreColor", false, e.target.value)} className="w-5 h-5 p-0 border-0 bg-transparent cursor-pointer" />
+                    </div>
+                    <div className="flex items-center border border-gray-300 rounded bg-white shadow-sm px-1" title="Highlight Color">
+                      <span className="text-xs text-gray-500 px-1 font-serif bg-yellow-200">A</span><input type="color" onChange={(e) => document.execCommand("hiliteColor", false, e.target.value)} className="w-5 h-5 p-0 border-0 bg-transparent cursor-pointer" />
+                    </div>
+                    <button type="button" onClick={handleInsertTable} className="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-sm text-gray-700 transition-colors shadow-sm font-medium flex items-center gap-1">📊 Table</button>
                     <input type="file" accept="image/*" ref={fileInputRef} onChange={handleImageUpload} className="hidden" />
                   </div>
-                  <div ref={contentRef} contentEditable onInput={e => setEditData({ ...editData, content: e.currentTarget.innerHTML })} onPaste={handlePaste} className="p-4 min-h-[200px] max-h-[50vh] overflow-y-auto outline-none prose prose-blue max-w-none bg-white"></div>
+                  {selectedImage && (
+                    <div className="bg-blue-50/50 border-b border-gray-200 p-2 flex gap-2 flex-wrap items-center">
+                      <span className="text-xs font-bold text-blue-800 uppercase ml-1 mr-2">Image:</span>
+                      <button type="button" onClick={() => applyImageStyle('align', 'left')} className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-xs shadow-sm font-medium">Left</button>
+                      <button type="button" onClick={() => applyImageStyle('align', 'center')} className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-xs shadow-sm font-medium">Center</button>
+                      <button type="button" onClick={() => applyImageStyle('align', 'right')} className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-xs shadow-sm font-medium">Right</button>
+                      <div className="w-px h-5 bg-gray-300 self-center mx-1"></div>
+                      <button type="button" onClick={() => applyImageStyle('width', '25%')} className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-xs shadow-sm font-medium">25%</button>
+                      <button type="button" onClick={() => applyImageStyle('width', '50%')} className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-xs shadow-sm font-medium">50%</button>
+                      <button type="button" onClick={() => applyImageStyle('width', '75%')} className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-xs shadow-sm font-medium">75%</button>
+                      <button type="button" onClick={() => applyImageStyle('width', '100%')} className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-xs shadow-sm font-medium">100%</button>
+                    </div>
+                  )}
+                  {selectedTable && (
+                    <div className="bg-green-50/50 border-b border-gray-200 p-2 flex gap-2 flex-wrap items-center">
+                      <span className="text-xs font-bold text-green-800 uppercase ml-1 mr-2">Table:</span>
+                      <button type="button" onClick={() => applyTableStyle('align', 'left')} className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-xs shadow-sm font-medium">Left</button>
+                      <button type="button" onClick={() => applyTableStyle('align', 'center')} className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-xs shadow-sm font-medium">Center</button>
+                      <button type="button" onClick={() => applyTableStyle('align', 'right')} className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-xs shadow-sm font-medium">Right</button>
+                      <div className="w-px h-5 bg-gray-300 self-center mx-1"></div>
+                      <button type="button" onClick={() => applyTableStyle('width', '25%')} className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-xs shadow-sm font-medium">25%</button>
+                      <button type="button" onClick={() => applyTableStyle('width', '50%')} className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-xs shadow-sm font-medium">50%</button>
+                      <button type="button" onClick={() => applyTableStyle('width', '75%')} className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-xs shadow-sm font-medium">75%</button>
+                      <button type="button" onClick={() => applyTableStyle('width', '100%')} className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-xs shadow-sm font-medium">100%</button>
+                      <div className="w-px h-5 bg-gray-300 self-center mx-1"></div>
+                      <button type="button" onClick={() => applyTableStyle('addRow')} className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-xs shadow-sm font-medium flex items-center gap-1">+ Row</button>
+                      <button type="button" onClick={() => applyTableStyle('addColumn')} className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-xs shadow-sm font-medium flex items-center gap-1">+ Col</button>
+                    </div>
+                  )}
+                  <div ref={contentRef} contentEditable onInput={e => setEditData({ ...editData, content: e.currentTarget.innerHTML })} onPaste={handlePaste} onClick={(e) => { const target = e.target as HTMLElement; if (target.tagName === 'IMG') { setSelectedImage(target as HTMLImageElement); setSelectedTable(null); } else { setSelectedImage(null); const table = target.closest('table'); setSelectedTable((table as HTMLTableElement) || null); } }} onKeyUp={() => { setSelectedImage(null); const sel = window.getSelection(); if (sel && sel.anchorNode) { const table = sel.anchorNode.parentElement?.closest('table'); setSelectedTable((table as HTMLTableElement) || null); } else { setSelectedTable(null); } }} className="p-4 min-h-[200px] max-h-[50vh] overflow-y-auto outline-none prose prose-blue max-w-none bg-white"></div>
                 </div>
               </div>
             </div>

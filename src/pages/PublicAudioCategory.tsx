@@ -64,6 +64,97 @@ export default function PublicAudioCategory({ type }: { type: 'music' | 'podcast
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editData, setEditData] = useState({ title: "", url: "", source: "", content: "" });
   const contentRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [selectedImage, setSelectedImage] = useState<HTMLImageElement | null>(null);
+  const [selectedTable, setSelectedTable] = useState<HTMLTableElement | null>(null);
+
+  const applyTableStyle = (action: string, value?: string) => {
+    if (!selectedTable) return;
+    if (action === 'align') {
+      if (value === 'center') {
+        selectedTable.style.marginLeft = 'auto';
+        selectedTable.style.marginRight = 'auto';
+        selectedTable.style.float = 'none';
+      } else if (value === 'left') {
+        selectedTable.style.marginLeft = '0';
+        selectedTable.style.marginRight = 'auto';
+        selectedTable.style.float = 'left';
+      } else if (value === 'right') {
+        selectedTable.style.marginLeft = 'auto';
+        selectedTable.style.marginRight = '0';
+        selectedTable.style.float = 'right';
+      }
+    } else if (action === 'width') {
+      selectedTable.style.width = value!;
+    } else if (action === 'addRow') {
+      const rowCount = selectedTable.rows.length;
+      const colCount = rowCount > 0 ? selectedTable.rows[0].cells.length : 1;
+      const newRow = selectedTable.insertRow();
+      for (let i = 0; i < colCount; i++) {
+        const cell = newRow.insertCell();
+        cell.innerHTML = '&nbsp;';
+        cell.style.border = '1px solid #ccc';
+        cell.style.padding = '8px';
+      }
+    } else if (action === 'addColumn') {
+      for (let i = 0; i < selectedTable.rows.length; i++) {
+        const cell = selectedTable.rows[i].insertCell();
+        cell.innerHTML = '&nbsp;';
+        cell.style.border = '1px solid #ccc';
+        cell.style.padding = '8px';
+      }
+    }
+    if (contentRef.current) {
+      setEditData(prev => ({ ...prev, content: contentRef.current!.innerHTML }));
+    }
+  };
+
+  const handleInsertTable = () => {
+    const dims = window.prompt("Enter table dimensions (rows,columns) e.g., '3,3'", "3,3");
+    if (!dims) return;
+    const [rows, cols] = dims.split(',').map(Number);
+    if (!rows || !cols || rows <= 0 || cols <= 0) return;
+    
+    let html = '<table style="width: 100%; border-collapse: collapse; margin-bottom: 1rem;"><tbody>';
+    for (let i = 0; i < rows; i++) {
+      html += '<tr>';
+      for (let j = 0; j < cols; j++) {
+        html += '<td style="border: 1px solid #ccc; padding: 8px;">&nbsp;</td>';
+      }
+      html += '</tr>';
+    }
+    html += '</tbody></table><p><br></p>';
+    
+    if (contentRef.current) {
+      contentRef.current.focus();
+      document.execCommand('insertHTML', false, html);
+      setEditData(prev => ({ ...prev, content: contentRef.current!.innerHTML }));
+    }
+  };
+
+  const applyImageStyle = (action: string, value: string) => {
+    if (!selectedImage) return;
+    if (action === 'align') {
+      if (value === 'center') {
+        selectedImage.style.display = 'block';
+        selectedImage.style.float = 'none';
+        selectedImage.style.margin = '8px auto';
+      } else if (value === 'left') {
+        selectedImage.style.display = 'inline-block';
+        selectedImage.style.float = 'left';
+        selectedImage.style.margin = '8px 16px 8px 0';
+      } else if (value === 'right') {
+        selectedImage.style.display = 'inline-block';
+        selectedImage.style.float = 'right';
+        selectedImage.style.margin = '8px 0 8px 16px';
+      }
+    } else if (action === 'width') {
+      selectedImage.style.width = value;
+    }
+    if (contentRef.current) {
+      setEditData(prev => ({ ...prev, content: contentRef.current!.innerHTML }));
+    }
+  };
 
   const [isSaveWordModalOpen, setIsSaveWordModalOpen] = useState(false);
   const [newGerman, setNewGerman] = useState("");
@@ -73,6 +164,11 @@ export default function PublicAudioCategory({ type }: { type: 'music' | 'podcast
   const [newExample, setNewExample] = useState("");
   const [newNote, setNewNote] = useState("");
   const [newCategory, setNewCategory] = useState("vocabulary");
+  const [saveToPublic, setSaveToPublic] = useState(isAdmin ? adminMode : false);
+
+  useEffect(() => {
+    setSaveToPublic(isAdmin ? adminMode : false);
+  }, [isAdmin, adminMode]);
 
   const categoryName = t((categoryId || '') as any) || categoryId;
   const sectionName = type === 'music' ? t("music_section" as any) : type === 'podcasts' ? t("podcasts_section" as any) : t("audiobooks_section" as any);
@@ -258,18 +354,18 @@ export default function PublicAudioCategory({ type }: { type: 'music' | 'podcast
   const handleSave = async () => {
     if (editData.title && editData.content) {
       try {
-        const payload = {
+        const payload: any = {
           title: editData.title,
           content: editData.content,
           url: editData.url,
           source: editData.source,
           categoryId,
-          userId: isAdmin && adminMode ? "PUBLIC_LIBRARY" : user?.uid,
           updatedAt: Date.now()
         };
         if (editingId) {
-          await setDoc(doc(dbCloud, "audio", editingId), payload);
+          await setDoc(doc(dbCloud, "audio", editingId), payload, { merge: true });
         } else {
+          payload.userId = (isAdmin && adminMode && saveToPublic) ? "PUBLIC_LIBRARY" : user?.uid;
           await setDoc(doc(collection(dbCloud, "audio")), payload);
         }
         closeModal();
@@ -315,7 +411,7 @@ export default function PublicAudioCategory({ type }: { type: 'music' | 'podcast
       return;
     }
 
-    const isPublicSave = isAdmin && adminMode;
+    const isPublicSave = isAdmin && adminMode && saveToPublic;
     const targetUserId = isPublicSave ? "PUBLIC_LIBRARY" : user.uid;
     const targetVocabulary = isPublicSave ? publicVocabulary : userVocabulary;
 
@@ -371,7 +467,60 @@ export default function PublicAudioCategory({ type }: { type: 'music' | 'podcast
     setIsModalOpen(true);
   };
 
+  const processImageFile = (file: File) => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 800;
+        const MAX_HEIGHT = 800;
+        let width = img.width;
+        let height = img.height;
+        if (width > height) {
+          if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+        } else {
+          if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, width, height);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+        const imgHtml = `<br><img src="${dataUrl}" alt="Image" style="max-width: 100%; height: auto; border-radius: 8px; margin-top: 8px; margin-bottom: 8px;" /><br>`;
+        if (contentRef.current) {
+          contentRef.current.focus();
+          document.execCommand("insertHTML", false, imgHtml);
+          setEditData(prev => ({ ...prev, content: contentRef.current!.innerHTML }));
+        }
+      };
+      img.src = event.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      processImageFile(file);
+      e.target.value = '';
+    }
+  };
+
   const handlePaste = (e: React.ClipboardEvent) => {
+    const items = e.clipboardData.items;
+    let hasImage = false;
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.indexOf('image') !== -1) {
+        hasImage = true;
+        const blob = items[i].getAsFile();
+        if (blob) processImageFile(blob);
+        e.preventDefault();
+        break;
+      }
+    }
+    if (hasImage) return;
+
     const html = e.clipboardData.getData("text/html");
     const text = e.clipboardData.getData("text/plain");
     if (!html && text) {
@@ -425,7 +574,7 @@ export default function PublicAudioCategory({ type }: { type: 'music' | 'podcast
           {user ? (t("bookmark_instructions_logged_in") || "Highlight any text while reading to save a bookmark, or save the highlighted text directly to your personal vocabulary database or into your quizzes!") : (t("bookmark_instructions_guest") || "Highlight any text while reading to save a bookmark, or save the highlighted text directly to your personal vocabulary database or into your quizzes! (This feature is exclusively available for logged-in users. Log in to use it!)")}
         </div>
 
-        {isAdmin && adminMode && (
+        {user && (
           <div className="flex justify-end">
             <button onClick={openAddModal} className="w-full sm:w-auto justify-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-xl shadow-sm transition-colors flex items-center gap-2">
               <span className="text-xl leading-none">+</span> {t("add_audio") || "Add Audio"}
@@ -439,7 +588,7 @@ export default function PublicAudioCategory({ type }: { type: 'music' | 'podcast
               const isExpanded = expandedItems.has(item.id);
               return (
                 <div key={item.id} className="relative bg-white/80 backdrop-blur-xl p-8 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white transition-all duration-300">
-                  {isAdmin && adminMode && (
+                  {((user && item.userId === user.uid) || (isAdmin && adminMode && item.userId === "PUBLIC_LIBRARY")) && (
                     <div className="absolute top-4 right-4 md:top-8 md:right-8 flex items-center gap-1.5 md:gap-2 z-10">
                       <button onClick={() => openEditModal(item)} className="p-2.5 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 hover:text-blue-700 transition-colors shadow-sm" title={t("edit_audio") || "Edit Audio"}>
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
@@ -521,6 +670,23 @@ export default function PublicAudioCategory({ type }: { type: 'music' | 'podcast
               </button>
             </div>
             <div className="p-6 md:p-8 overflow-y-auto space-y-6">
+              {!editingId && isAdmin && adminMode && (
+                <div className="flex items-center gap-2 bg-purple-50 px-4 py-2 rounded-xl border border-purple-200 shadow-sm w-full mb-4">
+                  <span className="text-sm font-bold text-purple-900 mr-2">Admin Target:</span>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      className="sr-only peer"
+                      checked={saveToPublic}
+                      onChange={(e) => setSaveToPublic(e.target.checked)}
+                    />
+                    <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600" />
+                    <span className="ml-3 text-sm font-medium text-purple-800">
+                      {saveToPublic ? 'Public Library' : 'Personal Library'}
+                    </span>
+                  </label>
+                </div>
+              )}
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2">{t("url_optional") || "URL (Optional)"}</label>
                 <div className="flex flex-col sm:flex-row gap-3">
@@ -552,8 +718,53 @@ export default function PublicAudioCategory({ type }: { type: 'music' | 'podcast
                     <div className="w-px h-6 bg-gray-300 self-center mx-1"></div>
                     <button type="button" onClick={handleInsertList} className="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-sm text-gray-700 transition-colors shadow-sm font-medium">• Bullet List</button>
                     <button type="button" onClick={e => { e.preventDefault(); document.execCommand("undo", false); }} className="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-sm text-gray-700 transition-colors shadow-sm font-medium">↩ Undo</button>
+                    <div className="w-px h-6 bg-gray-300 self-center mx-1"></div>
+                    <button type="button" onClick={() => fileInputRef.current?.click()} className="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-sm text-gray-700 transition-colors shadow-sm font-medium flex items-center gap-1">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg> {t('add_image') || 'Add Image'}
+                    </button>
+                    <div className="w-px h-6 bg-gray-300 self-center mx-1"></div>
+                    <select onChange={(e) => { document.execCommand("fontSize", false, e.target.value); e.target.value = ""; }} className="px-2 py-1 bg-white border border-gray-300 rounded text-sm shadow-sm outline-none cursor-pointer">
+                      <option value="">Size</option><option value="1">Small</option><option value="3">Normal</option><option value="5">Large</option><option value="7">Huge</option>
+                    </select>
+                    <div className="flex items-center border border-gray-300 rounded bg-white shadow-sm px-1" title="Text Color">
+                      <span className="text-xs text-gray-500 px-1 font-serif">A</span><input type="color" onChange={(e) => document.execCommand("foreColor", false, e.target.value)} className="w-5 h-5 p-0 border-0 bg-transparent cursor-pointer" />
+                    </div>
+                    <div className="flex items-center border border-gray-300 rounded bg-white shadow-sm px-1" title="Highlight Color">
+                      <span className="text-xs text-gray-500 px-1 font-serif bg-yellow-200">A</span><input type="color" onChange={(e) => document.execCommand("hiliteColor", false, e.target.value)} className="w-5 h-5 p-0 border-0 bg-transparent cursor-pointer" />
+                    </div>
+                    <button type="button" onClick={handleInsertTable} className="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-sm text-gray-700 transition-colors shadow-sm font-medium flex items-center gap-1">📊 Table</button>
+                    <input type="file" accept="image/*" ref={fileInputRef} onChange={handleImageUpload} className="hidden" />
                   </div>
-                  <div ref={contentRef} contentEditable onInput={e => setEditData({ ...editData, content: e.currentTarget.innerHTML })} onPaste={handlePaste} className="p-4 min-h-[200px] max-h-[50vh] overflow-y-auto outline-none prose prose-blue max-w-none focus:bg-blue-50/10 transition-colors"></div>
+                  {selectedImage && (
+                    <div className="bg-blue-50/50 border-b border-gray-200 p-2 flex gap-2 flex-wrap items-center">
+                      <span className="text-xs font-bold text-blue-800 uppercase ml-1 mr-2">Image:</span>
+                      <button type="button" onClick={() => applyImageStyle('align', 'left')} className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-xs shadow-sm font-medium">Left</button>
+                      <button type="button" onClick={() => applyImageStyle('align', 'center')} className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-xs shadow-sm font-medium">Center</button>
+                      <button type="button" onClick={() => applyImageStyle('align', 'right')} className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-xs shadow-sm font-medium">Right</button>
+                      <div className="w-px h-5 bg-gray-300 self-center mx-1"></div>
+                      <button type="button" onClick={() => applyImageStyle('width', '25%')} className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-xs shadow-sm font-medium">25%</button>
+                      <button type="button" onClick={() => applyImageStyle('width', '50%')} className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-xs shadow-sm font-medium">50%</button>
+                      <button type="button" onClick={() => applyImageStyle('width', '75%')} className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-xs shadow-sm font-medium">75%</button>
+                      <button type="button" onClick={() => applyImageStyle('width', '100%')} className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-xs shadow-sm font-medium">100%</button>
+                    </div>
+                  )}
+                  {selectedTable && (
+                    <div className="bg-green-50/50 border-b border-gray-200 p-2 flex gap-2 flex-wrap items-center">
+                      <span className="text-xs font-bold text-green-800 uppercase ml-1 mr-2">Table:</span>
+                      <button type="button" onClick={() => applyTableStyle('align', 'left')} className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-xs shadow-sm font-medium">Left</button>
+                      <button type="button" onClick={() => applyTableStyle('align', 'center')} className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-xs shadow-sm font-medium">Center</button>
+                      <button type="button" onClick={() => applyTableStyle('align', 'right')} className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-xs shadow-sm font-medium">Right</button>
+                      <div className="w-px h-5 bg-gray-300 self-center mx-1"></div>
+                      <button type="button" onClick={() => applyTableStyle('width', '25%')} className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-xs shadow-sm font-medium">25%</button>
+                      <button type="button" onClick={() => applyTableStyle('width', '50%')} className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-xs shadow-sm font-medium">50%</button>
+                      <button type="button" onClick={() => applyTableStyle('width', '75%')} className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-xs shadow-sm font-medium">75%</button>
+                      <button type="button" onClick={() => applyTableStyle('width', '100%')} className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-xs shadow-sm font-medium">100%</button>
+                      <div className="w-px h-5 bg-gray-300 self-center mx-1"></div>
+                      <button type="button" onClick={() => applyTableStyle('addRow')} className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-xs shadow-sm font-medium flex items-center gap-1">+ Row</button>
+                      <button type="button" onClick={() => applyTableStyle('addColumn')} className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-xs shadow-sm font-medium flex items-center gap-1">+ Col</button>
+                    </div>
+                  )}
+                  <div ref={contentRef} contentEditable onInput={e => setEditData({ ...editData, content: e.currentTarget.innerHTML })} onPaste={handlePaste} onClick={(e) => { const target = e.target as HTMLElement; if (target.tagName === 'IMG') { setSelectedImage(target as HTMLImageElement); setSelectedTable(null); } else { setSelectedImage(null); const table = target.closest('table'); setSelectedTable((table as HTMLTableElement) || null); } }} onKeyUp={() => { setSelectedImage(null); const sel = window.getSelection(); if (sel && sel.anchorNode) { const table = sel.anchorNode.parentElement?.closest('table'); setSelectedTable((table as HTMLTableElement) || null); } else { setSelectedTable(null); } }} className="p-4 min-h-[200px] max-h-[50vh] overflow-y-auto outline-none prose prose-blue max-w-none focus:bg-blue-50/10 transition-colors bg-white"></div>
                 </div>
               </div>
             </div>
@@ -589,6 +800,23 @@ export default function PublicAudioCategory({ type }: { type: 'music' | 'podcast
             </div>
 
             <div className="p-6 md:p-8 overflow-y-auto space-y-6">
+              {isAdmin && adminMode && (
+                <div className="flex items-center gap-2 bg-purple-50 px-4 py-2 rounded-xl border border-purple-200 shadow-sm w-full mb-4">
+                  <span className="text-sm font-bold text-purple-900 mr-2">Admin Target:</span>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      className="sr-only peer"
+                      checked={saveToPublic}
+                      onChange={(e) => setSaveToPublic(e.target.checked)}
+                    />
+                    <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600" />
+                    <span className="ml-3 text-sm font-medium text-purple-800">
+                      {saveToPublic ? 'Public Library' : 'Personal Library'}
+                    </span>
+                  </label>
+                </div>
+              )}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">{t('modal_category_label') || 'Category'}</label>
                 <select value={newCategory} onChange={(e) => setNewCategory(e.target.value)} className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50">
@@ -611,9 +839,9 @@ export default function PublicAudioCategory({ type }: { type: 'music' | 'podcast
                 germanPlaceholder = t('modal_german_phrase_placeholder') || "e.g. Wie geht es Ihnen?";
                 hungarianPlaceholder = t('modal_hungarian_phrase_placeholder') || "e.g. Hogy van?";
               } else if (newCategory === 'prepositions') {
-                germanLabel = t('modal_german_verb_label') || "German Verb *";
-                germanPlaceholder = t('modal_german_prep_verb_placeholder') || "e.g. verzichten, lemondani valamiről/felhagyni valamivel";
-                hungarianPlaceholder = t('modal_prep_case_placeholder') || "e.g. auf + Akkusativ";
+                germanLabel = t('modal_german_prep_label') || "German Preposition *";
+                germanPlaceholder = t('modal_german_prep_placeholder') || "e.g. mit";
+                hungarianPlaceholder = t('modal_hungarian_prep_placeholder') || "e.g. val/vel";
               } else if (newCategory === 'verbs') {
                 germanLabel = t('modal_german_verb_label') || "German Verb *";
                 germanPlaceholder = t('modal_german_verb_placeholder') || "e.g. machen";

@@ -1,8 +1,15 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useI18n } from "../I18nContext";
 import { useAuth } from "../AuthContext";
-import { useCloudVocabulary, bulkDeleteCloudWords } from "../lib/firestore";
+import { 
+  useCloudVocabulary, 
+  bulkDeleteCloudWords, 
+  bulkAddCloudWords, 
+  updateCloudWord 
+} from "../lib/firestore";
+import { publicVocabulary, publicPhrases, publicArticles, publicPrepositions, publicFalseFriends, publicAdjectives } from '../lib/public-data';
+import * as XLSX from 'xlsx';
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { dbCloud } from "../lib/firebase";
 
@@ -32,11 +39,16 @@ interface UserSettings {
 
 export default function Settings() {
   const { t, language, setLanguage } = useI18n();
-  const { user } = useAuth();
+  const { user, isAdmin, adminMode } = useAuth();
   const personalWords = useCloudVocabulary(user?.uid) || [];
+  const publicWords = useCloudVocabulary("PUBLIC_LIBRARY") || [];
   const [isWiping, setIsWiping] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
+  const [saveToPublic, setSaveToPublic] = useState(isAdmin ? adminMode : false);
+  const [isFilesListOpen, setIsFilesListOpen] = useState(false);
+  const [fileSearchTerm, setFileSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Load the user's preference from localStorage (defaults to true)
   const [showExamples, setShowExamples] = useState(() => {
@@ -49,6 +61,64 @@ export default function Settings() {
   const [sources, setSources] = useState<{ name: string; count: number }[]>([]);
   const [selectedSources, setSelectedSources] = useState<Set<string>>(new Set());
   const [isCleaning, setIsCleaning] = useState(false);
+
+  // State for editing files
+  const [editingFile, setEditingFile] = useState<string | null>(null);
+  const [editingFileCategory, setEditingFileCategory] = useState<string>('vocabulary');
+  const [editFileItems, setEditFileItems] = useState<any[]>([]);
+  const [deletedEditItemIds, setDeletedEditItemIds] = useState<string[]>([]);
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
+  const [modalSearchTerm, setModalSearchTerm] = useState("");
+  const itemsPerPage = 10;
+
+  useEffect(() => {
+    setSaveToPublic(isAdmin ? adminMode : false);
+  }, [isAdmin, adminMode]);
+
+  const allItems = useMemo(() => {
+    const existingItems = saveToPublic ? publicWords : personalWords;
+    const cloudItems = existingItems.map((item: any) => ({ ...item, isCloud: true }));
+    if (!saveToPublic) return cloudItems;
+
+    const staticItems: any[] = [];
+    const pushStatic = (data: any[], type: string) => {
+      data.forEach((item: any, idx: number) => {
+        const key = String(item.german || '').toLowerCase().trim();
+        const hasTombstoneOrOverride = existingItems.some((i: any) => (i.german || '').toLowerCase().trim() === key);
+        if (!hasTombstoneOrOverride) {
+          staticItems.push({
+            ...item,
+            id: `static_${item.german}_${idx}`,
+            sourceFile: `Static Library (${type})`,
+            category: type,
+            sourceType: 'static',
+            isCloud: false
+          });
+        }
+      });
+    };
+
+    pushStatic(publicVocabulary, 'vocabulary');
+    pushStatic(publicPhrases, 'phrases');
+    pushStatic(publicArticles, 'articles');
+    pushStatic(publicPrepositions, 'prepositions');
+    pushStatic(publicFalseFriends, 'false_friends');
+    pushStatic(publicAdjectives || [], 'adjectives');
+
+    return [...cloudItems.filter((i: any) => !i.deleted), ...staticItems];
+  }, [personalWords, publicWords, saveToPublic]);
+
+  const importedFiles = useMemo(() => {
+    const fileMap = new Map<string, { fileName: string; fileType: string; destination: string; itemCount: number; wordIds: string[] }>();
+    allItems.forEach((item: any) => {
+      const source = item.sourceFile || "Legacy Import (No File Name)";
+      if (!fileMap.has(source)) fileMap.set(source, { fileName: source, fileType: item.sourceType || (item.sourceFile ? item.sourceFile.split('.').pop() || 'unknown' : 'unknown'), destination: item.category || 'mixed', itemCount: 0, wordIds: [] });
+      const fileData = fileMap.get(source)!;
+      fileData.itemCount++;
+      if (item.id) fileData.wordIds.push(item.id);
+    });
+    return Array.from(fileMap.values()).sort((a, b) => a.fileName.localeCompare(b.fileName));
+  }, [allItems]);
 
 
   // Fetch settings from Firestore on mount for logged-in users
@@ -172,6 +242,216 @@ export default function Settings() {
     }
   };
 
+  const filteredImportedFiles = useMemo(() => {
+    if (!fileSearchTerm.trim()) return importedFiles;
+    const term = fileSearchTerm.toLowerCase();
+    return importedFiles.filter(f => {
+      if (f.fileName.toLowerCase().includes(term)) return true;
+      const itemsInFile = allItems.filter((item: any) => (item.sourceFile || "Legacy Import (No File Name)") === f.fileName);
+      return itemsInFile.some((item: any) =>
+        (item.german || '').toLowerCase().includes(term) ||
+        (item.hungarian || '').toLowerCase().includes(term) ||
+        (item.example || '').toLowerCase().includes(term) ||
+        (item.note || '').toLowerCase().includes(term)
+      );
+    });
+  }, [importedFiles, allItems, fileSearchTerm]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredImportedFiles.length / itemsPerPage));
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [fileSearchTerm]);
+
+  const handleEditFile = (file: any) => {
+    const items = allItems.filter((item: any) => (item.sourceFile || "Legacy Import (No File Name)") === file.fileName);
+    setEditFileItems(JSON.parse(JSON.stringify(items)));
+    setEditingFileCategory(file.destination);
+    setEditingFile(file.fileName);
+    setDeletedEditItemIds([]);
+    setModalSearchTerm(fileSearchTerm);
+  };
+
+  const handleEditItemChange = (index: number, field: string, value: string) => {
+    setEditFileItems(prev => {
+      const next = [...prev];
+      next[index] = { ...next[index], [field]: value };
+      if (editingFileCategory === 'articles' && (field === 'article' || field === 'noun')) {
+        next[index].german = `${next[index].article || ''} ${next[index].noun || ''}`.trim();
+      }
+      return next;
+    });
+  };
+
+  const handleDeleteEditItem = (index: number) => {
+    const item = editFileItems[index];
+    if (item.id) {
+      setDeletedEditItemIds(prev => [...prev, item.id]);
+    }
+    setEditFileItems(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleSaveFileEdits = async () => {
+    setIsSavingEdit(true);
+    try {
+      if (deletedEditItemIds.length > 0) {
+        const cloudDeletes = deletedEditItemIds.filter((id: string) => !id.startsWith('static_'));
+        const staticDeletes = deletedEditItemIds.filter((id: string) => id.startsWith('static_'));
+
+        if (cloudDeletes.length > 0) await bulkDeleteCloudWords(cloudDeletes);
+
+        if (staticDeletes.length > 0) {
+          const tombstones = staticDeletes.map((id: string) => {
+            const orig: any = allItems.find((i: any) => i.id === id);
+            return orig ? { userId: 'PUBLIC_LIBRARY', german: orig.german, hungarian: orig.hungarian, category: orig.category || 'vocabulary', deleted: true, dateAdded: Date.now() } : null;
+          }).filter(Boolean);
+          if (tombstones.length > 0) await bulkAddCloudWords(tombstones as any[]);
+        }
+      }
+
+      const newCloudItems: any[] = [];
+      const originalItems = allItems.filter((item: any) => (item.sourceFile || 'Legacy Import (No File Name)') === editingFile);
+      const originalMap = new Map<string, any>(originalItems.map((i: any) => [i.id, i]));
+
+      for (const item of editFileItems) {
+        if (!item.id) continue;
+        const orig = originalMap.get(item.id);
+        if (
+          orig &&
+          (orig.german !== item.german || orig.hungarian !== item.hungarian || orig.example !== item.example || (orig as any).note !== item.note || (orig as any).levels !== item.levels || (orig as any).hint !== item.hint || (orig as any).article !== item.article || (orig as any).noun !== item.noun)
+        ) {
+          if (orig.isCloud) {
+            const updatePayload: any = { german: item.german?.trim() || '', hungarian: item.hungarian?.trim() || '' };
+            if (item.example !== undefined) updatePayload.example = item.example.trim();
+            if (item.note !== undefined) updatePayload.note = item.note.trim();
+            if (item.levels !== undefined) updatePayload.levels = item.levels.trim();
+            if (item.hint !== undefined) updatePayload.hint = item.hint.trim();
+            if (item.article !== undefined) updatePayload.article = item.article.trim();
+            if (item.noun !== undefined) updatePayload.noun = item.noun.trim();
+            await updateCloudWord(item.id, updatePayload);
+          } else {
+            newCloudItems.push({ userId: 'PUBLIC_LIBRARY', german: orig.german, hungarian: orig.hungarian, category: orig.category || 'vocabulary', deleted: true, dateAdded: Date.now() });
+            const newCloudItem: any = { userId: 'PUBLIC_LIBRARY', german: item.german?.trim() || '', hungarian: item.hungarian?.trim() || '', category: orig.category || 'vocabulary', dateAdded: Date.now(), sourceFile: orig.sourceFile, sourceType: orig.sourceType };
+            if (item.example !== undefined) newCloudItem.example = item.example.trim();
+            if (item.note !== undefined) newCloudItem.note = item.note.trim();
+            if (item.levels !== undefined) newCloudItem.levels = item.levels.trim();
+            if (item.hint !== undefined) newCloudItem.hint = item.hint.trim();
+            if (item.article !== undefined) newCloudItem.article = item.article.trim();
+            if (item.noun !== undefined) newCloudItem.noun = item.noun.trim();
+            newCloudItems.push(newCloudItem);
+          }
+        }
+      }
+
+      if (newCloudItems.length > 0) {
+        await bulkAddCloudWords(newCloudItems as any[]);
+      }
+
+      setEditingFile(null);
+      setDeletedEditItemIds([]);
+    } catch (error) {
+      console.error('Failed to save edits:', error);
+      alert('An error occurred while saving edits.');
+    } finally {
+      setIsSavingEdit(false);
+    }
+  };
+
+  const handleDeleteFile = async (fileName: string) => {
+    const fileInfo = importedFiles.find(f => f.fileName === fileName);
+    if (!fileInfo) return;
+
+    if (!confirm(t('confirm_delete_file', { fileName, count: fileInfo.itemCount }))) return;
+
+    setIsSaving(true);
+    try {
+      const itemsInFile = allItems.filter((item: any) => (item.sourceFile || "Legacy Import (No File Name)") === fileName);
+      const wordIdsToDelete = itemsInFile.map((item: any) => item.id).filter(Boolean);
+
+      const cloudDeletes = wordIdsToDelete.filter((id: string) => !id.startsWith('static_'));
+      const staticDeletes = wordIdsToDelete.filter((id: string) => id.startsWith('static_'));
+
+      if (cloudDeletes.length > 0) await bulkDeleteCloudWords(cloudDeletes);
+
+      if (staticDeletes.length > 0) {
+        const tombstones = staticDeletes.map((id: string) => {
+          const orig: any = allItems.find((i: any) => i.id === id);
+          return orig ? { userId: 'PUBLIC_LIBRARY', german: orig.german, hungarian: orig.hungarian, category: orig.category || 'vocabulary', deleted: true, dateAdded: Date.now() } : null;
+        }).filter(Boolean);
+        if (tombstones.length > 0) await bulkAddCloudWords(tombstones as any[]);
+      }
+
+      setSelectedSources(prev => {
+        const next = new Set(prev);
+        next.delete(fileName);
+        return next;
+      });
+    } catch (error) {
+      console.error('Failed to delete file items:', error);
+      alert(t('error_delete_file_desc'));
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleBulkDeleteFiles = async () => {
+    if (selectedSources.size === 0) return;
+    if (!confirm(t('confirm_bulk_delete', { count: selectedSources.size }))) return;
+
+    setIsSaving(true);
+    try {
+      let allIdsToDelete: string[] = [];
+      importedFiles.forEach(f => {
+        if (selectedSources.has(f.fileName)) {
+          const itemsInFile = allItems.filter((item: any) => (item.sourceFile || "Legacy Import (No File Name)") === f.fileName);
+          const wordIds = itemsInFile.map((item: any) => item.id).filter(Boolean);
+          allIdsToDelete.push(...wordIds);
+        }
+      });
+      allIdsToDelete = Array.from(new Set(allIdsToDelete));
+
+      const cloudDeletes = allIdsToDelete.filter((id: string) => !id.startsWith('static_'));
+      const staticDeletes = allIdsToDelete.filter((id: string) => id.startsWith('static_'));
+
+      if (cloudDeletes.length > 0) await bulkDeleteCloudWords(cloudDeletes);
+
+      if (staticDeletes.length > 0) {
+        const tombstones = staticDeletes.map((id: string) => {
+          const orig: any = allItems.find((i: any) => i.id === id);
+          return orig ? { userId: 'PUBLIC_LIBRARY', german: orig.german, hungarian: orig.hungarian, category: orig.category || 'vocabulary', deleted: true, dateAdded: Date.now() } : null;
+        }).filter(Boolean);
+        if (tombstones.length > 0) await bulkAddCloudWords(tombstones as any[]);
+      }
+
+      setSelectedSources(new Set());
+    } catch (error) {
+      console.error('Failed to bulk delete files:', error);
+      alert(t('error_bulk_delete_desc'));
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDownloadFiles = (fileNames: string[]) => {
+    const itemsToExport = allItems.filter((item: any) => {
+      const source = item.sourceFile || 'Legacy Import (No File Name)';
+      return fileNames.includes(source);
+    });
+
+    if (itemsToExport.length === 0) {
+      alert(t('no_items_export'));
+      return;
+    }
+
+    const exportData = itemsToExport.map((item: any) => ({ German: item.german || '', Hungarian: item.hungarian || '', Example: item.example || '', Note: item.note || '', Category: item.category || '', 'Source File': item.sourceFile || 'Legacy Import (No File Name)' }));
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    worksheet['!cols'] = [{ wch: 30 }, { wch: 30 }, { wch: 40 }, { wch: 15 }, { wch: 25 }];
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Export');
+    const outName = fileNames.length === 1 ? `MicaLingo_Export_${fileNames[0].replace(/\.[^/.]+$/, '')}.xlsx` : `MicaLingo_Bulk_Export_${fileNames.length}_files.xlsx`;
+    XLSX.writeFile(workbook, outName);
+  };
+
   return (
     <div className="relative min-h-[85vh] w-full flex flex-col pt-4 md:pt-8 pb-12">
       <BackgroundBlobs />
@@ -280,13 +560,13 @@ export default function Settings() {
                 </div>
 
                 {/* Advanced Cleanup */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between p-5 bg-yellow-50/50 rounded-2xl border border-yellow-100 shadow-sm">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between p-5 bg-yellow-50/50 rounded-2xl border border-yellow-200 shadow-sm">
                   <div className="mb-3 sm:mb-0 sm:mr-4">
                     <h3 className="font-bold text-yellow-800">Advanced Cleanup</h3>
                     <p className="text-sm text-yellow-600 mt-1 font-medium">Manually delete words from specific imported files, including old or "ghost" files.</p>
                   </div>
                   <button 
-                    onClick={openCleanupModal}
+                    onClick={() => setIsFilesListOpen(true)}
                     className="whitespace-nowrap bg-yellow-400 text-yellow-900 hover:bg-yellow-500 font-bold py-2.5 px-6 rounded-xl transition-colors text-sm shadow-sm"
                   >
                     Manage Sources...
@@ -314,6 +594,118 @@ export default function Settings() {
           </button>
         </div>
       </div>
+
+      {/* IMPORTED FILES MANAGER */}
+      {isAdmin && adminMode && (
+        <div className="bg-white/80 backdrop-blur-xl rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white mt-8 overflow-hidden transition-all duration-300">
+          <div 
+            className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-6 md:p-8 gap-4 cursor-pointer hover:bg-white/50 transition-colors"
+            onClick={() => setIsFilesListOpen(!isFilesListOpen)}
+          >
+            <div className="flex-1 text-left">
+              <h2 className="text-2xl font-extrabold text-blue-950">
+                {t('manage_imported_files')} <span className="text-purple-600 ml-2">({saveToPublic ? 'Public' : 'Personal'})</span>
+              </h2>
+              <p className="text-gray-600 text-sm mt-1">{t('manage_imported_files_desc')}</p>
+            </div>
+            <div className="flex items-center gap-4 w-full sm:w-auto">
+              <div className="w-full sm:w-64" onClick={e => e.stopPropagation()}>
+                <input
+                  type="text"
+                  placeholder={t('search_files') || 'Search files or keywords...'}
+                  value={fileSearchTerm}
+                  onChange={(e) => {
+                    setFileSearchTerm(e.target.value);
+                    if (e.target.value) setIsFilesListOpen(true);
+                  }}
+                  className="w-full px-5 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                />
+              </div>
+              <div className={`w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-sm text-blue-600 transition-transform duration-500 flex-shrink-0 ${isFilesListOpen ? "rotate-180" : ""}`}>
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"></path></svg>
+              </div>
+            </div>
+          </div>
+
+          <div className={`grid transition-[grid-template-rows,opacity] duration-500 ease-in-out ${isFilesListOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}>
+            <div className="overflow-hidden">
+              <div className="px-6 pb-6 md:px-8 md:pb-8 pt-2 border-t border-blue-50/50 space-y-6">
+                {selectedSources.size > 0 && (
+                  <div className="bg-blue-50 border border-blue-200 p-4 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
+                    <span className="text-blue-800 font-medium text-center sm:text-left">{t('files_selected', { count: selectedSources.size })}</span>
+                    <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-2">
+                      <button onClick={() => handleDownloadFiles(Array.from(selectedSources))} disabled={isSaving} className="flex items-center justify-center gap-2 bg-white border border-blue-200 text-blue-600 hover:bg-blue-50 px-5 py-2.5 rounded-xl font-bold transition-colors shadow-sm disabled:opacity-50">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M8 12l4 4m0 0l4-4m-4 4V4" /></svg>
+                        {t('download_selected')}
+                      </button>
+                      <button onClick={handleBulkDeleteFiles} disabled={isSaving} className="flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 rounded-xl font-bold transition-colors shadow-sm disabled:opacity-50 w-full sm:w-auto">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5-3h4m-6 3h8" /></svg>
+                        {t('delete_selected')}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                <div className="bg-white rounded-2xl shadow-sm border border-blue-50 overflow-x-auto">
+                  <table className="w-full text-left border-collapse">
+                    <thead className="bg-blue-50/50 border-b border-blue-100">
+                      <tr>
+                        <th className="p-2 sm:p-4 w-10 sm:w-12 text-center"></th>
+                        <th className="p-3 sm:p-5 font-bold text-sm text-blue-900/60 uppercase tracking-wider">{t('file_name')}</th>
+                        <th className="p-3 sm:p-5 font-bold text-sm text-blue-900/60 uppercase tracking-wider">{t('format')}</th>
+                        <th className="p-3 sm:p-5 font-bold text-sm text-blue-900/60 uppercase tracking-wider">{t('used_in')}</th>
+                        <th className="p-3 sm:p-5 font-bold text-sm text-blue-900/60 uppercase tracking-wider">{t('items')}</th>
+                        <th className="p-3 sm:p-5 font-bold text-sm text-blue-900/60 uppercase tracking-wider text-right">{t('action')}</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {filteredImportedFiles.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((file: any) => (
+                        <tr key={file.fileName} className="hover:bg-gray-50 transition-colors">
+                          <td className="p-3 sm:p-4 text-center">
+                            <input type="checkbox" checked={selectedSources.has(file.fileName)} onChange={() => handleSourceSelection(file.fileName)} className="w-5 h-5 text-blue-600 rounded border-blue-200 cursor-pointer" />
+                          </td>
+                          <td className="p-3 sm:p-5 font-bold text-blue-950 break-all">{file.fileName}</td>
+                          <td className="p-3 sm:p-5 text-gray-600 uppercase text-sm font-bold">{file.fileType}</td>
+                          <td className="p-3 sm:p-5"><span className="px-2.5 py-1 text-xs font-bold rounded-full bg-blue-100 text-blue-800 uppercase tracking-wider">{file.destination}</span></td>
+                          <td className="p-3 sm:p-5 text-gray-700 font-medium">{file.itemCount}</td>
+                          <td className="p-3 sm:p-5 text-right">
+                            <div className="flex flex-wrap items-center justify-end gap-1 sm:gap-2">
+                              <button onClick={() => handleEditFile(file)} disabled={isSaving} className="flex items-center text-blue-600 hover:text-blue-800 p-2 rounded-lg hover:bg-blue-50 transition-colors disabled:opacity-50 font-bold text-sm">
+                                <svg className="w-4 h-4 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536M9 11l6.768-6.768a2.5 2.5 0 113.536 3.536L12.536 14.536A4 4 0 019.172 15.9L6 16l.1-3.172A4 4 0 017.464 9.464z" /></svg>
+                                <span className="hidden sm:inline">Edit</span>
+                              </button>
+                              <button onClick={() => handleDownloadFiles([file.fileName])} disabled={isSaving} className="flex items-center text-green-600 hover:text-green-800 p-2 rounded-lg hover:bg-green-50 transition-colors disabled:opacity-50 font-bold text-sm">
+                                <svg className="w-4 h-4 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M8 12l4 4m0 0l4-4m-4 4V4" /></svg>
+                                <span className="hidden sm:inline">{t('download')}</span>
+                              </button>
+                              <button onClick={() => handleDeleteFile(file.fileName)} disabled={isSaving} className="flex items-center text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50 font-bold text-sm">
+                                <svg className="w-4 h-4 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5-3h4m-6 3h8" /></svg>
+                                <span className="hidden sm:inline">{t('delete')}</span>
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                
+                {totalPages > 1 && (
+                  <div className="flex justify-between items-center pt-6 px-2">
+                    <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-blue-600 font-bold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-50 transition-colors shadow-sm flex items-center gap-2">
+                      &larr; <span className="hidden sm:inline">Previous</span>
+                    </button>
+                    <span className="text-gray-600 font-medium text-sm bg-white px-4 py-2 rounded-xl border border-gray-100 shadow-sm">Page {currentPage} of {totalPages}</span>
+                    <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-blue-600 font-bold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-50 transition-colors shadow-sm flex items-center gap-2">
+                      <span className="hidden sm:inline">Next</span> &rarr;
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {isCleanupModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-blue-950/40 backdrop-blur-sm">
