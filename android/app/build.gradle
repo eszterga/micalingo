@@ -62,6 +62,14 @@ dependencies {
     implementation project(':capacitor-cordova-android-plugins')
 }
 
+// FIX: Prevent Duplicate Classes error by stripping out old Kotlin libraries
+configurations.all {
+    resolutionStrategy {
+        exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk7'
+        exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8'
+    }
+}
+
 apply from: 'capacitor.build.gradle'
 
 try {
