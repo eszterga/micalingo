@@ -16,6 +16,16 @@ export default function Login() {
   useEffect(() => {
     // Mobile WebViews require catching the result when the app reopens after redirect
     if (Capacitor.isNativePlatform()) {
+      // RESTORE session storage from localStorage if it was cleared by the Android WebView
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('backup_firebase:')) {
+          const originalKey = key.replace('backup_', '');
+          sessionStorage.setItem(originalKey, localStorage.getItem(key)!);
+          localStorage.removeItem(key);
+        }
+      }
+
       setIsRedirecting(true);
       getRedirectResult(auth)
         .then((result) => {
@@ -43,6 +53,18 @@ export default function Login() {
       
       if (Capacitor.isNativePlatform()) {
         // Mobile app environment: use Redirect
+        
+        // BACKUP sessionStorage to localStorage to prevent "missing initial state" error
+        const backupInterval = setInterval(() => {
+          for (let i = 0; i < sessionStorage.length; i++) {
+            const key = sessionStorage.key(i);
+            if (key && key.startsWith('firebase:')) {
+              localStorage.setItem(`backup_${key}`, sessionStorage.getItem(key)!);
+            }
+          }
+        }, 50);
+        setTimeout(() => clearInterval(backupInterval), 3000);
+
         await signInWithRedirect(auth, provider);
       } else {
         // Desktop/Browser environment: use Popup
