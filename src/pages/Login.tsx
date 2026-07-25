@@ -23,6 +23,7 @@ export default function Login() {
     try {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
+
       const redirectUrl = searchParams.get('redirect') || '/';
       navigate(redirectUrl, { replace: true }); // Redirect on successful login
     } catch (error) {
