@@ -1,31 +1,55 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider } from 'firebase/auth';
 import { auth } from '../lib/firebase';
 import { useAuth } from '../AuthContext';
 import { useI18n } from '../I18nContext';
+import { Capacitor } from '@capacitor/core';
 
 export default function Login() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { t } = useI18n();
+  const [isRedirecting, setIsRedirecting] = useState(false);
+
+  useEffect(() => {
+    // Mobile WebViews require catching the result when the app reopens after redirect
+    if (Capacitor.isNativePlatform()) {
+      setIsRedirecting(true);
+      getRedirectResult(auth)
+        .then((result) => {
+          if (result) {
+            const redirectUrl = searchParams.get('redirect') || '/';
+            navigate(redirectUrl, { replace: true });
+          }
+        })
+        .catch((error) => console.error("Redirect login error:", error))
+        .finally(() => setIsRedirecting(false));
+    }
+  }, [navigate, searchParams]);
 
   useEffect(() => {
     // If user is already logged in, redirect them.
-    if (!loading && user) {
+    if (!loading && user && !isRedirecting) {
       const redirectUrl = searchParams.get('redirect') || '/';
       navigate(redirectUrl, { replace: true });
     }
-  }, [user, loading, navigate, searchParams]);
+  }, [user, loading, navigate, searchParams, isRedirecting]);
 
   const handleGoogleLogin = async () => {
     try {
       const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
-
-      const redirectUrl = searchParams.get('redirect') || '/';
-      navigate(redirectUrl, { replace: true }); // Redirect on successful login
+      
+      if (Capacitor.isNativePlatform()) {
+        // Mobile app environment: use Redirect
+        await signInWithRedirect(auth, provider);
+      } else {
+        // Desktop/Browser environment: use Popup
+        await signInWithPopup(auth, provider);
+        const redirectUrl = searchParams.get('redirect') || '/';
+        navigate(redirectUrl, { replace: true });
+      }
     } catch (error) {
       console.error("Login failed:", error);
       alert(t('alert_login_failed'));
