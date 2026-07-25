@@ -1,4 +1,4 @@
-import{j as e,L as r}from"./vendor-y8IPvkpw.js";import{a}from"./index-B-TbZzGl.js";const l=()=>e.jsxs(e.Fragment,{children:[e.jsx("style",{children:`
+import{j as e,L as r}from"./vendor-y8IPvkpw.js";import{a}from"./index-kYeeLeiF.js";const l=()=>e.jsxs(e.Fragment,{children:[e.jsx("style",{children:`
       @keyframes blob {
         0% { transform: translate(0px, 0px) scale(1); }
         33% { transform: translate(30px, -50px) scale(1.1); }
