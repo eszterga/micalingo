@@ -14,6 +14,7 @@ interface ImportedFilePreview {
   destination: string;
   itemCount: number;
   wordIds: string[];
+  uniqueKey: string;
 }
 
 const BackgroundBlobs = () => (
@@ -247,20 +248,23 @@ export default function Import() {
     const fileMap = new Map<string, ImportedFilePreview>();
     allItems.forEach((item: any) => {
       const source = item.sourceFile || "Legacy Import (No File Name)";
-      if (!fileMap.has(source)) {
-        fileMap.set(source, {
+      const category = item.category || 'mixed';
+      const key = `${source}_${category}`;
+      if (!fileMap.has(key)) {
+        fileMap.set(key, {
           fileName: source,
           fileType: item.sourceType || (item.sourceFile ? item.sourceFile.split('.').pop() || 'unknown' : 'unknown'),
-          destination: item.category || 'mixed',
+          destination: category,
           itemCount: 0,
-          wordIds: []
+          wordIds: [],
+          uniqueKey: key
         });
       }
-      const fileData = fileMap.get(source)!;
+      const fileData = fileMap.get(key)!;
       fileData.itemCount++;
       if (item.id) fileData.wordIds.push(item.id);
     });
-    return Array.from(fileMap.values()).sort((a, b) => a.fileName.localeCompare(b.fileName));
+    return Array.from(fileMap.values()).sort((a, b) => a.fileName.localeCompare(b.fileName) || a.destination.localeCompare(b.destination));
   }, [allItems]);
 
   const filteredImportedFiles = useMemo(() => {
@@ -268,7 +272,10 @@ export default function Import() {
     const term = fileSearchTerm.toLowerCase();
     return importedFiles.filter((f: ImportedFilePreview) => {
       if (f.fileName.toLowerCase().includes(term)) return true;
-      const itemsInFile = allItems.filter((item: any) => (item.sourceFile || "Legacy Import (No File Name)") === f.fileName);
+      const itemsInFile = allItems.filter((item: any) => 
+        (item.sourceFile || "Legacy Import (No File Name)") === f.fileName &&
+        (item.category || 'mixed') === f.destination
+      );
       return itemsInFile.some((item: any) =>
         (item.german || '').toLowerCase().includes(term) ||
         (item.hungarian || '').toLowerCase().includes(term) ||
@@ -290,17 +297,20 @@ export default function Import() {
     }
   }, [totalPages, currentPage]);
 
-  const toggleFileSelection = (fileName: string) => {
+  const toggleFileSelection = (uniqueKey: string) => {
     setSelectedFiles(prev => {
       const next = new Set(prev);
-      if (next.has(fileName)) next.delete(fileName);
-      else next.add(fileName);
+      if (next.has(uniqueKey)) next.delete(uniqueKey);
+      else next.add(uniqueKey);
       return next;
     });
   };
 
   const handleEditFile = (file: ImportedFilePreview) => {
-    const items = allItems.filter((item: any) => (item.sourceFile || "Legacy Import (No File Name)") === file.fileName);
+    const items = allItems.filter((item: any) => 
+      (item.sourceFile || "Legacy Import (No File Name)") === file.fileName &&
+      (item.category || 'mixed') === file.destination
+    );
     setEditFileItems(JSON.parse(JSON.stringify(items)));
     setEditingFileCategory(file.destination);
     setEditingFile(file.fileName);
@@ -355,7 +365,10 @@ export default function Import() {
       }
 
       const newCloudItems: any[] = [];
-      const originalItems = allItems.filter((item: any) => (item.sourceFile || 'Legacy Import (No File Name)') === editingFile);
+      const originalItems = allItems.filter((item: any) => 
+        (item.sourceFile || 'Legacy Import (No File Name)') === editingFile &&
+        (item.category || 'mixed') === editingFileCategory
+      );
       const originalMap = new Map<string, any>(originalItems.map((i: any) => [i.id, i]));
 
       for (const item of editFileItems) {
@@ -433,16 +446,19 @@ export default function Import() {
     }
   };
 
-  const handleDeleteFile = async (fileName: string) => {
-    const fileInfo = importedFiles.find(f => f.fileName === fileName);
+  const handleDeleteFile = async (uniqueKey: string) => {
+    const fileInfo = importedFiles.find(f => f.uniqueKey === uniqueKey);
     if (!fileInfo) return;
 
-    if (!confirm(t('confirm_delete_file', { fileName, count: fileInfo.itemCount }))) return;
+    if (!confirm(t('confirm_delete_file', { fileName: fileInfo.fileName, count: fileInfo.itemCount }))) return;
 
     setSaving(true);
     try {
       // Re-determine the items to delete at the moment of action to avoid stale state.
-      const itemsInFile = allItems.filter((item: any) => (item.sourceFile || "Legacy Import (No File Name)") === fileName);
+      const itemsInFile = allItems.filter((item: any) => 
+        (item.sourceFile || "Legacy Import (No File Name)") === fileInfo.fileName &&
+        (item.category || 'mixed') === fileInfo.destination
+      );
       const wordIdsToDelete = itemsInFile.map((item: any) => item.id).filter(Boolean);
 
       const cloudDeletes = wordIdsToDelete.filter((id: string) => !id.startsWith('static_'));
@@ -471,7 +487,7 @@ export default function Import() {
 
       setSelectedFiles(prev => {
         const next = new Set(prev);
-        next.delete(fileName);
+        next.delete(uniqueKey);
         return next;
       });
     } catch (error) {
@@ -490,14 +506,17 @@ export default function Import() {
     try {
       let allIdsToDelete: string[] = [];
       importedFiles.forEach((f: ImportedFilePreview) => {
-        if (selectedFiles.has(f.fileName)) {
+        if (selectedFiles.has(f.uniqueKey)) {
           // Re-calculate IDs to ensure freshness
-          const itemsInFile = allItems.filter((item: any) => (item.sourceFile || "Legacy Import (No File Name)") === f.fileName);
+          const itemsInFile = allItems.filter((item: any) => 
+            (item.sourceFile || "Legacy Import (No File Name)") === f.fileName &&
+            (item.category || 'mixed') === f.destination
+          );
           const wordIds = itemsInFile.map((item: any) => item.id).filter(Boolean);
           allIdsToDelete.push(...wordIds);
         }
       });
-      allIdsToDelete = Array.from(new Set(allIdsToDelete)); // Ensure uniqueness
+      allIdsToDelete = Array.from(new Set(allIdsToDelete));
 
       const cloudDeletes = allIdsToDelete.filter((id: string) => !id.startsWith('static_'));
       const staticDeletes = allIdsToDelete.filter((id: string) => id.startsWith('static_'));
@@ -530,10 +549,11 @@ export default function Import() {
     }
   };
 
-  const handleDownloadFiles = (fileNames: string[]) => {
+  const handleDownloadFiles = (uniqueKeys: string[]) => {
+    const keysSet = new Set(uniqueKeys);
     const itemsToExport = allItems.filter((item: any) => {
-      const source = item.sourceFile || 'Legacy Import (No File Name)';
-      return fileNames.includes(source);
+      const key = `${item.sourceFile || 'Legacy Import (No File Name)'}_${item.category || 'mixed'}`;
+      return keysSet.has(key);
     });
 
     if (itemsToExport.length === 0) {
@@ -555,10 +575,11 @@ export default function Import() {
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Export');
 
+    const firstItem = importedFiles.find(f => f.uniqueKey === uniqueKeys[0]);
     const outName =
-      fileNames.length === 1
-        ? `MicaLingo_Export_${fileNames[0].replace(/\.[^/.]+$/, '')}.xlsx`
-        : `MicaLingo_Bulk_Export_${fileNames.length}_files.xlsx`;
+      uniqueKeys.length === 1 && firstItem
+        ? `MicaLingo_Export_${firstItem.fileName.replace(/\.[^/.]+$/, '')}_${firstItem.destination}.xlsx`
+        : `MicaLingo_Bulk_Export_${uniqueKeys.length}_files.xlsx`;
 
     XLSX.writeFile(workbook, outName);
   };
@@ -874,76 +895,76 @@ export default function Import() {
         </ul>
 
         {/* Downloadable Template */}
-          <div className="mt-4 pt-4 border-t border-blue-200/60 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div>
+        <div className="mt-4 pt-4 border-t border-blue-200/60 flex flex-col gap-4">
+          <div className="mb-2">
             <h3 className="font-semibold text-blue-800">{t('need_starting_point')}</h3>
             <p className="text-sm text-blue-600">{t('download_template_desc')}</p>
           </div>
-          <div className="flex flex-col sm:flex-row flex-wrap gap-2 w-full lg:w-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 w-full">
             <button
               onClick={() => handleDownloadTemplate('standard')}
-                className="whitespace-nowrap px-5 py-2.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 shadow-sm w-full sm:w-auto"
+              className="w-full px-4 py-2.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 shadow-sm text-sm"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M8 12l4 4m0 0l4-4m-4 4V4" />
               </svg>
-              {t('vocab_template')}
+              <span>{t('vocab_template')}</span>
             </button>
             <button
               onClick={() => handleDownloadTemplate('articles')}
-                className="whitespace-nowrap px-5 py-2.5 bg-white text-blue-600 border border-blue-200 font-bold rounded-xl hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 shadow-sm w-full sm:w-auto"
+              className="w-full px-4 py-2.5 bg-white text-blue-600 border border-blue-200 font-bold rounded-xl hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 shadow-sm text-sm"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M8 12l4 4m0 0l4-4m-4 4V4" />
               </svg>
-              {t('articles_template')}
+              <span>{t('articles_template')}</span>
             </button>
             <button
               onClick={() => handleDownloadTemplate('adjectives')}
-              className="whitespace-nowrap px-5 py-2.5 bg-white text-blue-600 border border-blue-200 font-bold rounded-xl hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 shadow-sm w-full sm:w-auto"
+              className="w-full px-4 py-2.5 bg-white text-blue-600 border border-blue-200 font-bold rounded-xl hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 shadow-sm text-sm"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M8 12l4 4m0 0l4-4m-4 4V4" />
               </svg>
-              {t('adjectives_template')}
+              <span>{t('adjectives_template')}</span>
             </button>
             <button
               onClick={() => handleDownloadTemplate('verbs')}
-              className="whitespace-nowrap px-5 py-2.5 bg-white text-blue-600 border border-blue-200 font-bold rounded-xl hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 shadow-sm w-full sm:w-auto"
+              className="w-full px-4 py-2.5 bg-white text-blue-600 border border-blue-200 font-bold rounded-xl hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 shadow-sm text-sm"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M8 12l4 4m0 0l4-4m-4 4V4" />
               </svg>
-              {t('verbs_template') || 'Verbs Template'}
+              <span>{t('verbs_template') || 'Verbs Template'}</span>
             </button>
             <button
               onClick={() => handleDownloadTemplate('prepositions')}
-              className="whitespace-nowrap px-5 py-2.5 bg-white text-blue-600 border border-blue-200 font-bold rounded-xl hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 shadow-sm w-full sm:w-auto"
+              className="w-full px-4 py-2.5 bg-white text-blue-600 border border-blue-200 font-bold rounded-xl hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 shadow-sm text-sm"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M8 12l4 4m0 0l4-4m-4 4V4" />
               </svg>
-              {t('prepositions_template') || 'Prepositions Template'}
+              <span>{t('prepositions_template') || 'Prepositions Template'}</span>
             </button>
             {isAdmin && adminMode && (
               <>
                 <button
                   onClick={() => handleDownloadTemplate('false_friends')}
-                  className="whitespace-nowrap px-5 py-2.5 bg-white text-blue-600 border border-blue-200 font-bold rounded-xl hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 shadow-sm w-full sm:w-auto"
+                  className="w-full px-4 py-2.5 bg-white text-blue-600 border border-blue-200 font-bold rounded-xl hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 shadow-sm text-sm"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M8 12l4 4m0 0l4-4m-4 4V4" />
                   </svg>
-                  {t('false_friends') || 'False Friends Template'}
+                  <span>{t('false_friends') || 'False Friends Template'}</span>
                 </button>
                 <button
                   onClick={() => handleDownloadTemplate('idioms')}
-                  className="whitespace-nowrap px-5 py-2.5 bg-white text-blue-600 border border-blue-200 font-bold rounded-xl hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 shadow-sm w-full sm:w-auto"
+                  className="w-full px-4 py-2.5 bg-white text-blue-600 border border-blue-200 font-bold rounded-xl hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 shadow-sm text-sm"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M8 12l4 4m0 0l4-4m-4 4V4" />
                   </svg>
-                  {t('idioms') || 'Idioms Template'}
+                  <span>{t('idioms') || 'Idioms Template'}</span>
                 </button>
               </>
             )}
@@ -995,7 +1016,7 @@ export default function Import() {
 
           {previewItems.length > 0 ? (
             <div className="bg-white border border-blue-50 rounded-2xl shadow-sm max-h-[400px] overflow-auto">
-              <table className="w-full text-left border-collapse table-fixed">
+              <table className="w-full text-left border-collapse table-fixed min-w-[800px]">
                 <thead className="bg-blue-50/50 border-b border-blue-100 sticky top-0 backdrop-blur-md z-10">
                   <tr>
                     {destination === 'articles' ? (
@@ -1348,7 +1369,7 @@ export default function Import() {
 
           <div className={`grid transition-[grid-template-rows,opacity] duration-500 ease-in-out ${isFilesListOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}>
             <div className="overflow-hidden">
-              <div className="px-6 pb-6 md:px-8 md:pb-8 pt-2 border-t border-blue-50/50 space-y-6">
+              <div className="px-4 pb-4 sm:px-6 sm:pb-6 md:px-8 md:pb-8 pt-2 border-t border-blue-50/50 space-y-6">
           {selectedFiles.size > 0 && (
             <div className="bg-blue-50 border border-blue-200 p-4 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
               <span className="text-blue-800 font-medium text-center sm:text-left">{t('files_selected', { count: selectedFiles.size })}</span>
@@ -1378,7 +1399,7 @@ export default function Import() {
           )}
 
           <div className="bg-white rounded-2xl shadow-sm border border-blue-50 overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full text-left border-collapse min-w-[800px]">
               <thead className="bg-blue-50/50 border-b border-blue-100">
                 <tr>
                   <th className="p-2 sm:p-4 w-10 sm:w-12 text-center"></th>
@@ -1391,12 +1412,12 @@ export default function Import() {
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {filteredImportedFiles.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((file: ImportedFilePreview) => (
-                  <tr key={file.fileName} className="hover:bg-gray-50 transition-colors">
+                  <tr key={file.uniqueKey} className="hover:bg-gray-50 transition-colors">
                     <td className="p-3 sm:p-4 text-center">
                       <input
                         type="checkbox"
-                        checked={selectedFiles.has(file.fileName)}
-                        onChange={() => toggleFileSelection(file.fileName)}
+                        checked={selectedFiles.has(file.uniqueKey)}
+                        onChange={() => toggleFileSelection(file.uniqueKey)}
                         className="w-5 h-5 text-blue-600 rounded border-blue-200 cursor-pointer"
                       />
                     </td>
@@ -1419,7 +1440,7 @@ export default function Import() {
                           <span className="hidden sm:inline">Edit</span>
                         </button>
                         <button
-                          onClick={() => handleDownloadFiles([file.fileName])}
+                          onClick={() => handleDownloadFiles([file.uniqueKey])}
                           disabled={saving}
                           className="flex items-center text-green-600 hover:text-green-800 p-2 rounded-lg hover:bg-green-50 transition-colors disabled:opacity-50 font-bold text-sm"
                         >
@@ -1429,7 +1450,7 @@ export default function Import() {
                           <span className="hidden sm:inline">{t('download')}</span>
                         </button>
                         <button
-                          onClick={() => handleDeleteFile(file.fileName)}
+                          onClick={() => handleDeleteFile(file.uniqueKey)}
                           disabled={saving}
                           className="flex items-center text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50 font-bold text-sm"
                         >
@@ -1477,7 +1498,7 @@ export default function Import() {
       {editingFile && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-blue-950/40 backdrop-blur-sm transition-opacity">
           <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col animate-fade-in-up">
-            <div className="p-6 md:p-8 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 flex-wrap gap-4">
+            <div className="p-4 sm:p-6 md:p-8 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 flex-wrap gap-4">
               <h2 className="text-2xl font-extrabold text-blue-950">{t('preview_filename', { filename: editingFile || '' })} (Edit Mode)</h2>
               
               <div className="flex-1 max-w-md mx-auto w-full">
@@ -1495,11 +1516,11 @@ export default function Import() {
               </button>
             </div>
 
-            <div className="flex-1 overflow-auto bg-white p-6 md:p-8">
+            <div className="flex-1 overflow-auto bg-white p-3 sm:p-6 md:p-8">
               {editFileItems.length === 0 ? (
                 <p className="text-gray-500 italic text-center py-4">{t("no_items_left") || "No items left. Save to delete all."}</p>
               ) : (
-                <table className="w-full text-left border-collapse table-fixed border border-blue-50 rounded-xl shadow-sm">
+                <table className="w-full text-left border-collapse table-fixed min-w-[800px] border border-blue-50 rounded-xl shadow-sm">
                   <thead className="bg-blue-50/80 border-b border-blue-100 sticky top-0 backdrop-blur z-10">
                     <tr>
                       {editingFileCategory === 'articles' ? (
@@ -1640,7 +1661,7 @@ export default function Import() {
               )}
             </div>
 
-            <div className="p-6 md:p-8 border-t border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row justify-end gap-3">
+            <div className="p-4 sm:p-6 md:p-8 border-t border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row justify-end gap-3">
               <button
                 onClick={() => setEditingFile(null)}
                 disabled={isSavingEdit}

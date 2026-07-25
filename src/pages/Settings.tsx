@@ -58,7 +58,8 @@ export default function Settings() {
 
   // State for advanced cleanup modal
   const [isCleanupModalOpen, setIsCleanupModalOpen] = useState(false);
-  const [sources, setSources] = useState<{ name: string; count: number }[]>([]);
+  const [sources, setSources] = useState<{ name: string; category: string; count: number; uniqueKey: string }[]>([]);
+  // State for managing sources selection
   const [selectedSources, setSelectedSources] = useState<Set<string>>(new Set());
   const [isCleaning, setIsCleaning] = useState(false);
 
@@ -109,15 +110,26 @@ export default function Settings() {
   }, [personalWords, publicWords, saveToPublic]);
 
   const importedFiles = useMemo(() => {
-    const fileMap = new Map<string, { fileName: string; fileType: string; destination: string; itemCount: number; wordIds: string[] }>();
+    const fileMap = new Map<string, { fileName: string; fileType: string; destination: string; itemCount: number; wordIds: string[]; uniqueKey: string }>();
     allItems.forEach((item: any) => {
       const source = item.sourceFile || "Legacy Import (No File Name)";
-      if (!fileMap.has(source)) fileMap.set(source, { fileName: source, fileType: item.sourceType || (item.sourceFile ? item.sourceFile.split('.').pop() || 'unknown' : 'unknown'), destination: item.category || 'mixed', itemCount: 0, wordIds: [] });
-      const fileData = fileMap.get(source)!;
+      const category = item.category || 'mixed';
+      const key = `${source}_${category}`;
+      if (!fileMap.has(key)) {
+        fileMap.set(key, { 
+          fileName: source, 
+          fileType: item.sourceType || (item.sourceFile ? item.sourceFile.split('.').pop() || 'unknown' : 'unknown'), 
+          destination: category, 
+          itemCount: 0, 
+          wordIds: [],
+          uniqueKey: key
+        });
+      }
+      const fileData = fileMap.get(key)!;
       fileData.itemCount++;
       if (item.id) fileData.wordIds.push(item.id);
     });
-    return Array.from(fileMap.values()).sort((a, b) => a.fileName.localeCompare(b.fileName));
+    return Array.from(fileMap.values()).sort((a, b) => a.fileName.localeCompare(b.fileName) || a.destination.localeCompare(b.destination));
   }, [allItems]);
 
 
@@ -196,46 +208,54 @@ export default function Settings() {
   }
 
   const openCleanupModal = () => {
-    const sourceMap = new Map<string, number>();
+    const sourceMap = new Map<string, { name: string; category: string; count: number; uniqueKey: string }>();
     personalWords.forEach(word => {
       const sourceName = word.sourceFile || 'Legacy Import (No File Name)';
-      sourceMap.set(sourceName, (sourceMap.get(sourceName) || 0) + 1);
+      const category = word.category || 'mixed';
+      const key = `${sourceName}_${category}`;
+      if (!sourceMap.has(key)) {
+        sourceMap.set(key, { name: sourceName, category, count: 0, uniqueKey: key });
+      }
+      sourceMap.get(key)!.count++;
     });
-    const sourcesArray = Array.from(sourceMap.entries()).map(([name, count]) => ({ name, count }));
-    sourcesArray.sort((a, b) => a.name.localeCompare(b.name));
+    const sourcesArray = Array.from(sourceMap.values());
+    sourcesArray.sort((a, b) => a.name.localeCompare(b.name) || a.category.localeCompare(b.category));
     setSources(sourcesArray);
     setSelectedSources(new Set());
     setIsCleanupModalOpen(true);
   };
 
-  const handleSourceSelection = (sourceName: string) => {
+  const handleSourceSelection = (uniqueKey: string) => {
     setSelectedSources(prev => {
       const next = new Set(prev);
-      if (next.has(sourceName)) next.delete(sourceName);
-      else next.add(sourceName);
+      if (next.has(uniqueKey)) next.delete(uniqueKey);
+      else next.add(uniqueKey);
       return next;
     });
   };
 
   const handleBulkDeleteFromSources = async () => {
     if (selectedSources.size === 0) return;
-    const totalWordsToDelete = sources.filter(s => selectedSources.has(s.name)).reduce((acc, s) => acc + s.count, 0);
+    const totalWordsToDelete = sources.filter(s => selectedSources.has(s.uniqueKey)).reduce((acc, s) => acc + s.count, 0);
 
-    if (!confirm(`Are you sure you want to permanently delete all ${totalWordsToDelete} words from the ${selectedSources.size} selected sources? This cannot be undone.`)) return;
+    if (!window.confirm(`Are you sure you want to permanently delete all ${totalWordsToDelete} words from the ${selectedSources.size} selected sources? This cannot be undone.`)) return;
 
     setIsCleaning(true);
     try {
       const idsToDelete = personalWords
-        .filter(word => selectedSources.has(word.sourceFile || 'Legacy Import (No File Name)'))
+        .filter(word => {
+          const key = `${word.sourceFile || 'Legacy Import (No File Name)'}_${word.category || 'mixed'}`;
+          return selectedSources.has(key);
+        })
         .map(word => word.id)
         .filter((id): id is string => !!id);
       
       if (idsToDelete.length > 0) await bulkDeleteCloudWords(idsToDelete);
-      alert(`${idsToDelete.length} words have been deleted. The page will now reload.`);
+      window.alert(`${idsToDelete.length} words have been deleted. The page will now reload.`);
       window.location.reload();
     } catch (error) {
       console.error("Error during cleanup:", error);
-      alert("An error occurred during cleanup. Please try again.");
+      window.alert("An error occurred during cleanup. Please try again.");
     } finally {
       setIsCleaning(false);
       setIsCleanupModalOpen(false);
@@ -247,7 +267,10 @@ export default function Settings() {
     const term = fileSearchTerm.toLowerCase();
     return importedFiles.filter(f => {
       if (f.fileName.toLowerCase().includes(term)) return true;
-      const itemsInFile = allItems.filter((item: any) => (item.sourceFile || "Legacy Import (No File Name)") === f.fileName);
+      const itemsInFile = allItems.filter((item: any) => 
+        (item.sourceFile || "Legacy Import (No File Name)") === f.fileName &&
+        (item.category || 'mixed') === f.destination
+      );
       return itemsInFile.some((item: any) =>
         (item.german || '').toLowerCase().includes(term) ||
         (item.hungarian || '').toLowerCase().includes(term) ||
@@ -263,13 +286,23 @@ export default function Settings() {
     setCurrentPage(1);
   }, [fileSearchTerm]);
 
-  const handleEditFile = (file: any) => {
-    const items = allItems.filter((item: any) => (item.sourceFile || "Legacy Import (No File Name)") === file.fileName);
-    setEditFileItems(JSON.parse(JSON.stringify(items)));
-    setEditingFileCategory(file.destination);
-    setEditingFile(file.fileName);
-    setDeletedEditItemIds([]);
-    setModalSearchTerm(fileSearchTerm);
+  const handleEditFile = (e: React.MouseEvent, file: any) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      const items = allItems.filter((item: any) => 
+        (item.sourceFile || "Legacy Import (No File Name)") === file.fileName &&
+        (item.category || 'mixed') === file.destination
+      );
+      // Use safe mapping instead of JSON.stringify to prevent silent crashes
+      setEditFileItems(items.map((i: any) => ({ ...i })));
+      setEditingFileCategory(file.destination);
+      setEditingFile(file.fileName);
+      setDeletedEditItemIds([]);
+      setModalSearchTerm("");
+    } catch (err) {
+      console.error("Error opening edit modal:", err);
+    }
   };
 
   const handleEditItemChange = (index: number, field: string, value: string) => {
@@ -310,7 +343,10 @@ export default function Settings() {
       }
 
       const newCloudItems: any[] = [];
-      const originalItems = allItems.filter((item: any) => (item.sourceFile || 'Legacy Import (No File Name)') === editingFile);
+      const originalItems = allItems.filter((item: any) => 
+        (item.sourceFile || 'Legacy Import (No File Name)') === editingFile &&
+        (item.category || 'mixed') === editingFileCategory
+      );
       const originalMap = new Map<string, any>(originalItems.map((i: any) => [i.id, i]));
 
       for (const item of editFileItems) {
@@ -351,21 +387,24 @@ export default function Settings() {
       setDeletedEditItemIds([]);
     } catch (error) {
       console.error('Failed to save edits:', error);
-      alert('An error occurred while saving edits.');
+      window.alert('An error occurred while saving edits.');
     } finally {
       setIsSavingEdit(false);
     }
   };
 
-  const handleDeleteFile = async (fileName: string) => {
-    const fileInfo = importedFiles.find(f => f.fileName === fileName);
+  const handleDeleteFile = async (uniqueKey: string) => {
+    const fileInfo = importedFiles.find(f => f.uniqueKey === uniqueKey);
     if (!fileInfo) return;
 
-    if (!confirm(t('confirm_delete_file', { fileName, count: fileInfo.itemCount }))) return;
+    if (!window.confirm(t('confirm_delete_file', { fileName: fileInfo.fileName, count: fileInfo.itemCount }) || `Delete ${fileInfo.fileName}?`)) return;
 
     setIsSaving(true);
     try {
-      const itemsInFile = allItems.filter((item: any) => (item.sourceFile || "Legacy Import (No File Name)") === fileName);
+      const itemsInFile = allItems.filter((item: any) => 
+        (item.sourceFile || "Legacy Import (No File Name)") === fileInfo.fileName &&
+        (item.category || 'mixed') === fileInfo.destination
+      );
       const wordIdsToDelete = itemsInFile.map((item: any) => item.id).filter(Boolean);
 
       const cloudDeletes = wordIdsToDelete.filter((id: string) => !id.startsWith('static_'));
@@ -383,12 +422,12 @@ export default function Settings() {
 
       setSelectedSources(prev => {
         const next = new Set(prev);
-        next.delete(fileName);
+        next.delete(uniqueKey);
         return next;
       });
     } catch (error) {
       console.error('Failed to delete file items:', error);
-      alert(t('error_delete_file_desc'));
+      window.alert(t('error_delete_file_desc') || 'An error occurred while deleting the file items.');
     } finally {
       setIsSaving(false);
     }
@@ -396,14 +435,17 @@ export default function Settings() {
 
   const handleBulkDeleteFiles = async () => {
     if (selectedSources.size === 0) return;
-    if (!confirm(t('confirm_bulk_delete', { count: selectedSources.size }))) return;
+    if (!window.confirm(t('confirm_bulk_delete', { count: selectedSources.size }) || 'Delete selected?')) return;
 
     setIsSaving(true);
     try {
       let allIdsToDelete: string[] = [];
       importedFiles.forEach(f => {
-        if (selectedSources.has(f.fileName)) {
-          const itemsInFile = allItems.filter((item: any) => (item.sourceFile || "Legacy Import (No File Name)") === f.fileName);
+        if (selectedSources.has(f.uniqueKey)) {
+          const itemsInFile = allItems.filter((item: any) => 
+            (item.sourceFile || "Legacy Import (No File Name)") === f.fileName &&
+            (item.category || 'mixed') === f.destination
+          );
           const wordIds = itemsInFile.map((item: any) => item.id).filter(Boolean);
           allIdsToDelete.push(...wordIds);
         }
@@ -426,20 +468,21 @@ export default function Settings() {
       setSelectedSources(new Set());
     } catch (error) {
       console.error('Failed to bulk delete files:', error);
-      alert(t('error_bulk_delete_desc'));
+      window.alert(t('error_bulk_delete_desc') || 'An error occurred while deleting the files.');
     } finally {
       setIsSaving(false);
     }
   };
 
-  const handleDownloadFiles = (fileNames: string[]) => {
+  const handleDownloadFiles = (uniqueKeys: string[]) => {
+    const keysSet = new Set(uniqueKeys);
     const itemsToExport = allItems.filter((item: any) => {
-      const source = item.sourceFile || 'Legacy Import (No File Name)';
-      return fileNames.includes(source);
+      const key = `${item.sourceFile || 'Legacy Import (No File Name)'}_${item.category || 'mixed'}`;
+      return keysSet.has(key);
     });
 
     if (itemsToExport.length === 0) {
-      alert(t('no_items_export'));
+      window.alert(t('no_items_export') || 'No items found to export.');
       return;
     }
 
@@ -448,7 +491,10 @@ export default function Settings() {
     worksheet['!cols'] = [{ wch: 30 }, { wch: 30 }, { wch: 40 }, { wch: 15 }, { wch: 25 }];
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Export');
-    const outName = fileNames.length === 1 ? `MicaLingo_Export_${fileNames[0].replace(/\.[^/.]+$/, '')}.xlsx` : `MicaLingo_Bulk_Export_${fileNames.length}_files.xlsx`;
+    const firstItem = importedFiles.find(f => f.uniqueKey === uniqueKeys[0]);
+    const outName = uniqueKeys.length === 1 && firstItem 
+      ? `MicaLingo_Export_${firstItem.fileName.replace(/\.[^/.]+$/, '')}_${firstItem.destination}.xlsx` 
+      : `MicaLingo_Bulk_Export_${uniqueKeys.length}_files.xlsx`;
     XLSX.writeFile(workbook, outName);
   };
 
@@ -560,18 +606,23 @@ export default function Settings() {
                 </div>
 
                 {/* Advanced Cleanup */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between p-5 bg-yellow-50/50 rounded-2xl border border-yellow-200 shadow-sm">
-                  <div className="mb-3 sm:mb-0 sm:mr-4">
-                    <h3 className="font-bold text-yellow-800">Advanced Cleanup</h3>
-                    <p className="text-sm text-yellow-600 mt-1 font-medium">Manually delete words from specific imported files, including old or "ghost" files.</p>
+                {isAdmin && adminMode && (
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between p-5 bg-yellow-50/50 rounded-2xl border border-yellow-200 shadow-sm">
+                    <div className="mb-3 sm:mb-0 sm:mr-4">
+                      <h3 className="font-bold text-yellow-800">Advanced Cleanup (Public Library)</h3>
+                      <p className="text-sm text-yellow-600 mt-1 font-medium">Search, edit, delete, or download content from public imported files and ghost databases.</p>
+                    </div>
+                    <button 
+                      onClick={() => {
+                        setIsFilesListOpen(true);
+                        setTimeout(() => document.getElementById('file-manager-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+                      }}
+                      className="whitespace-nowrap bg-yellow-400 text-yellow-900 hover:bg-yellow-500 font-bold py-2.5 px-6 rounded-xl transition-colors text-sm shadow-sm"
+                    >
+                      Manage Sources...
+                    </button>
                   </div>
-                  <button 
-                    onClick={() => setIsFilesListOpen(true)}
-                    className="whitespace-nowrap bg-yellow-400 text-yellow-900 hover:bg-yellow-500 font-bold py-2.5 px-6 rounded-xl transition-colors text-sm shadow-sm"
-                  >
-                    Manage Sources...
-                  </button>
-                </div>
+                )}
               </div>
             </div>
           </>
@@ -597,7 +648,7 @@ export default function Settings() {
 
       {/* IMPORTED FILES MANAGER */}
       {isAdmin && adminMode && (
-        <div className="bg-white/80 backdrop-blur-xl rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white mt-8 overflow-hidden transition-all duration-300">
+        <div id="file-manager-section" className="bg-white/80 backdrop-blur-xl rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white mt-8 overflow-hidden transition-all duration-300">
           <div 
             className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-6 md:p-8 gap-4 cursor-pointer hover:bg-white/50 transition-colors"
             onClick={() => setIsFilesListOpen(!isFilesListOpen)}
@@ -629,7 +680,7 @@ export default function Settings() {
 
           <div className={`grid transition-[grid-template-rows,opacity] duration-500 ease-in-out ${isFilesListOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}>
             <div className="overflow-hidden">
-              <div className="px-6 pb-6 md:px-8 md:pb-8 pt-2 border-t border-blue-50/50 space-y-6">
+              <div className="px-4 pb-4 sm:px-6 sm:pb-6 md:px-8 md:pb-8 pt-2 border-t border-blue-50/50 space-y-6">
                 {selectedSources.size > 0 && (
                   <div className="bg-blue-50 border border-blue-200 p-4 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
                     <span className="text-blue-800 font-medium text-center sm:text-left">{t('files_selected', { count: selectedSources.size })}</span>
@@ -647,7 +698,7 @@ export default function Settings() {
                 )}
 
                 <div className="bg-white rounded-2xl shadow-sm border border-blue-50 overflow-x-auto">
-                  <table className="w-full text-left border-collapse">
+                  <table className="w-full text-left border-collapse min-w-[800px]">
                     <thead className="bg-blue-50/50 border-b border-blue-100">
                       <tr>
                         <th className="p-2 sm:p-4 w-10 sm:w-12 text-center"></th>
@@ -660,9 +711,9 @@ export default function Settings() {
                     </thead>
                     <tbody className="divide-y divide-gray-100">
                       {filteredImportedFiles.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((file: any) => (
-                        <tr key={file.fileName} className="hover:bg-gray-50 transition-colors">
+                        <tr key={file.uniqueKey} className="hover:bg-gray-50 transition-colors">
                           <td className="p-3 sm:p-4 text-center">
-                            <input type="checkbox" checked={selectedSources.has(file.fileName)} onChange={() => handleSourceSelection(file.fileName)} className="w-5 h-5 text-blue-600 rounded border-blue-200 cursor-pointer" />
+                            <input type="checkbox" checked={selectedSources.has(file.uniqueKey)} onChange={() => handleSourceSelection(file.uniqueKey)} className="w-5 h-5 text-blue-600 rounded border-blue-200 cursor-pointer" />
                           </td>
                           <td className="p-3 sm:p-5 font-bold text-blue-950 break-all">{file.fileName}</td>
                           <td className="p-3 sm:p-5 text-gray-600 uppercase text-sm font-bold">{file.fileType}</td>
@@ -670,15 +721,15 @@ export default function Settings() {
                           <td className="p-3 sm:p-5 text-gray-700 font-medium">{file.itemCount}</td>
                           <td className="p-3 sm:p-5 text-right">
                             <div className="flex flex-wrap items-center justify-end gap-1 sm:gap-2">
-                              <button onClick={() => handleEditFile(file)} disabled={isSaving} className="flex items-center text-blue-600 hover:text-blue-800 p-2 rounded-lg hover:bg-blue-50 transition-colors disabled:opacity-50 font-bold text-sm">
+                              <button onClick={(e) => handleEditFile(e, file)} disabled={isSaving} className="flex items-center text-blue-600 hover:text-blue-800 p-2 rounded-lg hover:bg-blue-50 transition-colors disabled:opacity-50 font-bold text-sm">
                                 <svg className="w-4 h-4 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536M9 11l6.768-6.768a2.5 2.5 0 113.536 3.536L12.536 14.536A4 4 0 019.172 15.9L6 16l.1-3.172A4 4 0 017.464 9.464z" /></svg>
                                 <span className="hidden sm:inline">Edit</span>
                               </button>
-                              <button onClick={() => handleDownloadFiles([file.fileName])} disabled={isSaving} className="flex items-center text-green-600 hover:text-green-800 p-2 rounded-lg hover:bg-green-50 transition-colors disabled:opacity-50 font-bold text-sm">
+                              <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleDownloadFiles([file.uniqueKey]); }} disabled={isSaving} className="flex items-center text-green-600 hover:text-green-800 p-2 rounded-lg hover:bg-green-50 transition-colors disabled:opacity-50 font-bold text-sm">
                                 <svg className="w-4 h-4 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M8 12l4 4m0 0l4-4m-4 4V4" /></svg>
                                 <span className="hidden sm:inline">{t('download')}</span>
                               </button>
-                              <button onClick={() => handleDeleteFile(file.fileName)} disabled={isSaving} className="flex items-center text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50 font-bold text-sm">
+                              <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleDeleteFile(file.uniqueKey); }} disabled={isSaving} className="flex items-center text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50 font-bold text-sm">
                                 <svg className="w-4 h-4 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5-3h4m-6 3h8" /></svg>
                                 <span className="hidden sm:inline">{t('delete')}</span>
                               </button>
@@ -710,52 +761,191 @@ export default function Settings() {
       {isCleanupModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-blue-950/40 backdrop-blur-sm">
           <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col animate-fade-in-up">
-            <div className="p-6 md:p-8 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+            <div className="p-4 sm:p-6 md:p-8 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
               <h2 className="text-2xl font-extrabold text-blue-950">Manage Data Sources</h2>
               <button onClick={() => setIsCleanupModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-full hover:bg-gray-200">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
               </button>
             </div>
-            <div className="p-6 md:p-8 overflow-y-auto space-y-4">
+            <div className="p-4 sm:p-6 md:p-8 overflow-y-auto space-y-4">
               <p className="text-sm text-gray-600">Select the file sources you want to permanently delete all associated words from. This is useful for cleaning up old or "ghost" imports.</p>
-              <div className="bg-white rounded-2xl shadow-sm border border-blue-50 max-h-96 overflow-y-auto">
-                <table className="w-full text-left border-collapse">
+              <div className="bg-white rounded-2xl shadow-sm border border-blue-50 max-h-96 overflow-auto">
+                <table className="w-full text-left border-collapse min-w-[500px]">
                   <thead className="bg-blue-50/50 border-b border-blue-100 sticky top-0">
                     <tr>
-                      <th className="p-4 w-12 text-center"></th>
-                      <th className="p-4 font-bold text-sm text-blue-900/60 uppercase tracking-wider">Source File</th>
-                      <th className="p-4 font-bold text-sm text-blue-900/60 uppercase tracking-wider text-right">Words</th>
+                      <th className="p-3 sm:p-4 w-10 sm:w-12 text-center"></th>
+                      <th className="p-3 sm:p-4 font-bold text-sm text-blue-900/60 uppercase tracking-wider">Source File</th>
+                      <th className="p-3 sm:p-4 font-bold text-sm text-blue-900/60 uppercase tracking-wider text-right">Words</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
                     {sources.map(source => (
-                      <tr key={source.name} className="hover:bg-gray-50">
-                        <td className="p-4 text-center">
+                      <tr key={source.uniqueKey} className="hover:bg-gray-50">
+                        <td className="p-3 sm:p-4 text-center">
                           <input
                             type="checkbox"
-                            checked={selectedSources.has(source.name)}
-                            onChange={() => handleSourceSelection(source.name)}
+                            checked={selectedSources.has(source.uniqueKey)}
+                            onChange={() => handleSourceSelection(source.uniqueKey)}
                             className="w-5 h-5 text-blue-600 rounded border-blue-200 cursor-pointer"
                           />
                         </td>
-                        <td className="p-4 font-bold text-blue-950 break-all">{source.name}</td>
-                        <td className="p-4 text-gray-700 font-medium text-right">{source.count}</td>
+                        <td className="p-3 sm:p-4 font-bold text-blue-950 break-all">{source.name} <span className="text-xs text-blue-600 ml-2">({source.category})</span></td>
+                        <td className="p-3 sm:p-4 text-gray-700 font-medium text-right">{source.count}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
             </div>
-            <div className="p-6 md:p-8 border-t border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row justify-between items-center gap-3">
-              <span className="text-sm font-medium text-red-600">
+            <div className="p-4 sm:p-6 md:p-8 border-t border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row justify-between items-center gap-3">
+              <span className="text-sm font-medium text-red-600 text-center sm:text-left mb-2 sm:mb-0">
                 {selectedSources.size > 0 ? `Selected ${selectedSources.size} sources to delete.` : 'No sources selected.'}
               </span>
-              <div className="flex gap-3 w-full sm:w-auto">
+              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
                 <button onClick={() => setIsCleanupModalOpen(false)} className="w-full sm:w-auto px-6 py-3 font-bold text-gray-600 hover:bg-gray-200 rounded-xl transition-colors">Cancel</button>
                 <button onClick={handleBulkDeleteFromSources} disabled={selectedSources.size === 0 || isCleaning} className="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-xl shadow-sm transition-colors disabled:opacity-50">
                   {isCleaning ? 'Deleting...' : 'Delete Selected'}
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* EDIT UPLOADED FILE MODAL */}
+      {editingFile && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-blue-950/40 backdrop-blur-sm transition-opacity">
+          <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col animate-fade-in-up">
+            <div className="p-4 sm:p-6 md:p-8 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 flex-wrap gap-4">
+              <h2 className="text-2xl font-extrabold text-blue-950">{t('preview_filename' as any, { filename: editingFile || '' }) || `Edit ${editingFile}`}</h2>
+              
+              <div className="flex-1 max-w-md mx-auto w-full">
+                 <input
+                   type="text"
+                   placeholder="Highlight specific word..."
+                   value={modalSearchTerm}
+                   onChange={e => setModalSearchTerm(e.target.value)}
+                   className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                 />
+              </div>
+
+              <button onClick={() => setEditingFile(null)} className="text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-full hover:bg-gray-200">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-auto bg-white p-3 sm:p-6 md:p-8">
+              {editFileItems.length === 0 ? (
+                <p className="text-gray-500 italic text-center py-4">{t("no_items_left" as any) || "No items left. Save to delete all."}</p>
+              ) : (
+                <table className="w-full text-left border-collapse table-fixed min-w-[800px] border border-blue-50 rounded-xl shadow-sm">
+                  <thead className="bg-blue-50/80 border-b border-blue-100 sticky top-0 backdrop-blur z-10">
+                    <tr>
+                      {editingFileCategory === 'articles' ? (
+                        <>
+                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('article')}</th>
+                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('noun')}</th>
+                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('hungarian')}</th>
+                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('example')}</th>
+                        </>
+                      ) : editingFileCategory === 'false_friends' || editingFileCategory === 'idioms' ? (
+                        <>
+                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{editingFileCategory === 'idioms' ? (t('idiom_german_label' as any) || 'German Idiom') : t('german')}</th>
+                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{editingFileCategory === 'idioms' ? (t('idiom_hungarian_label' as any) || 'Hungarian Meaning') : t('hungarian')}</th>
+                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{editingFileCategory === 'idioms' ? (t('explanation_label' as any) || 'Explanation') : t('example')}</th>
+                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{editingFileCategory === 'idioms' ? (t('idiom_note_label' as any) || 'Note (Explanation)') : t('note')}</th>
+                        </>
+                      ) : editingFileCategory === 'prepositions' ? (
+                        <>
+                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('template_german_verb_header' as any) || 'German Verb + Hungarian'}</th>
+                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('prep_case_label' as any) || 'Preposition + Case'}</th>
+                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('template_meaning_example_header' as any) || 'Example Sentence'}</th>
+                        </>
+                      ) : editingFileCategory === 'adjectives' ? (
+                        <>
+                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('adjective' as any) || 'Adjective'}</th>
+                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('hungarian')}</th>
+                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('levels' as any) || 'Levels'}</th>
+                        </>
+                      ) : editingFileCategory === 'verbs' ? (
+                        <>
+                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('german')}</th>
+                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('hungarian')}</th>
+                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('hint' as any) || 'Hint / Past Form'}</th>
+                        </>
+                      ) : (
+                        <>
+                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('german')}</th>
+                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('hungarian')}</th>
+                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('example')}</th>
+                        </>
+                      )}
+                      <th className="p-2 sm:p-3 w-10"></th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {editFileItems.map((item: any, idx: number) => {
+                      const term = modalSearchTerm.toLowerCase();
+                      const matches = !term || (
+                        (item.german || '').toLowerCase().includes(term) ||
+                        (item.hungarian || '').toLowerCase().includes(term) ||
+                        (item.example || '').toLowerCase().includes(term) ||
+                        (item.note || '').toLowerCase().includes(term)
+                      );
+                      
+                      if (!matches) return null;
+                      
+                      return (
+                      <tr key={item.id || idx} className={`transition-colors ${term ? 'bg-yellow-50' : 'hover:bg-gray-50'}`}>
+                        {editingFileCategory === 'articles' ? (
+                          <>
+                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.article || ''} onChange={(e) => handleEditItemChange(idx, 'article', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
+                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.noun || ''} onChange={(e) => handleEditItemChange(idx, 'noun', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
+                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleEditItemChange(idx, 'hungarian', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
+                            <td className="p-1 sm:p-2 align-top"><textarea rows={2} value={item.example || ''} onChange={(e) => handleEditItemChange(idx, 'example', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
+                          </>
+                        ) : editingFileCategory === 'prepositions' ? (
+                          <>
+                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.german || ''} onChange={(e) => handleEditItemChange(idx, 'german', e.target.value)} placeholder={t('modal_german_prep_verb_placeholder' as any) || "e.g. verzichten, lemondani, felhagyni valamivel"} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
+                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleEditItemChange(idx, 'hungarian', e.target.value)} placeholder={t('modal_prep_case_placeholder' as any) || "e.g. auf + Akk."} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
+                            <td className="p-1 sm:p-2 align-top"><textarea rows={2} value={item.example || ''} onChange={(e) => handleEditItemChange(idx, 'example', e.target.value)} placeholder={t('meaning_example_placeholder' as any) || "e.g. Ich verzichte auf das Angebot."} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
+                          </>
+                        ) : editingFileCategory === 'false_friends' || editingFileCategory === 'idioms' ? (
+                          <>
+                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.german || ''} onChange={(e) => handleEditItemChange(idx, 'german', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
+                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleEditItemChange(idx, 'hungarian', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
+                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.example || ''} onChange={(e) => handleEditItemChange(idx, 'example', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
+                            <td className="p-1 sm:p-2 align-top"><textarea rows={2} value={item.note || ''} onChange={(e) => handleEditItemChange(idx, 'note', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
+                          </>
+                        ) : editingFileCategory === 'adjectives' ? (
+                          <>
+                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.german || ''} onChange={(e) => handleEditItemChange(idx, 'german', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
+                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleEditItemChange(idx, 'hungarian', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
+                            <td className="p-1 sm:p-2 align-top"><textarea rows={2} value={item.levels || ''} onChange={(e) => handleEditItemChange(idx, 'levels', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
+                          </>
+                        ) : (
+                          <>
+                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.german || ''} onChange={(e) => handleEditItemChange(idx, 'german', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
+                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleEditItemChange(idx, 'hungarian', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
+                            <td className="p-1 sm:p-2 align-top"><textarea rows={2} value={item.hint || item.example || ''} onChange={(e) => handleEditItemChange(idx, editingFileCategory === 'verbs' ? 'hint' : 'example', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
+                          </>
+                        )}
+                        <td className="p-1 sm:p-2 align-top text-center border-l border-gray-100">
+                          <button onClick={() => handleDeleteEditItem(idx)} className="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50" title={t('delete') || 'Delete'}>
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                          </button>
+                        </td>
+                      </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              )}
+            </div>
+
+            <div className="p-4 sm:p-6 md:p-8 border-t border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row justify-end gap-3">
+              <button onClick={() => setEditingFile(null)} disabled={isSavingEdit} className="w-full sm:w-auto px-6 py-3 font-bold text-gray-600 hover:bg-gray-200 rounded-xl transition-colors disabled:opacity-50">{t('cancel')}</button>
+              <button onClick={handleSaveFileEdits} disabled={isSavingEdit} className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl shadow-sm disabled:opacity-50 transition-colors">{isSavingEdit ? t('saving') : t('modal_save_changes') || 'Save Changes'}</button>
             </div>
           </div>
         </div>

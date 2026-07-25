@@ -61,6 +61,13 @@ export default function Quiz() {
   const [quizState, setQuizState] = useState<'loading' | 'ongoing' | 'finished' | 'no_data'>('loading');
   const [showQuitModal, setShowQuitModal] = useState(false);
 
+  // Safeguard to prevent flashing "finished" or "no_data" while Firestore initializes from an empty local cache
+  const [isInitializing, setIsInitializing] = useState(true);
+  useEffect(() => {
+    const timer = setTimeout(() => setIsInitializing(false), 800);
+    return () => clearTimeout(timer);
+  }, []);
+
   const [showExamples] = useState(() => {
     const stored = localStorage.getItem('micalingo_show_examples');
     return stored !== null ? JSON.parse(stored) : true;
@@ -163,8 +170,24 @@ export default function Quiz() {
         const normalize = (s: string) => (s || '').toLowerCase().replace(/\s+/g, '');
         const normalizedCorrect = normalize(correctAnswer);
 
-        let distractorPool = words.map(w => w.hungarian).filter(Boolean);
-        const fallbackPool = ["auf + Akk.", "an + Dat.", "mit + Dat.", "für + Akk.", "über + Akk.", "von + Dat.", "zu + Dat.", "bei + Dat.", "aus + Dat.", "nach + Dat."];
+        // Strictly filter the user's pool to ONLY allow valid preposition formats as distractors
+        let distractorPool = words
+          .map(w => w.hungarian)
+          .filter(h => h && typeof h === 'string' && (h.includes('+') || /akk|dat|gen/i.test(h)));
+
+        const fallbackPool = [
+          "auf + Akk.", "auf + Dat.", "an + Akk.", "an + Dat.", 
+          "in + Akk.", "in + Dat.", "mit + Dat.", "für + Akk.", 
+          "über + Akk.", "über + Dat.", "von + Dat.", "zu + Dat.", 
+          "bei + Dat.", "aus + Dat.", "nach + Dat.", "um + Akk.", 
+          "durch + Akk.", "ohne + Akk.", "gegen + Akk.", "wegen + Akk.", 
+          "unter + Akk.", "unter + Dat.", "vor + Akk.", "vor + Dat.", 
+          "hinter + Akk.", "hinter + Dat.", "neben + Akk.", "neben + Dat.", 
+          "zwischen + Akk.", "zwischen + Dat.", "trotz + Gen.", 
+          "wegen + Gen.", "während + Gen.", "aufgrund + Gen.",
+          "ab + Dat.", "seit + Dat.", "entgegen + Dat.", "gegenüber + Dat."
+        ];
+        
         distractorPool = [...distractorPool, ...fallbackPool];
 
         const uniqueDistractors: string[] = [];
@@ -184,10 +207,10 @@ export default function Quiz() {
         const options = [...uniqueDistractors, correctAnswer].sort(() => 0.5 - Math.random());
 
         return {
-          questionText: word.german,
-          options,
-          correctAnswer,
-          example: word.example,
+          questionText: word.german, // Column A (Verb + Hungarian meaning)
+          options, // Column B (Preposition + Case) + Distractors
+          correctAnswer, // Column B
+          example: word.example, // Column C (Additional explanation)
           german: word.german,
           hungarian: word.hungarian
         };
@@ -331,6 +354,10 @@ export default function Quiz() {
     }
 
     if ((isCustom || (!topic && userVocabulary)) && wordsForQuiz.length < 4) {
+      if (isInitializing) {
+        setQuizState('loading');
+        return;
+      }
       setQuizState('finished');
       setQuestions([]);
       return;
@@ -341,13 +368,21 @@ export default function Quiz() {
       setQuestions(newQuestions);
       setQuizState(newQuestions.length > 0 ? 'ongoing' : 'no_data');
     } else if (isCustom) {
+      if (isInitializing) {
+        setQuizState('loading');
+        return;
+      }
       setQuizState('finished');
       setQuestions([]);
     } else {
+      if (isInitializing) {
+        setQuizState('loading');
+        return;
+      }
       setQuizState('no_data');
       setQuestions([]);
     }
-  }, [topic, userVocabulary, quizId, isCustom, publicDbWordsRaw, publicDbWords, isRedo, user?.uid, generateQuestions]);
+  }, [topic, userVocabulary, quizId, isCustom, publicDbWordsRaw, publicDbWords, isRedo, user?.uid, generateQuestions, isInitializing]);
 
   useEffect(() => {
     if (quizState === 'ongoing' && questions.length > 0) {
