@@ -1,4 +1,4 @@
-import{f as ge,e as fe,r as w,j as e,m as X,w as we,p as _e,q as ve}from"./vendor-BZn69qKb.js";import{u as ye,a as je,d as ze}from"./index-DPnNmkOy.js";import{u as ce}from"./firestore-C81zRRlq.js";import{p as U,a as V,b as ee,e as F,c as te}from"./public-data-B9vhmN5L.js";const P=["vocabulary","phrases","articles","prepositions","adjectives","verbs"],$=20,D=()=>e.jsxs(e.Fragment,{children:[e.jsx("style",{children:`
+import{f as ge,e as fe,r as w,j as e,m as X,w as we,p as _e,q as ve}from"./vendor-BZn69qKb.js";import{u as ye,a as je,d as ze}from"./index-BWGnWq46.js";import{u as ce}from"./firestore-BknMpyVB.js";import{p as U,a as V,b as ee,e as F,c as te}from"./public-data-B9vhmN5L.js";const P=["vocabulary","phrases","articles","prepositions","adjectives","verbs"],$=20,D=()=>e.jsxs(e.Fragment,{children:[e.jsx("style",{children:`
       @keyframes blob {
         0% { transform: translate(0px, 0px) scale(1); }
         33% { transform: translate(30px, -50px) scale(1.1); }
