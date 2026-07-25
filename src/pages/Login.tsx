@@ -54,16 +54,14 @@ export default function Login() {
       if (Capacitor.isNativePlatform()) {
         // Mobile app environment: use Redirect
         
-        // BACKUP sessionStorage to localStorage to prevent "missing initial state" error
-        const backupInterval = setInterval(() => {
-          for (let i = 0; i < sessionStorage.length; i++) {
-            const key = sessionStorage.key(i);
-            if (key && key.startsWith('firebase:')) {
-              localStorage.setItem(`backup_${key}`, sessionStorage.getItem(key)!);
-            }
+        // BULLETPROOF BACKUP: Intercept sessionStorage writes to instantly save Firebase state
+        const originalSetItem = sessionStorage.setItem;
+        sessionStorage.setItem = function(key, value) {
+          if (key.startsWith('firebase:')) {
+            localStorage.setItem(`backup_${key}`, value);
           }
-        }, 50);
-        setTimeout(() => clearInterval(backupInterval), 3000);
+          originalSetItem.call(sessionStorage, key, value);
+        };
 
         await signInWithRedirect(auth, provider);
       } else {
