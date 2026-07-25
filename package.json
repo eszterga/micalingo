@@ -12,6 +12,8 @@
     "deploy": "gh-pages -d dist --cname micalingo.com"
   },
   "dependencies": {
+    "@capacitor/cli": "^8.4.2",
+    "@capacitor/core": "^8.4.2",
     "dexie": "^4.4.4",
     "firebase": "^10.12.2",
     "mammoth": "^1.7.2",
