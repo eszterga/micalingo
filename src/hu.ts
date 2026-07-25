@@ -99,6 +99,9 @@ export const hu = {
   coming_soon: "Hamarosan",
   review_grammar_topics: "Nyelvtani szabályok és magyarázatok.",
   track_your_progress: "Kövesd nyomon a fejlődésedet.",
+  download_android: "Töltsd le az Android alkalmazást",
+  download_android_desc: "Vidd magaddal a MicaLingo-t! Töltsd le közvetlenül a telefonodra.",
+  download_apk: "Letöltés",
 
   // Import
   import_title: "Fájlok importálása",

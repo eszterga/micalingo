@@ -99,6 +99,9 @@ export const en = {
   coming_soon: "Coming soon",
   review_grammar_topics: "Grammar rules and explanations.",
   track_your_progress: "Track your progress over time.",
+  download_android: "Get the Android App",
+  download_android_desc: "Take your MicaLingo on the go. Download directly to your phone.",
+  download_apk: "Download",
 
   // Import
   import_title: "Import Files",

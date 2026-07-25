@@ -99,6 +99,9 @@ export const de = {
   coming_soon: "Demnächst",
   review_grammar_topics: "Grammatikregeln und Erklärungen.",
   track_your_progress: "Verfolge deinen Lernfortschritt.",
+  download_android: "Hol dir die Android-App",
+  download_android_desc: "Nimm dein MicaLingo mit! Lade sie direkt auf dein Handy herunter.",
+  download_apk: "Herunterladen",
 
   // Import
   import_title: "Dateien importieren",

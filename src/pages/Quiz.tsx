@@ -228,12 +228,12 @@ export default function Quiz() {
         let distractorPool = Array.from(new Set(words.map(w => w.hungarian))).filter(h => h !== correctAnswer && isValidDistractor(h));
 
         if (distractorPool.length < 3) {
-          let fallbackSource = topic === 'phrases' ? publicPhrases : publicVocabulary;
+          let fallbackSource = isCustom ? (userVocabulary || []).filter((w: any) => w.category === topic) : (topic === 'phrases' ? publicPhrases : publicVocabulary);
           // Filter out invalid vocabulary entries (like articles) from being used as distractors.
           if (topic === 'vocabulary') {
-            fallbackSource = fallbackSource.filter(w => !['der', 'die', 'das'].includes((w.german || '').trim().toLowerCase()));
+            fallbackSource = fallbackSource.filter((w: any) => !['der', 'die', 'das'].includes((w.german || '').trim().toLowerCase()));
           }
-          const fallbackPool = Array.from(new Set(fallbackSource.map(w => w.hungarian))).filter(h => h !== correctAnswer && isValidDistractor(h));
+          const fallbackPool = Array.from(new Set(fallbackSource.map((w: any) => w.hungarian))).filter((h: any) => h !== correctAnswer && isValidDistractor(h));
           distractorPool = Array.from(new Set([...distractorPool, ...fallbackPool]));
         }
 

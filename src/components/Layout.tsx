@@ -157,6 +157,20 @@ export default function Layout() {
                   {link.label}
                 </Link>
               ))}
+
+              <div className="mt-4 pt-4 border-t border-blue-800">
+                <a 
+                  href="/MicaLingo.apk" 
+                  download="MicaLingo.apk"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center gap-3 px-4 py-3 rounded-lg bg-purple-600/20 text-purple-200 hover:bg-purple-600/40 transition-colors border border-purple-500/30"
+                >
+                  <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993.0004.5511-.4482.9997-.9993.9997m-11.046 0c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993.0004.5511-.4482.9997-.9993.9997m11.4045-6.02l1.9973-3.4592a.416.416 0 00-.1521-.5676.416.416 0 00-.5676.1521l-2.0218 3.503c-1.4359-.6581-3.1371-1.0375-4.9458-1.0375-1.8088 0-3.51.3794-4.9458 1.0375L5.2235 5.447a.416.416 0 00-.5676-.1521.416.416 0 00-.1521.5676l1.9973 3.4592C2.6889 11.1867.3432 14.6589 0 18.761h24c-.3436-4.1021-2.6892-7.5743-6.1185-9.4396"/>
+                  </svg>
+                  <span className="font-bold text-sm">{t("download_android") || "Get the Android App"}</span>
+                </a>
+              </div>
             </nav>
           </div>
         </div>
