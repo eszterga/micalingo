@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">MicaLingo</string>
+    <string name="title_activity_main">MicaLingo</string>
+    <string name="package_name">com.micalingo.app</string>
+    <string name="custom_url_scheme">com.micalingo.app</string>
+</resources>
