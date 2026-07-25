@@ -102,6 +102,7 @@ export const de = {
   download_android: "Hol dir die Android-App",
   download_android_desc: "Nimm dein MicaLingo mit! Lade sie direkt auf dein Handy herunter.",
   download_apk: "Herunterladen",
+  android_install_note: "Hinweis: Da diese App direkt heruntergeladen wird, zeigt Ihr Telefon möglicherweise eine Sicherheitswarnung an. Klicken Sie auf 'Weitere Details' und dann auf 'Trotzdem installieren', um fortzufahren.",
 
   // Import
   import_title: "Dateien importieren",

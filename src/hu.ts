@@ -102,6 +102,7 @@ export const hu = {
   download_android: "Töltsd le az Android alkalmazást",
   download_android_desc: "Vidd magaddal a MicaLingo-t! Töltsd le közvetlenül a telefonodra.",
   download_apk: "Letöltés",
+  android_install_note: "Megjegyzés: Mivel ezt az alkalmazást közvetlenül töltöd le, a telefonod biztonsági figyelmeztetést jeleníthet meg. A folytatáshoz kattints a 'További részletek', majd a 'Telepítés mindenképpen' gombra.",
 
   // Import
   import_title: "Fájlok importálása",

@@ -102,6 +102,7 @@ export const en = {
   download_android: "Get the Android App",
   download_android_desc: "Take your MicaLingo on the go. Download directly to your phone.",
   download_apk: "Download",
+  android_install_note: "Note: Since this app is downloaded directly, your phone may show a security warning. Click 'More details' then 'Install anyway' to proceed.",
 
   // Import
   import_title: "Import Files",
