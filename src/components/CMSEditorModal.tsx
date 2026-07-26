@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { ImageLightbox, useImageLightbox } from './ImageLightbox';
 
 export interface MaterialData {
   id?: string;
@@ -34,6 +35,7 @@ export default function CMSEditorModal({ isOpen, onClose, onSave, initialData, t
   const [content, setContent] = useState(initialData?.content || '');
   const [categoryId, setCategoryId] = useState(initialData?.categoryId || categories?.[0]?.id || '');
   const editorRef = useRef<HTMLDivElement>(null);
+  const { image: lightboxImage, handleImageClick, closeLightbox } = useImageLightbox();
 
   // Set initial content in the contentEditable div when modal opens
   useEffect(() => {
@@ -268,7 +270,7 @@ export default function CMSEditorModal({ isOpen, onClose, onSave, initialData, t
                 onPaste={handlePaste}
                 onMouseUp={saveSelection}
                 onKeyUp={saveSelection}
-                onClick={saveSelection}
+                onClick={(e) => { saveSelection(); handleImageClick(e); }}
               />
             </div>
           </div>
@@ -293,6 +295,8 @@ export default function CMSEditorModal({ isOpen, onClose, onSave, initialData, t
         </div>
 
       </div>
+
+      <ImageLightbox image={lightboxImage} onClose={closeLightbox} />
     </div>
   );
 }

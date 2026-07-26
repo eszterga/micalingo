@@ -5,6 +5,7 @@ import { dbCloud } from '../lib/firebase';
 import { useAuth } from '../AuthContext';
 import { useI18n } from '../I18nContext';
 import { addCloudWord, useCloudVocabulary } from '../lib/firestore';
+import { ImageLightbox, useImageLightbox } from '../components/ImageLightbox';
 
 const BackgroundBlobs = () => (
   <>
@@ -67,6 +68,7 @@ export default function PublicAudioCategory({ type }: { type: 'music' | 'podcast
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedImage, setSelectedImage] = useState<HTMLImageElement | null>(null);
   const [selectedTable, setSelectedTable] = useState<HTMLTableElement | null>(null);
+  const { image: lightboxImage, handleImageClick, closeLightbox } = useImageLightbox();
 
   const savedSelection = useRef<Range | null>(null);
   const saveSelection = () => {
@@ -645,7 +647,7 @@ export default function PublicAudioCategory({ type }: { type: 'music' | 'podcast
                               <span className="bg-blue-100 p-1.5 rounded-lg text-xs shadow-sm">🎧</span> {item.source}
                             </p>
                           )}
-                          <div id={`article-content-${item.id}`} onMouseUp={(e) => handleMouseUp(e, item.id)} onTouchEnd={(e) => handleMouseUp(e, item.id)} className="prose prose-blue max-w-none text-gray-700 leading-relaxed space-y-4 mb-4" dangerouslySetInnerHTML={{ __html: item.content }}></div>
+                          <div id={`article-content-${item.id}`} onClick={handleImageClick} onMouseUp={(e) => handleMouseUp(e, item.id)} onTouchEnd={(e) => handleMouseUp(e, item.id)} className="prose prose-blue max-w-none text-gray-700 leading-relaxed space-y-4 mb-4" dangerouslySetInnerHTML={{ __html: item.content }}></div>
                         {item.url && (
                           <a href={item.url} target="_blank" rel="noopener noreferrer" className="inline-block mt-4 text-blue-600 hover:text-blue-800 font-medium text-sm">
                             {t("original_source") || "Original source"} ↗
@@ -786,7 +788,7 @@ export default function PublicAudioCategory({ type }: { type: 'music' | 'podcast
                       <button type="button" onClick={() => applyTableStyle('addColumn')} className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-xs shadow-sm font-medium flex items-center gap-1">+ Col</button>
                     </div>
                   )}
-                  <div ref={contentRef} contentEditable onInput={e => setEditData({ ...editData, content: e.currentTarget.innerHTML })} onPaste={handlePaste} onMouseUp={saveSelection} onClick={(e) => { saveSelection(); const target = e.target as HTMLElement; if (target.tagName === 'IMG') { setSelectedImage(target as HTMLImageElement); setSelectedTable(null); } else { setSelectedImage(null); const table = target.closest('table'); setSelectedTable((table as HTMLTableElement) || null); } }} onKeyUp={() => { saveSelection(); setSelectedImage(null); const sel = window.getSelection(); if (sel && sel.anchorNode) { const table = sel.anchorNode.parentElement?.closest('table'); setSelectedTable((table as HTMLTableElement) || null); } else { setSelectedTable(null); } }} className="p-4 min-h-[200px] max-h-[50vh] overflow-y-auto outline-none prose prose-blue max-w-none focus:bg-blue-50/10 transition-colors bg-white"></div>
+                  <div ref={contentRef} contentEditable onInput={e => setEditData({ ...editData, content: e.currentTarget.innerHTML })} onPaste={handlePaste} onMouseUp={saveSelection} onClick={(e) => { saveSelection(); const target = e.target as HTMLElement; if (target.tagName === 'IMG') { setSelectedImage(target as HTMLImageElement); setSelectedTable(null); handleImageClick(e); } else { setSelectedImage(null); const table = target.closest('table'); setSelectedTable((table as HTMLTableElement) || null); } }} onKeyUp={() => { saveSelection(); setSelectedImage(null); const sel = window.getSelection(); if (sel && sel.anchorNode) { const table = sel.anchorNode.parentElement?.closest('table'); setSelectedTable((table as HTMLTableElement) || null); } else { setSelectedTable(null); } }} className="p-4 min-h-[200px] max-h-[50vh] overflow-y-auto outline-none prose prose-blue max-w-none focus:bg-blue-50/10 transition-colors bg-white"></div>
                 </div>
               </div>
             </div>
@@ -922,6 +924,8 @@ export default function PublicAudioCategory({ type }: { type: 'music' | 'podcast
           </div>
         </div>
       )}
+
+      <ImageLightbox image={lightboxImage} onClose={closeLightbox} />
     </div>
   );
 }

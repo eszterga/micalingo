@@ -7,3 +7,7 @@ html, body, #root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   background-color: #f9fafb; /* gray-50 */
 }
+
+.prose img {
+  cursor: zoom-in;
+}
