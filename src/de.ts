@@ -182,7 +182,7 @@ export const de = {
   loading_vocabulary: "Ihr Wortschatz wird geladen...",
   words_selected: "{count} Wörter ausgewählt",
   delete_selected_words: "Ausgewählte löschen",
-  edit_word: "Wort bearbeiten",
+  edit_word: "Bearbeiten",
   delete_word: "Wort löschen",
   modal_edit_word_title: "Wort bearbeiten",
   modal_add_word_title: "Neues Wort hinzufügen",

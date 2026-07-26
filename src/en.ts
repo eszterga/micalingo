@@ -182,7 +182,7 @@ export const en = {
   loading_vocabulary: "Loading your vocabulary...",
   words_selected: "{count} words selected",
   delete_selected_words: "Delete Selected",
-  edit_word: "Edit word",
+  edit_word: "Edit",
   delete_word: "Delete word",
   modal_edit_word_title: "Edit Word",
   modal_add_word_title: "Add New Word",
