@@ -491,7 +491,7 @@ export default function Grammar() {
   }, []);
 
   // Bookmarks Logic
-  const handleMouseUp = useCallback((e: React.MouseEvent | React.TouchEvent, itemId: string) => {
+  const handleMouseUp = useCallback((_e: React.MouseEvent | React.TouchEvent, itemId: string) => {
     if (!user) return;
     setTimeout(() => {
       const selection = window.getSelection();

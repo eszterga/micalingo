@@ -219,7 +219,7 @@ export default function GrammarCategory() {
     };
   }, []);
 
-  const handleMouseUp = (e: React.MouseEvent | React.TouchEvent, itemId: string) => {
+  const handleMouseUp = (_e: React.MouseEvent | React.TouchEvent, itemId: string) => {
     if (!user) return;
     setTimeout(() => {
       const selection = window.getSelection();

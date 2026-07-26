@@ -311,7 +311,7 @@ export default function PrivateMaterials({ type }: { type: 'reading' | 'listenin
     return next;
   });
   
-  const handleMouseUp = (e: React.MouseEvent | React.TouchEvent, itemId: string) => {
+  const handleMouseUp = (_e: React.MouseEvent | React.TouchEvent, itemId: string) => {
     if (!user) return;
     setTimeout(() => {
       const selection = window.getSelection();

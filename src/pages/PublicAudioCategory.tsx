@@ -241,7 +241,7 @@ export default function PublicAudioCategory({ type }: { type: 'music' | 'podcast
     };
   }, []);
 
-  const handleMouseUp = (e: React.MouseEvent | React.TouchEvent, itemId: string) => {
+  const handleMouseUp = (_e: React.MouseEvent | React.TouchEvent, itemId: string) => {
     if (!user) return; // Only allow highlighting features for logged-in users
     setTimeout(() => {
       const selection = window.getSelection();
