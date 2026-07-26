@@ -534,4 +534,8 @@ export const en = {
   idiom_note_placeholder: "Literal meaning...",
   save_content: "Save Content",
   confirm_delete_idiom: "Are you sure you want to delete this idiom?",
+  confirm_delete_ff: "Are you sure you want to delete this false friend?",
+  ff_note_placeholder: "e.g. False friend: gift != ajándék",
+  alert_fill_fields_admin: "Please fill in at least the German and Hungarian fields.",
+  confirm_exit_app: "Are you sure you want to exit the app?",
 };

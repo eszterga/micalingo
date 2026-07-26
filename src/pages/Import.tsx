@@ -269,18 +269,24 @@ export default function Import() {
 
   const filteredImportedFiles = useMemo(() => {
     if (!fileSearchTerm.trim()) return importedFiles;
-    const term = fileSearchTerm.toLowerCase();
+    const searchTerms = fileSearchTerm.toLowerCase().trim().split(/\s+/).filter(Boolean);
     return importedFiles.filter((f: ImportedFilePreview) => {
-      if (f.fileName.toLowerCase().includes(term)) return true;
+      if (searchTerms.every(t => f.fileName.toLowerCase().includes(t))) return true;
       const itemsInFile = allItems.filter((item: any) => 
         (item.sourceFile || "Legacy Import (No File Name)") === f.fileName &&
         (item.category || 'mixed') === f.destination
       );
       return itemsInFile.some((item: any) =>
-        (item.german || '').toLowerCase().includes(term) ||
-        (item.hungarian || '').toLowerCase().includes(term) ||
-        (item.example || '').toLowerCase().includes(term) ||
-        (item.note || '').toLowerCase().includes(term)
+        searchTerms.every(t =>
+          (item.german || '').toLowerCase().includes(t) ||
+          (item.hungarian || '').toLowerCase().includes(t) ||
+          (item.example || '').toLowerCase().includes(t) ||
+          (item.note || '').toLowerCase().includes(t) ||
+          (item.article || '').toLowerCase().includes(t) ||
+          (item.noun || '').toLowerCase().includes(t) ||
+          (item.levels || '').toLowerCase().includes(t) ||
+          (item.hint || '').toLowerCase().includes(t)
+        )
       );
     });
   }, [importedFiles, allItems, fileSearchTerm]);
@@ -1015,7 +1021,7 @@ export default function Import() {
           </div>
 
           {previewItems.length > 0 ? (
-            <div className="bg-white border border-blue-50 rounded-2xl shadow-sm max-h-[400px] overflow-auto">
+            <div className="bg-white border border-blue-50 rounded-2xl shadow-sm max-h-[60vh] md:max-h-[400px] overflow-auto">
               <table className="w-full text-left border-collapse table-fixed min-w-[800px]">
                 <thead className="bg-blue-50/50 border-b border-blue-100 sticky top-0 backdrop-blur-md z-10">
                   <tr>
@@ -1298,9 +1304,9 @@ export default function Import() {
             })()}
             </div>
 
-            <div className="p-6 md:p-8 border-t border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row justify-end gap-3">
-              <button onClick={() => setIsAddModalOpen(false)} className="w-full sm:w-auto px-6 py-3 font-bold text-gray-600 hover:bg-gray-200 rounded-xl transition-colors">{t('cancel')}</button>
-              <button onClick={handleSaveNewWord} className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl shadow-sm transition-colors">{t('modal_save_word')}</button>
+            <div className="p-3 sm:p-6 md:p-8 border-t border-gray-100 bg-gray-50/50 flex flex-row justify-end gap-2 sm:gap-3">
+              <button onClick={() => setEditingFile(null)} disabled={isSavingEdit} className="flex-1 sm:flex-none px-4 py-2 sm:px-6 sm:py-3 font-bold text-gray-600 hover:bg-gray-200 rounded-xl transition-colors disabled:opacity-50">{t('cancel')}</button>
+              <button onClick={handleSaveFileEdits} disabled={isSavingEdit} className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 sm:py-3 sm:px-8 rounded-xl shadow-sm disabled:opacity-50 transition-colors">{isSavingEdit ? t('saving') : t('modal_save_changes') || 'Save'}</button>
             </div>
           </div>
         </div>
@@ -1428,7 +1434,7 @@ export default function Import() {
                     </td>
                     <td className="p-3 sm:p-5 text-gray-700 font-medium">{file.itemCount}</td>
                     <td className="p-3 sm:p-5 text-right">
-                      <div className="flex flex-wrap items-center justify-end gap-1 sm:gap-2">
+                      <div className="flex flex-nowrap items-center justify-end gap-1.5 opacity-100 transition-opacity">
                         <button
                           onClick={() => handleEditFile(file)}
                           disabled={saving}
@@ -1496,9 +1502,9 @@ export default function Import() {
 
       {/* EDIT UPLOADED FILE MODAL */}
       {editingFile && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-blue-950/40 backdrop-blur-sm transition-opacity">
-          <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col animate-fade-in-up">
-            <div className="p-4 sm:p-6 md:p-8 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 flex-wrap gap-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center md:p-4 bg-blue-950/40 backdrop-blur-sm transition-opacity">
+          <div className="bg-white md:rounded-[2rem] shadow-2xl w-full max-w-6xl h-full md:h-auto max-h-[100vh] md:max-h-[90vh] overflow-hidden flex flex-col animate-fade-in-up">
+            <div className="p-3 sm:p-6 md:p-8 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 flex-wrap gap-2 sm:gap-4">
               <h2 className="text-2xl font-extrabold text-blue-950">{t('preview_filename', { filename: editingFile || '' })} (Edit Mode)</h2>
               
               <div className="flex-1 max-w-md mx-auto w-full">
@@ -1516,7 +1522,7 @@ export default function Import() {
               </button>
             </div>
 
-            <div className="flex-1 overflow-auto bg-white p-3 sm:p-6 md:p-8">
+            <div className="flex-1 overflow-auto bg-white p-0 sm:p-6 md:p-8">
               {editFileItems.length === 0 ? (
                 <p className="text-gray-500 italic text-center py-4">{t("no_items_left") || "No items left. Save to delete all."}</p>
               ) : (

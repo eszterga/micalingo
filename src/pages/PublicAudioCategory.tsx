@@ -68,6 +68,21 @@ export default function PublicAudioCategory({ type }: { type: 'music' | 'podcast
   const [selectedImage, setSelectedImage] = useState<HTMLImageElement | null>(null);
   const [selectedTable, setSelectedTable] = useState<HTMLTableElement | null>(null);
 
+  const savedSelection = useRef<Range | null>(null);
+  const saveSelection = () => {
+    const sel = window.getSelection();
+    if (sel && sel.rangeCount > 0) {
+      savedSelection.current = sel.getRangeAt(0);
+    }
+  };
+  const restoreSelection = () => {
+    if (savedSelection.current) {
+      const sel = window.getSelection();
+      sel?.removeAllRanges();
+      sel?.addRange(savedSelection.current);
+    }
+  };
+
   const applyTableStyle = (action: string, value?: string) => {
     if (!selectedTable) return;
     if (action === 'align') {
@@ -587,36 +602,39 @@ export default function PublicAudioCategory({ type }: { type: 'music' | 'podcast
             {items.map((item, index) => {
               const isExpanded = expandedItems.has(item.id);
               return (
-                <div key={item.id} className="relative bg-white/80 backdrop-blur-xl p-8 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white transition-all duration-300">
-                  {((user && item.userId === user.uid) || (isAdmin && adminMode && item.userId === "PUBLIC_LIBRARY")) && (
-                    <div className="absolute top-4 right-4 md:top-8 md:right-8 flex items-center gap-1.5 md:gap-2 z-10">
-                      <button onClick={() => openEditModal(item)} className="p-2.5 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 hover:text-blue-700 transition-colors shadow-sm" title={t("edit_audio") || "Edit Audio"}>
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                      </button>
-                      <button onClick={() => handleDelete(item.id)} className="p-2.5 bg-red-50 text-red-500 rounded-xl hover:bg-red-100 hover:text-red-600 transition-colors shadow-sm" title={t("delete_audio") || "Delete Audio"}>
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                      </button>
-                    </div>
-                  )}
-                  
-                  <button onClick={() => toggleExpand(item.id)} className={`w-full flex items-center justify-between group outline-none text-left ${isAdmin && adminMode ? "pr-20 md:pr-[100px]" : ""}`}>
-                    <div className="flex flex-col items-start gap-2 text-left">
-                      <h2 className="text-2xl font-extrabold text-blue-950 m-0">{item.title}</h2>
-                      {bookmarks[item.id] && (
-                        <div className="flex items-center gap-2 mt-1">
-                          <span onClick={(e) => handleContinueFrom(e, item.id, bookmarks[item.id])} className="inline-flex items-center gap-1.5 text-xs font-bold bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-lg hover:bg-yellow-200 transition-colors shadow-sm cursor-pointer border border-yellow-300">
-                            🔖 {t("continue_from") || "Continue from:"} "{bookmarks[item.id].substring(0, 25)}..."
-                          </span>
-                          <button onClick={(e) => deleteBookmark(e, item.id)} className="p-1 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors shadow-sm" title="Delete bookmark">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                    <div className={`w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center shadow-sm text-blue-600 transition-transform duration-500 flex-shrink-0 ml-4 ${isExpanded ? "rotate-180" : ""}`}>
-                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"></path></svg>
-                    </div>
-                  </button>
+                <div key={item.id} className="relative bg-white/80 backdrop-blur-xl p-5 md:p-8 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white transition-all duration-300">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 w-full">
+                    <button onClick={() => toggleExpand(item.id)} className="flex-1 w-full flex items-center justify-between group outline-none text-left">
+                      <div className="flex flex-col items-start gap-2 text-left pr-4">
+                        <h2 className="text-2xl font-extrabold text-blue-950 m-0 leading-tight">{item.title}</h2>
+                        {bookmarks[item.id] && (
+                          <div className="flex items-center gap-2 mt-1">
+                            <span onClick={(e) => handleContinueFrom(e, item.id, bookmarks[item.id])} className="inline-flex items-center gap-1.5 text-xs font-bold bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-lg hover:bg-yellow-200 transition-colors shadow-sm cursor-pointer border border-yellow-300">
+                              🔖 {t("continue_from") || "Continue from:"} "{bookmarks[item.id].substring(0, 25)}..."
+                            </span>
+                            <button onClick={(e) => deleteBookmark(e, item.id)} className="p-1 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors shadow-sm" title="Delete bookmark">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                      <div className={`w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center shadow-sm text-blue-600 transition-transform duration-500 flex-shrink-0 ml-4 ${isExpanded ? "rotate-180" : ""}`}>
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                      </div>
+                    </button>
+                    {((user && item.userId === user.uid) || (isAdmin && adminMode && item.userId === "PUBLIC_LIBRARY")) && (
+                      <div className="flex items-center gap-2 w-full sm:w-auto justify-end sm:border-l sm:border-gray-100 sm:pl-4 pt-3 sm:pt-0 border-t border-gray-100 sm:border-t-0 flex-shrink-0">
+                        <button onClick={() => openEditModal(item)} className="px-3 py-2 sm:p-2 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 hover:text-blue-700 transition-colors shadow-sm flex items-center gap-2" title={t("edit_audio") || "Edit Audio"}>
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                          <span className="text-xs font-bold sm:hidden">{t("edit_word") || "Edit"}</span>
+                        </button>
+                        <button onClick={() => handleDelete(item.id)} className="px-3 py-2 sm:p-2 bg-red-50 text-red-500 rounded-xl hover:bg-red-100 hover:text-red-600 transition-colors shadow-sm flex items-center gap-2" title={t("delete_audio") || "Delete Audio"}>
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                          <span className="text-xs font-bold sm:hidden">{t("delete") || "Delete"}</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
                   
                   <div className={`grid transition-[grid-template-rows,opacity,margin] duration-500 ease-in-out ${isExpanded ? "grid-rows-[1fr] opacity-100 mt-6" : "grid-rows-[0fr] opacity-0 mt-0"}`}>
                     <div className="overflow-hidden">
@@ -712,6 +730,10 @@ export default function PublicAudioCategory({ type }: { type: 'music' | 'podcast
                     <button type="button" onClick={e => { e.preventDefault(); document.execCommand("bold", false); }} className="px-3 py-1 bg-white border border-gray-300 rounded font-bold hover:bg-gray-200 text-sm transition-colors shadow-sm">B</button>
                     <button type="button" onClick={e => { e.preventDefault(); document.execCommand("italic", false); }} className="px-3 py-1 bg-white border border-gray-300 rounded italic hover:bg-gray-200 text-sm transition-colors shadow-sm">I</button>
                     <div className="w-px h-6 bg-gray-300 self-center mx-1"></div>
+                    <button type="button" onClick={e => { e.preventDefault(); document.execCommand("justifyLeft", false); }} className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-sm shadow-sm" title="Align Left">⬅️</button>
+                    <button type="button" onClick={e => { e.preventDefault(); document.execCommand("justifyCenter", false); }} className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-sm shadow-sm" title="Align Center">↔️</button>
+                    <button type="button" onClick={e => { e.preventDefault(); document.execCommand("justifyRight", false); }} className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-sm shadow-sm" title="Align Right">➡️</button>
+                    <div className="w-px h-6 bg-gray-300 self-center mx-1"></div>
                     <button type="button" onClick={e => { e.preventDefault(); document.execCommand("formatBlock", false, "H2"); }} className="px-3 py-1 bg-white border border-gray-300 rounded font-bold hover:bg-gray-200 text-sm text-gray-700 transition-colors shadow-sm">H2</button>
                     <button type="button" onClick={e => { e.preventDefault(); document.execCommand("formatBlock", false, "H3"); }} className="px-3 py-1 bg-white border border-gray-300 rounded font-bold hover:bg-gray-200 text-sm text-gray-700 transition-colors shadow-sm">H3</button>
                     <button type="button" onClick={e => { e.preventDefault(); document.execCommand("formatBlock", false, "P"); }} className="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-sm text-gray-700 transition-colors shadow-sm">P</button>
@@ -723,14 +745,14 @@ export default function PublicAudioCategory({ type }: { type: 'music' | 'podcast
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg> {t('add_image') || 'Add Image'}
                     </button>
                     <div className="w-px h-6 bg-gray-300 self-center mx-1"></div>
-                    <select onChange={(e) => { document.execCommand("fontSize", false, e.target.value); e.target.value = ""; }} className="px-2 py-1 bg-white border border-gray-300 rounded text-sm shadow-sm outline-none cursor-pointer">
+                    <select onChange={(e) => { restoreSelection(); document.execCommand("fontSize", false, e.target.value); setEditData(prev => ({ ...prev, content: contentRef.current!.innerHTML })); e.target.value = ""; }} className="px-2 py-1 bg-white border border-gray-300 rounded text-sm shadow-sm outline-none cursor-pointer">
                       <option value="">Size</option><option value="1">Small</option><option value="3">Normal</option><option value="5">Large</option><option value="7">Huge</option>
                     </select>
                     <div className="flex items-center border border-gray-300 rounded bg-white shadow-sm px-1" title="Text Color">
-                      <span className="text-xs text-gray-500 px-1 font-serif">A</span><input type="color" onChange={(e) => document.execCommand("foreColor", false, e.target.value)} className="w-5 h-5 p-0 border-0 bg-transparent cursor-pointer" />
+                      <span className="text-xs text-gray-500 px-1 font-serif">A</span><input type="color" onChange={(e) => { restoreSelection(); document.execCommand("foreColor", false, e.target.value); setEditData(prev => ({ ...prev, content: contentRef.current!.innerHTML })); }} className="w-5 h-5 p-0 border-0 bg-transparent cursor-pointer" />
                     </div>
                     <div className="flex items-center border border-gray-300 rounded bg-white shadow-sm px-1" title="Highlight Color">
-                      <span className="text-xs text-gray-500 px-1 font-serif bg-yellow-200">A</span><input type="color" onChange={(e) => document.execCommand("hiliteColor", false, e.target.value)} className="w-5 h-5 p-0 border-0 bg-transparent cursor-pointer" />
+                      <span className="text-xs text-gray-500 px-1 font-serif bg-yellow-200">A</span><input type="color" onChange={(e) => { restoreSelection(); document.execCommand("hiliteColor", false, e.target.value); setEditData(prev => ({ ...prev, content: contentRef.current!.innerHTML })); }} className="w-5 h-5 p-0 border-0 bg-transparent cursor-pointer" />
                     </div>
                     <button type="button" onClick={handleInsertTable} className="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-sm text-gray-700 transition-colors shadow-sm font-medium flex items-center gap-1">📊 Table</button>
                     <input type="file" accept="image/*" ref={fileInputRef} onChange={handleImageUpload} className="hidden" />
@@ -764,7 +786,7 @@ export default function PublicAudioCategory({ type }: { type: 'music' | 'podcast
                       <button type="button" onClick={() => applyTableStyle('addColumn')} className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-xs shadow-sm font-medium flex items-center gap-1">+ Col</button>
                     </div>
                   )}
-                  <div ref={contentRef} contentEditable onInput={e => setEditData({ ...editData, content: e.currentTarget.innerHTML })} onPaste={handlePaste} onClick={(e) => { const target = e.target as HTMLElement; if (target.tagName === 'IMG') { setSelectedImage(target as HTMLImageElement); setSelectedTable(null); } else { setSelectedImage(null); const table = target.closest('table'); setSelectedTable((table as HTMLTableElement) || null); } }} onKeyUp={() => { setSelectedImage(null); const sel = window.getSelection(); if (sel && sel.anchorNode) { const table = sel.anchorNode.parentElement?.closest('table'); setSelectedTable((table as HTMLTableElement) || null); } else { setSelectedTable(null); } }} className="p-4 min-h-[200px] max-h-[50vh] overflow-y-auto outline-none prose prose-blue max-w-none focus:bg-blue-50/10 transition-colors bg-white"></div>
+                  <div ref={contentRef} contentEditable onInput={e => setEditData({ ...editData, content: e.currentTarget.innerHTML })} onPaste={handlePaste} onMouseUp={saveSelection} onClick={(e) => { saveSelection(); const target = e.target as HTMLElement; if (target.tagName === 'IMG') { setSelectedImage(target as HTMLImageElement); setSelectedTable(null); } else { setSelectedImage(null); const table = target.closest('table'); setSelectedTable((table as HTMLTableElement) || null); } }} onKeyUp={() => { saveSelection(); setSelectedImage(null); const sel = window.getSelection(); if (sel && sel.anchorNode) { const table = sel.anchorNode.parentElement?.closest('table'); setSelectedTable((table as HTMLTableElement) || null); } else { setSelectedTable(null); } }} className="p-4 min-h-[200px] max-h-[50vh] overflow-y-auto outline-none prose prose-blue max-w-none focus:bg-blue-50/10 transition-colors bg-white"></div>
                 </div>
               </div>
             </div>

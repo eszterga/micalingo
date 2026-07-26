@@ -534,4 +534,8 @@ export const de = {
   idiom_note_placeholder: "Wörtliche Bedeutung...",
   save_content: "Inhalt speichern",
   confirm_delete_idiom: "Bist du sicher, dass du diese Redewendung löschen möchtest?",
+  confirm_delete_ff: "Bist du sicher, dass du diesen falschen Freund löschen möchtest?",
+  ff_note_placeholder: "z.B. Falscher Freund: gift != ajándék",
+  alert_fill_fields_admin: "Bitte fülle mindestens die deutschen und ungarischen Felder aus.",
+  confirm_exit_app: "Möchten Sie die App wirklich beenden?",
 };

@@ -299,9 +299,9 @@ _items_save: "Nincsenek érvényes szavak a mentéshez, vagy nem vagy bejelentke
   // Grammar & Statistics
   grammar_page_title: "Nyelvtan",
   grammar_page_subtitle: "Nyelvtani szabályok és magyarázatok áttekintése.",
-  grammar_cases: "Esetek (Fälle)",
-  grammar_tenses: "Igeidők (Zeitformen)",
-  grammar_articles: "Névelők és Nemek",
+  grammar_cases: "Esetek",
+  grammar_tenses: "Igeidők",
+  grammar_articles: "Névelők és nemek",
   grammar_adjectives: "Melléknévragozás",
   grammar_prepositions: "Elöljárószavak",
   grammar_sentence_structure: "Mondatszerkezet",
@@ -534,4 +534,8 @@ _items_save: "Nincsenek érvényes szavak a mentéshez, vagy nem vagy bejelentke
   idiom_note_placeholder: "Szó szerinti jelentés...",
   save_content: "Tartalom mentése",
   confirm_delete_idiom: "Biztosan törölni szeretnéd ezt a szólást?",
+  confirm_delete_ff: "Biztosan törölni szeretnéd ezt a hamis barátot?",
+  ff_note_placeholder: "pl. Hamis barát: gift != ajándék",
+  alert_fill_fields_admin: "Kérlek, töltsd ki legalább a német és magyar mezőket.",
+  confirm_exit_app: "Biztosan ki akarsz lépni az alkalmazásból?",
 };

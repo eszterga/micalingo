@@ -7,6 +7,8 @@ import { publicVocabulary, publicPhrases, publicArticles, publicPrepositions, pu
 import { doc, setDoc } from 'firebase/firestore';
 import { dbCloud } from '../lib/firebase';
 import * as XLSX from 'xlsx';
+import { Capacitor } from '@capacitor/core';
+import { App as CapacitorApp } from '@capacitor/app';
 
 interface Question {
   questionText: string;
@@ -429,6 +431,30 @@ export default function Quiz() {
       };
     }
   }, [quizState]);
+
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
+
+    const listener: any = CapacitorApp.addListener('backButton', (info: any) => {
+      if (quizState === 'ongoing') {
+        setShowQuitModal(true);
+      } else if (info.canGoBack) {
+        window.history.back();
+      } else {
+        if (window.confirm(t('confirm_exit_app') || 'Are you sure you want to exit the app?')) {
+          CapacitorApp.exitApp();
+        }
+      }
+    });
+
+    return () => {
+      if (listener && listener.then) {
+        listener.then((handle: any) => handle.remove());
+      } else if (listener) {
+        listener.remove();
+      }
+    };
+  }, [quizState, t]);
 
   const finishQuiz = async (finalScore: number) => {
     const key = user ? `micalingo_scores_${user.uid}` : 'micalingo_guest_scores';

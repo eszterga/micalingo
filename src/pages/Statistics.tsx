@@ -147,15 +147,18 @@ export default function Statistics() {
     const topic = parts.join('_');
     
     let translatedTopic = topic;
-    if (topic === 'vocabulary') translatedTopic = t('vocabulary') || 'Vocabulary';
+    if (topic === 'vocabulary') translatedTopic = t('vocabulary_short') || t('vocabulary') || 'Vocab';
     else if (topic === 'articles') translatedTopic = t('articles_quiz') || 'Articles';
-    else if (topic === 'phrases') translatedTopic = t('phrases_sentences_quiz') || 'Phrases';
+    else if (topic === 'phrases') translatedTopic = t('phrases_sentences_quiz') || t('phrases_quiz') || 'Phrases';
     else if (topic === 'prepositions') translatedTopic = t('prepositions_quiz') || 'Prepositions';
     else if (topic === 'adjectives') translatedTopic = t('adjectives_quiz') || 'Adjectives';
     else if (topic === 'verbs') translatedTopic = t('verbs_quiz') || 'Verbs';
 
-    if (isCustom) return t('quiz_title_custom', { topic: translatedTopic, id: quizId || '' }).trim();
-    return t('quiz_title_public', { topic: translatedTopic, id: quizId || '' }).trim();
+    // Make the name much shorter for the table view by removing unnecessary words
+    const shortTopic = translatedTopic.replace(/( kvíz| quiz| und Sätze| and sentences| és mondatok)/gi, '').trim();
+
+    if (isCustom) return `⭐ ${shortTopic} #${quizId}`;
+    return `${shortTopic} #${quizId}`;
   };
 
   const downloadResults = (key: string, data: any) => {
@@ -237,10 +240,10 @@ export default function Statistics() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse table-fixed border-t border-blue-50/50">
+            <table className="w-full text-left border-collapse table-fixed min-w-[750px] border-t border-blue-50/50">
               <thead className="bg-blue-50/30">
                 <tr>
-                  <th className="p-3 sm:p-5 w-10 text-center">
+                  <th className="p-3 sm:p-5 w-12 text-center">
                     <input
                       type="checkbox"
                       checked={selectedKeys.size === Object.keys(history).length && Object.keys(history).length > 0}
@@ -254,10 +257,10 @@ export default function Statistics() {
                       className="w-5 h-5 text-blue-600 rounded border-blue-200 focus:ring-blue-500 cursor-pointer"
                     />
                   </th>
-                  <th className="p-3 sm:p-5 font-bold text-sm text-blue-900/60 uppercase tracking-wider">Quiz</th>
-                  <th className="p-3 sm:p-5 font-bold text-sm text-blue-900/60 uppercase tracking-wider">Score</th>
-                  <th className="p-3 sm:p-5 font-bold text-sm text-blue-900/60 uppercase tracking-wider text-center">{t('result') || 'Result'}</th>
-                  <th className="p-3 sm:p-5 font-bold text-sm text-blue-900/60 uppercase tracking-wider text-right">Actions</th>
+                  <th className="p-3 sm:p-5 w-1/3 font-bold text-sm text-blue-900/60 uppercase tracking-wider">Quiz</th>
+                  <th className="p-3 sm:p-5 w-1/5 font-bold text-sm text-blue-900/60 uppercase tracking-wider">Score</th>
+                  <th className="p-3 sm:p-5 w-1/5 font-bold text-sm text-blue-900/60 uppercase tracking-wider text-center">{t('result') || 'Result'}</th>
+                  <th className="p-3 sm:p-5 w-auto font-bold text-sm text-blue-900/60 uppercase tracking-wider text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-blue-50/50">
@@ -288,7 +291,7 @@ export default function Statistics() {
                           className="w-5 h-5 text-blue-600 rounded border-blue-200 focus:ring-blue-500 cursor-pointer"
                         />
                       </td>
-                      <td className="p-3 sm:p-5 font-bold text-blue-950 break-words">
+                      <td className="p-3 sm:p-5 font-bold text-blue-950 truncate" title={formatQuizName(quizKey)}>
                         {formatQuizName(quizKey)}
                       </td>
                       <td className="p-3 sm:p-5">
@@ -309,7 +312,7 @@ export default function Statistics() {
                         </span>
                       </td>
                       <td className="p-3 sm:p-5 text-right">
-                        <div className="flex flex-wrap justify-end gap-1 opacity-100 transition-opacity">
+                        <div className="flex flex-nowrap justify-end gap-1.5 opacity-100 transition-opacity">
                           <button
                             onClick={() => downloadResults(quizKey, data)}
                             className="text-blue-600 hover:text-blue-800 text-sm font-medium p-2 hover:bg-blue-50 rounded-lg transition-colors"

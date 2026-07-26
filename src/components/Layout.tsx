@@ -3,6 +3,7 @@ import { Link, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { useI18n } from '../I18nContext';
 import { Capacitor } from '@capacitor/core';
+import { App as CapacitorApp } from '@capacitor/app';
 
 const BackgroundBlobs = () => (
   <>
@@ -65,6 +66,31 @@ export default function Layout() {
       window.removeEventListener('showSupportPrompt', handleShowSupportPrompt);
     };
   }, []);
+
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
+
+    const listener: any = CapacitorApp.addListener('backButton', (info: any) => {
+      // Let the Quiz page handle its own specific trap logic
+      if (window.location.pathname === '/quiz') return;
+
+      if (info.canGoBack) {
+        window.history.back();
+      } else {
+        if (window.confirm(t('confirm_exit_app') || 'Are you sure you want to exit the app?')) {
+          CapacitorApp.exitApp();
+        }
+      }
+    });
+
+    return () => {
+      if (listener && listener.then) {
+        listener.then((handle: any) => handle.remove());
+      } else if (listener) {
+        listener.remove();
+      }
+    };
+  }, [t]);
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-blue-100 via-blue-50 to-white text-gray-800 flex-col relative overflow-hidden">

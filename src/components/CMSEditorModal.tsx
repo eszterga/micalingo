@@ -65,10 +65,25 @@ export default function CMSEditorModal({ isOpen, onClose, onSave, initialData, t
 
   const embedUrl = type === 'listening' ? getEmbedUrl(mediaLink) : null;
 
+  // Store selection state
+  const savedSelection = useRef<Range | null>(null);
+  const saveSelection = () => {
+    const sel = window.getSelection();
+    if (sel && sel.rangeCount > 0) {
+      savedSelection.current = sel.getRangeAt(0);
+    }
+  };
+
   // Rich Text Formatting execution
   const executeCommand = (e: React.MouseEvent, command: string, value: string | undefined = undefined) => {
     e.preventDefault();
+    if (savedSelection.current && (command === 'hiliteColor' || command === 'foreColor')) {
+      const sel = window.getSelection();
+      sel?.removeAllRanges();
+      sel?.addRange(savedSelection.current);
+    }
     document.execCommand(command, false, value);
+    setContent(editorRef.current?.innerHTML || '');
     editorRef.current?.focus();
   };
 
@@ -236,6 +251,12 @@ export default function CMSEditorModal({ isOpen, onClose, onSave, initialData, t
                 <button onClick={(e) => executeCommand(e, 'formatBlock', 'H2')} className="px-2 h-8 font-bold text-sm bg-white border border-gray-200 rounded hover:bg-gray-100 flex items-center" title="Heading 2">H2</button>
                 <button onClick={(e) => executeCommand(e, 'formatBlock', 'H3')} className="px-2 h-8 font-bold text-sm bg-white border border-gray-200 rounded hover:bg-gray-100 flex items-center" title="Heading 3">H3</button>
                 <button onClick={(e) => executeCommand(e, 'formatBlock', 'P')} className="px-2 h-8 font-medium text-sm bg-white border border-gray-200 rounded hover:bg-gray-100 flex items-center" title="Paragraph">P</button>
+                
+                <div className="w-px h-6 bg-gray-300 mx-1"></div>
+                
+                <button onClick={(e) => executeCommand(e, 'justifyLeft')} className="w-8 h-8 flex items-center justify-center bg-white border border-gray-200 rounded hover:bg-gray-100" title="Align Left">⬅️</button>
+                <button onClick={(e) => executeCommand(e, 'justifyCenter')} className="w-8 h-8 flex items-center justify-center bg-white border border-gray-200 rounded hover:bg-gray-100" title="Align Center">↔️</button>
+                <button onClick={(e) => executeCommand(e, 'justifyRight')} className="w-8 h-8 flex items-center justify-center bg-white border border-gray-200 rounded hover:bg-gray-100" title="Align Right">➡️</button>
               </div>
 
               {/* Editable Area */}
@@ -245,6 +266,9 @@ export default function CMSEditorModal({ isOpen, onClose, onSave, initialData, t
                 contentEditable
                 onInput={(e) => setContent(e.currentTarget.innerHTML)}
                 onPaste={handlePaste}
+                onMouseUp={saveSelection}
+                onKeyUp={saveSelection}
+                onClick={saveSelection}
               />
             </div>
           </div>

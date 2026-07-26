@@ -264,18 +264,24 @@ export default function Settings() {
 
   const filteredImportedFiles = useMemo(() => {
     if (!fileSearchTerm.trim()) return importedFiles;
-    const term = fileSearchTerm.toLowerCase();
+    const searchTerms = fileSearchTerm.toLowerCase().trim().split(/\s+/).filter(Boolean);
     return importedFiles.filter(f => {
-      if (f.fileName.toLowerCase().includes(term)) return true;
+      if (searchTerms.every(t => f.fileName.toLowerCase().includes(t))) return true;
       const itemsInFile = allItems.filter((item: any) => 
         (item.sourceFile || "Legacy Import (No File Name)") === f.fileName &&
         (item.category || 'mixed') === f.destination
       );
       return itemsInFile.some((item: any) =>
-        (item.german || '').toLowerCase().includes(term) ||
-        (item.hungarian || '').toLowerCase().includes(term) ||
-        (item.example || '').toLowerCase().includes(term) ||
-        (item.note || '').toLowerCase().includes(term)
+        searchTerms.every(t =>
+          (item.german || '').toLowerCase().includes(t) ||
+          (item.hungarian || '').toLowerCase().includes(t) ||
+          (item.example || '').toLowerCase().includes(t) ||
+          (item.note || '').toLowerCase().includes(t) ||
+          (item.article || '').toLowerCase().includes(t) ||
+          (item.noun || '').toLowerCase().includes(t) ||
+          (item.levels || '').toLowerCase().includes(t) ||
+          (item.hint || '').toLowerCase().includes(t)
+        )
       );
     });
   }, [importedFiles, allItems, fileSearchTerm]);
@@ -720,7 +726,7 @@ export default function Settings() {
                           <td className="p-3 sm:p-5"><span className="px-2.5 py-1 text-xs font-bold rounded-full bg-blue-100 text-blue-800 uppercase tracking-wider">{file.destination}</span></td>
                           <td className="p-3 sm:p-5 text-gray-700 font-medium">{file.itemCount}</td>
                           <td className="p-3 sm:p-5 text-right">
-                            <div className="flex flex-wrap items-center justify-end gap-1 sm:gap-2">
+                            <div className="flex flex-nowrap items-center justify-end gap-1.5 opacity-100 transition-opacity">
                               <button onClick={(e) => handleEditFile(e, file)} disabled={isSaving} className="flex items-center text-blue-600 hover:text-blue-800 p-2 rounded-lg hover:bg-blue-50 transition-colors disabled:opacity-50 font-bold text-sm">
                                 <svg className="w-4 h-4 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536M9 11l6.768-6.768a2.5 2.5 0 113.536 3.536L12.536 14.536A4 4 0 019.172 15.9L6 16l.1-3.172A4 4 0 017.464 9.464z" /></svg>
                                 <span className="hidden sm:inline">Edit</span>
@@ -814,9 +820,9 @@ export default function Settings() {
 
       {/* EDIT UPLOADED FILE MODAL */}
       {editingFile && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-blue-950/40 backdrop-blur-sm transition-opacity">
-          <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col animate-fade-in-up">
-            <div className="p-4 sm:p-6 md:p-8 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 flex-wrap gap-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center md:p-4 bg-blue-950/40 backdrop-blur-sm transition-opacity">
+          <div className="bg-white md:rounded-[2rem] shadow-2xl w-full max-w-6xl h-full md:h-auto max-h-[100vh] md:max-h-[90vh] overflow-hidden flex flex-col animate-fade-in-up">
+            <div className="p-3 sm:p-6 md:p-8 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 flex-wrap gap-2 sm:gap-4">
               <h2 className="text-2xl font-extrabold text-blue-950">{t('preview_filename' as any, { filename: editingFile || '' }) || `Edit ${editingFile}`}</h2>
               
               <div className="flex-1 max-w-md mx-auto w-full">
@@ -834,7 +840,7 @@ export default function Settings() {
               </button>
             </div>
 
-            <div className="flex-1 overflow-auto bg-white p-3 sm:p-6 md:p-8">
+            <div className="flex-1 overflow-auto bg-white p-0 sm:p-6 md:p-8">
               {editFileItems.length === 0 ? (
                 <p className="text-gray-500 italic text-center py-4">{t("no_items_left" as any) || "No items left. Save to delete all."}</p>
               ) : (
@@ -885,49 +891,62 @@ export default function Settings() {
                   </thead>
                   <tbody className="divide-y divide-gray-100">
                     {editFileItems.map((item: any, idx: number) => {
-                      const term = modalSearchTerm.toLowerCase();
-                      const matches = !term || (
-                        (item.german || '').toLowerCase().includes(term) ||
-                        (item.hungarian || '').toLowerCase().includes(term) ||
-                        (item.example || '').toLowerCase().includes(term) ||
-                        (item.note || '').toLowerCase().includes(term)
+                      const searchTerms = modalSearchTerm.toLowerCase().trim().split(/\s+/).filter(Boolean);
+                      const matches = searchTerms.length === 0 || searchTerms.every(t => 
+                        (item.german || '').toLowerCase().includes(t) ||
+                        (item.hungarian || '').toLowerCase().includes(t) ||
+                        (item.example || '').toLowerCase().includes(t) ||
+                        (item.note || '').toLowerCase().includes(t) ||
+                        (item.article || '').toLowerCase().includes(t) ||
+                        (item.noun || '').toLowerCase().includes(t) ||
+                        (item.levels || '').toLowerCase().includes(t) ||
+                        (item.hint || '').toLowerCase().includes(t)
                       );
                       
                       if (!matches) return null;
                       
+                      const getMatchClass = (val: string | undefined) => {
+                        if (searchTerms.length === 0 || !val) return 'w-full border border-gray-200 rounded p-2 text-sm outline-none focus:ring-2 focus:ring-blue-500 bg-white transition-colors';
+                        const lowerVal = val.toLowerCase();
+                        const isFieldMatch = searchTerms.some(t => lowerVal.includes(t));
+                        return isFieldMatch 
+                          ? 'w-full border border-yellow-400 rounded p-2 text-sm outline-none focus:ring-2 focus:ring-yellow-500 bg-yellow-50 shadow-inner transition-colors font-semibold text-yellow-900' 
+                          : 'w-full border border-gray-200 rounded p-2 text-sm outline-none focus:ring-2 focus:ring-blue-500 bg-white transition-colors';
+                      };
+
                       return (
-                      <tr key={item.id || idx} className={`transition-colors ${term ? 'bg-yellow-50' : 'hover:bg-gray-50'}`}>
+                      <tr key={item.id || idx} className={`transition-colors ${searchTerms.length > 0 ? 'bg-blue-50/20' : 'hover:bg-gray-50'}`}>
                         {editingFileCategory === 'articles' ? (
                           <>
-                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.article || ''} onChange={(e) => handleEditItemChange(idx, 'article', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
-                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.noun || ''} onChange={(e) => handleEditItemChange(idx, 'noun', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
-                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleEditItemChange(idx, 'hungarian', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
-                            <td className="p-1 sm:p-2 align-top"><textarea rows={2} value={item.example || ''} onChange={(e) => handleEditItemChange(idx, 'example', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
+                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.article || ''} onChange={(e) => handleEditItemChange(idx, 'article', e.target.value)} className={getMatchClass(item.article)} /></td>
+                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.noun || ''} onChange={(e) => handleEditItemChange(idx, 'noun', e.target.value)} className={getMatchClass(item.noun)} /></td>
+                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleEditItemChange(idx, 'hungarian', e.target.value)} className={getMatchClass(item.hungarian)} /></td>
+                            <td className="p-1 sm:p-2 align-top"><textarea rows={2} value={item.example || ''} onChange={(e) => handleEditItemChange(idx, 'example', e.target.value)} className={getMatchClass(item.example)} /></td>
                           </>
                         ) : editingFileCategory === 'prepositions' ? (
                           <>
-                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.german || ''} onChange={(e) => handleEditItemChange(idx, 'german', e.target.value)} placeholder={t('modal_german_prep_verb_placeholder' as any) || "e.g. verzichten, lemondani, felhagyni valamivel"} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
-                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleEditItemChange(idx, 'hungarian', e.target.value)} placeholder={t('modal_prep_case_placeholder' as any) || "e.g. auf + Akk."} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
-                            <td className="p-1 sm:p-2 align-top"><textarea rows={2} value={item.example || ''} onChange={(e) => handleEditItemChange(idx, 'example', e.target.value)} placeholder={t('meaning_example_placeholder' as any) || "e.g. Ich verzichte auf das Angebot."} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
+                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.german || ''} onChange={(e) => handleEditItemChange(idx, 'german', e.target.value)} placeholder={t('modal_german_prep_verb_placeholder' as any) || "e.g. verzichten, lemondani, felhagyni valamivel"} className={getMatchClass(item.german)} /></td>
+                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleEditItemChange(idx, 'hungarian', e.target.value)} placeholder={t('modal_prep_case_placeholder' as any) || "e.g. auf + Akk."} className={getMatchClass(item.hungarian)} /></td>
+                            <td className="p-1 sm:p-2 align-top"><textarea rows={2} value={item.example || ''} onChange={(e) => handleEditItemChange(idx, 'example', e.target.value)} placeholder={t('meaning_example_placeholder' as any) || "e.g. Ich verzichte auf das Angebot."} className={getMatchClass(item.example)} /></td>
                           </>
                         ) : editingFileCategory === 'false_friends' || editingFileCategory === 'idioms' ? (
                           <>
-                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.german || ''} onChange={(e) => handleEditItemChange(idx, 'german', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
-                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleEditItemChange(idx, 'hungarian', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
-                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.example || ''} onChange={(e) => handleEditItemChange(idx, 'example', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
-                            <td className="p-1 sm:p-2 align-top"><textarea rows={2} value={item.note || ''} onChange={(e) => handleEditItemChange(idx, 'note', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
+                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.german || ''} onChange={(e) => handleEditItemChange(idx, 'german', e.target.value)} className={getMatchClass(item.german)} /></td>
+                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleEditItemChange(idx, 'hungarian', e.target.value)} className={getMatchClass(item.hungarian)} /></td>
+                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.example || ''} onChange={(e) => handleEditItemChange(idx, 'example', e.target.value)} className={getMatchClass(item.example)} /></td>
+                            <td className="p-1 sm:p-2 align-top"><textarea rows={2} value={item.note || ''} onChange={(e) => handleEditItemChange(idx, 'note', e.target.value)} className={getMatchClass(item.note)} /></td>
                           </>
                         ) : editingFileCategory === 'adjectives' ? (
                           <>
-                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.german || ''} onChange={(e) => handleEditItemChange(idx, 'german', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
-                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleEditItemChange(idx, 'hungarian', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
-                            <td className="p-1 sm:p-2 align-top"><textarea rows={2} value={item.levels || ''} onChange={(e) => handleEditItemChange(idx, 'levels', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
+                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.german || ''} onChange={(e) => handleEditItemChange(idx, 'german', e.target.value)} className={getMatchClass(item.german)} /></td>
+                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleEditItemChange(idx, 'hungarian', e.target.value)} className={getMatchClass(item.hungarian)} /></td>
+                            <td className="p-1 sm:p-2 align-top"><textarea rows={2} value={item.levels || ''} onChange={(e) => handleEditItemChange(idx, 'levels', e.target.value)} className={getMatchClass(item.levels)} /></td>
                           </>
                         ) : (
                           <>
-                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.german || ''} onChange={(e) => handleEditItemChange(idx, 'german', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
-                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleEditItemChange(idx, 'hungarian', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
-                            <td className="p-1 sm:p-2 align-top"><textarea rows={2} value={item.hint || item.example || ''} onChange={(e) => handleEditItemChange(idx, editingFileCategory === 'verbs' ? 'hint' : 'example', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" /></td>
+                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.german || ''} onChange={(e) => handleEditItemChange(idx, 'german', e.target.value)} className={getMatchClass(item.german)} /></td>
+                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleEditItemChange(idx, 'hungarian', e.target.value)} className={getMatchClass(item.hungarian)} /></td>
+                            <td className="p-1 sm:p-2 align-top"><textarea rows={2} value={item.hint || item.example || ''} onChange={(e) => handleEditItemChange(idx, editingFileCategory === 'verbs' ? 'hint' : 'example', e.target.value)} className={getMatchClass(editingFileCategory === 'verbs' ? item.hint : item.example)} /></td>
                           </>
                         )}
                         <td className="p-1 sm:p-2 align-top text-center border-l border-gray-100">

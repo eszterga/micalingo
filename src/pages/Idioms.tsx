@@ -78,7 +78,7 @@ export default function Idioms() {
 
   const handleSave = async () => {
     if (!formData.german.trim() || !formData.hungarian.trim()) {
-      alert(t('alert_fill_fields_login') || "German and Hungarian fields are required.");
+      alert(t('alert_fill_fields_admin') || "Please fill in at least the German and Hungarian fields.");
       return;
     }
 
@@ -116,21 +116,24 @@ export default function Idioms() {
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 pt-4">
           {allIdioms.length > 0 ? (
             allIdioms.map((item, idx) => (
-              <div key={idx} className="relative bg-white/80 backdrop-blur-xl p-6 md:p-8 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white flex flex-col justify-between hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 transition-all duration-500 hover:-translate-y-1 group/item">
+              <div key={idx} className="bg-white/80 backdrop-blur-xl p-5 md:p-8 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white flex flex-col justify-between hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 transition-all duration-500 hover:-translate-y-1 group/item">
                 
-                {isAdmin && adminMode && (
-                  <div className="absolute top-4 right-4 flex items-center gap-1.5 md:gap-2 z-10">
-                    <button onClick={(e) => { e.preventDefault(); openEditModal(item); }} className="p-2 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 hover:text-blue-700 transition-colors shadow-sm" title={t('edit_word') || 'Edit'}>
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                    </button>
-                    <button onClick={(e) => { e.preventDefault(); handleDelete(item); }} className="p-2 bg-red-50 text-red-500 rounded-xl hover:bg-red-100 hover:text-red-600 transition-colors shadow-sm" title={t('delete') || 'Delete'}>
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                    </button>
-                  </div>
-                )}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 w-full mb-2">
+                  <h2 className="text-2xl font-extrabold text-blue-950 m-0 leading-tight">{item.german}</h2>
+                  {isAdmin && adminMode && (
+                    <div className="flex items-center gap-2 w-full sm:w-auto justify-end sm:border-l sm:border-gray-100 sm:pl-4 pt-3 sm:pt-0 border-t border-gray-100 sm:border-t-0 flex-shrink-0">
+                      <button onClick={(e) => { e.preventDefault(); openEditModal(item); }} className="px-3 py-2 sm:p-2 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 hover:text-blue-700 transition-colors shadow-sm flex items-center gap-2" title={t('edit_word') || 'Edit'}>
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                        <span className="text-xs font-bold sm:hidden">{t('edit_word') || 'Edit'}</span>
+                      </button>
+                      <button onClick={(e) => { e.preventDefault(); handleDelete(item); }} className="px-3 py-2 sm:p-2 bg-red-50 text-red-500 rounded-xl hover:bg-red-100 hover:text-red-600 transition-colors shadow-sm flex items-center gap-2" title={t('delete') || 'Delete'}>
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        <span className="text-xs font-bold sm:hidden">{t('delete') || 'Delete'}</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
 
-                <div className={`${isAdmin && adminMode ? 'pr-16' : ''}`}>
-                  <h2 className="text-2xl font-extrabold text-blue-950 mb-1">{item.german}</h2>
                   <p className="text-lg font-medium text-blue-600 mb-4">{item.hungarian}</p>
                   
                   {item.note && (
@@ -145,7 +148,6 @@ export default function Idioms() {
                       <p className="text-gray-700 italic text-sm">{item.example}</p>
                     </div>
                   )}
-                </div>
               </div>
             ))
           ) : (
@@ -182,7 +184,7 @@ export default function Idioms() {
               </div>
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2">{t('explanation_label') || 'Explanation'}</label>
-                <textarea rows={3} value={formData.example} onChange={e => setFormData({ ...formData, example: e.target.value })} placeholder="Als er über Quantenphysik sprach, verstand ich nur Bahnhof." className="w-full rounded-xl border-gray-200 border p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all resize-none" />
+                <textarea rows={3} value={formData.example} onChange={e => setFormData({ ...formData, example: e.target.value })} placeholder={t('explanation_placeholder') || "Als er über Quantenphysik sprach, verstand ich nur Bahnhof."} className="w-full rounded-xl border-gray-200 border p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all resize-none" />
               </div>
             </div>
             <div className="p-6 md:p-8 border-t border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row justify-end gap-3">
