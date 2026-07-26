@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useSearchParams, Link } from "react-router-dom";
 import * as XLSX from 'xlsx';
 import FileDropZone from "../components/FileDropZone";
@@ -7,6 +8,26 @@ import { useAuth } from "../AuthContext";
 import { publicVocabulary, publicPhrases, publicArticles, publicPrepositions, publicFalseFriends, publicAdjectives } from '../lib/public-data';
 import { useCloudVocabulary, addCloudWord, bulkAddCloudWords, bulkDeleteCloudWords, updateCloudWord } from "../lib/firestore";
 import { useI18n } from "../I18nContext";
+
+const getEditItemKey = (item: any, idx: number) => String(item?.id ?? `idx_${idx}`);
+
+const itemMatchesModalSearch = (item: any, rawTerm: string) => {
+  const term = rawTerm.toLowerCase().trim();
+  if (!term) return true;
+  return (
+    (item.german || '').toLowerCase().includes(term) ||
+    (item.hungarian || '').toLowerCase().includes(term) ||
+    (item.example || '').toLowerCase().includes(term) ||
+    (item.note || '').toLowerCase().includes(term) ||
+    (item.article || '').toLowerCase().includes(term) ||
+    (item.noun || '').toLowerCase().includes(term) ||
+    (item.levels || '').toLowerCase().includes(term) ||
+    (item.hint || '').toLowerCase().includes(term)
+  );
+};
+
+const EDIT_FIELD_CLASS =
+  "w-full border border-gray-200 rounded-xl p-3 text-base outline-none focus:ring-2 focus:ring-blue-500 bg-white min-h-[48px]";
 
 interface ImportedFilePreview {
   fileName: string;
@@ -62,6 +83,9 @@ export default function Import() {
   const [fileSearchTerm, setFileSearchTerm] = useState("");
   const [isFilesListOpen, setIsFilesListOpen] = useState(false);
   const [modalSearchTerm, setModalSearchTerm] = useState("");
+  // Pin which rows stay visible while editing — live re-filter on every keystroke
+  // was hiding the focused word (felt like the modal "collapsing") on mobile.
+  const [pinnedEditMatchKeys, setPinnedEditMatchKeys] = useState<Set<string> | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
@@ -312,17 +336,54 @@ export default function Import() {
     });
   };
 
+  const pinEditMatches = (items: any[], term: string) => {
+    const trimmed = term.trim();
+    if (!trimmed) {
+      setPinnedEditMatchKeys(null);
+      return;
+    }
+    const keys = new Set<string>();
+    items.forEach((item, idx) => {
+      if (itemMatchesModalSearch(item, trimmed)) {
+        keys.add(getEditItemKey(item, idx));
+      }
+    });
+    setPinnedEditMatchKeys(keys);
+  };
+
   const handleEditFile = (file: ImportedFilePreview) => {
     const items = allItems.filter((item: any) => 
       (item.sourceFile || "Legacy Import (No File Name)") === file.fileName &&
       (item.category || 'mixed') === file.destination
     );
-    setEditFileItems(JSON.parse(JSON.stringify(items)));
+    const cloned = JSON.parse(JSON.stringify(items));
+    setEditFileItems(cloned);
     setEditingFileCategory(file.destination);
     setEditingFile(file.fileName);
     setDeletedEditItemIds([]);
     setModalSearchTerm(fileSearchTerm);
+    pinEditMatches(cloned, fileSearchTerm);
   };
+
+  const visibleEditEntries = useMemo(() => {
+    return editFileItems
+      .map((item, idx) => ({ item, idx, key: getEditItemKey(item, idx) }))
+      .filter(({ key }) => !pinnedEditMatchKeys || pinnedEditMatchKeys.has(key));
+  }, [editFileItems, pinnedEditMatchKeys]);
+
+  // Keep background page from scrolling / jumping when the mobile keyboard opens
+  useEffect(() => {
+    if (!editingFile) return;
+    const main = document.querySelector("main");
+    const prevBodyOverflow = document.body.style.overflow;
+    const prevMainOverflow = main instanceof HTMLElement ? main.style.overflow : "";
+    document.body.style.overflow = "hidden";
+    if (main instanceof HTMLElement) main.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prevBodyOverflow;
+      if (main instanceof HTMLElement) main.style.overflow = prevMainOverflow;
+    };
+  }, [editingFile]);
 
   const handleEditItemChange = (index: number, field: string, value: string) => {
     setEditFileItems(prev => {
@@ -444,6 +505,8 @@ export default function Import() {
 
       setEditingFile(null);
       setDeletedEditItemIds([]);
+      setPinnedEditMatchKeys(null);
+      setModalSearchTerm("");
     } catch (error) {
       console.error('Failed to save edits:', error);
       alert('An error occurred while saving edits.');
@@ -1305,8 +1368,8 @@ export default function Import() {
             </div>
 
             <div className="p-3 sm:p-6 md:p-8 border-t border-gray-100 bg-gray-50/50 flex flex-row justify-end gap-2 sm:gap-3">
-              <button onClick={() => setEditingFile(null)} disabled={isSavingEdit} className="flex-1 sm:flex-none px-4 py-2 sm:px-6 sm:py-3 font-bold text-gray-600 hover:bg-gray-200 rounded-xl transition-colors disabled:opacity-50">{t('cancel')}</button>
-              <button onClick={handleSaveFileEdits} disabled={isSavingEdit} className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 sm:py-3 sm:px-8 rounded-xl shadow-sm disabled:opacity-50 transition-colors">{isSavingEdit ? t('saving') : t('modal_save_changes') || 'Save'}</button>
+              <button onClick={() => setIsAddModalOpen(false)} className="flex-1 sm:flex-none px-4 py-2 sm:px-6 sm:py-3 font-bold text-gray-600 hover:bg-gray-200 rounded-xl transition-colors">{t('cancel')}</button>
+              <button onClick={handleSaveNewWord} className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 sm:py-3 sm:px-8 rounded-xl shadow-sm transition-colors">{t('modal_save_word') || 'Save Word'}</button>
             </div>
           </div>
         </div>
@@ -1500,175 +1563,287 @@ export default function Import() {
         </div>
       )}
 
-      {/* EDIT UPLOADED FILE MODAL */}
-      {editingFile && (
-        <div className="fixed inset-0 z-50 flex items-stretch sm:items-center justify-center md:p-4 bg-blue-950/40 backdrop-blur-sm transition-opacity">
-          <div className="bg-white md:rounded-[2rem] shadow-2xl w-full max-w-6xl h-[100dvh] md:h-auto max-h-[100dvh] md:max-h-[90vh] overflow-hidden flex flex-col animate-fade-in-up">
-            <div className="p-3 sm:p-6 md:p-8 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 flex-wrap gap-2 sm:gap-4">
-              <h2 className="text-2xl font-extrabold text-blue-950">{t('preview_filename', { filename: editingFile || '' })} (Edit Mode)</h2>
-              
-              <div className="flex-1 max-w-md mx-auto w-full">
-                 <input
-                   type="text"
-                   placeholder="Highlight specific word..."
-                   value={modalSearchTerm}
-                   onChange={e => setModalSearchTerm(e.target.value)}
-                   className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
-                 />
+      {/* EDIT UPLOADED FILE MODAL — portaled to body so Layout scroll/keyboard can't collapse it */}
+      {editingFile && createPortal(
+        <div className="fixed inset-0 z-[100] flex items-stretch justify-center bg-blue-950/40 backdrop-blur-sm md:p-4 md:items-center">
+          <div
+            className="bg-white shadow-2xl w-full h-full max-h-full overflow-hidden flex flex-col md:h-auto md:max-h-[90vh] md:max-w-6xl md:rounded-[2rem]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-3 sm:p-6 md:p-8 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 flex-wrap gap-2 sm:gap-4 shrink-0">
+              <h2 className="text-lg sm:text-2xl font-extrabold text-blue-950">{t('preview_filename', { filename: editingFile || '' })} (Edit Mode)</h2>
+
+              <div className="flex-1 max-w-md mx-auto w-full order-3 sm:order-none basis-full sm:basis-auto">
+                <input
+                  type="search"
+                  enterKeyHint="search"
+                  placeholder="Highlight specific word..."
+                  value={modalSearchTerm}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setModalSearchTerm(value);
+                    pinEditMatches(editFileItems, value);
+                  }}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm text-base"
+                />
               </div>
 
-              <button onClick={() => setEditingFile(null)} className="text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-full hover:bg-gray-200">
+              <button
+                type="button"
+                onClick={() => setEditingFile(null)}
+                className="text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-full hover:bg-gray-200"
+              >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
               </button>
             </div>
 
-            <div className="flex-1 overflow-auto bg-white p-0 sm:p-6 md:p-8">
+            <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain bg-white p-3 sm:p-6 md:p-8">
               {editFileItems.length === 0 ? (
                 <p className="text-gray-500 italic text-center py-4">{t("no_items_left") || "No items left. Save to delete all."}</p>
+              ) : visibleEditEntries.length === 0 ? (
+                <p className="text-gray-500 italic text-center py-4">{t("no_items_left") || "No matching words."}</p>
               ) : (
-                <table className="w-full text-left border-collapse table-fixed min-w-[800px] border border-blue-50 rounded-xl shadow-sm">
-                  <thead className="bg-blue-50/80 border-b border-blue-100 sticky top-0 backdrop-blur z-10">
-                    <tr>
-                      {editingFileCategory === 'articles' ? (
-                        <>
-                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('article')}</th>
-                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('noun')}</th>
-                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('hungarian')}</th>
-                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('example')}</th>
-                        </>
-                      ) : editingFileCategory === 'false_friends' || editingFileCategory === 'idioms' ? (
-                        <>
-                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{editingFileCategory === 'idioms' ? (t('idiom_german_label') || 'German Idiom') : t('german')}</th>
-                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{editingFileCategory === 'idioms' ? (t('idiom_hungarian_label') || 'Hungarian Meaning') : t('hungarian')}</th>
-                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{editingFileCategory === 'idioms' ? (t('explanation_label') || 'Explanation') : t('example')}</th>
-                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{editingFileCategory === 'idioms' ? (t('idiom_note_label') || 'Note (Explanation)') : t('note')}</th>
-                        </>
-                      ) : editingFileCategory === 'prepositions' ? (
-                        <>
-                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('template_german_verb_header') || 'German Verb + Hungarian'}</th>
-                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('prep_case_label') || 'Preposition + Case'}</th>
-                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('template_meaning_example_header') || 'Example Sentence'}</th>
-                        </>
-                      ) : editingFileCategory === 'adjectives' ? (
-                        <>
-                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('adjective') || 'Adjective'}</th>
-                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('hungarian')}</th>
-                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('levels') || 'Levels'}</th>
-                        </>
-                      ) : editingFileCategory === 'verbs' ? (
-                        <>
-                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('german')}</th>
-                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('hungarian')}</th>
-                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('hint') || 'Hint / Past Form'}</th>
-                        </>
-                      ) : (
-                        <>
-                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('german')}</th>
-                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('hungarian')}</th>
-                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('example')}</th>
-                        </>
-                      )}
-                      <th className="p-2 sm:p-3 w-10"></th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {editFileItems.map((item: any, idx: number) => {
-                      const term = modalSearchTerm.toLowerCase();
-                      const matches = !term || (
-                        (item.german || '').toLowerCase().includes(term) ||
-                        (item.hungarian || '').toLowerCase().includes(term) ||
-                        (item.example || '').toLowerCase().includes(term) ||
-                        (item.note || '').toLowerCase().includes(term)
-                      );
-                      
-                      if (!matches) return null;
-                      
-                      return (
-                      <tr key={item.id || idx} className={`transition-colors ${term ? 'bg-yellow-50' : 'hover:bg-gray-50'}`}>
+                <>
+                  {/* Mobile / app: stacked cards — wide tables + keyboard were collapsing the editor */}
+                  <div className="md:hidden space-y-4 pb-[env(safe-area-inset-bottom)]">
+                    {visibleEditEntries.map(({ item, idx, key }) => (
+                      <div key={key} className="rounded-2xl border border-blue-100 bg-yellow-50/40 p-4 space-y-3 shadow-sm">
                         {editingFileCategory === 'articles' ? (
                           <>
-                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top">
-                              <textarea rows={2} value={item.article || ''} onChange={(e) => handleEditItemChange(idx, 'article', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-base sm:text-sm" />
-                            </td>
-                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top">
-                              <textarea rows={2} value={item.noun || ''} onChange={(e) => handleEditItemChange(idx, 'noun', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-base sm:text-sm" />
-                            </td>
-                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top">
-                              <textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleEditItemChange(idx, 'hungarian', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-base sm:text-sm" />
-                            </td>
-                            <td className="p-1 sm:p-2 align-top">
-                              <textarea rows={2} value={item.example || ''} onChange={(e) => handleEditItemChange(idx, 'example', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-base sm:text-sm" />
-                            </td>
+                            <div>
+                              <label className="block text-xs font-semibold text-gray-500 mb-1">{t('article')}</label>
+                              <textarea rows={2} value={item.article || ''} onChange={(e) => handleEditItemChange(idx, 'article', e.target.value)} className={EDIT_FIELD_CLASS} />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-semibold text-gray-500 mb-1">{t('noun')}</label>
+                              <textarea rows={2} value={item.noun || ''} onChange={(e) => handleEditItemChange(idx, 'noun', e.target.value)} className={EDIT_FIELD_CLASS} />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-semibold text-gray-500 mb-1">{t('hungarian')}</label>
+                              <textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleEditItemChange(idx, 'hungarian', e.target.value)} className={EDIT_FIELD_CLASS} />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-semibold text-gray-500 mb-1">{t('example')}</label>
+                              <textarea rows={2} value={item.example || ''} onChange={(e) => handleEditItemChange(idx, 'example', e.target.value)} className={EDIT_FIELD_CLASS} />
+                            </div>
                           </>
                         ) : editingFileCategory === 'prepositions' ? (
                           <>
-                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top">
-                              <textarea rows={2} value={item.german || ''} onChange={(e) => handleEditItemChange(idx, 'german', e.target.value)} placeholder={t('modal_german_prep_verb_placeholder') || "e.g. verzichten, lemondani, felhagyni valamivel"} className="w-full border border-gray-200 rounded p-2 text-base sm:text-sm" />
-                            </td>
-                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top">
-                              <textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleEditItemChange(idx, 'hungarian', e.target.value)} placeholder={t('modal_prep_case_placeholder') || "e.g. auf + Akk."} className="w-full border border-gray-200 rounded p-2 text-base sm:text-sm" />
-                            </td>
-                            <td className="p-1 sm:p-2 align-top">
-                              <textarea rows={2} value={item.example || ''} onChange={(e) => handleEditItemChange(idx, 'example', e.target.value)} placeholder={t('meaning_example_placeholder') || "e.g. Ich verzichte auf das Angebot."} className="w-full border border-gray-200 rounded p-2 text-base sm:text-sm" />
-                            </td>
+                            <div>
+                              <label className="block text-xs font-semibold text-gray-500 mb-1">{t('template_german_verb_header') || 'German Verb + Hungarian'}</label>
+                              <textarea rows={2} value={item.german || ''} onChange={(e) => handleEditItemChange(idx, 'german', e.target.value)} className={EDIT_FIELD_CLASS} />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-semibold text-gray-500 mb-1">{t('prep_case_label') || 'Preposition + Case'}</label>
+                              <textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleEditItemChange(idx, 'hungarian', e.target.value)} className={EDIT_FIELD_CLASS} />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-semibold text-gray-500 mb-1">{t('template_meaning_example_header') || 'Example Sentence'}</label>
+                              <textarea rows={2} value={item.example || ''} onChange={(e) => handleEditItemChange(idx, 'example', e.target.value)} className={EDIT_FIELD_CLASS} />
+                            </div>
                           </>
                         ) : editingFileCategory === 'false_friends' || editingFileCategory === 'idioms' ? (
                           <>
-                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top">
-                              <textarea rows={2} value={item.german || ''} onChange={(e) => handleEditItemChange(idx, 'german', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-base sm:text-sm" />
-                            </td>
-                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top">
-                              <textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleEditItemChange(idx, 'hungarian', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-base sm:text-sm" />
-                            </td>
-                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top">
-                              <textarea rows={2} value={item.example || ''} onChange={(e) => handleEditItemChange(idx, 'example', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-base sm:text-sm" />
-                            </td>
-                            <td className="p-1 sm:p-2 align-top">
-                              <textarea rows={2} value={item.note || ''} onChange={(e) => handleEditItemChange(idx, 'note', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-base sm:text-sm" />
-                            </td>
+                            <div>
+                              <label className="block text-xs font-semibold text-gray-500 mb-1">{editingFileCategory === 'idioms' ? (t('idiom_german_label') || 'German Idiom') : t('german')}</label>
+                              <textarea rows={2} value={item.german || ''} onChange={(e) => handleEditItemChange(idx, 'german', e.target.value)} className={EDIT_FIELD_CLASS} />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-semibold text-gray-500 mb-1">{editingFileCategory === 'idioms' ? (t('idiom_hungarian_label') || 'Hungarian Meaning') : t('hungarian')}</label>
+                              <textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleEditItemChange(idx, 'hungarian', e.target.value)} className={EDIT_FIELD_CLASS} />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-semibold text-gray-500 mb-1">{editingFileCategory === 'idioms' ? (t('explanation_label') || 'Explanation') : t('example')}</label>
+                              <textarea rows={2} value={item.example || ''} onChange={(e) => handleEditItemChange(idx, 'example', e.target.value)} className={EDIT_FIELD_CLASS} />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-semibold text-gray-500 mb-1">{editingFileCategory === 'idioms' ? (t('idiom_note_label') || 'Note') : t('note')}</label>
+                              <textarea rows={2} value={item.note || ''} onChange={(e) => handleEditItemChange(idx, 'note', e.target.value)} className={EDIT_FIELD_CLASS} />
+                            </div>
                           </>
                         ) : editingFileCategory === 'adjectives' ? (
                           <>
-                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top">
-                              <textarea rows={2} value={item.german || ''} onChange={(e) => handleEditItemChange(idx, 'german', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-base sm:text-sm" />
-                            </td>
-                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top">
-                              <textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleEditItemChange(idx, 'hungarian', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-base sm:text-sm" />
-                            </td>
-                            <td className="p-1 sm:p-2 align-top">
-                              <textarea rows={2} value={item.levels || ''} onChange={(e) => handleEditItemChange(idx, 'levels', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-base sm:text-sm" />
-                            </td>
+                            <div>
+                              <label className="block text-xs font-semibold text-gray-500 mb-1">{t('adjective') || 'Adjective'}</label>
+                              <textarea rows={2} value={item.german || ''} onChange={(e) => handleEditItemChange(idx, 'german', e.target.value)} className={EDIT_FIELD_CLASS} />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-semibold text-gray-500 mb-1">{t('hungarian')}</label>
+                              <textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleEditItemChange(idx, 'hungarian', e.target.value)} className={EDIT_FIELD_CLASS} />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-semibold text-gray-500 mb-1">{t('levels') || 'Levels'}</label>
+                              <textarea rows={2} value={item.levels || ''} onChange={(e) => handleEditItemChange(idx, 'levels', e.target.value)} className={EDIT_FIELD_CLASS} />
+                            </div>
                           </>
                         ) : (
                           <>
-                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top">
-                              <textarea rows={2} value={item.german || ''} onChange={(e) => handleEditItemChange(idx, 'german', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-base sm:text-sm" />
-                            </td>
-                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top">
-                              <textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleEditItemChange(idx, 'hungarian', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-base sm:text-sm" />
-                            </td>
-                            <td className="p-1 sm:p-2 align-top">
-                              <textarea rows={2} value={item.hint || item.example || ''} onChange={(e) => handleEditItemChange(idx, editingFileCategory === 'verbs' ? 'hint' : 'example', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-base sm:text-sm" />
-                            </td>
+                            <div>
+                              <label className="block text-xs font-semibold text-gray-500 mb-1">{t('german')}</label>
+                              <textarea rows={2} value={item.german || ''} onChange={(e) => handleEditItemChange(idx, 'german', e.target.value)} className={EDIT_FIELD_CLASS} />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-semibold text-gray-500 mb-1">{t('hungarian')}</label>
+                              <textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleEditItemChange(idx, 'hungarian', e.target.value)} className={EDIT_FIELD_CLASS} />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-semibold text-gray-500 mb-1">{editingFileCategory === 'verbs' ? (t('hint') || 'Hint / Past Form') : t('example')}</label>
+                              <textarea
+                                rows={2}
+                                value={item.hint || item.example || ''}
+                                onChange={(e) => handleEditItemChange(idx, editingFileCategory === 'verbs' ? 'hint' : 'example', e.target.value)}
+                                className={EDIT_FIELD_CLASS}
+                              />
+                            </div>
                           </>
                         )}
-                        <td className="p-1 sm:p-2 align-top text-center border-l border-gray-100">
-                          <button onClick={() => handleDeleteEditItem(idx)} className="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50" title={t('delete') || 'Delete'}>
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                          </button>
-                        </td>
-                      </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteEditItem(idx)}
+                          className="w-full text-red-600 font-semibold py-2 rounded-xl border border-red-100 hover:bg-red-50"
+                        >
+                          {t('delete') || 'Delete'}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Desktop: table editor */}
+                  <div className="hidden md:block overflow-x-auto">
+                    <table className="w-full text-left border-collapse table-fixed min-w-[800px] border border-blue-50 rounded-xl shadow-sm">
+                      <thead className="bg-blue-50/80 border-b border-blue-100 sticky top-0 backdrop-blur z-10">
+                        <tr>
+                          {editingFileCategory === 'articles' ? (
+                            <>
+                              <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('article')}</th>
+                              <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('noun')}</th>
+                              <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('hungarian')}</th>
+                              <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('example')}</th>
+                            </>
+                          ) : editingFileCategory === 'false_friends' || editingFileCategory === 'idioms' ? (
+                            <>
+                              <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{editingFileCategory === 'idioms' ? (t('idiom_german_label') || 'German Idiom') : t('german')}</th>
+                              <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{editingFileCategory === 'idioms' ? (t('idiom_hungarian_label') || 'Hungarian Meaning') : t('hungarian')}</th>
+                              <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{editingFileCategory === 'idioms' ? (t('explanation_label') || 'Explanation') : t('example')}</th>
+                              <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{editingFileCategory === 'idioms' ? (t('idiom_note_label') || 'Note (Explanation)') : t('note')}</th>
+                            </>
+                          ) : editingFileCategory === 'prepositions' ? (
+                            <>
+                              <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('template_german_verb_header') || 'German Verb + Hungarian'}</th>
+                              <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('prep_case_label') || 'Preposition + Case'}</th>
+                              <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('template_meaning_example_header') || 'Example Sentence'}</th>
+                            </>
+                          ) : editingFileCategory === 'adjectives' ? (
+                            <>
+                              <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('adjective') || 'Adjective'}</th>
+                              <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('hungarian')}</th>
+                              <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('levels') || 'Levels'}</th>
+                            </>
+                          ) : editingFileCategory === 'verbs' ? (
+                            <>
+                              <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('german')}</th>
+                              <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('hungarian')}</th>
+                              <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('hint') || 'Hint / Past Form'}</th>
+                            </>
+                          ) : (
+                            <>
+                              <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('german')}</th>
+                              <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('hungarian')}</th>
+                              <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('example')}</th>
+                            </>
+                          )}
+                          <th className="p-2 sm:p-3 w-10"></th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100">
+                        {visibleEditEntries.map(({ item, idx, key }) => (
+                          <tr key={key} className={`transition-colors ${pinnedEditMatchKeys ? 'bg-yellow-50' : 'hover:bg-gray-50'}`}>
+                            {editingFileCategory === 'articles' ? (
+                              <>
+                                <td className="p-1 sm:p-2 border-r border-gray-100 align-top">
+                                  <textarea rows={2} value={item.article || ''} onChange={(e) => handleEditItemChange(idx, 'article', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" />
+                                </td>
+                                <td className="p-1 sm:p-2 border-r border-gray-100 align-top">
+                                  <textarea rows={2} value={item.noun || ''} onChange={(e) => handleEditItemChange(idx, 'noun', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" />
+                                </td>
+                                <td className="p-1 sm:p-2 border-r border-gray-100 align-top">
+                                  <textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleEditItemChange(idx, 'hungarian', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" />
+                                </td>
+                                <td className="p-1 sm:p-2 align-top">
+                                  <textarea rows={2} value={item.example || ''} onChange={(e) => handleEditItemChange(idx, 'example', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" />
+                                </td>
+                              </>
+                            ) : editingFileCategory === 'prepositions' ? (
+                              <>
+                                <td className="p-1 sm:p-2 border-r border-gray-100 align-top">
+                                  <textarea rows={2} value={item.german || ''} onChange={(e) => handleEditItemChange(idx, 'german', e.target.value)} placeholder={t('modal_german_prep_verb_placeholder') || "e.g. verzichten, lemondani, felhagyni valamivel"} className="w-full border border-gray-200 rounded p-2 text-sm" />
+                                </td>
+                                <td className="p-1 sm:p-2 border-r border-gray-100 align-top">
+                                  <textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleEditItemChange(idx, 'hungarian', e.target.value)} placeholder={t('modal_prep_case_placeholder') || "e.g. auf + Akk."} className="w-full border border-gray-200 rounded p-2 text-sm" />
+                                </td>
+                                <td className="p-1 sm:p-2 align-top">
+                                  <textarea rows={2} value={item.example || ''} onChange={(e) => handleEditItemChange(idx, 'example', e.target.value)} placeholder={t('meaning_example_placeholder') || "e.g. Ich verzichte auf das Angebot."} className="w-full border border-gray-200 rounded p-2 text-sm" />
+                                </td>
+                              </>
+                            ) : editingFileCategory === 'false_friends' || editingFileCategory === 'idioms' ? (
+                              <>
+                                <td className="p-1 sm:p-2 border-r border-gray-100 align-top">
+                                  <textarea rows={2} value={item.german || ''} onChange={(e) => handleEditItemChange(idx, 'german', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" />
+                                </td>
+                                <td className="p-1 sm:p-2 border-r border-gray-100 align-top">
+                                  <textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleEditItemChange(idx, 'hungarian', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" />
+                                </td>
+                                <td className="p-1 sm:p-2 border-r border-gray-100 align-top">
+                                  <textarea rows={2} value={item.example || ''} onChange={(e) => handleEditItemChange(idx, 'example', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" />
+                                </td>
+                                <td className="p-1 sm:p-2 align-top">
+                                  <textarea rows={2} value={item.note || ''} onChange={(e) => handleEditItemChange(idx, 'note', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" />
+                                </td>
+                              </>
+                            ) : editingFileCategory === 'adjectives' ? (
+                              <>
+                                <td className="p-1 sm:p-2 border-r border-gray-100 align-top">
+                                  <textarea rows={2} value={item.german || ''} onChange={(e) => handleEditItemChange(idx, 'german', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" />
+                                </td>
+                                <td className="p-1 sm:p-2 border-r border-gray-100 align-top">
+                                  <textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleEditItemChange(idx, 'hungarian', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" />
+                                </td>
+                                <td className="p-1 sm:p-2 align-top">
+                                  <textarea rows={2} value={item.levels || ''} onChange={(e) => handleEditItemChange(idx, 'levels', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" />
+                                </td>
+                              </>
+                            ) : (
+                              <>
+                                <td className="p-1 sm:p-2 border-r border-gray-100 align-top">
+                                  <textarea rows={2} value={item.german || ''} onChange={(e) => handleEditItemChange(idx, 'german', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" />
+                                </td>
+                                <td className="p-1 sm:p-2 border-r border-gray-100 align-top">
+                                  <textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleEditItemChange(idx, 'hungarian', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" />
+                                </td>
+                                <td className="p-1 sm:p-2 align-top">
+                                  <textarea rows={2} value={item.hint || item.example || ''} onChange={(e) => handleEditItemChange(idx, editingFileCategory === 'verbs' ? 'hint' : 'example', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" />
+                                </td>
+                              </>
+                            )}
+                            <td className="p-1 sm:p-2 align-top text-center border-l border-gray-100">
+                              <button type="button" onClick={() => handleDeleteEditItem(idx)} className="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50" title={t('delete') || 'Delete'}>
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
               )}
             </div>
 
-            <div className="p-4 sm:p-6 md:p-8 border-t border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row justify-end gap-3">
+            <div className="p-3 sm:p-6 md:p-8 border-t border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row justify-end gap-3 shrink-0 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
               <button
+                type="button"
                 onClick={() => setEditingFile(null)}
                 disabled={isSavingEdit}
                 className="w-full sm:w-auto px-6 py-3 font-bold text-gray-600 hover:bg-gray-200 rounded-xl transition-colors disabled:opacity-50"
@@ -1676,6 +1851,7 @@ export default function Import() {
                 {t('cancel')}
               </button>
               <button
+                type="button"
                 onClick={handleSaveFileEdits}
                 disabled={isSavingEdit}
                 className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl shadow-sm disabled:opacity-50 transition-colors"
@@ -1684,7 +1860,8 @@ export default function Import() {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
       </div>
     </div>
