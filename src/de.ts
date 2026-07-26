@@ -354,6 +354,8 @@ export const de = {
   review_answers: "Antworten überprüfen",
   retry_mistakes: "Fehler wiederholen",
   close: "Schließen",
+  expand_table: "Tabelle vergrößern",
+  table_preview: "Tabellenvorschau",
 
   // Library & Learning Materials
   library: "Bibliothek",

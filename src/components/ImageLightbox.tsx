@@ -1,10 +1,13 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useI18n } from '../I18nContext';
 
-export type ImageLightboxState = { src: string; alt: string } | null;
+export type ImageLightboxState =
+  | { type: 'image'; src: string; alt: string }
+  | { type: 'table'; html: string }
+  | null;
 
 export function useImageLightbox() {
-  const [image, setImage] = useState<ImageLightboxState>(null);
+  const [content, setContent] = useState<ImageLightboxState>(null);
 
   const handleImageClick = useCallback((e: React.MouseEvent<HTMLElement>) => {
     const target = e.target as HTMLElement;
@@ -12,30 +15,34 @@ export function useImageLightbox() {
     const img = target as HTMLImageElement;
     e.preventDefault();
     e.stopPropagation();
-    setImage({ src: img.currentSrc || img.src, alt: img.alt || '' });
+    setContent({ type: 'image', src: img.currentSrc || img.src, alt: img.alt || '' });
   }, []);
 
-  const closeLightbox = useCallback(() => setImage(null), []);
+  const openTable = useCallback((table: HTMLTableElement) => {
+    setContent({ type: 'table', html: table.outerHTML });
+  }, []);
+
+  const closeLightbox = useCallback(() => setContent(null), []);
 
   useEffect(() => {
-    if (!image) return;
+    if (!content) return;
     const onKey = (ev: KeyboardEvent) => {
-      if (ev.key === 'Escape') setImage(null);
+      if (ev.key === 'Escape') setContent(null);
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [image]);
+  }, [content]);
 
   useEffect(() => {
-    if (!image) return;
+    if (!content) return;
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     return () => {
       document.body.style.overflow = prev;
     };
-  }, [image]);
+  }, [content]);
 
-  return { image, handleImageClick, closeLightbox };
+  return { image: content, handleImageClick, openTable, closeLightbox };
 }
 
 interface ImageLightboxProps {
@@ -54,7 +61,7 @@ export function ImageLightbox({ image, onClose }: ImageLightboxProps) {
       onClick={onClose}
       role="dialog"
       aria-modal="true"
-      aria-label={image.alt || 'Image preview'}
+      aria-label={image.type === 'image' ? (image.alt || 'Image preview') : (t('table_preview') || 'Table preview')}
     >
       <button
         type="button"
@@ -66,13 +73,28 @@ export function ImageLightbox({ image, onClose }: ImageLightboxProps) {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
         </svg>
       </button>
-      <img
-        src={image.src}
-        alt={image.alt}
-        onClick={(e) => e.stopPropagation()}
-        className="max-h-[min(90vh,900px)] max-w-[min(95vw,1200px)] cursor-default select-none object-contain rounded-lg shadow-2xl"
-        draggable={false}
-      />
+
+      {image.type === 'image' ? (
+        <img
+          src={image.src}
+          alt={image.alt}
+          onClick={(e) => e.stopPropagation()}
+          className="max-h-[min(90vh,900px)] max-w-[min(95vw,1200px)] cursor-default select-none object-contain rounded-lg shadow-2xl"
+          draggable={false}
+        />
+      ) : (
+        <div
+          onClick={(e) => e.stopPropagation()}
+          className="flex max-h-[min(90vh,900px)] w-full max-w-[min(95vw,1200px)] flex-col overflow-hidden rounded-xl bg-white shadow-2xl"
+        >
+          <div className="overflow-auto p-4 md:p-6">
+            <div
+              className="prose prose-blue max-w-none text-sm md:text-base [&_table]:w-full [&_table]:min-w-[420px]"
+              dangerouslySetInnerHTML={{ __html: image.html }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

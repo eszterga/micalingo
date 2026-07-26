@@ -6,6 +6,7 @@ import { useAuth } from '../AuthContext';
 import { useI18n } from '../I18nContext';
 import { addCloudWord, useCloudVocabulary } from '../lib/firestore';
 import { ImageLightbox, useImageLightbox } from '../components/ImageLightbox';
+import ArticleContent from '../components/ArticleContent';
 
 const BackgroundBlobs = () => (
   <>
@@ -90,7 +91,7 @@ export default function PrivateMaterials({ type }: { type: 'reading' | 'listenin
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedImage, setSelectedImage] = useState<HTMLImageElement | null>(null);
   const [selectedTable, setSelectedTable] = useState<HTMLTableElement | null>(null);
-  const { image: lightboxImage, handleImageClick, closeLightbox } = useImageLightbox();
+  const { image: lightboxImage, handleImageClick, openTable, closeLightbox } = useImageLightbox();
 
   const savedSelection = useRef<Range | null>(null);
   const saveSelection = () => {
@@ -761,7 +762,7 @@ export default function PrivateMaterials({ type }: { type: 'reading' | 'listenin
                                     {type === 'listening' && item.url ? (
                                       <div className="flex flex-col lg:flex-row gap-8 items-start">
                                         <div className="flex-1 w-full order-2 lg:order-1">
-                                          <div id={`article-content-${item.id}`} onClick={handleImageClick} onMouseUp={(e) => handleMouseUp(e, item.id)} onTouchEnd={(e) => handleMouseUp(e, item.id)} className="prose prose-blue max-w-none text-gray-700 leading-relaxed space-y-4 mb-4" dangerouslySetInnerHTML={{ __html: item.content }}></div>
+                                          <ArticleContent id={`article-content-${item.id}`} html={item.content} onImageClick={handleImageClick} onExpandTable={openTable} onMouseUp={(e) => handleMouseUp(e, item.id)} onTouchEnd={(e) => handleMouseUp(e, item.id)} className="prose prose-blue max-w-none text-gray-700 leading-relaxed space-y-4 mb-4" />
                                         </div>
                                         <div className="w-full lg:w-80 flex-shrink-0 lg:sticky lg:top-4 bg-blue-50/50 p-4 rounded-3xl border border-blue-100 shadow-sm order-1 lg:order-2 mb-4 lg:mb-0">
                                           <div className="text-xs font-bold text-blue-800 uppercase tracking-wider mb-3 px-2">{t("media_player") || "Media Player"}</div>
@@ -770,7 +771,7 @@ export default function PrivateMaterials({ type }: { type: 'reading' | 'listenin
                                       </div>
                                   ) : ( // This is the reading block
                                     <>
-                                      <div id={`article-content-${item.id}`} onClick={handleImageClick} onMouseUp={(e) => handleMouseUp(e, item.id)} onTouchEnd={(e) => handleMouseUp(e, item.id)} className="prose prose-blue max-w-none text-gray-700 leading-relaxed space-y-4 mb-4" dangerouslySetInnerHTML={{ __html: item.content }}></div>
+                                      <ArticleContent id={`article-content-${item.id}`} html={item.content} onImageClick={handleImageClick} onExpandTable={openTable} onMouseUp={(e) => handleMouseUp(e, item.id)} onTouchEnd={(e) => handleMouseUp(e, item.id)} className="prose prose-blue max-w-none text-gray-700 leading-relaxed space-y-4 mb-4" />
                                       {item.url && (
                                         <a href={item.url} target="_blank" rel="noopener noreferrer" className="inline-block mt-4 text-blue-600 hover:text-blue-800 font-medium text-sm">
                                           {t("original_source") || "Original source"} ↗
@@ -886,7 +887,7 @@ export default function PrivateMaterials({ type }: { type: 'reading' | 'listenin
                       <button type="button" onClick={() => applyTableStyle('addColumn')} className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-xs shadow-sm font-medium flex items-center gap-1">+ Col</button>
                     </div>
                   )}
-                  <div ref={contentRef} contentEditable onInput={e => setEditData({ ...editData, content: e.currentTarget.innerHTML })} onPaste={handlePaste} onMouseUp={saveSelection} onClick={(e) => { saveSelection(); const target = e.target as HTMLElement; if (target.tagName === 'IMG') { setSelectedImage(target as HTMLImageElement); setSelectedTable(null); handleImageClick(e); } else { setSelectedImage(null); const table = target.closest('table'); setSelectedTable((table as HTMLTableElement) || null); } }} onKeyUp={() => { saveSelection(); setSelectedImage(null); const sel = window.getSelection(); if (sel && sel.anchorNode) { const table = sel.anchorNode.parentElement?.closest('table'); setSelectedTable((table as HTMLTableElement) || null); } else { setSelectedTable(null); } }} className="p-4 min-h-[200px] max-h-[50vh] overflow-y-auto outline-none prose prose-blue max-w-none focus:bg-blue-50/10 transition-colors bg-white"></div>
+                  <div ref={contentRef} contentEditable onInput={e => setEditData({ ...editData, content: e.currentTarget.innerHTML })} onPaste={handlePaste} onMouseUp={saveSelection} onClick={(e) => { saveSelection(); const target = e.target as HTMLElement; if (target.tagName === 'IMG') { setSelectedImage(target as HTMLImageElement); setSelectedTable(null); handleImageClick(e); } else { setSelectedImage(null); const table = target.closest('table'); setSelectedTable((table as HTMLTableElement) || null); } }} onKeyUp={() => { saveSelection(); setSelectedImage(null); const sel = window.getSelection(); if (sel && sel.anchorNode) { const table = sel.anchorNode.parentElement?.closest('table'); setSelectedTable((table as HTMLTableElement) || null); } else { setSelectedTable(null); } }} className="p-4 min-h-[200px] max-h-[50vh] overflow-y-auto overflow-x-auto outline-none prose prose-blue max-w-none focus:bg-blue-50/10 transition-colors bg-white"></div>
                 </div>
               </div>
             </div>

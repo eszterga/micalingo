@@ -11,3 +11,49 @@ html, body, #root {
 .prose img {
   cursor: zoom-in;
 }
+
+/* Responsive tables: pasted Word/Excel/Docs tables often carry fixed pixel
+   widths inline, which would otherwise overflow and get clipped on narrow
+   mobile/app viewports. Wrapping them lets the table scroll horizontally
+   instead of hiding content. */
+.table-scroll-wrapper {
+  position: relative;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 1rem 0;
+}
+
+.table-scroll-wrapper table {
+  margin: 0 !important;
+}
+
+.table-expand-btn {
+  position: absolute;
+  top: 0.375rem;
+  right: 0.375rem;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  border: none;
+  border-radius: 9999px;
+  background: rgba(37, 99, 235, 0.92);
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.table-expand-btn:hover {
+  background: rgba(29, 78, 216, 0.95);
+  transform: scale(1.06);
+}
+
+.table-expand-btn svg {
+  width: 0.875rem;
+  height: 0.875rem;
+}

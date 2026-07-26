@@ -354,6 +354,8 @@ export const en = {
   review_answers: "Review Answers",
   retry_mistakes: "Retry Mistakes",
   close: "Close",
+  expand_table: "Expand table",
+  table_preview: "Table preview",
 
   // Library & Learning Materials
   library: "Library",

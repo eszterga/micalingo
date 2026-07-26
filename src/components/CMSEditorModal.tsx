@@ -264,7 +264,7 @@ export default function CMSEditorModal({ isOpen, onClose, onSave, initialData, t
               {/* Editable Area */}
               <div 
                 ref={editorRef}
-                className="p-4 flex-1 outline-none min-h-[250px] max-h-[400px] overflow-y-auto prose prose-blue max-w-none bg-white"
+                className="p-4 flex-1 outline-none min-h-[250px] max-h-[400px] overflow-y-auto overflow-x-auto prose prose-blue max-w-none bg-white"
                 contentEditable
                 onInput={(e) => setContent(e.currentTarget.innerHTML)}
                 onPaste={handlePaste}
