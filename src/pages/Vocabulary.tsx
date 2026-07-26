@@ -541,35 +541,35 @@ export default function Vocabulary() {
 
                 {isOpen && (
                   <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse table-fixed border-t border-blue-50/50">
+                  <table className="w-full min-w-[640px] text-left border-collapse border-t border-blue-50/50">
                     <thead className="bg-blue-50/30">
                       <tr>
                         <th className="p-3 sm:p-5 font-bold text-sm text-blue-900/60 uppercase tracking-wider">{t('german')}</th>
                         <th className="p-3 sm:p-5 font-bold text-sm text-blue-900/60 uppercase tracking-wider">{t('hungarian')}</th>
                         <th className="p-3 sm:p-5 font-bold text-sm text-blue-900/60 uppercase tracking-wider">{t('example')}</th>
-                        {adminMode && <th className="p-2 sm:p-4 w-16 sm:w-24"></th>}
+                        {adminMode && <th className="p-2 sm:p-4 w-20 sm:w-24"></th>}
                         {adminMode && <th className="p-2 sm:p-4 w-10 sm:w-12"></th>}
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-blue-50/50">
                       {wordsInGroup.map((word, idx) => (
                         <tr key={word.id || `static_${word.german}_${idx}`} className="hover:bg-white/60 transition-colors group">
-                          <td className="p-3 sm:p-5 font-bold text-blue-950 break-all">{word.german}</td>
-                          <td className="p-3 sm:p-5 text-gray-700 break-all">{word.hungarian}</td>
-                          <td className="p-3 sm:p-5 text-gray-500 text-sm italic break-all">{word.example}</td>
+                          <td className="p-3 sm:p-5 font-bold text-blue-950 break-words">{word.german}</td>
+                          <td className="p-3 sm:p-5 text-gray-700 break-words">{word.hungarian}</td>
+                          <td className="p-3 sm:p-5 text-gray-500 text-sm italic break-words">{word.example}</td>
                           {adminMode && (
-                            <td className="p-2 sm:p-4 text-center w-16 sm:w-24">
-                              <div className="flex justify-center items-center gap-2 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
+                            <td className="p-2 sm:p-4 text-center w-20 sm:w-24">
+                              <div className="flex justify-center items-center gap-1.5">
                                 <button
                                   onClick={() => handleEditClick(word)}
-                                  className="text-blue-500 hover:text-blue-700 p-2 rounded-lg hover:bg-blue-50 transition-colors"
+                                  className="text-blue-500 hover:text-blue-700 p-1.5 sm:p-2 rounded-lg hover:bg-blue-50 transition-colors"
                                   title={t('edit_word')}
                                 >
                                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /></svg>
                                 </button>
                                 <button
                                   onClick={() => handleDelete(word)}
-                                  className="text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 transition-colors"
+                                  className="text-red-500 hover:text-red-700 p-1.5 sm:p-2 rounded-lg hover:bg-red-50 transition-colors"
                                   title={t('delete_word')}
                                 >
                                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
@@ -672,32 +672,34 @@ export default function Vocabulary() {
 
                   {isOpen && (
                     <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse table-fixed border-t border-blue-50/50">
+                    <table className="w-full min-w-[640px] text-left border-collapse border-t border-blue-50/50">
+                      <thead className="bg-blue-50/30">
+                        <tr>
+                          <th className="p-3 sm:p-5 font-bold text-sm text-blue-900/60 uppercase tracking-wider">{t('german')}</th>
+                          <th className="p-3 sm:p-5 font-bold text-sm text-blue-900/60 uppercase tracking-wider">{t('hungarian')}</th>
+                          <th className="p-3 sm:p-5 font-bold text-sm text-blue-900/60 uppercase tracking-wider">{t('example')}</th>
+                          <th className="p-2 sm:p-4 w-20 sm:w-24"></th>
+                          <th className="p-2 sm:p-4 w-10 sm:w-12"></th>
+                        </tr>
+                      </thead>
                       <tbody className="divide-y divide-blue-50/50">
                         {wordsInGroup.map((word: any, idx: number) => (
                           <tr key={word.id || `static_${word.german}_${idx}`} className="hover:bg-white/60 transition-colors group">
-                            <td className="p-3 sm:p-5 font-bold text-blue-950 break-all">
-                              {word.german}
-                              {word.category && word.category !== 'vocabulary' && (
-                                <span className="ml-2 px-2 py-0.5 text-[10px] uppercase font-bold bg-blue-100 text-blue-800 rounded">
-                                  {word.category}
-                                </span>
-                              )}
-                            </td>
-                            <td className="p-3 sm:p-5 text-gray-700 break-all">{word.hungarian}</td>
-                            <td className="p-3 sm:p-5 text-gray-500 text-sm italic break-all">{word.example}</td>
-                            <td className="p-2 sm:p-4 text-center w-16 sm:w-24">
-                              <div className="flex justify-center items-center gap-2 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
+                            <td className="p-3 sm:p-5 font-bold text-blue-950 break-words">{word.german}</td>
+                            <td className="p-3 sm:p-5 text-gray-700 break-words">{word.hungarian}</td>
+                            <td className="p-3 sm:p-5 text-gray-500 text-sm italic break-words">{word.example}</td>
+                            <td className="p-2 sm:p-4 text-center w-20 sm:w-24">
+                              <div className="flex justify-center items-center gap-1.5">
                                 <button
                                   onClick={() => handleEditClick(word)}
-                                  className="text-blue-500 hover:text-blue-700 p-2 rounded-lg hover:bg-blue-50 transition-colors"
+                                  className="text-blue-500 hover:text-blue-700 p-1.5 sm:p-2 rounded-lg hover:bg-blue-50 transition-colors"
                                   title={t('edit_word')}
                                 >
                                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /></svg>
                                 </button>
                                 <button
                                   onClick={() => handleDelete(word)}
-                                  className="text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 transition-colors"
+                                  className="text-red-500 hover:text-red-700 p-1.5 sm:p-2 rounded-lg hover:bg-red-50 transition-colors"
                                   title={t('delete_word')}
                                 >
                                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
