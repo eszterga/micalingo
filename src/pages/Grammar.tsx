@@ -543,6 +543,7 @@ export default function Grammar() {
     const targetVocabulary = isPublicSave ? publicVocabulary : userVocabulary;
 
     const duplicate = targetVocabulary.find((w: any) => 
+      !w.deleted &&
       w.category === newCategory && (w.german || '').toLowerCase().trim() === finalGerman.toLowerCase().trim()
     );
 

@@ -6,7 +6,7 @@ import FileDropZone from "../components/FileDropZone";
 import { ParsedImport } from "../lib/importParser";
 import { useAuth } from "../AuthContext";
 import { publicVocabulary, publicPhrases, publicArticles, publicPrepositions, publicFalseFriends, publicAdjectives } from '../lib/public-data';
-import { useCloudVocabulary, addCloudWord, bulkAddCloudWords, bulkDeleteCloudWords, updateCloudWord } from "../lib/firestore";
+import { useCloudVocabulary, addCloudWord, bulkAddCloudWords, bulkDeleteCloudWords, updateCloudWord, purgeVocabDuplicatesKeeping, purgeSoftDeletedVocabSiblings, isActiveVocabItem } from "../lib/firestore";
 import { useI18n } from "../I18nContext";
 
 const getEditItemKey = (item: any, idx: number) => String(item?.id ?? `idx_${idx}`);
@@ -126,7 +126,9 @@ export default function Import() {
       data.forEach((item: any, idx: number) => {
         const key = String(item.german || '').toLowerCase().trim();
         // If a tombstone or override exists in the cloud DB for this exact german key, hide the static one
-        const hasTombstoneOrOverride = existingItems.some((i: any) => (i.german || '').toLowerCase().trim() === key);
+        const hasTombstoneOrOverride = existingItems.some(
+          (i: any) => (i.german || '').toLowerCase().trim() === key
+        );
         if (!hasTombstoneOrOverride) {
           staticItems.push({
             ...item,
@@ -411,7 +413,22 @@ export default function Import() {
         const cloudDeletes = deletedEditItemIds.filter((id: string) => !id.startsWith('static_'));
         const staticDeletes = deletedEditItemIds.filter((id: string) => id.startsWith('static_'));
 
+        const softPurgeTargets = cloudDeletes
+          .map((id) => existingItems.find((i: any) => i.id === id))
+          .filter(Boolean)
+          .map((w: any) => ({ german: w.german, category: w.category }));
+
         if (cloudDeletes.length > 0) await bulkDeleteCloudWords(cloudDeletes);
+
+        for (const target of softPurgeTargets) {
+          if (target?.german) {
+            await purgeSoftDeletedVocabSiblings(
+              existingItems as any[],
+              target.german,
+              target.category
+            );
+          }
+        }
 
         if (staticDeletes.length > 0) {
           const tombstones = staticDeletes.map((id: string) => {
@@ -428,6 +445,9 @@ export default function Import() {
               : null;
           }).filter(Boolean);
           if (tombstones.length > 0) await bulkAddCloudWords(tombstones as any[]);
+          for (const t of tombstones as any[]) {
+            await purgeSoftDeletedVocabSiblings(existingItems as any[], t.german, t.category);
+          }
         }
       }
 
@@ -456,6 +476,7 @@ export default function Import() {
             const updatePayload: any = {
               german: item.german?.trim() || '',
               hungarian: item.hungarian?.trim() || '',
+              deleted: false,
             };
             if (item.example !== undefined) updatePayload.example = item.example.trim();
             if (item.note !== undefined) updatePayload.note = item.note.trim();
@@ -467,6 +488,12 @@ export default function Import() {
             await updateCloudWord(
               item.id,
               updatePayload
+            );
+            await purgeVocabDuplicatesKeeping(
+              existingItems as any[],
+              updatePayload.german,
+              orig.category || 'vocabulary',
+              item.id
             );
           } else {
             // Static item modified! Tombstone old + create new cloud item
@@ -772,7 +799,7 @@ export default function Import() {
     const duplicates: any[] = [];
     const existingSet = new Map(
       allItems
-        .filter((item: any) => (item.category || 'vocabulary') === destination)
+        .filter((item: any) => isActiveVocabItem(item) && (item.category || 'vocabulary') === destination)
         .map((item: any) => [(item.german || '').toLowerCase().trim(), item])
     );
 
@@ -820,6 +847,16 @@ export default function Import() {
           return payload;
         });
         await bulkAddCloudWords(newItemsPayload);
+        // Scrub soft-deleted leftovers so they cannot block later edits
+        for (const item of newItemsPayload) {
+          if (item.german) {
+            await purgeSoftDeletedVocabSiblings(
+              existingItems as any[],
+              item.german,
+              destination
+            );
+          }
+        }
         savedCount = newItemsPayload.length;
       }
 
@@ -831,7 +868,7 @@ export default function Import() {
         for (const item of currentDuplicates) {
           const { idToUpdate, isStatic, ...newItemData } = item;
           
-          const payload: any = { ...newItemData, userId: saveToPublic ? 'PUBLIC_LIBRARY' : user?.uid, updatedAt: Date.now(), category: destination };
+          const payload: any = { ...newItemData, userId: saveToPublic ? 'PUBLIC_LIBRARY' : user?.uid, updatedAt: Date.now(), category: destination, deleted: false };
           if (data?.fileName) payload.sourceFile = data.fileName;
           if (data?.fileType) payload.sourceType = data.fileType;
           Object.keys(payload).forEach(k => payload[k] === undefined && delete payload[k]);
@@ -839,11 +876,27 @@ export default function Import() {
           if (isStatic) {
             newCloudItems.push(payload);
           } else if (idToUpdate) {
-            cloudUpdates.push(updateCloudWord(idToUpdate, payload));
+            cloudUpdates.push(
+              updateCloudWord(idToUpdate, payload).then(() =>
+                purgeVocabDuplicatesKeeping(
+                  existingItems as any[],
+                  payload.german || newItemData.german,
+                  destination,
+                  idToUpdate
+                ).then(() => undefined)
+              )
+            );
           }
         }
 
-        if (newCloudItems.length > 0) await bulkAddCloudWords(newCloudItems);
+        if (newCloudItems.length > 0) {
+          await bulkAddCloudWords(newCloudItems);
+          for (const item of newCloudItems) {
+            if (item.german) {
+              await purgeSoftDeletedVocabSiblings(existingItems as any[], item.german, destination);
+            }
+          }
+        }
         if (cloudUpdates.length > 0) await Promise.all(cloudUpdates);
         overwrittenCount = currentDuplicates.length;
       }
@@ -885,9 +938,11 @@ export default function Import() {
       return;
     }
 
-    // The `existingItems` hook already correctly points to the public or private library
+    // Ignore soft-deleted leftovers — they must not block add/edit
     const duplicate = existingItems?.find((w: any) => 
-      w.category === newCategory && (w.german || '').toLowerCase().trim() === finalGerman.toLowerCase().trim()
+      isActiveVocabItem(w) &&
+      w.category === newCategory &&
+      (w.german || '').toLowerCase().trim() === finalGerman.toLowerCase().trim()
     );
 
     if (duplicate) {
@@ -911,7 +966,13 @@ export default function Import() {
           sourceType: "cms"
         };
 
-        await addCloudWord(payload);
+        const docRef = await addCloudWord(payload);
+        await purgeVocabDuplicatesKeeping(
+          existingItems as any[],
+          finalGerman,
+          newCategory,
+          docRef.id
+        );
         setIsAddModalOpen(false);
         alert(t('saved') || 'Saved!');
     } catch (e) {

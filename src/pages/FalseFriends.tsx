@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { Link } from "react-router-dom";
 import { useI18n } from "../I18nContext";
 import { useAuth } from "../AuthContext";
-import { useCloudVocabulary, addCloudWord, updateCloudWord, deleteCloudWord } from "../lib/firestore";
+import { useCloudVocabulary, addCloudWord, updateCloudWord, deleteCloudWordPurgingSoftDeleted, purgeVocabDuplicatesKeeping } from "../lib/firestore";
 import { publicFalseFriends } from "../lib/public-data";
 
 const BackgroundBlobs = () => (
@@ -77,7 +77,7 @@ export default function FalseFriends() {
   const handleDelete = async (item: any) => {
     if (!confirm(t('confirm_delete_ff') || "Are you sure you want to delete this false friend?")) return;
     if (item.id) {
-      await deleteCloudWord(item.id);
+      await deleteCloudWordPurgingSoftDeleted(item, publicDbWords as any[]);
     } else {
       await addCloudWord({ userId: "PUBLIC_LIBRARY", german: item.german, hungarian: item.hungarian, category: "false_friends", deleted: true, dateAdded: Date.now() } as any);
     }
@@ -90,13 +90,15 @@ export default function FalseFriends() {
     }
 
     if (editingId) {
-      await updateCloudWord(editingId, { german: formData.german.trim(), hungarian: formData.hungarian.trim(), note: formData.note.trim(), example: formData.example.trim(), category: 'false_friends' } as any);
+      await updateCloudWord(editingId, { german: formData.german.trim(), hungarian: formData.hungarian.trim(), note: formData.note.trim(), example: formData.example.trim(), category: 'false_friends', deleted: false } as any);
+      await purgeVocabDuplicatesKeeping(publicDbWords as any[], formData.german.trim(), 'false_friends', editingId);
     } else {
       if (editingStaticWord && editingStaticWord.german.toLowerCase().trim() !== formData.german.toLowerCase().trim()) {
          await addCloudWord({ userId: "PUBLIC_LIBRARY", german: editingStaticWord.german, hungarian: editingStaticWord.hungarian, category: "false_friends", deleted: true, dateAdded: Date.now() } as any);
       }
 
-      await addCloudWord({ userId: "PUBLIC_LIBRARY", german: formData.german.trim(), hungarian: formData.hungarian.trim(), note: formData.note.trim(), example: formData.example.trim(), category: 'false_friends', dateAdded: Date.now() } as any);
+      const docRef = await addCloudWord({ userId: "PUBLIC_LIBRARY", german: formData.german.trim(), hungarian: formData.hungarian.trim(), note: formData.note.trim(), example: formData.example.trim(), category: 'false_friends', dateAdded: Date.now() } as any);
+      await purgeVocabDuplicatesKeeping(publicDbWords as any[], formData.german.trim(), 'false_friends', docRef.id);
     }
 
     setIsModalOpen(false);

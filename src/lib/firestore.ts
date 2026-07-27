@@ -57,6 +57,79 @@ export const addCloudWord = (word: Omit<CloudVocabularyItem, 'id'>) => addDoc(co
 export const updateCloudWord = (id: string, data: Partial<CloudVocabularyItem>) => updateDoc(doc(dbCloud, VOCAB_COLLECTION, id), data);
 export const deleteCloudWord = (id: string) => deleteDoc(doc(dbCloud, VOCAB_COLLECTION, id));
 
+export const vocabGermanKey = (german?: string) => (german || '').toLowerCase().trim();
+export const vocabCategoryKey = (category?: string) => category || 'vocabulary';
+export const isActiveVocabItem = (w: { deleted?: boolean } | null | undefined) => !!w && !w.deleted;
+
+/** Same library + german + category (for duplicate / purge matching). */
+export const isSameVocabEntry = (
+  a: { german?: string; category?: string },
+  german: string,
+  category?: string
+) =>
+  vocabGermanKey(a.german) === vocabGermanKey(german) &&
+  vocabCategoryKey(a.category) === vocabCategoryKey(category);
+
+/**
+ * Hard-delete soft-deleted leftovers for a german+category key.
+ * Keeps active siblings (e.g. the remaining copy after deleting one duplicate).
+ */
+export async function purgeSoftDeletedVocabSiblings(
+  words: CloudVocabularyItem[],
+  german: string,
+  category?: string,
+  keepId?: string | null
+) {
+  const ids = words
+    .filter(
+      (w) =>
+        !!w.id &&
+        w.id !== keepId &&
+        !!w.deleted &&
+        isSameVocabEntry(w, german, category)
+    )
+    .map((w) => w.id!) as string[];
+  if (ids.length === 0) return 0;
+  await bulkDeleteCloudWords(ids);
+  return ids.length;
+}
+
+/**
+ * After save: hard-delete every other doc with the same german+category
+ * (soft-deleted tombstones AND extra active duplicates), keeping keepId.
+ */
+export async function purgeVocabDuplicatesKeeping(
+  words: CloudVocabularyItem[],
+  german: string,
+  category: string | undefined,
+  keepId: string
+) {
+  const ids = words
+    .filter(
+      (w) =>
+        !!w.id &&
+        w.id !== keepId &&
+        isSameVocabEntry(w, german, category)
+    )
+    .map((w) => w.id!) as string[];
+  if (ids.length === 0) return 0;
+  await bulkDeleteCloudWords(ids);
+  return ids.length;
+}
+
+/** Delete one cloud word and scrub soft-deleted siblings so they can't block future edits. */
+export async function deleteCloudWordPurgingSoftDeleted(
+  word: { id?: string; german?: string; category?: string },
+  words: CloudVocabularyItem[]
+) {
+  if (word.id) {
+    await deleteCloudWord(word.id);
+  }
+  if (word.german) {
+    await purgeSoftDeletedVocabSiblings(words, word.german, word.category, null);
+  }
+}
+
 export const bulkAddCloudWords = async (words: Omit<CloudVocabularyItem, 'id'>[]) => {
   if (!words || words.length === 0) {
     throw new Error('No words to add');

@@ -5,8 +5,11 @@ import {
   useCloudVocabulary, 
   addCloudWord, 
   updateCloudWord, 
-  deleteCloudWord, 
-  bulkDeleteCloudWords, 
+  bulkDeleteCloudWords,
+  deleteCloudWordPurgingSoftDeleted,
+  purgeVocabDuplicatesKeeping,
+  purgeSoftDeletedVocabSiblings,
+  isActiveVocabItem,
   type CloudVocabularyItem 
 } from "../lib/firestore";
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
@@ -42,8 +45,11 @@ export default function Vocabulary() {
   const navigate = useNavigate();
 
   const allPublicWords: any[] = useMemo(() => {
-    const combined = [
-      ...publicDbWords, // DB items come first so edits override static!
+    // Static first, then apply cloud adds / soft-delete tombstones / overrides.
+    // (Previously DB-first + seen-set hid active cloud rows when a tombstone appeared first.)
+    const byKey = new Map<string, any>();
+
+    const staticSources = [
       ...publicVocabulary.map(w => ({ ...w, category: 'vocabulary' })),
       ...publicPhrases.map(w => ({ ...w, category: 'phrases' })),
       ...publicArticles.map(w => ({ ...w, category: 'articles' })),
@@ -51,17 +57,25 @@ export default function Vocabulary() {
       ...publicFalseFriends.map(w => ({ ...w, category: 'false_friends' })),
       ...(publicAdjectives || []).map(w => ({ ...w, category: 'adjectives' }))
     ];
-    const unique: any[] = [];
-    const seen = new Set<string>();
 
-    for (const word of combined) {
-      const key = word.german.toLowerCase().trim();
-      if (!seen.has(key)) {
-        seen.add(key);
-        if (!(word as any).deleted) unique.push(word);
+    for (const word of staticSources) {
+      const key = `${(word.category || 'vocabulary')}::${(word.german || '').toLowerCase().trim()}`;
+      if (!key.endsWith('::')) byKey.set(key, word);
+    }
+
+    // Sort cloud so active overrides win over older tombstones for the same key
+    const cloudSorted = [...publicDbWords].sort((a, b) => (a.dateAdded || 0) - (b.dateAdded || 0));
+    for (const word of cloudSorted) {
+      const key = `${(word.category || 'vocabulary')}::${(word.german || '').toLowerCase().trim()}`;
+      if (key.endsWith('::')) continue;
+      if ((word as any).deleted) {
+        byKey.delete(key);
+      } else {
+        byKey.set(key, word);
       }
     }
-    return unique;
+
+    return Array.from(byKey.values());
   }, [publicDbWords]);
 
   const words = personalWords;
@@ -112,8 +126,9 @@ export default function Vocabulary() {
   const handleDelete = async (word: any) => {
     if (!word) return;
     if (confirm(t('alert_confirm_delete_word'))) {
+      const libraryWords = (adminMode && activeTab === 'library' ? publicDbWords : personalWords) || [];
       if (word.id) {
-        await deleteCloudWord(word.id);
+        await deleteCloudWordPurgingSoftDeleted(word, libraryWords as CloudVocabularyItem[]);
       } else if (adminMode) {
         await addCloudWord({
           userId: "PUBLIC_LIBRARY",
@@ -123,6 +138,12 @@ export default function Vocabulary() {
           deleted: true,
           dateAdded: Date.now()
         } as any);
+        // Keep a single tombstone — remove older soft-deleted copies of the same key
+        await purgeSoftDeletedVocabSiblings(
+          publicDbWords as CloudVocabularyItem[],
+          word.german,
+          word.category || "vocabulary"
+        );
       }
     }
   };
@@ -144,9 +165,24 @@ export default function Vocabulary() {
     if (confirm(t('alert_confirm_bulk_delete_words', { count: selectedIds.size }))) {
       const idsToDelete = Array.from(selectedIds).filter(id => !id.startsWith('static_'));
       const staticToTombstone = Array.from(selectedIds).filter(id => id.startsWith('static_'));
+      const libraryWords = (adminMode && activeTab === 'library' ? publicDbWords : personalWords) || [];
+
+      const softPurgeTargets: { german: string; category?: string }[] = [];
+      for (const id of idsToDelete) {
+        const word = (libraryWords as CloudVocabularyItem[]).find(w => w.id === id);
+        if (word?.german) softPurgeTargets.push({ german: word.german, category: word.category });
+      }
 
       if (idsToDelete.length > 0) {
         await bulkDeleteCloudWords(idsToDelete);
+      }
+
+      for (const target of softPurgeTargets) {
+        await purgeSoftDeletedVocabSiblings(
+          libraryWords as CloudVocabularyItem[],
+          target.german,
+          target.category
+        );
       }
 
       if (adminMode && staticToTombstone.length > 0) {
@@ -161,6 +197,11 @@ export default function Vocabulary() {
               deleted: true,
               dateAdded: Date.now()
             } as any);
+            await purgeSoftDeletedVocabSiblings(
+              publicDbWords as CloudVocabularyItem[],
+              word.german,
+              word.category || "vocabulary"
+            );
           }
         }
       }
@@ -183,7 +224,11 @@ export default function Vocabulary() {
       for (const staticId of staticToMove) {
         const word = allPublicWords.find(w => `static_${w.german}` === staticId);
         if (word) {
-          const duplicate = personalWords?.find(w => w.category === moveTargetCategory && (w.german || '').toLowerCase().trim() === (word.german || '').toLowerCase().trim());
+          const duplicate = personalWords?.find(w =>
+            isActiveVocabItem(w) &&
+            w.category === moveTargetCategory &&
+            (w.german || '').toLowerCase().trim() === (word.german || '').toLowerCase().trim()
+          );
           if (duplicate) {
                 const catKey = duplicate.category || 'vocabulary';
                 let catName = t(`dropdown_${catKey}`);
@@ -202,7 +247,12 @@ export default function Vocabulary() {
     for (const id of idsToMove) {
       const wordToMove = personalWords?.find(w => w.id === id);
       if (wordToMove) {
-        const isDuplicateInTarget = personalWords?.some(w => w.category === moveTargetCategory && (w.german || '').toLowerCase().trim() === (wordToMove.german || '').toLowerCase().trim() && w.id !== id);
+        const isDuplicateInTarget = personalWords?.some(w =>
+          isActiveVocabItem(w) &&
+          w.category === moveTargetCategory &&
+          (w.german || '').toLowerCase().trim() === (wordToMove.german || '').toLowerCase().trim() &&
+          w.id !== id
+        );
         if (isDuplicateInTarget) {
               const catKey = moveTargetCategory || 'vocabulary';
               let catName = t(`dropdown_${catKey}`);
@@ -248,6 +298,7 @@ export default function Vocabulary() {
 
   // Filter words based on search term. The list is already sorted alphabetically by the database query.
   const filteredWords = words?.filter((word: any) => {
+    if (!isActiveVocabItem(word)) return false;
     const search = searchTerm.toLowerCase();
     const g = (word.german || "").toLowerCase();
     const h = (word.hungarian || "").toLowerCase();
@@ -390,10 +441,14 @@ export default function Vocabulary() {
     }
 
     const isPublicSave = adminMode && activeTab === 'library';
-    const targetVocabulary = isPublicSave ? allPublicWords : personalWords;
+    const targetVocabulary = isPublicSave ? allPublicWords : (personalWords || []).filter(isActiveVocabItem);
+    const libraryWords = (isPublicSave ? publicDbWords : personalWords) || [];
 
     const duplicate = targetVocabulary?.find((w: any) => 
-      w.category === newCategory && (w.german || '').toLowerCase().trim() === finalGerman.toLowerCase().trim() && w.id !== editingId
+      isActiveVocabItem(w) &&
+      w.category === newCategory &&
+      (w.german || '').toLowerCase().trim() === finalGerman.toLowerCase().trim() &&
+      w.id !== editingId
     );
 
     if (duplicate) {
@@ -411,8 +466,16 @@ export default function Vocabulary() {
           hungarian: newHungarian.trim(),
           example: newExample.trim(),
           note: newCategory === 'false_friends' ? newNote.trim() : "",
-          category: newCategory
+          category: newCategory,
+          deleted: false
         } as any);
+        // Remove soft-deleted leftovers and any other active duplicates of this key
+        await purgeVocabDuplicatesKeeping(
+          libraryWords as CloudVocabularyItem[],
+          finalGerman,
+          newCategory,
+          editingId
+        );
       } else {
         if (adminMode && editingStaticWord && editingStaticWord.german.toLowerCase().trim() !== finalGerman.toLowerCase()) {
            // Tombstone the old static word since the german key changed
@@ -439,7 +502,13 @@ export default function Vocabulary() {
         if (editingStaticWord?.sourceFile) payload.sourceFile = editingStaticWord.sourceFile;
         if (editingStaticWord?.sourceType) payload.sourceType = editingStaticWord.sourceType;
 
-        await addCloudWord(payload);
+        const docRef = await addCloudWord(payload);
+        await purgeVocabDuplicatesKeeping(
+          libraryWords as CloudVocabularyItem[],
+          finalGerman,
+          newCategory,
+          docRef.id
+        );
       }
 
       // Clear form and close modal

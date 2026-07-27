@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { Link } from "react-router-dom";
 import { useI18n } from "../I18nContext";
 import { useAuth } from "../AuthContext";
-import { useCloudVocabulary, addCloudWord, updateCloudWord, deleteCloudWord } from "../lib/firestore";
+import { useCloudVocabulary, addCloudWord, updateCloudWord, deleteCloudWordPurgingSoftDeleted, purgeVocabDuplicatesKeeping } from "../lib/firestore";
 
 const BackgroundBlobs = () => (
   <>
@@ -72,7 +72,7 @@ export default function Idioms() {
   const handleDelete = async (item: any) => {
     if (!confirm(t('confirm_delete_idiom') || "Are you sure you want to delete this idiom?")) return;
     if (item.id) {
-      await deleteCloudWord(item.id);
+      await deleteCloudWordPurgingSoftDeleted(item, publicDbWords as any[]);
     }
   };
 
@@ -83,9 +83,11 @@ export default function Idioms() {
     }
 
     if (editingId) {
-      await updateCloudWord(editingId, { german: formData.german.trim(), hungarian: formData.hungarian.trim(), note: formData.note.trim(), example: formData.example.trim(), category: 'idioms' } as any);
+      await updateCloudWord(editingId, { german: formData.german.trim(), hungarian: formData.hungarian.trim(), note: formData.note.trim(), example: formData.example.trim(), category: 'idioms', deleted: false } as any);
+      await purgeVocabDuplicatesKeeping(publicDbWords as any[], formData.german.trim(), 'idioms', editingId);
     } else {
-      await addCloudWord({ userId: "PUBLIC_LIBRARY", german: formData.german.trim(), hungarian: formData.hungarian.trim(), note: formData.note.trim(), example: formData.example.trim(), category: 'idioms', dateAdded: Date.now() } as any);
+      const docRef = await addCloudWord({ userId: "PUBLIC_LIBRARY", german: formData.german.trim(), hungarian: formData.hungarian.trim(), note: formData.note.trim(), example: formData.example.trim(), category: 'idioms', dateAdded: Date.now() } as any);
+      await purgeVocabDuplicatesKeeping(publicDbWords as any[], formData.german.trim(), 'idioms', docRef.id);
     }
 
     setIsModalOpen(false);
