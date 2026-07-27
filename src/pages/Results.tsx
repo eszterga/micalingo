@@ -35,6 +35,7 @@ export default function Results() {
   const [history, setHistory] = useState<Record<string, any>>({});
   const [selectedQuizKey, setSelectedQuizKey] = useState<string | null>(searchParams.get("quizKey"));
   const publicDbWords = useCloudVocabulary("PUBLIC_LIBRARY") || [];
+  const userVocabulary = useCloudVocabulary(user?.uid);
 
   useEffect(() => {
     const historyKey = user ? `micalingo_history_${user.uid}` : 'micalingo_guest_history';
@@ -97,11 +98,24 @@ export default function Results() {
 
   const isLastQuiz = (key: string) => {
     const isCustom = key.startsWith('custom_');
-    if (isCustom) return true; // Treat custom quizzes as "last" so no Next Quiz button appears
-    
-    const parts = key.split('_');
+    const stripped = isCustom ? key.replace('custom_', '') : key;
+    const parts = stripped.split('_');
     const quizId = parseInt(parts.pop() || '0');
     const topic = parts.join('_');
+
+    if (isCustom) {
+      if (!userVocabulary) return false; // still loading — allow Next
+      const customCount = userVocabulary.filter(
+        (w: any) =>
+          !w.deleted &&
+          w.category === topic &&
+          (w.german || '').trim() !== '' &&
+          (w.hungarian || '').trim() !== ''
+      ).length;
+      const maxQuizzes = Math.max(1, Math.ceil(customCount / WORDS_PER_QUIZ));
+      if (maxQuizzes <= 1) return false; // undercount safeguard — still offer Next
+      return quizId >= maxQuizzes;
+    }
     
     const staticSource =
       topic === 'vocabulary' ? publicVocabulary 

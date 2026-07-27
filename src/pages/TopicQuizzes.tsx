@@ -123,7 +123,13 @@ export default function TopicQuizzes() {
   const totalQuizzes = Math.ceil(sourceData.length / WORDS_PER_QUIZ);
   const quizzes = Array.from({ length: totalQuizzes }, (_, i) => i + 1);
 
-  const customSourceData = (userVocabulary || []).filter((word: any) => word.category === topic && word.german && word.hungarian);
+  const customSourceData = (userVocabulary || []).filter(
+    (word: any) =>
+      !word.deleted &&
+      word.category === topic &&
+      word.german &&
+      word.hungarian
+  );
   const totalCustomQuizzes = Math.ceil(customSourceData.length / WORDS_PER_QUIZ);
   const customQuizzes = Array.from({ length: totalCustomQuizzes }, (_, i) => i + 1);
 

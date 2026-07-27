@@ -127,18 +127,26 @@ export default function Quiz() {
     return Math.max(1, Math.ceil(unique.length / WORDS_PER_QUIZ));
   }, [topic, publicDbWords]);
 
+  const customTopicWords = useMemo(() => {
+    if (!isCustom || !topic || !userVocabulary) return [];
+    return userVocabulary.filter(
+      (w: any) =>
+        !w.deleted &&
+        w.category === topic &&
+        (w.german || '').trim() !== '' &&
+        (w.hungarian || '').trim() !== ''
+    );
+  }, [isCustom, topic, userVocabulary]);
+
   const hasNextQuiz = useMemo(() => {
     if (!topic || quizId <= 0) return false;
 
     if (isCustom) {
-      if (!userVocabulary) return false;
-      const customCount = userVocabulary.filter(
-        (w: any) =>
-          w.category === topic &&
-          (w.german || '').trim() !== '' &&
-          (w.hungarian || '').trim() !== ''
-      ).length;
-      const customTotal = Math.max(1, Math.ceil(customCount / WORDS_PER_QUIZ));
+      // Vocab still loading on Capacitor — don't hide Next (same idea as public undercount safeguard).
+      if (!userVocabulary) return true;
+      const customTotal = Math.max(1, Math.ceil(customTopicWords.length / WORDS_PER_QUIZ));
+      // If cloud/cache undercounts to 1, still offer Next; past the end shows "all completed".
+      if (customTotal <= 1) return true;
       return quizId < customTotal;
     }
 
@@ -146,7 +154,7 @@ export default function Quiz() {
     // Navigating past the last quiz shows the existing "all completed" screen.
     if (totalQuizzes <= 1) return true;
     return quizId < totalQuizzes;
-  }, [topic, quizId, isCustom, userVocabulary, totalQuizzes]);
+  }, [topic, quizId, isCustom, userVocabulary, customTopicWords, totalQuizzes]);
 
   // Return to the same library the user started from (private custom vs public)
   const quizzesBackPath = topic && QUIZ_TOPICS.includes(topic as any)
@@ -313,6 +321,8 @@ export default function Quiz() {
         setQuizState('finished');
         return;
       }
+      // finished=true but no history yet — keep in-memory completion UI (next/review/download)
+      return;
     }
 
     if (publicDbWordsRaw === undefined) {
@@ -344,16 +354,35 @@ export default function Quiz() {
         setQuizState('loading');
         return;
       }
-      const customSource = (userVocabulary || []).filter((word: any) =>
-        word.category === topic &&
-        (word.german || '').trim() !== '' &&
-        (word.hungarian || '').trim() !== ''
-      );
+      const customSource = customTopicWords;
       // Ensure stable sorting before slicing so levels are deterministic
       const sortedSource = [...customSource].sort((a, b) => (a.german || '').localeCompare(b.german || ''));
+
+      // Truly not enough material in the private library to run any quiz
+      if (sortedSource.length < 4) {
+        if (isInitializing) {
+          setQuizState('loading');
+          return;
+        }
+        setQuizState('finished');
+        setQuestions([]);
+        return;
+      }
+
       const startIndex = (quizId - 1) * WORDS_PER_QUIZ;
       const endIndex = startIndex + WORDS_PER_QUIZ;
       wordsForQuiz = sortedSource.slice(startIndex, endIndex).sort(() => 0.5 - Math.random());
+
+      // Past the last private level — same "all completed" screen as public
+      if (wordsForQuiz.length === 0) {
+        if (isInitializing) {
+          setQuizState('loading');
+          return;
+        }
+        setQuizState('no_data');
+        setQuestions([]);
+        return;
+      }
     } else if (topic) {
       let staticSource: any[] = [];
       if (topic === 'vocabulary') staticSource = publicVocabulary;
@@ -413,7 +442,7 @@ export default function Quiz() {
       ).sort(() => 0.5 - Math.random()).slice(0, WORDS_PER_QUIZ);
     }
 
-    if ((isCustom || (!topic && userVocabulary)) && wordsForQuiz.length < 4) {
+    if (!isCustom && !topic && userVocabulary && wordsForQuiz.length < 4) {
       if (isInitializing) {
         setQuizState('loading');
         return;
@@ -432,7 +461,7 @@ export default function Quiz() {
         setQuizState('loading');
         return;
       }
-      setQuizState('finished');
+      setQuizState('no_data');
       setQuestions([]);
     } else {
       if (isInitializing) {
@@ -442,7 +471,7 @@ export default function Quiz() {
       setQuizState('no_data');
       setQuestions([]);
     }
-  }, [topic, userVocabulary, quizId, isCustom, publicDbWordsRaw, publicDbWords, isRedo, user?.uid, generateQuestions, isInitializing]);
+  }, [topic, userVocabulary, customTopicWords, quizId, isCustom, publicDbWordsRaw, publicDbWords, isRedo, user?.uid, generateQuestions, isInitializing, searchParams]);
 
   useEffect(() => {
     if (quizState === 'ongoing' && questions.length > 0) {
@@ -512,31 +541,33 @@ export default function Quiz() {
     };
   }, [quizState, quizzesBackPath, navigate]);
 
-  const finishQuiz = async (finalScore: number) => {
+  const finishQuiz = async (finalScore: number, answersOverride?: string[]) => {
     const key = user ? `micalingo_scores_${user.uid}` : 'micalingo_guest_scores';
     const scores = JSON.parse(localStorage.getItem(key) || '{}');
     const quizKey = isCustom ? `custom_${topic || 'general'}_${quizId}` : `${topic || 'custom'}_${quizId}`;
     const previousScore = scores[quizKey] || 0;
+    const answersForHistory = answersOverride ?? userAnswers;
+
+    // Always store latest attempt so review/download work on the finished screen
+    const historyKey = user ? `micalingo_history_${user.uid}` : `micalingo_guest_history`;
+    const historyMap = JSON.parse(localStorage.getItem(historyKey) || '{}');
+    historyMap[quizKey] = {
+      questions,
+      userAnswers: answersForHistory,
+      score: finalScore
+    };
+    localStorage.setItem(historyKey, JSON.stringify(historyMap));
 
     if (finalScore >= previousScore) {
       scores[quizKey] = finalScore;
       localStorage.setItem(key, JSON.stringify(scores));
-
-      const historyKey = user ? `micalingo_history_${user.uid}` : `micalingo_guest_history`;
-      const historyMap = JSON.parse(localStorage.getItem(historyKey) || '{}');
-      historyMap[quizKey] = {
-        questions,
-        userAnswers,
-        score: finalScore
-      };
-      localStorage.setItem(historyKey, JSON.stringify(historyMap));
 
       if (user) {
         try {
           const statsRef = doc(dbCloud, 'user_stats', user.uid);
           await setDoc(statsRef, {
             scores: { [quizKey]: finalScore },
-            history: { [quizKey]: { questions, userAnswers, score: finalScore } }
+            history: { [quizKey]: { questions, userAnswers: answersForHistory, score: finalScore } }
           }, { merge: true });
         } catch (error) {
           console.error("Error saving to cloud:", error);
@@ -592,7 +623,7 @@ export default function Quiz() {
         if (currentQuestionIndex < questions.length - 1) {
           setCurrentQuestionIndex(i => i + 1);
         } else {
-          finishQuiz(score + 1);
+          finishQuiz(score + 1, newUserAnswers);
         }
       }, delay);
     }
