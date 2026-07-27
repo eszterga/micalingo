@@ -2,8 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { useI18n } from "../I18nContext";
 import { useAuth } from "../AuthContext";
-import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
-import { auth } from '../lib/firebase';
+import { signInWithGoogle } from '../lib/googleAuth';
 
 const BackgroundBlobs = () => (
   <>
@@ -48,8 +47,7 @@ export default function Quizzes() {
 
   const handleGoogleLogin = async () => {
     try {
-      const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
+      await signInWithGoogle();
     } catch (error) {
       console.error("Login failed:", error);
       alert(t('alert_login_failed'));
