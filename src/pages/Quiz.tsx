@@ -127,7 +127,26 @@ export default function Quiz() {
     return Math.max(1, Math.ceil(unique.length / WORDS_PER_QUIZ));
   }, [topic, publicDbWords]);
 
-  const hasNextQuiz = !!topic && !isCustom && quizId > 0 && quizId < totalQuizzes;
+  const hasNextQuiz = useMemo(() => {
+    if (!topic || quizId <= 0) return false;
+
+    if (isCustom) {
+      if (!userVocabulary) return false;
+      const customCount = userVocabulary.filter(
+        (w: any) =>
+          w.category === topic &&
+          (w.german || '').trim() !== '' &&
+          (w.hungarian || '').trim() !== ''
+      ).length;
+      const customTotal = Math.max(1, Math.ceil(customCount / WORDS_PER_QUIZ));
+      return quizId < customTotal;
+    }
+
+    // Public quizzes: if cloud data undercounts (totalQuizzes === 1), still offer Next.
+    // Navigating past the last quiz shows the existing "all completed" screen.
+    if (totalQuizzes <= 1) return true;
+    return quizId < totalQuizzes;
+  }, [topic, quizId, isCustom, userVocabulary, totalQuizzes]);
 
   // Return to the same library the user started from (private custom vs public)
   const quizzesBackPath = topic && QUIZ_TOPICS.includes(topic as any)
@@ -590,9 +609,11 @@ export default function Quiz() {
   };
 
   const handleNextQuiz = () => {
-    if (!topic || isCustom) return;
+    if (!topic || !hasNextQuiz) return;
     const nextId = quizId + 1;
-    navigate(`/quiz?topic=${encodeURIComponent(topic)}&quizId=${nextId}`);
+    navigate(
+      `/quiz?topic=${encodeURIComponent(topic)}&quizId=${nextId}${isCustom ? '&custom=true' : ''}`
+    );
     setQuizState('loading');
     setScore(0);
     setCurrentQuestionIndex(0);
@@ -691,7 +712,20 @@ export default function Quiz() {
             <div className="w-16 h-16 bg-green-50 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">🏁</div>
             <h2 className="text-3xl font-extrabold text-blue-950 mb-4">{t('quiz_complete')}</h2>
             <p className="text-xl text-blue-900/70 font-medium">{t('your_score')} <span className="font-bold text-blue-600 text-2xl">{score}</span> / {questions.length}</p>
-            <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4 flex-wrap">
+
+            {/* Primary CTA first — must stay above the fold on Capacitor WebViews */}
+            {hasNextQuiz && (
+              <div className="mt-8">
+                <button
+                  onClick={handleNextQuiz}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-xl shadow-sm transition-colors text-lg"
+                >
+                  {t('next_quiz_button') || t('go_to_level', { level: quizId + 1 })}
+                </button>
+              </div>
+            )}
+
+            <div className={`flex flex-col sm:flex-row justify-center gap-4 flex-wrap ${hasNextQuiz ? 'mt-4' : 'mt-8'}`}>
               <button onClick={() => navigate(quizzesBackPath)} className="w-full sm:w-auto bg-white border border-gray-200 text-gray-700 font-bold py-3 px-8 rounded-xl hover:bg-gray-50 transition-colors shadow-sm">
                 {t('back_to_quizzes')}
               </button>
@@ -732,17 +766,6 @@ export default function Quiz() {
                 {t('download_button') || 'Download Excel'}
               </button>
             </div>
-            {/* Next quiz as its own bottom row so Capacitor WebViews always reveal it */}
-            {!isCustom && topic && hasNextQuiz && (
-              <div className="mt-6 pt-6 border-t border-blue-100/80">
-                <button
-                  onClick={handleNextQuiz}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-xl shadow-sm transition-colors text-lg"
-                >
-                  {t('next_quiz_button') || t('go_to_level', { level: quizId + 1 })}
-                </button>
-              </div>
-            )}
           </div>
         </div>
       </div>
