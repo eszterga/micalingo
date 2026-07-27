@@ -67,6 +67,15 @@ export default function Results() {
     XLSX.writeFile(workbook, `${key}_results.xlsx`);
   };
 
+  const getTopicQuizzesUrl = (key: string) => {
+    const isCustom = key.startsWith('custom_');
+    const stripped = isCustom ? key.replace('custom_', '') : key;
+    const parts = stripped.split('_');
+    parts.pop(); // quizId
+    const topic = parts.join('_');
+    return `/quizzes/${topic}${isCustom ? '?tab=custom' : ''}`;
+  };
+
   const getQuizUrl = (key: string) => {
     const isCustom = key.startsWith('custom_');
     const stripped = isCustom ? key.replace('custom_', '') : key;
@@ -245,7 +254,7 @@ export default function Results() {
               {/* Next Level Button Section */}
               <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-between pt-6 border-t border-white/60">
                 <button 
-                  onClick={() => navigate('/quizzes')} 
+                  onClick={() => navigate(selectedQuizKey ? getTopicQuizzesUrl(selectedQuizKey) : '/quizzes')} 
                   className="w-full sm:w-auto justify-center bg-white/70 backdrop-blur-md border border-white text-gray-700 font-bold px-6 py-3.5 rounded-xl shadow-sm hover:bg-white transition-all"
                 >
                   {t('back_to_quizzes') || 'Back to Quizzes'}

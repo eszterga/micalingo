@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 import { 
   useCloudVocabulary, 
@@ -38,6 +38,8 @@ export default function Vocabulary() {
   const personalWords = useCloudVocabulary(user?.uid);
   const publicDbWords = useCloudVocabulary("PUBLIC_LIBRARY") || [];
   const { t } = useI18n();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   const allPublicWords: any[] = useMemo(() => {
     const combined = [
@@ -64,8 +66,23 @@ export default function Vocabulary() {
 
   const words = personalWords;
   const [searchTerm, setSearchTerm] = useState("");
-  const [activeTab, setActiveTab] = useState<'library' | 'personal'>('library');
+  const [activeTab, setActiveTab] = useState<'library' | 'personal'>(
+    searchParams.get('tab') === 'personal' ? 'personal' : 'library'
+  );
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab === 'personal') setActiveTab('personal');
+    else if (tab === 'library') setActiveTab('library');
+  }, [searchParams]);
+
+  const handleTabChange = (tab: 'library' | 'personal') => {
+    setActiveTab(tab);
+    const newParams = new URLSearchParams(searchParams);
+    newParams.set('tab', tab);
+    navigate(`?${newParams.toString()}`, { replace: true });
+  };
 
   // State for the "Add Word" modal
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -460,13 +477,13 @@ export default function Vocabulary() {
       {/* Navigation Tabs */}
         <div className="flex overflow-x-auto whitespace-nowrap border-b border-white/60">
           <button
-            onClick={() => setActiveTab('library')}
+            onClick={() => handleTabChange('library')}
             className={`py-3 px-6 font-bold text-sm border-b-2 transition-colors ${activeTab === 'library' ? 'border-blue-600 text-blue-700' : 'border-transparent text-blue-900/50 hover:text-blue-900/80'}`}
           >
             {t('open_library')}
           </button>
           <button
-            onClick={() => setActiveTab('personal')}
+            onClick={() => handleTabChange('personal')}
             className={`py-3 px-6 font-bold text-sm border-b-2 transition-colors ${activeTab === 'personal' ? 'border-blue-600 text-blue-700' : 'border-transparent text-blue-900/50 hover:text-blue-900/80'}`}
           >
           {t('personalized_space')}

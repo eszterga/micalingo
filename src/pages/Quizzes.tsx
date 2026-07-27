@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { useI18n } from "../I18nContext";
 import { useAuth } from "../AuthContext";
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
@@ -27,7 +27,24 @@ const BackgroundBlobs = () => (
 export default function Quizzes() {
   const { t } = useI18n();
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<'library' | 'personal'>('library');
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<'library' | 'personal'>(
+    searchParams.get('tab') === 'personal' ? 'personal' : 'library'
+  );
+
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab === 'personal') setActiveTab('personal');
+    else if (tab === 'library') setActiveTab('library');
+  }, [searchParams]);
+
+  const handleTabChange = (tab: 'library' | 'personal') => {
+    setActiveTab(tab);
+    const newParams = new URLSearchParams(searchParams);
+    newParams.set('tab', tab);
+    navigate(`?${newParams.toString()}`, { replace: true });
+  };
 
   const handleGoogleLogin = async () => {
     try {
@@ -56,13 +73,13 @@ export default function Quizzes() {
       {/* Navigation Tabs */}
         <div className="flex overflow-x-auto whitespace-nowrap border-b border-white/60">
           <button
-            onClick={() => setActiveTab('library')}
+            onClick={() => handleTabChange('library')}
             className={`py-3 px-6 font-bold text-sm border-b-2 transition-colors ${activeTab === 'library' ? 'border-blue-600 text-blue-700' : 'border-transparent text-blue-900/50 hover:text-blue-900/80'}`}
           >
             {t('open_library')}
           </button>
           <button
-            onClick={() => setActiveTab('personal')}
+            onClick={() => handleTabChange('personal')}
             className={`py-3 px-6 font-bold text-sm border-b-2 transition-colors ${activeTab === 'personal' ? 'border-blue-600 text-blue-700' : 'border-transparent text-blue-900/50 hover:text-blue-900/80'}`}
           >
           {t('personalized_space')}

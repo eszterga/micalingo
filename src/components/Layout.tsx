@@ -70,12 +70,17 @@ export default function Layout() {
   useEffect(() => {
     if (!Capacitor.isNativePlatform()) return;
 
-    const listener: any = CapacitorApp.addListener('backButton', (info: any) => {
-      // Let the Quiz page handle its own specific trap logic
-      if (window.location.pathname === '/quiz') return;
+    const listener: any = CapacitorApp.addListener('backButton', ({ canGoBack }: { canGoBack: boolean }) => {
+      // HashRouter: use react-router location, not window.location.pathname
+      // Let the Quiz page handle its own quit-confirm trap
+      if (location.pathname === '/quiz') return;
 
-      if (info.canGoBack) {
+      // Prefer SPA history so private-space tabs (?tab=custom / personal / private) are restored
+      if (canGoBack || window.history.length > 1) {
         window.history.back();
+      } else if (location.pathname !== '/') {
+        // Deep link / cold start on a subpage with empty history → go home instead of exiting
+        window.location.hash = '#/';
       } else {
         if (window.confirm(t('confirm_exit_app') || 'Are you sure you want to exit the app?')) {
           CapacitorApp.exitApp();
@@ -90,7 +95,7 @@ export default function Layout() {
         listener.remove();
       }
     };
-  }, [t]);
+  }, [t, location.pathname]);
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-blue-100 via-blue-50 to-white text-gray-800 flex-col relative overflow-hidden">

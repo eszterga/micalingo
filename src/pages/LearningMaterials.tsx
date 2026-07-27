@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { useI18n } from '../I18nContext';
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
@@ -28,11 +28,21 @@ export default function LearningMaterials() {
   const { t } = useI18n();
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(searchParams.get("tab") === "private" ? "private" : "public");
 
   useEffect(() => {
-    if (searchParams.get("tab") === "private") setActiveTab("private");
+    const tab = searchParams.get("tab");
+    if (tab === "private") setActiveTab("private");
+    else if (tab === "public") setActiveTab("public");
   }, [searchParams]);
+
+  const handleTabChange = (tab: "public" | "private") => {
+    setActiveTab(tab);
+    const newParams = new URLSearchParams(searchParams);
+    newParams.set("tab", tab);
+    navigate(`?${newParams.toString()}`, { replace: true });
+  };
 
   const handleLogin = async () => {
     try {
@@ -64,10 +74,10 @@ export default function LearningMaterials() {
         </div>
 
         <div className="flex overflow-x-auto whitespace-nowrap border-b border-white/60">
-          <button onClick={() => setActiveTab("public")} className={`py-3 px-6 font-bold text-sm border-b-2 transition-colors ${activeTab === "public" ? "border-blue-600 text-blue-700" : "border-transparent text-blue-900/50 hover:text-blue-900/80"}`}>
+          <button onClick={() => handleTabChange("public")} className={`py-3 px-6 font-bold text-sm border-b-2 transition-colors ${activeTab === "public" ? "border-blue-600 text-blue-700" : "border-transparent text-blue-900/50 hover:text-blue-900/80"}`}>
             {t("open_library")}
           </button>
-          <button onClick={() => setActiveTab("private")} className={`py-3 px-6 font-bold text-sm border-b-2 transition-colors ${activeTab === "private" ? "border-blue-600 text-blue-700" : "border-transparent text-blue-900/50 hover:text-blue-900/80"}`}>
+          <button onClick={() => handleTabChange("private")} className={`py-3 px-6 font-bold text-sm border-b-2 transition-colors ${activeTab === "private" ? "border-blue-600 text-blue-700" : "border-transparent text-blue-900/50 hover:text-blue-900/80"}`}>
             {t("personalized_space")}
           </button>
         </div>

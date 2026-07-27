@@ -134,7 +134,7 @@ export default function TopicQuizzes() {
         <div className="relative z-10 w-full max-w-7xl mx-auto space-y-8 px-4 md:px-8">
             <div className="text-center bg-white/70 backdrop-blur-xl p-12 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white">
                 <h1 className="text-3xl font-extrabold text-blue-950 mb-3">{t('topic_not_found') || 'Topic not found'}</h1>
-                <button onClick={() => navigate('/quizzes')} className="mt-4 text-blue-600 hover:underline font-bold">{t('return_to_quizzes') || 'Return to Quizzes'}</button>
+                <button onClick={() => navigate(activeTab === 'custom' ? '/quizzes?tab=personal' : '/quizzes')} className="mt-4 text-blue-600 hover:underline font-bold">{t('return_to_quizzes') || 'Return to Quizzes'}</button>
             </div>
         </div>
       </div>
@@ -146,7 +146,10 @@ export default function TopicQuizzes() {
       <BackgroundBlobs />
       <div className="relative z-10 w-full max-w-7xl mx-auto space-y-8 px-4 md:px-8">
         <div className="flex items-center gap-4">
-          <Link to="/quizzes" className="bg-white/70 backdrop-blur-md border border-white text-gray-700 hover:bg-white font-bold px-5 py-2.5 rounded-xl shadow-sm transition-all flex items-center gap-2">
+          <Link
+            to={activeTab === 'custom' ? '/quizzes?tab=personal' : '/quizzes'}
+            className="bg-white/70 backdrop-blur-md border border-white text-gray-700 hover:bg-white font-bold px-5 py-2.5 rounded-xl shadow-sm transition-all flex items-center gap-2"
+          >
             {t('back_button')}
           </Link>
           <div>

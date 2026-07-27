@@ -113,6 +113,13 @@ export default function Quiz() {
   const isLastQuiz = !!topic && !isCustom && totalQuizzes > 0 && quizId >= totalQuizzes;
   const hasNextQuiz = !!topic && !isCustom && quizId > 0 && quizId < totalQuizzes;
 
+  // Return to the same library the user started from (private custom vs public)
+  const quizzesBackPath = topic && QUIZ_TOPICS.includes(topic as any)
+    ? `/quizzes/${topic}${isCustom ? '?tab=custom' : ''}`
+    : isCustom
+      ? '/quizzes?tab=personal'
+      : '/quizzes';
+
   let pageTitle = "";
   if (isCustom) {
     pageTitle = t('quiz_title_custom', { topic: translatedTopic, id: quizId || '' }).trim();
@@ -435,15 +442,13 @@ export default function Quiz() {
   useEffect(() => {
     if (!Capacitor.isNativePlatform()) return;
 
-    const listener: any = CapacitorApp.addListener('backButton', (info: any) => {
+    const listener: any = CapacitorApp.addListener('backButton', ({ canGoBack }: { canGoBack: boolean }) => {
       if (quizState === 'ongoing') {
         setShowQuitModal(true);
-      } else if (info.canGoBack) {
+      } else if (canGoBack || window.history.length > 1) {
         window.history.back();
       } else {
-        if (window.confirm(t('confirm_exit_app') || 'Are you sure you want to exit the app?')) {
-          CapacitorApp.exitApp();
-        }
+        navigate(quizzesBackPath, { replace: true });
       }
     });
 
@@ -454,7 +459,7 @@ export default function Quiz() {
         listener.remove();
       }
     };
-  }, [quizState, t]);
+  }, [quizState, quizzesBackPath, navigate]);
 
   const finishQuiz = async (finalScore: number) => {
     const key = user ? `micalingo_scores_${user.uid}` : 'micalingo_guest_scores';
@@ -567,8 +572,13 @@ export default function Quiz() {
     if (quizState === 'ongoing') {
       setShowQuitModal(true);
     } else {
-      navigate(topic && QUIZ_TOPICS.includes(topic as any) ? `/quizzes/${topic}` : '/quizzes');
+      navigate(quizzesBackPath);
     }
+  };
+
+  const confirmQuitQuiz = () => {
+    setShowQuitModal(false);
+    navigate(quizzesBackPath, { replace: true });
   };
 
   const currentQuestion = questions[currentQuestionIndex];
@@ -598,7 +608,7 @@ export default function Quiz() {
             </p>
             <p className="text-blue-600 mt-2 font-medium">{t('great_job') || 'Great job with your progress!'}</p>
             <div className="mt-8">
-              <button onClick={() => navigate(topic && QUIZ_TOPICS.includes(topic as any) ? `/quizzes/${topic}` : '/quizzes')} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl shadow-sm transition-colors">
+              <button onClick={() => navigate(quizzesBackPath)} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl shadow-sm transition-colors">
                 {t('back_to_quizzes')}
               </button>
             </div>
@@ -645,7 +655,7 @@ export default function Quiz() {
             <h2 className="text-3xl font-extrabold text-blue-950 mb-4">{t('quiz_complete')}</h2>
             <p className="text-xl text-blue-900/70 font-medium">{t('your_score')} <span className="font-bold text-blue-600 text-2xl">{score}</span> / {questions.length}</p>
             <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4 flex-wrap">
-              <button onClick={() => navigate(topic && QUIZ_TOPICS.includes(topic as any) ? `/quizzes/${topic}` : '/quizzes')} className="w-full sm:w-auto bg-white border border-gray-200 text-gray-700 font-bold py-3 px-8 rounded-xl hover:bg-gray-50 transition-colors shadow-sm">
+              <button onClick={() => navigate(quizzesBackPath)} className="w-full sm:w-auto bg-white border border-gray-200 text-gray-700 font-bold py-3 px-8 rounded-xl hover:bg-gray-50 transition-colors shadow-sm">
                 {t('back_to_quizzes')}
               </button>
               <button onClick={() => window.location.reload()} className="w-full sm:w-auto bg-blue-100 text-blue-700 font-bold py-3 px-8 rounded-xl hover:bg-blue-200 transition-colors shadow-sm">
@@ -781,7 +791,7 @@ export default function Quiz() {
               <p className="text-gray-600 mb-8 text-center font-medium">{t('quit_quiz_desc')}</p>
               <div className="flex flex-col gap-3">
                 <button 
-                  onClick={() => navigate(topic && QUIZ_TOPICS.includes(topic as any) ? `/quizzes/${topic}` : '/quizzes', { replace: true })} 
+                  onClick={confirmQuitQuiz} 
                   className="w-full py-3.5 bg-red-500 text-white font-bold rounded-xl hover:bg-red-600 transition-colors shadow-sm"
                 >
                   {t('quit')}
