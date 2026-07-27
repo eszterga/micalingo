@@ -1,0 +1,1 @@
+import{C as o,I as a,J as i,K as r}from"./vendor-jqhU6Pe0.js";import{b as e}from"./index-LSydRs5H.js";async function p(){if(o.isNativePlatform()){await a.signInWithGoogle();return}const t=new i;return t.setCustomParameters({prompt:"select_account"}),r(e,t)}export{p as s};
