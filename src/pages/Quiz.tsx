@@ -94,23 +94,39 @@ export default function Quiz() {
       : topic === 'verbs' ? [] 
       : publicPrepositions;
 
-    const dbSource = publicDbWords.filter((w: any) => w.category === topic);
-    const combined = [...dbSource, ...staticSource];
+    // Seed from static library first so Firestore "deleted" overlays cannot
+    // collapse the public quiz count to 1 (which hid "next quiz" on the app).
     const unique: any[] = [];
     const seen = new Set<string>();
 
-    for (const word of combined) {
+    for (const word of staticSource) {
       const wordKey = ((word as any).german || '').toLowerCase().trim();
+      if (!wordKey || seen.has(wordKey) || (word as any).deleted) continue;
+      seen.add(wordKey);
+      unique.push(word);
+    }
+
+    const dbSource = publicDbWords.filter((w: any) => w.category === topic);
+    for (const word of dbSource) {
+      const wordKey = ((word as any).german || '').toLowerCase().trim();
+      if (!wordKey) continue;
+      if ((word as any).deleted) {
+        const idx = unique.findIndex(
+          (w: any) => ((w.german || '').toLowerCase().trim() === wordKey)
+        );
+        if (idx >= 0) unique.splice(idx, 1);
+        seen.add(wordKey);
+        continue;
+      }
       if (!seen.has(wordKey)) {
         seen.add(wordKey);
-        if (!(word as any).deleted) unique.push(word);
+        unique.push(word);
       }
     }
 
     return Math.max(1, Math.ceil(unique.length / WORDS_PER_QUIZ));
   }, [topic, publicDbWords]);
 
-  const isLastQuiz = !!topic && !isCustom && totalQuizzes > 0 && quizId >= totalQuizzes;
   const hasNextQuiz = !!topic && !isCustom && quizId > 0 && quizId < totalQuizzes;
 
   // Return to the same library the user started from (private custom vs public)
@@ -328,16 +344,32 @@ export default function Quiz() {
       else if (topic === 'verbs') staticSource = [];
       else if (topic === 'prepositions') staticSource = publicPrepositions;
 
-      const dbSource = publicDbWords.filter((w: any) => w.category === topic);
-      const combined = [...dbSource, ...staticSource];
+      // Match totalQuizzes: static first, then DB adds/deletes (avoid deleted DB rows wiping static words)
       const unique: any[] = [];
       const seen = new Set<string>();
 
-      for (const word of combined) {
+      for (const word of staticSource) {
         const wordKey = ((word as any).german || '').toLowerCase().trim();
+        if (!wordKey || seen.has(wordKey) || (word as any).deleted) continue;
+        seen.add(wordKey);
+        unique.push(word);
+      }
+
+      const dbSource = publicDbWords.filter((w: any) => w.category === topic);
+      for (const word of dbSource) {
+        const wordKey = ((word as any).german || '').toLowerCase().trim();
+        if (!wordKey) continue;
+        if ((word as any).deleted) {
+          const idx = unique.findIndex(
+            (w: any) => ((w.german || '').toLowerCase().trim() === wordKey)
+          );
+          if (idx >= 0) unique.splice(idx, 1);
+          seen.add(wordKey);
+          continue;
+        }
         if (!seen.has(wordKey)) {
           seen.add(wordKey);
-          if (!(word as any).deleted) unique.push(word);
+          unique.push(word);
         }
       }
 
@@ -558,14 +590,16 @@ export default function Quiz() {
   };
 
   const handleNextQuiz = () => {
-    if (!hasNextQuiz) return;
-    navigate(`/quiz?topic=${topic || ''}&quizId=${quizId + 1}`);
+    if (!topic || isCustom) return;
+    const nextId = quizId + 1;
+    navigate(`/quiz?topic=${encodeURIComponent(topic)}&quizId=${nextId}`);
     setQuizState('loading');
     setScore(0);
     setCurrentQuestionIndex(0);
     setIsAnswered(false);
     setSelectedAnswer(null);
     setUserAnswers([]);
+    setQuestions([]);
   };
 
   const handleBackClick = () => {
@@ -647,10 +681,13 @@ export default function Quiz() {
     const quizKey = isCustom ? `custom_${topic || 'general'}_${quizId}` : `${topic || 'custom'}_${quizId}`;
 
     return (
-      <div className="relative min-h-[85vh] w-full flex flex-col pt-4 md:pt-8 pb-12">
+      <div
+        className="relative min-h-[85vh] w-full flex flex-col pt-4 md:pt-8"
+        style={{ paddingBottom: 'max(3rem, calc(1.5rem + env(safe-area-inset-bottom, 0px)))' }}
+      >
         <BackgroundBlobs />
         <div className="relative z-10 w-full max-w-7xl mx-auto space-y-8 px-4 md:px-8">
-          <div className="text-center bg-white/70 backdrop-blur-xl p-12 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white mx-4 sm:mx-0">
+          <div className="text-center bg-white/70 backdrop-blur-xl p-8 sm:p-12 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white mx-4 sm:mx-0">
             <div className="w-16 h-16 bg-green-50 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">🏁</div>
             <h2 className="text-3xl font-extrabold text-blue-950 mb-4">{t('quiz_complete')}</h2>
             <p className="text-xl text-blue-900/70 font-medium">{t('your_score')} <span className="font-bold text-blue-600 text-2xl">{score}</span> / {questions.length}</p>
@@ -658,7 +695,17 @@ export default function Quiz() {
               <button onClick={() => navigate(quizzesBackPath)} className="w-full sm:w-auto bg-white border border-gray-200 text-gray-700 font-bold py-3 px-8 rounded-xl hover:bg-gray-50 transition-colors shadow-sm">
                 {t('back_to_quizzes')}
               </button>
-              <button onClick={() => window.location.reload()} className="w-full sm:w-auto bg-blue-100 text-blue-700 font-bold py-3 px-8 rounded-xl hover:bg-blue-200 transition-colors shadow-sm">
+              <button onClick={() => {
+                // Prefer SPA navigation over full reload — more reliable in Capacitor WebViews
+                navigate(`/quiz?topic=${encodeURIComponent(topic || '')}&quizId=${quizId}${isCustom ? '&custom=true' : ''}&redo=true`, { replace: true });
+                setQuizState('loading');
+                setScore(0);
+                setCurrentQuestionIndex(0);
+                setIsAnswered(false);
+                setSelectedAnswer(null);
+                setUserAnswers([]);
+                setQuestions([]);
+              }} className="w-full sm:w-auto bg-blue-100 text-blue-700 font-bold py-3 px-8 rounded-xl hover:bg-blue-200 transition-colors shadow-sm">
                 {t('retry_quiz')}
               </button>
               <button onClick={() => navigate(`/results?quizKey=${quizKey}`)} className="w-full sm:w-auto bg-purple-100 text-purple-700 font-bold py-3 px-8 rounded-xl hover:bg-purple-200 transition-colors shadow-sm">
@@ -684,12 +731,18 @@ export default function Quiz() {
               }} className="w-full sm:w-auto bg-green-100 text-green-700 font-bold py-3 px-8 rounded-xl hover:bg-green-200 transition-colors shadow-sm">
                 {t('download_button') || 'Download Excel'}
               </button>
-              {hasNextQuiz && (
-                <button onClick={handleNextQuiz} className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl shadow-sm transition-colors">
-                  {t('go_to_level', { level: quizId + 1 })}
-                </button>
-              )}
             </div>
+            {/* Next quiz as its own bottom row so Capacitor WebViews always reveal it */}
+            {!isCustom && topic && hasNextQuiz && (
+              <div className="mt-6 pt-6 border-t border-blue-100/80">
+                <button
+                  onClick={handleNextQuiz}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-xl shadow-sm transition-colors text-lg"
+                >
+                  {t('next_quiz_button') || t('go_to_level', { level: quizId + 1 })}
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

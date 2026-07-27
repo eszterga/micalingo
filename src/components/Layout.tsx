@@ -210,7 +210,7 @@ export default function Layout() {
         </div>
       )}
 
-      <div className="flex-1 flex flex-col h-screen overflow-hidden">
+      <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
         {/* Desktop Header */}
         <header className="hidden md:flex justify-between items-center px-8 py-4 bg-white/30 backdrop-blur-lg border-b border-white/40 shadow-sm z-50 relative">
           <Link to="/" className="flex items-center gap-3 hover:scale-105 transition-transform">
