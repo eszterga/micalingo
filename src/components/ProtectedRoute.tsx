@@ -1,7 +1,6 @@
 import { Outlet } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
-import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
-import { auth } from '../lib/firebase';
+import { signInWithGoogle } from '../lib/googleAuth';
 import { useI18n } from '../I18nContext';
 
 export default function ProtectedRoute() {
@@ -10,8 +9,7 @@ export default function ProtectedRoute() {
 
   const handleGoogleLogin = async () => {
     try {
-      const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
+      await signInWithGoogle();
     } catch (error) {
       console.error("Login failed:", error);
       alert("Failed to log in with Google.");

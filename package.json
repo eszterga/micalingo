@@ -12,13 +12,14 @@
     "deploy": "gh-pages -d dist --cname micalingo.com"
   },
   "dependencies": {
+    "@capacitor-firebase/authentication": "^8.3.0",
     "@capacitor/android": "^8.4.2",
     "@capacitor/app": "^8.1.1",
     "@capacitor/cli": "^8.4.2",
     "@capacitor/core": "^8.4.2",
     "@capacitor/ios": "^8.4.2",
     "dexie": "^4.4.4",
-    "firebase": "^10.12.2",
+    "firebase": "^12.16.0",
     "mammoth": "^1.7.2",
     "pdfjs-dist": "^4.3.136",
     "react": "^18.2.0",

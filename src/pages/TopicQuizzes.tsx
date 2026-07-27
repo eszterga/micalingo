@@ -2,8 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { Link, useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { publicVocabulary, publicPhrases, publicArticles, publicPrepositions, publicAdjectives } from "../lib/public-data";
 import { useAuth } from "../AuthContext";
-import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
-import { auth } from '../lib/firebase';
+import { signInWithGoogle } from '../lib/googleAuth';
 import { useCloudVocabulary, vocabCategoryKey, isReadingVocabCategory } from "../lib/firestore";
 import { useI18n } from "../I18nContext";
 
@@ -70,8 +69,7 @@ export default function TopicQuizzes() {
 
   const handleGoogleLogin = async () => {
     try {
-      const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
+      await signInWithGoogle();
     } catch (error) {
       console.error("Login failed:", error);
     }

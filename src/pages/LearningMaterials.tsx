@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { useI18n } from '../I18nContext';
-import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
-import { auth } from '../lib/firebase';
+import { signInWithGoogle } from '../lib/googleAuth';
 
 const BackgroundBlobs = () => (
   <>
@@ -46,9 +45,7 @@ export default function LearningMaterials() {
 
   const handleLogin = async () => {
     try {
-      const provider = new GoogleAuthProvider();
-      provider.setCustomParameters({ prompt: "select_account" });
-      await signInWithPopup(auth, provider);
+      await signInWithGoogle();
     } catch (error) {
       console.error("Login failed:", error);
       alert(t("alert_login_failed"));

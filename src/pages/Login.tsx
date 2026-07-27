@@ -1,78 +1,38 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider } from 'firebase/auth';
-import { auth } from '../lib/firebase';
 import { useAuth } from '../AuthContext';
 import { useI18n } from '../I18nContext';
-import { Capacitor } from '@capacitor/core';
+import { signInWithGoogle } from '../lib/googleAuth';
 
 export default function Login() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { t } = useI18n();
-  const [isRedirecting, setIsRedirecting] = useState(false);
-
-  useEffect(() => {
-    // Mobile WebViews require catching the result when the app reopens after redirect
-    if (Capacitor.isNativePlatform()) {
-      // RESTORE session storage from localStorage if it was cleared by the Android WebView
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key && key.startsWith('backup_firebase:')) {
-          const originalKey = key.replace('backup_', '');
-          sessionStorage.setItem(originalKey, localStorage.getItem(key)!);
-          localStorage.removeItem(key);
-        }
-      }
-
-      setIsRedirecting(true);
-      getRedirectResult(auth)
-        .then((result) => {
-          if (result) {
-            const redirectUrl = searchParams.get('redirect') || '/';
-            navigate(redirectUrl, { replace: true });
-          }
-        })
-        .catch((error) => console.error("Redirect login error:", error))
-        .finally(() => setIsRedirecting(false));
-    }
-  }, [navigate, searchParams]);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   useEffect(() => {
     // If user is already logged in, redirect them.
-    if (!loading && user && !isRedirecting) {
+    if (!loading && user) {
       const redirectUrl = searchParams.get('redirect') || '/';
       navigate(redirectUrl, { replace: true });
     }
-  }, [user, loading, navigate, searchParams, isRedirecting]);
+  }, [user, loading, navigate, searchParams]);
 
   const handleGoogleLogin = async () => {
+    setIsLoggingIn(true);
     try {
-      const provider = new GoogleAuthProvider();
-      
-      if (Capacitor.isNativePlatform()) {
-        // Mobile app environment: use Redirect
-        
-        // BULLETPROOF BACKUP: Intercept sessionStorage writes to instantly save Firebase state
-        const originalSetItem = sessionStorage.setItem;
-        sessionStorage.setItem = function(key, value) {
-          if (key.startsWith('firebase:')) {
-            localStorage.setItem(`backup_${key}`, value);
-          }
-          originalSetItem.call(sessionStorage, key, value);
-        };
-
-        await signInWithRedirect(auth, provider);
-      } else {
-        // Desktop/Browser environment: use Popup
-        await signInWithPopup(auth, provider);
-        const redirectUrl = searchParams.get('redirect') || '/';
-        navigate(redirectUrl, { replace: true });
-      }
+      await signInWithGoogle();
+      // On the web this resolves once signed in; on native, AuthContext's
+      // onAuthStateChanged listener picks up the sign-in and the effect
+      // above handles the redirect.
+      const redirectUrl = searchParams.get('redirect') || '/';
+      navigate(redirectUrl, { replace: true });
     } catch (error) {
       console.error("Login failed:", error);
       alert(t('alert_login_failed'));
+    } finally {
+      setIsLoggingIn(false);
     }
   };
 
@@ -86,7 +46,7 @@ export default function Login() {
         </div>
         <button
           onClick={handleGoogleLogin}
-          disabled={loading}
+          disabled={loading || isLoggingIn}
           className="w-full inline-flex items-center justify-center gap-3 bg-white border border-gray-300 hover:bg-gray-50 text-gray-800 font-bold py-3 px-6 rounded-xl shadow-sm transition-colors disabled:opacity-50"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">
