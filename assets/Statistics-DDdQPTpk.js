@@ -1,4 +1,4 @@
-import{r as g,j as e,L as b,v as $,F as E,x as q,p as y,w as J}from"./vendor-Drs7xaMk.js";import{u as D,a as T,d as A}from"./index-D8gCPQL-.js";const Q=()=>e.jsxs(e.Fragment,{children:[e.jsx("style",{children:`
+import{r as g,j as e,L as b,v as $,F as E,x as q,p as y,w as J}from"./vendor-Drs7xaMk.js";import{u as D,a as T,d as A}from"./index-CikzPUFy.js";const Q=()=>e.jsxs(e.Fragment,{children:[e.jsx("style",{children:`
       @keyframes blob {
         0% { transform: translate(0px, 0px) scale(1); }
         33% { transform: translate(30px, -50px) scale(1.1); }
