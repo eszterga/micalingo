@@ -2,11 +2,13 @@ import { useState, useEffect } from "react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { useI18n } from "../I18nContext";
 import { useAuth } from "../AuthContext";
-import { publicVocabulary, publicPhrases, publicArticles, publicPrepositions, publicAdjectives } from "../lib/public-data";
 import { useCloudVocabulary } from "../lib/firestore";
+import {
+  buildPublicQuizPool,
+  buildCustomQuizPool,
+  getQuizLevelCount,
+} from "../lib/quizPool";
 import * as XLSX from 'xlsx';
-
-const WORDS_PER_QUIZ = 20;
 
 const BackgroundBlobs = () => (
   <>
@@ -105,40 +107,15 @@ export default function Results() {
 
     if (isCustom) {
       if (!userVocabulary) return false; // still loading — allow Next
-      const customCount = userVocabulary.filter(
-        (w: any) =>
-          !w.deleted &&
-          w.category === topic &&
-          (w.german || '').trim() !== '' &&
-          (w.hungarian || '').trim() !== ''
-      ).length;
-      const maxQuizzes = Math.max(1, Math.ceil(customCount / WORDS_PER_QUIZ));
+      const customCount = buildCustomQuizPool(topic, userVocabulary).length;
+      const maxQuizzes = Math.max(1, getQuizLevelCount(customCount));
       if (maxQuizzes <= 1) return false; // undercount safeguard — still offer Next
       return quizId >= maxQuizzes;
     }
-    
-    const staticSource =
-      topic === 'vocabulary' ? publicVocabulary 
-      : topic === 'phrases' ? publicPhrases 
-      : topic === 'articles' ? publicArticles 
-      : topic === 'adjectives' ? (publicAdjectives || []) 
-      : topic === 'verbs' ? [] 
-      : publicPrepositions;
 
-    const dbSource = publicDbWords.filter((w: any) => w.category === topic);
-    const combined = [...dbSource, ...staticSource];
-    const unique: any[] = [];
-    const seen = new Set<string>();
-
-    for (const word of combined) {
-      const wordKey = ((word as any).german || '').toLowerCase().trim();
-      if (!seen.has(wordKey)) {
-        seen.add(wordKey);
-        if (!(word as any).deleted) unique.push(word);
-      }
-    }
-
-    const maxQuizzes = Math.max(1, Math.ceil(unique.length / WORDS_PER_QUIZ));
+    // Same public pool as TopicQuizzes / Quiz so "next level" agrees with the list
+    const pool = buildPublicQuizPool(topic, publicDbWords);
+    const maxQuizzes = Math.max(1, getQuizLevelCount(pool.length));
     return quizId >= maxQuizzes;
   };
 

@@ -1,12 +1,15 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Link, useParams, useNavigate, useSearchParams } from "react-router-dom";
-import { publicVocabulary, publicPhrases, publicArticles, publicPrepositions, publicAdjectives } from "../lib/public-data";
 import { useAuth } from "../AuthContext";
 import { signInWithGoogle } from '../lib/googleAuth';
-import { useCloudVocabulary, vocabCategoryKey, isReadingVocabCategory } from "../lib/firestore";
+import { useCloudVocabulary } from "../lib/firestore";
 import { useI18n } from "../I18nContext";
-
-const WORDS_PER_QUIZ = 20;
+import {
+  buildPublicQuizPool,
+  buildCustomQuizPool,
+  getQuizLevelCount,
+  getItemsInQuizLevel,
+} from "../lib/quizPool";
 
 const BackgroundBlobs = () => (
   <>
@@ -75,63 +78,33 @@ export default function TopicQuizzes() {
     }
   };
 
-  const getUniqueSourceData = useCallback((staticSource: any[], currentTopic: string) => {
-    const dbSource = publicDbWords.filter(
-      (w: any) => !isReadingVocabCategory(w.category) && vocabCategoryKey(w.category) === currentTopic
-    );
-    const combined = [...dbSource, ...staticSource];
-    const unique: any[] = [];
-    const seen = new Set<string>();
+  const sourceData = useMemo(() => {
+    if (!topic) return [];
+    // Wait for PUBLIC_LIBRARY before listing DB-backed levels so the count
+    // matches what Quiz.tsx will actually serve.
+    if (publicDbWordsRaw === null) return buildPublicQuizPool(topic, []);
+    return buildPublicQuizPool(topic, publicDbWords);
+  }, [topic, publicDbWords, publicDbWordsRaw]);
 
-    for (const word of combined) {
-      const key = (word.german || "").toLowerCase().trim();
-      if (!seen.has(key)) {
-        seen.add(key);
-        if (!word.deleted) {
-          unique.push(word);
-        }
-      }
-    }
-    return unique;
-  }, [publicDbWords]);
-
-  const { sourceData, pageTitle } = useMemo(() => {
-    if (!topic) return { sourceData: [], pageTitle: "" };
-
-    const staticSource =
-      topic === 'vocabulary' ? publicVocabulary
-      : topic === 'phrases' ? publicPhrases
-      : topic === 'articles' ? publicArticles
-      : topic === 'adjectives' ? (publicAdjectives || [])
-      : topic === 'verbs' ? []
-      : topic === 'prepositions' ? publicPrepositions
-      : [];
-    
-    const data = getUniqueSourceData(staticSource, topic);
-
-    const title = topic === 'vocabulary' ? t('vocabulary') || "Vocabulary"
+  const pageTitle = useMemo(() => {
+    if (!topic) return "";
+    return topic === 'vocabulary' ? t('vocabulary') || "Vocabulary"
       : topic === 'phrases' ? t('phrases_sentences_quiz') || "Phrases and sentences quiz"
       : topic === 'articles' ? t('articles_quiz') || "Articles"
       : topic === 'prepositions' ? t('prepositions_quiz') || "Prepositions"
       : topic === 'adjectives' ? t('adjectives_quiz') || "Adjectives"
       : topic === 'verbs' ? t('verbs_quiz') || "Verbs"
       : "";
+  }, [topic, t]);
 
-    return { sourceData: data, pageTitle: title };
-  }, [topic, getUniqueSourceData, t]);
-
-  const totalQuizzes = Math.ceil(sourceData.length / WORDS_PER_QUIZ);
+  const totalQuizzes = getQuizLevelCount(sourceData.length);
   const quizzes = Array.from({ length: totalQuizzes }, (_, i) => i + 1);
 
-  const customSourceData = (userVocabulary || []).filter(
-    (word: any) =>
-      !word.deleted &&
-      !isReadingVocabCategory(word.category) &&
-      vocabCategoryKey(word.category) === topic &&
-      word.german &&
-      word.hungarian
+  const customSourceData = useMemo(
+    () => buildCustomQuizPool(topic || '', userVocabulary || undefined),
+    [topic, userVocabulary]
   );
-  const totalCustomQuizzes = Math.ceil(customSourceData.length / WORDS_PER_QUIZ);
+  const totalCustomQuizzes = getQuizLevelCount(customSourceData.length);
   const customQuizzes = Array.from({ length: totalCustomQuizzes }, (_, i) => i + 1);
 
   if (!topic || !pageTitle) {
@@ -182,7 +155,7 @@ export default function TopicQuizzes() {
 
       {activeTab === 'default' && (
         <div className="bg-white/60 backdrop-blur-xl p-6 md:p-8 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white">
-          {publicDbWordsRaw === undefined || (isInitializing && quizzes.length === 0) ? (
+          {publicDbWordsRaw === null || (isInitializing && quizzes.length === 0) ? (
             <div className="flex flex-col items-center justify-center py-12 space-y-4">
               <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
               <p className="text-blue-900/70 font-medium">{t('loading') || 'Loading...'}</p>
@@ -194,7 +167,7 @@ export default function TopicQuizzes() {
               const score = scores[scoreKey];
               const isFinished = score !== undefined;
               const hasProgress = !!progress[scoreKey];
-              const itemsInThisQuiz = quizId === totalQuizzes && sourceData.length % WORDS_PER_QUIZ !== 0 ? sourceData.length % WORDS_PER_QUIZ : WORDS_PER_QUIZ;
+              const itemsInThisQuiz = getItemsInQuizLevel(sourceData.length, quizId);
               const isPerfect = score === itemsInThisQuiz;
 
               return (
@@ -320,9 +293,7 @@ export default function TopicQuizzes() {
                 const isFinished = score !== undefined;
                 const hasProgress = !!progress[scoreKey];
                 
-                const itemsInThisQuiz = quizId === totalCustomQuizzes && customSourceData.length % WORDS_PER_QUIZ !== 0 
-                  ? customSourceData.length % WORDS_PER_QUIZ 
-                  : WORDS_PER_QUIZ;
+                const itemsInThisQuiz = getItemsInQuizLevel(customSourceData.length, quizId);
                 
                 const isPerfect = score === itemsInThisQuiz;
 

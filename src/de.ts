@@ -246,6 +246,8 @@ export const de = {
   need_more_items: "Du benötigst mindestens 4 Elemente für '{topic}'.",
   import_more_words: "Mehr Wörter importieren",
   quiz_complete: "Quiz abgeschlossen!",
+  no_more_quizzes: "Du hast alle verfügbaren Quizzes für dieses Thema abgeschlossen!",
+  great_job: "Toll gemacht – weiter so!",
   your_score: "Deine Punktzahl:",
   back_to_quizzes: "Zurück zu den Quizzen",
   retry_quiz: "Quiz wiederholen",
