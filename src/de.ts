@@ -89,7 +89,7 @@ export const de = {
   // Home
   welcome_back: "Willkommen, schön dich hier zu sehen!",
   ready_to_learn: "Bereit, dein Deutsch zu verbessern? Erstelle deine eigene Bibliothek, Quizze und Lernmaterialien, teste jetzt dein Wissen!",
-  import_data: "Daten importieren",
+  import_data: "Daten importieren und verwalten",
   upload_new_materials: "Neue Wörter und Sätze hochladen.",
   login_required: "Anmeldung erforderlich",
   to_create_new_quizzes_login_required: "Anmeldung erforderlich, um benutzerdefinierte Quizze zu erstellen",

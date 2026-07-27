@@ -89,7 +89,7 @@ export const en = {
   // Home
   welcome_back: "Welcome, nice to see you here!",
   ready_to_learn: "Ready to improve your German? Create your own library, quizzes and learning materials, test your knowledge now!",
-  import_data: "Import Data",
+  import_data: "Import and manage data",
   upload_new_materials: "Upload new words and phrases.",
   login_required: "Login required",
   to_create_new_quizzes_login_required: "Login required to create custom quizzes",
