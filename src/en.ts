@@ -228,6 +228,9 @@ export const en = {
   // Dropdown Categories
   dropdown_vocabulary: "Vocabulary Quiz",
   dropdown_reading: "Vocabulary (to read)",
+  vocab_reading_subtitle: "Words uploaded for reading only — separate from quiz libraries.",
+  copy_to_quiz: "Also add to quiz...",
+  copy_to_quiz_hint: "Creates a separate quiz copy. The word stays in Vocabulary (to read).",
   category_separation_hint: "Reading and quiz libraries are separate — the same word can exist in both.",
   dropdown_articles: "Articles Quiz",
   dropdown_phrases: "Phrases and Sentences Quiz",

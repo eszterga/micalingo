@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+﻿import { useState, useEffect, useMemo } from "react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 import { 
@@ -12,11 +12,12 @@ import {
   isActiveVocabItem,
   findVocabDuplicate,
   vocabCategoryKey,
+  isReadingVocabCategory,
+  READING_VOCAB_CATEGORY,
   type CloudVocabularyItem 
 } from "../lib/firestore";
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { auth } from '../lib/firebase';
-import { publicVocabulary, publicPhrases, publicArticles, publicPrepositions, publicFalseFriends, publicAdjectives } from '../lib/public-data';
 import { useI18n } from "../I18nContext";
 
 const BackgroundBlobs = () => (
@@ -40,47 +41,27 @@ const BackgroundBlobs = () => (
 
 export default function Vocabulary() {
   const { user, loading, adminMode } = useAuth();
-  const personalWords = useCloudVocabulary(user?.uid);
+  const personalWordsRaw = useCloudVocabulary(user?.uid);
   const publicDbWords = useCloudVocabulary("PUBLIC_LIBRARY") || [];
   const { t } = useI18n();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  const allPublicWords: any[] = useMemo(() => {
-    // Static first, then apply cloud adds / soft-delete tombstones / overrides.
-    // (Previously DB-first + seen-set hid active cloud rows when a tombstone appeared first.)
-    const byKey = new Map<string, any>();
-
-    const staticSources = [
-      ...publicVocabulary.map(w => ({ ...w, category: 'vocabulary' })),
-      ...publicPhrases.map(w => ({ ...w, category: 'phrases' })),
-      ...publicArticles.map(w => ({ ...w, category: 'articles' })),
-      ...publicPrepositions.map(w => ({ ...w, category: 'prepositions' })),
-      ...publicFalseFriends.map(w => ({ ...w, category: 'false_friends' })),
-      ...(publicAdjectives || []).map(w => ({ ...w, category: 'adjectives' }))
-    ];
-
-    for (const word of staticSources) {
-      const key = `${(word.category || 'vocabulary')}::${(word.german || '').toLowerCase().trim()}`;
-      if (!key.endsWith('::')) byKey.set(key, word);
-    }
-
-    // Sort cloud so active overrides win over older tombstones for the same key
-    const cloudSorted = [...publicDbWords].sort((a, b) => (a.dateAdded || 0) - (b.dateAdded || 0));
-    for (const word of cloudSorted) {
-      const key = `${(word.category || 'vocabulary')}::${(word.german || '').toLowerCase().trim()}`;
-      if (key.endsWith('::')) continue;
-      if ((word as any).deleted) {
-        byKey.delete(key);
-      } else {
-        byKey.set(key, word);
-      }
-    }
-
-    return Array.from(byKey.values());
+  // This page is Vocabulary (to read) only — never mix quiz-topic words here.
+  const readingPublicWords: any[] = useMemo(() => {
+    return (publicDbWords as CloudVocabularyItem[])
+      .filter((w) => isActiveVocabItem(w) && isReadingVocabCategory(w.category))
+      .sort((a, b) => (a.german || '').localeCompare(b.german || ''));
   }, [publicDbWords]);
 
-  const words = personalWords;
+  const readingPersonalWords = useMemo(() => {
+    if (!personalWordsRaw) return personalWordsRaw;
+    return personalWordsRaw
+      .filter((w) => isActiveVocabItem(w) && isReadingVocabCategory(w.category))
+      .sort((a, b) => (a.german || '').localeCompare(b.german || ''));
+  }, [personalWordsRaw]);
+
+  const words = readingPersonalWords;
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState<'library' | 'personal'>(
     searchParams.get('tab') === 'personal' ? 'personal' : 'library'
@@ -95,22 +76,18 @@ export default function Vocabulary() {
 
   const handleTabChange = (tab: 'library' | 'personal') => {
     setActiveTab(tab);
+    setSelectedIds(new Set());
     const newParams = new URLSearchParams(searchParams);
     newParams.set('tab', tab);
     navigate(`?${newParams.toString()}`, { replace: true });
   };
 
-  // State for the "Add Word" modal
+  // State for the "Add Word" modal — always reading category on this page
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newGerman, setNewGerman] = useState("");
-  const [newArticle, setNewArticle] = useState("der");
-  const [newNoun, setNewNoun] = useState("");
   const [newHungarian, setNewHungarian] = useState("");
   const [newExample, setNewExample] = useState("");
-  const [newNote, setNewNote] = useState("");
-  const [newCategory, setNewCategory] = useState("vocabulary");
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editingStaticWord, setEditingStaticWord] = useState<any>(null);
   const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
   const [moveTargetCategory, setMoveTargetCategory] = useState("vocabulary");
 
@@ -126,27 +103,13 @@ export default function Vocabulary() {
   };
 
   const handleDelete = async (word: any) => {
-    if (!word) return;
+    if (!word?.id) return;
     if (confirm(t('alert_confirm_delete_word'))) {
-      const libraryWords = (adminMode && activeTab === 'library' ? publicDbWords : personalWords) || [];
-      if (word.id) {
-        await deleteCloudWordPurgingSoftDeleted(word, libraryWords as CloudVocabularyItem[]);
-      } else if (adminMode) {
-        await addCloudWord({
-          userId: "PUBLIC_LIBRARY",
-          german: word.german,
-          hungarian: word.hungarian,
-          category: word.category || "vocabulary",
-          deleted: true,
-          dateAdded: Date.now()
-        } as any);
-        // Keep a single tombstone — remove older soft-deleted copies of the same key
-        await purgeSoftDeletedVocabSiblings(
-          publicDbWords as CloudVocabularyItem[],
-          word.german,
-          word.category || "vocabulary"
-        );
-      }
+      const libraryWords = (adminMode && activeTab === 'library' ? publicDbWords : personalWordsRaw) || [];
+      await deleteCloudWordPurgingSoftDeleted(
+        { ...word, category: READING_VOCAB_CATEGORY },
+        libraryWords as CloudVocabularyItem[]
+      );
     }
   };
 
@@ -165,14 +128,13 @@ export default function Vocabulary() {
   const handleBulkDelete = async () => {
     if (selectedIds.size === 0) return;
     if (confirm(t('alert_confirm_bulk_delete_words', { count: selectedIds.size }))) {
-      const idsToDelete = Array.from(selectedIds).filter(id => !id.startsWith('static_'));
-      const staticToTombstone = Array.from(selectedIds).filter(id => id.startsWith('static_'));
-      const libraryWords = (adminMode && activeTab === 'library' ? publicDbWords : personalWords) || [];
+      const idsToDelete = Array.from(selectedIds);
+      const libraryWords = (adminMode && activeTab === 'library' ? publicDbWords : personalWordsRaw) || [];
 
       const softPurgeTargets: { german: string; category?: string }[] = [];
       for (const id of idsToDelete) {
         const word = (libraryWords as CloudVocabularyItem[]).find(w => w.id === id);
-        if (word?.german) softPurgeTargets.push({ german: word.german, category: word.category });
+        if (word?.german) softPurgeTargets.push({ german: word.german, category: READING_VOCAB_CATEGORY });
       }
 
       if (idsToDelete.length > 0) {
@@ -183,112 +145,59 @@ export default function Vocabulary() {
         await purgeSoftDeletedVocabSiblings(
           libraryWords as CloudVocabularyItem[],
           target.german,
-          target.category
+          READING_VOCAB_CATEGORY
         );
-      }
-
-      if (adminMode && staticToTombstone.length > 0) {
-        for (const staticId of staticToTombstone) {
-          const word = allPublicWords.find(w => `static_${w.german}` === staticId);
-          if (word) {
-            await addCloudWord({
-              userId: "PUBLIC_LIBRARY",
-              german: word.german,
-              hungarian: word.hungarian,
-              category: word.category || "vocabulary",
-              deleted: true,
-              dateAdded: Date.now()
-            } as any);
-            await purgeSoftDeletedVocabSiblings(
-              publicDbWords as CloudVocabularyItem[],
-              word.german,
-              word.category || "vocabulary"
-            );
-          }
-        }
       }
       setSelectedIds(new Set());
     }
   };
 
+  // Copy selected reading words into a quiz topic (keeps them in to-read library)
   const handleBulkMoveSubmit = async () => {
-    if (selectedIds.size === 0) return;
+    if (selectedIds.size === 0 || !user) return;
 
-    const idsToMove = Array.from(selectedIds).filter(id => !id.startsWith('static_'));
-    const staticToMove = Array.from(selectedIds).filter(id => id.startsWith('static_'));
-    
-    const duplicatesFound: { german: string, category: string }[] = [];
-    const nonDuplicateStaticToMove: string[] = [];
-    const nonDuplicateIdsToMove: string[] = [];
-
-    // Check for duplicates when copying static (public) words to personal library
-    if (user && (!adminMode || activeTab !== 'library')) {
-      for (const staticId of staticToMove) {
-        const word = allPublicWords.find(w => `static_${w.german}` === staticId);
-        if (word) {
-          const duplicate = personalWords?.find(w =>
-            isActiveVocabItem(w) &&
-            vocabCategoryKey(w.category) === vocabCategoryKey(moveTargetCategory) &&
-            (w.german || '').toLowerCase().trim() === (word.german || '').toLowerCase().trim()
-          );
-          if (duplicate) {
-                const catKey = duplicate.category || 'vocabulary';
-                let catName = t(`dropdown_${catKey}`);
-                if (catName === `dropdown_${catKey}`) catName = catKey;
-                duplicatesFound.push({ german: word.german, category: catName });
-          } else {
-            nonDuplicateStaticToMove.push(staticId);
-          }
-        }
-      }
-    } else {
-      nonDuplicateStaticToMove.push(...staticToMove);
+    const targetCat = vocabCategoryKey(moveTargetCategory);
+    if (isReadingVocabCategory(targetCat)) {
+      setIsMoveModalOpen(false);
+      return;
     }
 
-    // Check for duplicates when moving personal words between categories
-    for (const id of idsToMove) {
-      const wordToMove = personalWords?.find(w => w.id === id);
-      if (wordToMove) {
-        const isDuplicateInTarget = personalWords?.some(w =>
-          isActiveVocabItem(w) &&
-          vocabCategoryKey(w.category) === vocabCategoryKey(moveTargetCategory) &&
-          (w.german || '').toLowerCase().trim() === (wordToMove.german || '').toLowerCase().trim() &&
-          w.id !== id
-        );
-        if (isDuplicateInTarget) {
-              const catKey = moveTargetCategory || 'vocabulary';
-              let catName = t(`dropdown_${catKey}`);
-              if (catName === `dropdown_${catKey}`) catName = catKey;
-              duplicatesFound.push({ german: wordToMove.german, category: catName });
-        } else {
-          nonDuplicateIdsToMove.push(id);
-        }
+    const sourceList = activeTab === 'library' ? readingPublicWords : (readingPersonalWords || []);
+    const targetPool = activeTab === 'library' && adminMode
+      ? (publicDbWords as CloudVocabularyItem[])
+      : (personalWordsRaw || []);
+
+    const duplicatesFound: { german: string, category: string }[] = [];
+    let itemsProcessed = 0;
+
+    for (const id of Array.from(selectedIds)) {
+      const word = sourceList.find((w: any) => w.id === id);
+      if (!word) continue;
+
+      const duplicate = findVocabDuplicate(targetPool as any[], word.german, targetCat);
+      if (duplicate) {
+        const catKey = vocabCategoryKey(duplicate.category);
+        let catName = t(`dropdown_${catKey}`);
+        if (catName === `dropdown_${catKey}`) catName = catKey;
+        duplicatesFound.push({ german: word.german, category: catName });
+        continue;
       }
+
+      const targetUserId = (adminMode && activeTab === 'library') ? "PUBLIC_LIBRARY" : user.uid;
+      await addCloudWord({
+        userId: targetUserId,
+        german: word.german,
+        hungarian: word.hungarian,
+        example: word.example || "",
+        category: targetCat,
+        dateAdded: Date.now()
+      } as any);
+      itemsProcessed++;
     }
 
     if (duplicatesFound.length > 0) {
       const message = duplicatesFound.map(d => `"${d.german}" (${t('alert_word_exists', { category: d.category })})`).join('\n');
       alert(`${t('duplicates_found_title')}\n\n${message}\n\n${t('duplicates_found_subtitle')}`);
-    }
-
-    let itemsProcessed = 0;
-    for (const id of nonDuplicateIdsToMove) {
-      await updateCloudWord(id, { category: moveTargetCategory } as any);
-      itemsProcessed++;
-    }
-
-    for (const staticId of nonDuplicateStaticToMove) {
-      const word = allPublicWords.find(w => `static_${w.german}` === staticId);
-      if (word) {
-        if (adminMode && activeTab === 'library') {
-          await addCloudWord({ ...word, userId: "PUBLIC_LIBRARY", deleted: true, dateAdded: Date.now() } as any);
-          await addCloudWord({ ...word, category: moveTargetCategory, userId: "PUBLIC_LIBRARY", dateAdded: Date.now() } as any);
-          itemsProcessed++;
-        } else if (user) {
-          await addCloudWord({ userId: user.uid, german: word.german, hungarian: word.hungarian, example: word.example || "", note: word.note || "", category: moveTargetCategory, dateAdded: Date.now() } as any);
-          itemsProcessed++;
-        }
-      }
     }
 
     setSelectedIds(new Set());
@@ -298,29 +207,20 @@ export default function Vocabulary() {
     }
   };
 
-  const categoryLabel = (category?: string) => {
-    const catKey = vocabCategoryKey(category);
-    const name = t(`dropdown_${catKey}` as any);
-    return name === `dropdown_${catKey}` ? catKey : name;
-  };
-
-  // Filter words based on search term. The list is already sorted alphabetically by the database query.
+  // Filter words based on search term (reading library only)
   const filteredWords = words?.filter((word: any) => {
-    if (!isActiveVocabItem(word)) return false;
     const search = searchTerm.toLowerCase();
     const g = (word.german || "").toLowerCase();
     const h = (word.hungarian || "").toLowerCase();
     const e = (word.example || "").toLowerCase();
-    const c = categoryLabel(word.category).toLowerCase();
-    return g.includes(search) || h.includes(search) || e.includes(search) || c.includes(search);
+    return g.includes(search) || h.includes(search) || e.includes(search);
   });
 
-  const filteredLibraryWords = allPublicWords.filter((word: any) => {
+  const filteredLibraryWords = readingPublicWords.filter((word: any) => {
     const search = searchTerm.toLowerCase();
     const g = (word.german || "").toLowerCase();
     const h = (word.hungarian || "").toLowerCase();
-    const c = categoryLabel(word.category).toLowerCase();
-    return g.includes(search) || h.includes(search) || c.includes(search);
+    return g.includes(search) || h.includes(search);
   });
 
   // Grouping logic for the library
@@ -405,45 +305,22 @@ export default function Vocabulary() {
 
   const openAddModal = () => {
     setEditingId(null);
-    setEditingStaticWord(null);
     setNewGerman("");
-    setNewArticle("der");
-    setNewNoun("");
     setNewHungarian("");
     setNewExample("");
-    setNewNote("");
-    setNewCategory("vocabulary");
     setIsModalOpen(true);
   };
 
   const handleEditClick = (word: CloudVocabularyItem | any) => {
     setEditingId(word.id || null);
-    setEditingStaticWord(word.id ? null : word);
-    if (word.category === 'articles') {
-      const match = word.german.match(/^(der|die|das)\s+(.*)/i);
-      if (match) {
-        setNewArticle(match[1].toLowerCase());
-        setNewNoun(match[2]);
-        setNewGerman("");
-      } else {
-        setNewArticle("der");
-        setNewNoun(word.german);
-        setNewGerman("");
-      }
-    } else {
-      setNewGerman(word.german);
-      setNewArticle("der");
-      setNewNoun("");
-    }
-    setNewHungarian(word.hungarian);
+    setNewGerman(word.german || "");
+    setNewHungarian(word.hungarian || "");
     setNewExample(word.example || "");
-    setNewNote(word.note || "");
-    setNewCategory(word.category || "vocabulary");
     setIsModalOpen(true);
   };
 
   const handleSaveWord = async () => {
-    const finalGerman = newCategory === 'articles' ? `${newArticle} ${newNoun.trim()}` : newGerman.trim();
+    const finalGerman = newGerman.trim();
 
     if (!finalGerman || !newHungarian.trim() || !user) {
       alert(t('alert_fill_fields_login'));
@@ -451,23 +328,19 @@ export default function Vocabulary() {
     }
 
     const isPublicSave = adminMode && activeTab === 'library';
-    const targetVocabulary = isPublicSave ? allPublicWords : (personalWords || []).filter(isActiveVocabItem);
-    const libraryWords = (isPublicSave ? publicDbWords : personalWords) || [];
-    const saveCategory = vocabCategoryKey(newCategory);
+    const targetVocabulary = isPublicSave ? readingPublicWords : (readingPersonalWords || []);
+    const libraryWords = (isPublicSave ? publicDbWords : personalWordsRaw) || [];
 
-    // Strict topic match: reading (to read) never conflicts with vocabulary quiz (or other quiz topics)
+    // Only check duplicates within the reading library
     const duplicate = findVocabDuplicate(
       targetVocabulary || [],
       finalGerman,
-      saveCategory,
+      READING_VOCAB_CATEGORY,
       editingId
     );
 
     if (duplicate) {
-      const catKey = vocabCategoryKey(duplicate.category);
-      let catName = t(`dropdown_${catKey}`);
-      if (catName === `dropdown_${catKey}`) catName = catKey;
-      alert(t('alert_word_exists', { category: catName }));
+      alert(t('alert_word_exists', { category: t('dropdown_reading') || 'Vocabulary (to read)' }));
       return;
     }
 
@@ -477,61 +350,36 @@ export default function Vocabulary() {
           german: finalGerman,
           hungarian: newHungarian.trim(),
           example: newExample.trim(),
-          note: saveCategory === 'false_friends' ? newNote.trim() : "",
-          category: saveCategory,
+          category: READING_VOCAB_CATEGORY,
           deleted: false
         } as any);
-        // Remove soft-deleted leftovers and any other active duplicates of this SAME topic only
         await purgeVocabDuplicatesKeeping(
           libraryWords as CloudVocabularyItem[],
           finalGerman,
-          saveCategory,
+          READING_VOCAB_CATEGORY,
           editingId
         );
       } else {
-        if (adminMode && editingStaticWord && editingStaticWord.german.toLowerCase().trim() !== finalGerman.toLowerCase()) {
-           // Tombstone the old static word since the german key changed
-           await addCloudWord({
-             userId: "PUBLIC_LIBRARY",
-             german: editingStaticWord.german,
-             hungarian: editingStaticWord.hungarian,
-             category: vocabCategoryKey(editingStaticWord.category),
-             deleted: true,
-             dateAdded: Date.now()
-           } as any);
-        }
-
-        const payload: any = {
-          userId: (adminMode && activeTab === 'library') ? "PUBLIC_LIBRARY" : user.uid,
+        const docRef = await addCloudWord({
+          userId: isPublicSave ? "PUBLIC_LIBRARY" : user.uid,
           german: finalGerman,
           hungarian: newHungarian.trim(),
           example: newExample.trim(),
-          note: saveCategory === 'false_friends' ? newNote.trim() : "",
           dateAdded: Date.now(),
-          category: saveCategory,
-        };
-
-        if (editingStaticWord?.sourceFile) payload.sourceFile = editingStaticWord.sourceFile;
-        if (editingStaticWord?.sourceType) payload.sourceType = editingStaticWord.sourceType;
-
-        const docRef = await addCloudWord(payload);
+          category: READING_VOCAB_CATEGORY,
+        } as any);
         await purgeVocabDuplicatesKeeping(
           libraryWords as CloudVocabularyItem[],
           finalGerman,
-          saveCategory,
+          READING_VOCAB_CATEGORY,
           docRef.id
         );
       }
 
-      // Clear form and close modal
       setNewGerman("");
-      setNewArticle("der");
-      setNewNoun("");
       setNewHungarian("");
       setNewExample("");
-      setNewNote("");
       setEditingId(null);
-      setEditingStaticWord(null);
       setIsModalOpen(false);
       alert(t('saved') || 'Saved!');
     } catch (e) {
@@ -550,8 +398,8 @@ export default function Vocabulary() {
             {t('back_button')}
           </Link>
           <div>
-            <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600 tracking-tight pb-2">{t('vocab_title')}</h1>
-            <p className="text-lg text-blue-900/70 font-medium mt-1">{t('vocab_subtitle')}</p>
+            <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600 tracking-tight pb-2">{t('dropdown_reading') || t('vocab_title')}</h1>
+            <p className="text-lg text-blue-900/70 font-medium mt-1">{t('vocab_reading_subtitle') || 'Words uploaded for reading only — separate from quiz libraries.'}</p>
           </div>
         </div>
 
@@ -605,7 +453,7 @@ export default function Vocabulary() {
                   className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-bold transition-colors shadow-sm"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
-                  {t('save_to') || 'Save to...'}
+                  {t('copy_to_quiz') || 'Also add to quiz...'}
                 </button>
                 <button
                   onClick={handleBulkDelete}
@@ -644,7 +492,6 @@ export default function Vocabulary() {
                       <tr>
                         <th className="p-3 sm:p-5 font-bold text-sm text-blue-900/60 uppercase tracking-wider">{t('german')}</th>
                         <th className="p-3 sm:p-5 font-bold text-sm text-blue-900/60 uppercase tracking-wider">{t('hungarian')}</th>
-                        <th className="p-3 sm:p-5 font-bold text-sm text-blue-900/60 uppercase tracking-wider">{t('modal_category_label') || 'Category'}</th>
                         <th className="p-3 sm:p-5 font-bold text-sm text-blue-900/60 uppercase tracking-wider">{t('example')}</th>
                         {adminMode && <th className="p-2 sm:p-4 w-20 sm:w-24"></th>}
                         {adminMode && <th className="p-2 sm:p-4 w-10 sm:w-12"></th>}
@@ -652,14 +499,9 @@ export default function Vocabulary() {
                     </thead>
                     <tbody className="divide-y divide-blue-50/50">
                       {wordsInGroup.map((word, idx) => (
-                        <tr key={word.id || `static_${word.german}_${idx}`} className="hover:bg-white/60 transition-colors group">
+                        <tr key={word.id || `reading_${word.german}_${idx}`} className="hover:bg-white/60 transition-colors group">
                           <td className="p-3 sm:p-5 font-bold text-blue-950 break-words">{word.german}</td>
                           <td className="p-3 sm:p-5 text-gray-700 break-words">{word.hungarian}</td>
-                          <td className="p-3 sm:p-5">
-                            <span className={`inline-block px-2.5 py-1 text-xs font-bold rounded-full ${vocabCategoryKey(word.category) === 'reading' ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-800'}`}>
-                              {categoryLabel(word.category)}
-                            </span>
-                          </td>
                           <td className="p-3 sm:p-5 text-gray-500 text-sm italic break-words">{word.example}</td>
                           {adminMode && (
                             <td className="p-2 sm:p-4 text-center w-20 sm:w-24">
@@ -685,8 +527,8 @@ export default function Vocabulary() {
                             <td className="p-2 sm:p-4 text-center w-10 sm:w-12 border-l border-blue-50/50">
                               <input
                                 type="checkbox"
-                                checked={word.id ? selectedIds.has(word.id) : selectedIds.has(`static_${word.german}`)}
-                                onChange={() => toggleSelection(word.id || `static_${word.german}`)}
+                                checked={!!word.id && selectedIds.has(word.id)}
+                                onChange={() => word.id && toggleSelection(word.id)}
                                 className="w-5 h-5 text-blue-600 rounded border-blue-200 focus:ring-blue-500 cursor-pointer"
                               />
                             </td>
@@ -742,7 +584,7 @@ export default function Vocabulary() {
                     className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-bold transition-colors shadow-sm"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
-                    {t('save_to') || 'Save to...'}
+                    {t('copy_to_quiz') || 'Also add to quiz...'}
                   </button>
                   <button
                     onClick={handleBulkDelete}
@@ -781,7 +623,6 @@ export default function Vocabulary() {
                         <tr>
                           <th className="p-3 sm:p-5 font-bold text-sm text-blue-900/60 uppercase tracking-wider">{t('german')}</th>
                           <th className="p-3 sm:p-5 font-bold text-sm text-blue-900/60 uppercase tracking-wider">{t('hungarian')}</th>
-                          <th className="p-3 sm:p-5 font-bold text-sm text-blue-900/60 uppercase tracking-wider">{t('modal_category_label') || 'Category'}</th>
                           <th className="p-3 sm:p-5 font-bold text-sm text-blue-900/60 uppercase tracking-wider">{t('example')}</th>
                           <th className="p-2 sm:p-4 w-20 sm:w-24"></th>
                           <th className="p-2 sm:p-4 w-10 sm:w-12"></th>
@@ -789,14 +630,9 @@ export default function Vocabulary() {
                       </thead>
                       <tbody className="divide-y divide-blue-50/50">
                         {wordsInGroup.map((word: any, idx: number) => (
-                          <tr key={word.id || `static_${word.german}_${idx}`} className="hover:bg-white/60 transition-colors group">
+                          <tr key={word.id || `reading_${word.german}_${idx}`} className="hover:bg-white/60 transition-colors group">
                             <td className="p-3 sm:p-5 font-bold text-blue-950 break-words">{word.german}</td>
                             <td className="p-3 sm:p-5 text-gray-700 break-words">{word.hungarian}</td>
-                            <td className="p-3 sm:p-5">
-                              <span className={`inline-block px-2.5 py-1 text-xs font-bold rounded-full ${vocabCategoryKey(word.category) === 'reading' ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-800'}`}>
-                                {categoryLabel(word.category)}
-                              </span>
-                            </td>
                             <td className="p-3 sm:p-5 text-gray-500 text-sm italic break-words">{word.example}</td>
                             <td className="p-2 sm:p-4 text-center w-20 sm:w-24">
                               <div className="flex justify-center items-center gap-1.5">
@@ -819,8 +655,8 @@ export default function Vocabulary() {
                             <td className="p-2 sm:p-4 text-center w-10 sm:w-12 border-l border-blue-50/50">
                               <input
                                 type="checkbox"
-                                checked={word.id ? selectedIds.has(word.id) : selectedIds.has(`static_${word.german}`)}
-                                onChange={() => toggleSelection(word.id || `static_${word.german}`)}
+                                checked={!!word.id && selectedIds.has(word.id)}
+                                onChange={() => word.id && toggleSelection(word.id)}
                                 className="w-5 h-5 text-blue-600 rounded border-blue-200 focus:ring-blue-500 cursor-pointer"
                               />
                             </td>
@@ -846,8 +682,8 @@ export default function Vocabulary() {
                   <h2 className="text-3xl font-extrabold text-blue-950 mb-3">{t('personalized_space_empty') || 'Your Private Space is Empty'}</h2>
                   <p className="text-blue-900/70 text-lg font-medium mb-8 max-w-md">{t('personalized_space_description')}</p>
                   <div className="flex flex-col sm:flex-row gap-4">
-                    <Link to="/import" className="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold shadow-sm hover:bg-blue-700 transition-colors">{t('import_data')}</Link>
-                    <Link to="/quizzes" className="bg-white border border-gray-300 text-gray-700 px-8 py-3 rounded-xl font-bold shadow-sm hover:bg-gray-50 transition-colors">{t('create_your_own_quizzes')}</Link>
+                    <Link to="/import?destination=reading" className="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold shadow-sm hover:bg-blue-700 transition-colors">{t('import_data')}</Link>
+                    <button onClick={openAddModal} className="bg-white border border-gray-300 text-gray-700 px-8 py-3 rounded-xl font-bold shadow-sm hover:bg-gray-50 transition-colors">{t('add_word')}</button>
                   </div>
                 </div>
               )
@@ -869,130 +705,39 @@ export default function Vocabulary() {
             </div>
 
             <div className="p-6 md:p-8 overflow-y-auto space-y-6">
-             {(() => {
-              let germanLabel = t('modal_german_label');
-              let germanPlaceholder = t('modal_german_placeholder');
-              let hungarianPlaceholder = t('modal_hungarian_placeholder');
-
-              if (newCategory === 'phrases') {
-                germanLabel = t('modal_german_phrase_label') || "German Phrase/Sentence *";
-                germanPlaceholder = t('modal_german_phrase_placeholder') || "e.g. Wie geht es Ihnen?";
-                hungarianPlaceholder = t('modal_hungarian_phrase_placeholder') || "e.g. Hogy van?";
-              } else if (newCategory === 'prepositions') {
-                germanLabel = t('modal_german_prep_verb_label') || "German Verb + Hungarian *";
-                germanPlaceholder = t('modal_german_prep_verb_placeholder') || "e.g. verzichten, lemondani valamiről/felhagyni valamivel";
-                hungarianPlaceholder = t('modal_prep_case_placeholder') || "e.g. auf + Akk.";
-              } else if (newCategory === 'verbs') {
-                germanLabel = t('modal_german_verb_label') || "German Verb *";
-                germanPlaceholder = t('modal_german_verb_placeholder') || "e.g. machen";
-                hungarianPlaceholder = t('modal_hungarian_verb_placeholder') || "e.g. csinálni";
-              } else if (newCategory === 'false_friends') {
-                germanLabel = t('modal_german_ff_label') || "German False Friend *";
-                germanPlaceholder = t('modal_german_ff_placeholder') || "e.g. das Gift, die Gifte";
-                hungarianPlaceholder = t('modal_hungarian_ff_placeholder') || "e.g. a méreg";
-              }
-              
-              return (
-                <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t('modal_category_label') || 'Category'}</label>
-                <select
-                  value={newCategory}
-                  onChange={(e) => setNewCategory(e.target.value)}
-                  className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
-                >
-                  <option value="vocabulary">{t('dropdown_vocabulary') || 'Vocabulary quiz'}</option>
-                  <option value="reading">{t('dropdown_reading') || 'Vocabulary (to read)'}</option>
-                  <option value="articles">{t('dropdown_articles') || 'Articles quiz'}</option>
-                  <option value="phrases">{t('dropdown_phrases') || 'Phrases and sentences quiz'}</option>
-                  <option value="prepositions">{t('dropdown_prepositions') || 'Prepositions quiz'}</option>
-                  <option value="adjectives">{t('dropdown_adjectives') || 'Adjectives quiz'}</option>
-                  <option value="verbs">{t('dropdown_verbs') || 'Verbs quiz'}</option>
-                  {adminMode && activeTab === 'library' && (
-                    <>
-                      <option value="false_friends">{t('false_friends') || 'False Friends'}</option>
-                      <option value="idioms">{t('idioms') || 'Idioms'}</option>
-                    </>
-                  )}
-                </select>
-                <p className="mt-1.5 text-xs text-gray-500">
-                  {t('category_separation_hint') || 'Reading and quiz libraries are separate — the same word can exist in both.'}
-                </p>
-              </div>
-              {newCategory === 'articles' ? (
-                <div className="flex gap-4">
-                  <div className="w-1/3">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('modal_article_label') || 'Article *'}</label>
-                    <select
-                      value={newArticle}
-                      onChange={(e) => setNewArticle(e.target.value)}
-                      className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                    >
-                      <option value="der">der</option>
-                      <option value="die">die</option>
-                      <option value="das">das</option>
-                    </select>
-                  </div>
-                  <div className="w-2/3">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('modal_noun_label') || 'Noun (with plural) *'}</label>
-                    <input
-                      type="text"
-                      value={newNoun}
-                      onChange={(e) => setNewNoun(e.target.value)}
-                      placeholder={t('modal_noun_placeholder') || 'e.g. Mann, die Männer'}
-                      className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      autoFocus
-                    />
-                  </div>
-                </div>
-              ) : (
+              <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">{germanLabel}</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('modal_german_label')}</label>
                   <input
                     type="text"
                     value={newGerman}
                     onChange={(e) => setNewGerman(e.target.value)}
-                    placeholder={germanPlaceholder}
+                    placeholder={t('modal_german_placeholder')}
                     className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
                     autoFocus
                   />
                 </div>
-              )}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{newCategory === 'idioms' ? (t('idiom_hungarian_label') || 'Hungarian Meaning *') : newCategory === 'prepositions' ? (t('prep_case_label') || 'Preposition + Case *') : t('modal_hungarian_label')}</label>
-                <input
-                  type="text"
-                  value={newHungarian}
-                  onChange={(e) => setNewHungarian(e.target.value)}
-                  placeholder={hungarianPlaceholder}
-                  className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{newCategory === 'idioms' ? (t('explanation_label') || 'Explanation') : newCategory === 'prepositions' ? (t('meaning_example_label') || 'Example Sentence') : t('modal_example_label')}</label>
-                <input
-                  type="text"
-                  value={newExample}
-                  onChange={(e) => setNewExample(e.target.value)}
-                  placeholder={newCategory === 'idioms' ? (t('explanation_placeholder') || 'Explanation') : newCategory === 'prepositions' ? (t('meaning_example_placeholder') || 'e.g. Ich verzichte auf das Angebot.') : t('modal_example_placeholder')}
-                  className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              {newCategory === 'false_friends' && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('note') || 'Note'} *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('modal_hungarian_label')}</label>
                   <input
                     type="text"
-                    value={newNote}
-                    onChange={(e) => setNewNote(e.target.value)}
-                    placeholder={t('template_note_header') || 'Note'}
+                    value={newHungarian}
+                    onChange={(e) => setNewHungarian(e.target.value)}
+                    placeholder={t('modal_hungarian_placeholder')}
                     className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-              )}
-            </div>
-            );
-          })()}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('modal_example_label')}</label>
+                  <input
+                    type="text"
+                    value={newExample}
+                    onChange={(e) => setNewExample(e.target.value)}
+                    placeholder={t('modal_example_placeholder')}
+                    className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
             </div>
 
             <div className="p-6 md:p-8 border-t border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row justify-end gap-3">
@@ -1003,22 +748,22 @@ export default function Vocabulary() {
         </div>
       )}
 
-      {/* Move Selected / Save To Modal */}
+      {/* Copy selected reading words into a quiz library (keeps them in to-read) */}
       {isMoveModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-blue-950/40 backdrop-blur-sm transition-opacity">
           <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-md max-h-[90vh] overflow-hidden flex flex-col animate-fade-in-up">
             <div className="p-6 md:p-8 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-              <h2 className="text-2xl font-extrabold text-blue-950">{t('save_to') || 'Save to...'}</h2>
+              <h2 className="text-2xl font-extrabold text-blue-950">{t('copy_to_quiz') || 'Also add to quiz...'}</h2>
               <button onClick={() => setIsMoveModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-full hover:bg-gray-200">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
               </button>
             </div>
             <div className="p-6 md:p-8 overflow-y-auto space-y-6">
+              <p className="text-sm text-gray-600">{t('copy_to_quiz_hint') || 'Creates a separate quiz copy. The word stays in Vocabulary (to read).'}</p>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t('modal_category_label') || 'Target Category'}</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('modal_category_label') || 'Quiz category'}</label>
                 <select value={moveTargetCategory} onChange={(e) => setMoveTargetCategory(e.target.value)} className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50">
                   <option value="vocabulary">{t('dropdown_vocabulary') || 'Vocabulary quiz'}</option>
-                  <option value="reading">{t('dropdown_reading') || 'Vocabulary (to read)'}</option>
                   <option value="articles">{t('dropdown_articles') || 'Articles quiz'}</option>
                   <option value="phrases">{t('dropdown_phrases') || 'Phrases and sentences quiz'}</option>
                   <option value="prepositions">{t('dropdown_prepositions') || 'Prepositions quiz'}</option>

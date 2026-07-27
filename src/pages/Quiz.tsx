@@ -444,7 +444,9 @@ export default function Quiz() {
       const endIndex = startIndex + WORDS_PER_QUIZ;
       wordsForQuiz = finalSourceData.slice(startIndex, endIndex).sort(() => 0.5 - Math.random());
     } else if (userVocabulary) {
+      // Never pull "reading" (to-read) words into quiz pools
       wordsForQuiz = [...userVocabulary].filter((word: any) =>
+        !isReadingVocabCategory(word.category) &&
         (word.german || '').trim() !== '' &&
         (word.hungarian || '').trim() !== ''
       ).sort(() => 0.5 - Math.random()).slice(0, WORDS_PER_QUIZ);

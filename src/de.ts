@@ -228,6 +228,9 @@ export const de = {
   // Dropdown Categories
   dropdown_vocabulary: "Wortschatz-Quiz",
   dropdown_reading: "Wortschatz (zum Lesen)",
+  vocab_reading_subtitle: "Nur zum Lesen hochgeladene Wörter — getrennt von den Quiz-Bibliotheken.",
+  copy_to_quiz: "Auch zum Quiz hinzufügen...",
+  copy_to_quiz_hint: "Erstellt eine separate Quiz-Kopie. Das Wort bleibt in Wortschatz (zum Lesen).",
   category_separation_hint: "Lese- und Quiz-Bibliotheken sind getrennt — dasselbe Wort kann in beiden vorkommen.",
   dropdown_articles: "Artikel-Quiz",
   dropdown_phrases: "Ausdrücke und Sätze Quiz",

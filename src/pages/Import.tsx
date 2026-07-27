@@ -125,9 +125,12 @@ export default function Import() {
     const pushStatic = (data: any[], type: string) => {
       data.forEach((item: any, idx: number) => {
         const key = String(item.german || '').toLowerCase().trim();
-        // If a tombstone or override exists in the cloud DB for this exact german key, hide the static one
+        // Only hide static quiz items when the same word exists in the *same* quiz category
+        // (reading/to-read entries must not suppress quiz static libraries, and vice versa)
         const hasTombstoneOrOverride = existingItems.some(
-          (i: any) => (i.german || '').toLowerCase().trim() === key
+          (i: any) =>
+            (i.german || '').toLowerCase().trim() === key &&
+            vocabCategoryKey(i.category) === type
         );
         if (!hasTombstoneOrOverride) {
           staticItems.push({
