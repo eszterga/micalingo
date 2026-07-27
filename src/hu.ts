@@ -228,6 +228,7 @@ _items_save: "Nincsenek érvényes szavak a mentéshez, vagy nem vagy bejelentke
   // Dropdown Categories
   dropdown_vocabulary: "Szókincs kvíz",
   dropdown_reading: "Szókincs (olvasnivaló)",
+  category_separation_hint: "Az olvasnivaló és a kvíz könyvtárak külön vannak — ugyanaz a szó lehet mindkettőben.",
   dropdown_articles: "Névelők kvíz",
   dropdown_phrases: "Kifejezések és mondatok kvíz",
   dropdown_prepositions: "Elöljárószavak kvíz",

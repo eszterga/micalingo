@@ -1,3 +1,8 @@
+/**
+ * Static QUIZ vocabulary seed data only.
+ * "Vocabulary (to read)" uses Firestore category "reading" and is intentionally
+ * separate — never mix reading/to-read entries into quiz levels.
+ */
 export interface PublicWord {
   german: string;
   hungarian: string;

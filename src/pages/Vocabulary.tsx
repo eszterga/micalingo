@@ -10,6 +10,8 @@ import {
   purgeVocabDuplicatesKeeping,
   purgeSoftDeletedVocabSiblings,
   isActiveVocabItem,
+  findVocabDuplicate,
+  vocabCategoryKey,
   type CloudVocabularyItem 
 } from "../lib/firestore";
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
@@ -226,7 +228,7 @@ export default function Vocabulary() {
         if (word) {
           const duplicate = personalWords?.find(w =>
             isActiveVocabItem(w) &&
-            w.category === moveTargetCategory &&
+            vocabCategoryKey(w.category) === vocabCategoryKey(moveTargetCategory) &&
             (w.german || '').toLowerCase().trim() === (word.german || '').toLowerCase().trim()
           );
           if (duplicate) {
@@ -249,7 +251,7 @@ export default function Vocabulary() {
       if (wordToMove) {
         const isDuplicateInTarget = personalWords?.some(w =>
           isActiveVocabItem(w) &&
-          w.category === moveTargetCategory &&
+          vocabCategoryKey(w.category) === vocabCategoryKey(moveTargetCategory) &&
           (w.german || '').toLowerCase().trim() === (wordToMove.german || '').toLowerCase().trim() &&
           w.id !== id
         );
@@ -296,6 +298,12 @@ export default function Vocabulary() {
     }
   };
 
+  const categoryLabel = (category?: string) => {
+    const catKey = vocabCategoryKey(category);
+    const name = t(`dropdown_${catKey}` as any);
+    return name === `dropdown_${catKey}` ? catKey : name;
+  };
+
   // Filter words based on search term. The list is already sorted alphabetically by the database query.
   const filteredWords = words?.filter((word: any) => {
     if (!isActiveVocabItem(word)) return false;
@@ -303,14 +311,16 @@ export default function Vocabulary() {
     const g = (word.german || "").toLowerCase();
     const h = (word.hungarian || "").toLowerCase();
     const e = (word.example || "").toLowerCase();
-    return g.includes(search) || h.includes(search) || e.includes(search);
+    const c = categoryLabel(word.category).toLowerCase();
+    return g.includes(search) || h.includes(search) || e.includes(search) || c.includes(search);
   });
 
   const filteredLibraryWords = allPublicWords.filter((word: any) => {
     const search = searchTerm.toLowerCase();
     const g = (word.german || "").toLowerCase();
     const h = (word.hungarian || "").toLowerCase();
-    return g.includes(search) || h.includes(search);
+    const c = categoryLabel(word.category).toLowerCase();
+    return g.includes(search) || h.includes(search) || c.includes(search);
   });
 
   // Grouping logic for the library
@@ -443,18 +453,20 @@ export default function Vocabulary() {
     const isPublicSave = adminMode && activeTab === 'library';
     const targetVocabulary = isPublicSave ? allPublicWords : (personalWords || []).filter(isActiveVocabItem);
     const libraryWords = (isPublicSave ? publicDbWords : personalWords) || [];
+    const saveCategory = vocabCategoryKey(newCategory);
 
-    const duplicate = targetVocabulary?.find((w: any) => 
-      isActiveVocabItem(w) &&
-      w.category === newCategory &&
-      (w.german || '').toLowerCase().trim() === finalGerman.toLowerCase().trim() &&
-      w.id !== editingId
+    // Strict topic match: reading (to read) never conflicts with vocabulary quiz (or other quiz topics)
+    const duplicate = findVocabDuplicate(
+      targetVocabulary || [],
+      finalGerman,
+      saveCategory,
+      editingId
     );
 
     if (duplicate) {
-          const catKey = duplicate.category || 'vocabulary';
-          let catName = t(`dropdown_${catKey}`);
-          if (catName === `dropdown_${catKey}`) catName = catKey;
+      const catKey = vocabCategoryKey(duplicate.category);
+      let catName = t(`dropdown_${catKey}`);
+      if (catName === `dropdown_${catKey}`) catName = catKey;
       alert(t('alert_word_exists', { category: catName }));
       return;
     }
@@ -465,15 +477,15 @@ export default function Vocabulary() {
           german: finalGerman,
           hungarian: newHungarian.trim(),
           example: newExample.trim(),
-          note: newCategory === 'false_friends' ? newNote.trim() : "",
-          category: newCategory,
+          note: saveCategory === 'false_friends' ? newNote.trim() : "",
+          category: saveCategory,
           deleted: false
         } as any);
-        // Remove soft-deleted leftovers and any other active duplicates of this key
+        // Remove soft-deleted leftovers and any other active duplicates of this SAME topic only
         await purgeVocabDuplicatesKeeping(
           libraryWords as CloudVocabularyItem[],
           finalGerman,
-          newCategory,
+          saveCategory,
           editingId
         );
       } else {
@@ -483,7 +495,7 @@ export default function Vocabulary() {
              userId: "PUBLIC_LIBRARY",
              german: editingStaticWord.german,
              hungarian: editingStaticWord.hungarian,
-             category: editingStaticWord.category || "vocabulary",
+             category: vocabCategoryKey(editingStaticWord.category),
              deleted: true,
              dateAdded: Date.now()
            } as any);
@@ -494,9 +506,9 @@ export default function Vocabulary() {
           german: finalGerman,
           hungarian: newHungarian.trim(),
           example: newExample.trim(),
-          note: newCategory === 'false_friends' ? newNote.trim() : "",
+          note: saveCategory === 'false_friends' ? newNote.trim() : "",
           dateAdded: Date.now(),
-          category: newCategory,
+          category: saveCategory,
         };
 
         if (editingStaticWord?.sourceFile) payload.sourceFile = editingStaticWord.sourceFile;
@@ -506,7 +518,7 @@ export default function Vocabulary() {
         await purgeVocabDuplicatesKeeping(
           libraryWords as CloudVocabularyItem[],
           finalGerman,
-          newCategory,
+          saveCategory,
           docRef.id
         );
       }
@@ -632,6 +644,7 @@ export default function Vocabulary() {
                       <tr>
                         <th className="p-3 sm:p-5 font-bold text-sm text-blue-900/60 uppercase tracking-wider">{t('german')}</th>
                         <th className="p-3 sm:p-5 font-bold text-sm text-blue-900/60 uppercase tracking-wider">{t('hungarian')}</th>
+                        <th className="p-3 sm:p-5 font-bold text-sm text-blue-900/60 uppercase tracking-wider">{t('modal_category_label') || 'Category'}</th>
                         <th className="p-3 sm:p-5 font-bold text-sm text-blue-900/60 uppercase tracking-wider">{t('example')}</th>
                         {adminMode && <th className="p-2 sm:p-4 w-20 sm:w-24"></th>}
                         {adminMode && <th className="p-2 sm:p-4 w-10 sm:w-12"></th>}
@@ -642,6 +655,11 @@ export default function Vocabulary() {
                         <tr key={word.id || `static_${word.german}_${idx}`} className="hover:bg-white/60 transition-colors group">
                           <td className="p-3 sm:p-5 font-bold text-blue-950 break-words">{word.german}</td>
                           <td className="p-3 sm:p-5 text-gray-700 break-words">{word.hungarian}</td>
+                          <td className="p-3 sm:p-5">
+                            <span className={`inline-block px-2.5 py-1 text-xs font-bold rounded-full ${vocabCategoryKey(word.category) === 'reading' ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-800'}`}>
+                              {categoryLabel(word.category)}
+                            </span>
+                          </td>
                           <td className="p-3 sm:p-5 text-gray-500 text-sm italic break-words">{word.example}</td>
                           {adminMode && (
                             <td className="p-2 sm:p-4 text-center w-20 sm:w-24">
@@ -763,6 +781,7 @@ export default function Vocabulary() {
                         <tr>
                           <th className="p-3 sm:p-5 font-bold text-sm text-blue-900/60 uppercase tracking-wider">{t('german')}</th>
                           <th className="p-3 sm:p-5 font-bold text-sm text-blue-900/60 uppercase tracking-wider">{t('hungarian')}</th>
+                          <th className="p-3 sm:p-5 font-bold text-sm text-blue-900/60 uppercase tracking-wider">{t('modal_category_label') || 'Category'}</th>
                           <th className="p-3 sm:p-5 font-bold text-sm text-blue-900/60 uppercase tracking-wider">{t('example')}</th>
                           <th className="p-2 sm:p-4 w-20 sm:w-24"></th>
                           <th className="p-2 sm:p-4 w-10 sm:w-12"></th>
@@ -773,6 +792,11 @@ export default function Vocabulary() {
                           <tr key={word.id || `static_${word.german}_${idx}`} className="hover:bg-white/60 transition-colors group">
                             <td className="p-3 sm:p-5 font-bold text-blue-950 break-words">{word.german}</td>
                             <td className="p-3 sm:p-5 text-gray-700 break-words">{word.hungarian}</td>
+                            <td className="p-3 sm:p-5">
+                              <span className={`inline-block px-2.5 py-1 text-xs font-bold rounded-full ${vocabCategoryKey(word.category) === 'reading' ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-800'}`}>
+                                {categoryLabel(word.category)}
+                              </span>
+                            </td>
                             <td className="p-3 sm:p-5 text-gray-500 text-sm italic break-words">{word.example}</td>
                             <td className="p-2 sm:p-4 text-center w-20 sm:w-24">
                               <div className="flex justify-center items-center gap-1.5">
@@ -870,6 +894,31 @@ export default function Vocabulary() {
               
               return (
                 <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('modal_category_label') || 'Category'}</label>
+                <select
+                  value={newCategory}
+                  onChange={(e) => setNewCategory(e.target.value)}
+                  className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
+                >
+                  <option value="vocabulary">{t('dropdown_vocabulary') || 'Vocabulary quiz'}</option>
+                  <option value="reading">{t('dropdown_reading') || 'Vocabulary (to read)'}</option>
+                  <option value="articles">{t('dropdown_articles') || 'Articles quiz'}</option>
+                  <option value="phrases">{t('dropdown_phrases') || 'Phrases and sentences quiz'}</option>
+                  <option value="prepositions">{t('dropdown_prepositions') || 'Prepositions quiz'}</option>
+                  <option value="adjectives">{t('dropdown_adjectives') || 'Adjectives quiz'}</option>
+                  <option value="verbs">{t('dropdown_verbs') || 'Verbs quiz'}</option>
+                  {adminMode && activeTab === 'library' && (
+                    <>
+                      <option value="false_friends">{t('false_friends') || 'False Friends'}</option>
+                      <option value="idioms">{t('idioms') || 'Idioms'}</option>
+                    </>
+                  )}
+                </select>
+                <p className="mt-1.5 text-xs text-gray-500">
+                  {t('category_separation_hint') || 'Reading and quiz libraries are separate — the same word can exist in both.'}
+                </p>
+              </div>
               {newCategory === 'articles' ? (
                 <div className="flex gap-4">
                   <div className="w-1/3">

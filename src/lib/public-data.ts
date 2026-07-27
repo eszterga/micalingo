@@ -1,3 +1,8 @@
+/**
+ * Static public QUIZ libraries (vocabulary / phrases / articles / …).
+ * The separate "Vocabulary (to read)" library is category "reading" in Firestore
+ * and must not be mixed into quiz topic pools.
+ */
 export interface PublicWord {
   german: string;
   hungarian: string;

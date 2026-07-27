@@ -5,7 +5,7 @@ import { useAuth } from '../AuthContext';
 import { collection, query, where, getDocs, doc, getDoc, setDoc, deleteDoc } from 'firebase/firestore';
 import { dbCloud, auth } from '../lib/firebase';
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
-import { addCloudWord, useCloudVocabulary } from '../lib/firestore';
+import { addCloudWord, useCloudVocabulary, findVocabDuplicate, vocabCategoryKey } from '../lib/firestore';
 import { ImageLightbox, useImageLightbox } from '../components/ImageLightbox';
 import ArticleContent from '../components/ArticleContent';
 
@@ -541,21 +541,19 @@ export default function Grammar() {
     const isPublicSave = isAdmin && adminMode && saveToPublic;
     const targetUserId = isPublicSave ? "PUBLIC_LIBRARY" : user.uid;
     const targetVocabulary = isPublicSave ? publicVocabulary : userVocabulary;
+    const saveCategory = vocabCategoryKey(newCategory);
 
-    const duplicate = targetVocabulary.find((w: any) => 
-      !w.deleted &&
-      w.category === newCategory && (w.german || '').toLowerCase().trim() === finalGerman.toLowerCase().trim()
-    );
+    const duplicate = findVocabDuplicate(targetVocabulary, finalGerman, saveCategory);
 
     if (duplicate) {
-      const catKey = duplicate.category || 'vocabulary';
+      const catKey = vocabCategoryKey(duplicate.category);
       let catName = t(`dropdown_${catKey}`);
       if (catName === `dropdown_${catKey}`) catName = catKey;
       alert(t('alert_word_exists', { category: catName }));
       return;
     }
 
-    await addCloudWord({ userId: targetUserId, german: finalGerman, hungarian: newHungarian.trim(), example: newExample.trim(), note: newCategory === 'false_friends' ? newNote.trim() : "", dateAdded: Date.now(), category: newCategory } as any);
+    await addCloudWord({ userId: targetUserId, german: finalGerman, hungarian: newHungarian.trim(), example: newExample.trim(), note: saveCategory === 'false_friends' ? newNote.trim() : "", dateAdded: Date.now(), category: saveCategory } as any);
     setIsSaveWordModalOpen(false);
     alert(t('saved') || 'Saved!');
   }, [newCategory, newArticle, newNoun, newGerman, newHungarian, user, t, userVocabulary, publicVocabulary, isAdmin, adminMode, saveToPublic, newExample, newNote]);

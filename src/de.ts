@@ -228,6 +228,7 @@ export const de = {
   // Dropdown Categories
   dropdown_vocabulary: "Wortschatz-Quiz",
   dropdown_reading: "Wortschatz (zum Lesen)",
+  category_separation_hint: "Lese- und Quiz-Bibliotheken sind getrennt — dasselbe Wort kann in beiden vorkommen.",
   dropdown_articles: "Artikel-Quiz",
   dropdown_phrases: "Ausdrücke und Sätze Quiz",
   dropdown_prepositions: "Präpositionen-Quiz",

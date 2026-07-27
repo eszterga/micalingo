@@ -6,7 +6,7 @@ import FileDropZone from "../components/FileDropZone";
 import { ParsedImport } from "../lib/importParser";
 import { useAuth } from "../AuthContext";
 import { publicVocabulary, publicPhrases, publicArticles, publicPrepositions, publicFalseFriends, publicAdjectives } from '../lib/public-data';
-import { useCloudVocabulary, addCloudWord, bulkAddCloudWords, bulkDeleteCloudWords, updateCloudWord, purgeVocabDuplicatesKeeping, purgeSoftDeletedVocabSiblings, isActiveVocabItem } from "../lib/firestore";
+import { useCloudVocabulary, addCloudWord, bulkAddCloudWords, bulkDeleteCloudWords, updateCloudWord, purgeVocabDuplicatesKeeping, purgeSoftDeletedVocabSiblings, isActiveVocabItem, findVocabDuplicate, vocabCategoryKey } from "../lib/firestore";
 import { useI18n } from "../I18nContext";
 
 const getEditItemKey = (item: any, idx: number) => String(item?.id ?? `idx_${idx}`);
@@ -799,7 +799,7 @@ export default function Import() {
     const duplicates: any[] = [];
     const existingSet = new Map(
       allItems
-        .filter((item: any) => isActiveVocabItem(item) && (item.category || 'vocabulary') === destination)
+        .filter((item: any) => isActiveVocabItem(item) && vocabCategoryKey(item.category) === vocabCategoryKey(destination))
         .map((item: any) => [(item.german || '').toLowerCase().trim(), item])
     );
 
@@ -840,7 +840,7 @@ export default function Import() {
       // 1. Save brand new items
       if (currentNewItems.length > 0) {
         const newItemsPayload = currentNewItems.map(item => {
-          const payload: any = { ...item, userId: saveToPublic ? 'PUBLIC_LIBRARY' : user?.uid, dateAdded: Date.now(), category: destination };
+          const payload: any = { ...item, userId: saveToPublic ? 'PUBLIC_LIBRARY' : user?.uid, dateAdded: Date.now(), category: vocabCategoryKey(destination) };
           if (data?.fileName) payload.sourceFile = data.fileName;
           if (data?.fileType) payload.sourceType = data.fileType;
           Object.keys(payload).forEach(k => payload[k] === undefined && delete payload[k]);
@@ -938,15 +938,15 @@ export default function Import() {
       return;
     }
 
-    // Ignore soft-deleted leftovers — they must not block add/edit
-    const duplicate = existingItems?.find((w: any) => 
-      isActiveVocabItem(w) &&
-      w.category === newCategory &&
-      (w.german || '').toLowerCase().trim() === finalGerman.toLowerCase().trim()
+    // Same-topic only: reading (to read) never conflicts with vocabulary quiz
+    const duplicate = findVocabDuplicate(
+      existingItems || [],
+      finalGerman,
+      newCategory
     );
 
     if (duplicate) {
-      const catKey = duplicate.category || 'vocabulary';
+      const catKey = vocabCategoryKey(duplicate.category);
       let catName = t(`dropdown_${catKey}`);
       if (catName === `dropdown_${catKey}`) catName = catKey;
       alert(t('alert_word_exists', { category: catName }));
@@ -961,7 +961,7 @@ export default function Import() {
           example: newExample.trim(),
           note: newCategory === 'false_friends' || newCategory === 'idioms' ? newNote.trim() : "",
           dateAdded: Date.now(),
-          category: newCategory,
+          category: vocabCategoryKey(newCategory),
           sourceFile: "Manual CMS Entry",
           sourceType: "cms"
         };
@@ -970,7 +970,7 @@ export default function Import() {
         await purgeVocabDuplicatesKeeping(
           existingItems as any[],
           finalGerman,
-          newCategory,
+          vocabCategoryKey(newCategory),
           docRef.id
         );
         setIsAddModalOpen(false);

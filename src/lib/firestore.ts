@@ -58,10 +58,37 @@ export const updateCloudWord = (id: string, data: Partial<CloudVocabularyItem>) 
 export const deleteCloudWord = (id: string) => deleteDoc(doc(dbCloud, VOCAB_COLLECTION, id));
 
 export const vocabGermanKey = (german?: string) => (german || '').toLowerCase().trim();
-export const vocabCategoryKey = (category?: string) => category || 'vocabulary';
+
+/** Quiz topic categories (never includes reading / to-read library). */
+export const QUIZ_VOCAB_CATEGORIES = [
+  'vocabulary',
+  'articles',
+  'phrases',
+  'prepositions',
+  'adjectives',
+  'verbs',
+] as const;
+
+export const READING_VOCAB_CATEGORY = 'reading';
+
+/**
+ * Normalize a stored category. Missing/blank only defaults to vocabulary (quiz).
+ * Explicit "reading" always stays reading — never mixed with quiz.
+ */
+export const vocabCategoryKey = (category?: string | null) => {
+  const c = (category || '').trim();
+  return c || 'vocabulary';
+};
+
+export const isReadingVocabCategory = (category?: string | null) =>
+  vocabCategoryKey(category) === READING_VOCAB_CATEGORY;
+
+export const isQuizVocabCategory = (category?: string | null) =>
+  (QUIZ_VOCAB_CATEGORIES as readonly string[]).includes(vocabCategoryKey(category));
+
 export const isActiveVocabItem = (w: { deleted?: boolean } | null | undefined) => !!w && !w.deleted;
 
-/** Same library + german + category (for duplicate / purge matching). */
+/** Same german + same library topic (reading vs vocabulary quiz stay distinct). */
 export const isSameVocabEntry = (
   a: { german?: string; category?: string },
   german: string,
@@ -69,6 +96,24 @@ export const isSameVocabEntry = (
 ) =>
   vocabGermanKey(a.german) === vocabGermanKey(german) &&
   vocabCategoryKey(a.category) === vocabCategoryKey(category);
+
+/** Find an active duplicate in the SAME topic library only. */
+export function findVocabDuplicate(
+  words: Array<{ id?: string; german?: string; category?: string; deleted?: boolean }>,
+  german: string,
+  category: string,
+  excludeId?: string | null
+) {
+  const key = vocabGermanKey(german);
+  const cat = vocabCategoryKey(category);
+  if (!key) return undefined;
+  return words.find((w) => {
+    if (!isActiveVocabItem(w)) return false;
+    if (excludeId && w.id && w.id === excludeId) return false;
+    if (vocabGermanKey(w.german) !== key) return false;
+    return vocabCategoryKey(w.category) === cat;
+  });
+}
 
 /**
  * Hard-delete soft-deleted leftovers for a german+category key.

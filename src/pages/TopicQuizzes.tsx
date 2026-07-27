@@ -4,7 +4,7 @@ import { publicVocabulary, publicPhrases, publicArticles, publicPrepositions, pu
 import { useAuth } from "../AuthContext";
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { auth } from '../lib/firebase';
-import { useCloudVocabulary } from "../lib/firestore";
+import { useCloudVocabulary, vocabCategoryKey, isReadingVocabCategory } from "../lib/firestore";
 import { useI18n } from "../I18nContext";
 
 const WORDS_PER_QUIZ = 20;
@@ -78,7 +78,9 @@ export default function TopicQuizzes() {
   };
 
   const getUniqueSourceData = useCallback((staticSource: any[], currentTopic: string) => {
-    const dbSource = publicDbWords.filter((w: any) => w.category === currentTopic);
+    const dbSource = publicDbWords.filter(
+      (w: any) => !isReadingVocabCategory(w.category) && vocabCategoryKey(w.category) === currentTopic
+    );
     const combined = [...dbSource, ...staticSource];
     const unique: any[] = [];
     const seen = new Set<string>();
@@ -126,7 +128,8 @@ export default function TopicQuizzes() {
   const customSourceData = (userVocabulary || []).filter(
     (word: any) =>
       !word.deleted &&
-      word.category === topic &&
+      !isReadingVocabCategory(word.category) &&
+      vocabCategoryKey(word.category) === topic &&
       word.german &&
       word.hungarian
   );

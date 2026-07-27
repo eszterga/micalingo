@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 import { useI18n } from "../I18nContext";
-import { useCloudVocabulary } from "../lib/firestore";
+import { useCloudVocabulary, vocabCategoryKey, isReadingVocabCategory } from "../lib/firestore";
 import { publicVocabulary, publicPhrases, publicArticles, publicPrepositions, publicAdjectives } from "../lib/public-data";
 import { doc, setDoc } from 'firebase/firestore';
 import { dbCloud } from '../lib/firebase';
@@ -106,7 +106,9 @@ export default function Quiz() {
       unique.push(word);
     }
 
-    const dbSource = publicDbWords.filter((w: any) => w.category === topic);
+    const dbSource = publicDbWords.filter(
+      (w: any) => !isReadingVocabCategory(w.category) && vocabCategoryKey(w.category) === topic
+    );
     for (const word of dbSource) {
       const wordKey = ((word as any).german || '').toLowerCase().trim();
       if (!wordKey) continue;
@@ -129,10 +131,12 @@ export default function Quiz() {
 
   const customTopicWords = useMemo(() => {
     if (!isCustom || !topic || !userVocabulary) return [];
+    // Never pull "reading" (to-read) words into quiz topics
     return userVocabulary.filter(
       (w: any) =>
         !w.deleted &&
-        w.category === topic &&
+        !isReadingVocabCategory(w.category) &&
+        vocabCategoryKey(w.category) === topic &&
         (w.german || '').trim() !== '' &&
         (w.hungarian || '').trim() !== ''
     );
@@ -280,7 +284,9 @@ export default function Quiz() {
         let distractorPool = Array.from(new Set(words.map(w => w.hungarian))).filter(h => h !== correctAnswer && isValidDistractor(h));
 
         if (distractorPool.length < 3) {
-          let fallbackSource = isCustom ? (userVocabulary || []).filter((w: any) => w.category === topic) : (topic === 'phrases' ? publicPhrases : publicVocabulary);
+          let fallbackSource = isCustom
+            ? (userVocabulary || []).filter((w: any) => !isReadingVocabCategory(w.category) && vocabCategoryKey(w.category) === topic)
+            : (topic === 'phrases' ? publicPhrases : publicVocabulary);
           // Filter out invalid vocabulary entries (like articles) from being used as distractors.
           if (topic === 'vocabulary') {
             fallbackSource = fallbackSource.filter((w: any) => !['der', 'die', 'das'].includes((w.german || '').trim().toLowerCase()));
@@ -403,7 +409,9 @@ export default function Quiz() {
         unique.push(word);
       }
 
-      const dbSource = publicDbWords.filter((w: any) => w.category === topic);
+      const dbSource = publicDbWords.filter(
+      (w: any) => !isReadingVocabCategory(w.category) && vocabCategoryKey(w.category) === topic
+    );
       for (const word of dbSource) {
         const wordKey = ((word as any).german || '').toLowerCase().trim();
         if (!wordKey) continue;
