@@ -121,8 +121,8 @@ export default function Home() {
       {!Capacitor.isNativePlatform() && (
         <div className="flex flex-col items-center w-full mt-8 md:mt-12 z-10 px-4" style={{ animation: "fade-in-up 0.8s ease-out 0.7s both" }}>
           <a 
-            href="/MicaLingo_v4.apk" 
-            download="MicaLingo_v4.apk"
+            href="/MicaLingo_v5.apk" 
+            download="MicaLingo_v5.apk"
             className="inline-flex items-center justify-center gap-3 px-8 py-4 bg-purple-600 text-white hover:bg-purple-700 font-bold text-base rounded-2xl shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 active:scale-95"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M8 12l4 4m0 0l4-4m-4 4V4"></path></svg>
