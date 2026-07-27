@@ -246,6 +246,8 @@ _items_save: "Nincsenek érvényes szavak a mentéshez, vagy nem vagy bejelentke
   need_more_items: "Legalább 4 '{topic}' kategóriájú elemre van szükség.",
   import_more_words: "További szavak importálása",
   quiz_complete: "Kvíz befejezve!",
+  no_more_quizzes: "Ebből a témából minden elérhető kvízt teljesítettél!",
+  great_job: "Szép munka, így tovább!",
   your_score: "Pontszámod:",
   back_to_quizzes: "Vissza a kvízekhez",
   retry_quiz: "Kvíz újraindítása",
