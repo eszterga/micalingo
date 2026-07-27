@@ -57,7 +57,11 @@ export const addCloudWord = (word: Omit<CloudVocabularyItem, 'id'>) => addDoc(co
 export const updateCloudWord = (id: string, data: Partial<CloudVocabularyItem>) => updateDoc(doc(dbCloud, VOCAB_COLLECTION, id), data);
 export const deleteCloudWord = (id: string) => deleteDoc(doc(dbCloud, VOCAB_COLLECTION, id));
 
-export const vocabGermanKey = (german?: string) => (german || '').toLowerCase().trim();
+export const vocabGermanKey = (german?: string) =>
+  (german || '')
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, ' ');
 
 /** Quiz topic categories (never includes reading / to-read library). */
 export const QUIZ_VOCAB_CATEGORIES = [
@@ -175,7 +179,7 @@ export async function deleteCloudWordPurgingSoftDeleted(
   }
 }
 
-export const bulkAddCloudWords = async (words: Omit<CloudVocabularyItem, 'id'>[]) => {
+export const bulkAddCloudWords = async (words: Omit<CloudVocabularyItem, 'id'>[]): Promise<string[]> => {
   if (!words || words.length === 0) {
     throw new Error('No words to add');
   }
@@ -192,6 +196,7 @@ export const bulkAddCloudWords = async (words: Omit<CloudVocabularyItem, 'id'>[]
     }
   }
 
+  const createdIds: string[] = [];
   try {
     const chunkSize = 450; // Stay well below Firestore's 500 operation limit
     for (let i = 0; i < words.length; i += chunkSize) {
@@ -207,6 +212,7 @@ export const bulkAddCloudWords = async (words: Omit<CloudVocabularyItem, 'id'>[]
           example: word.example?.trim() || '',
           dateAdded: word.dateAdded
         });
+        createdIds.push(newRef.id);
       });
       
       await batch.commit();
@@ -221,6 +227,7 @@ export const bulkAddCloudWords = async (words: Omit<CloudVocabularyItem, 'id'>[]
     }
     throw new Error(`Database error: ${errorMessage}`);
   }
+  return createdIds;
 };
 
 export const bulkDeleteCloudWords = async (ids: string[]) => {

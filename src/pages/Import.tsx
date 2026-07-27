@@ -6,7 +6,7 @@ import FileDropZone from "../components/FileDropZone";
 import { ParsedImport } from "../lib/importParser";
 import { useAuth } from "../AuthContext";
 import { publicVocabulary, publicPhrases, publicArticles, publicPrepositions, publicFalseFriends, publicAdjectives } from '../lib/public-data';
-import { useCloudVocabulary, addCloudWord, bulkAddCloudWords, bulkDeleteCloudWords, updateCloudWord, purgeVocabDuplicatesKeeping, purgeSoftDeletedVocabSiblings, isActiveVocabItem, findVocabDuplicate, vocabCategoryKey } from "../lib/firestore";
+import { useCloudVocabulary, addCloudWord, bulkAddCloudWords, bulkDeleteCloudWords, updateCloudWord, purgeVocabDuplicatesKeeping, purgeSoftDeletedVocabSiblings, isActiveVocabItem, findVocabDuplicate, vocabCategoryKey, vocabGermanKey } from "../lib/firestore";
 import { useI18n } from "../I18nContext";
 
 const getEditItemKey = (item: any, idx: number) => String(item?.id ?? `idx_${idx}`);
@@ -798,24 +798,41 @@ export default function Import() {
       return;
     }
 
-    const newItems: any[] = [];
-    const duplicates: any[] = [];
-    const existingSet = new Map(
-      allItems
-        .filter((item: any) => isActiveVocabItem(item) && vocabCategoryKey(item.category) === vocabCategoryKey(destination))
-        .map((item: any) => [(item.german || '').toLowerCase().trim(), item])
-    );
+    const targetCat = vocabCategoryKey(destination);
 
+    // Collapse same-file duplicates (last row wins) so we never insert twin rows
+    const uniquePreview = new Map<string, any>();
     for (const item of previewItems) {
       const german = item.german?.trim() || '';
       const hungarian = item.hungarian?.trim() || '';
       if (!german || !hungarian) continue;
+      uniquePreview.set(vocabGermanKey(german), { ...item, german, hungarian });
+    }
 
-      const key = german.toLowerCase();
+    // Prefer an existing cloud doc over a static library row for the same key
+    const existingSet = new Map<string, any>();
+    for (const item of allItems) {
+      if (!isActiveVocabItem(item)) continue;
+      if (vocabCategoryKey(item.category) !== targetCat) continue;
+      const key = vocabGermanKey(item.german);
+      if (!key) continue;
+      const prev = existingSet.get(key);
+      if (!prev || (!prev.isCloud && item.isCloud)) {
+        existingSet.set(key, item);
+      }
+    }
+
+    const newItems: any[] = [];
+    const duplicates: any[] = [];
+
+    for (const [key, item] of uniquePreview) {
       const existingItem = existingSet.get(key);
-
       if (existingItem) {
-        duplicates.push({ ...item, idToUpdate: existingItem.id, isStatic: !existingItem.isCloud });
+        duplicates.push({
+          ...item,
+          idToUpdate: existingItem.id,
+          isStatic: !existingItem.isCloud
+        });
       } else {
         newItems.push(item);
       }
@@ -827,7 +844,6 @@ export default function Import() {
     if (duplicates.length > 0) {
       setIsOverwriteModalOpen(true);
     } else {
-      // No duplicates, proceed to save directly.
       executeSave(false, newItems, duplicates);
     }
   };
@@ -839,52 +855,65 @@ export default function Import() {
     try {
       let savedCount = 0;
       let overwrittenCount = 0;
+      const targetCat = vocabCategoryKey(destination);
+      const targetUserId = saveToPublic ? 'PUBLIC_LIBRARY' : user?.uid;
+      const librarySnapshot = [...(existingItems as any[])];
 
-      // 1. Save brand new items
+      // 1. Save brand new items — then hard-purge any twin docs for that german+category
       if (currentNewItems.length > 0) {
         const newItemsPayload = currentNewItems.map(item => {
-          const payload: any = { ...item, userId: saveToPublic ? 'PUBLIC_LIBRARY' : user?.uid, dateAdded: Date.now(), category: vocabCategoryKey(destination) };
+          const payload: any = {
+            ...item,
+            userId: targetUserId,
+            dateAdded: Date.now(),
+            category: targetCat,
+            deleted: false
+          };
           if (data?.fileName) payload.sourceFile = data.fileName;
           if (data?.fileType) payload.sourceType = data.fileType;
           Object.keys(payload).forEach(k => payload[k] === undefined && delete payload[k]);
           return payload;
         });
-        await bulkAddCloudWords(newItemsPayload);
-        // Scrub soft-deleted leftovers so they cannot block later edits
-        for (const item of newItemsPayload) {
-          if (item.german) {
-            await purgeSoftDeletedVocabSiblings(
-              existingItems as any[],
-              item.german,
-              destination
-            );
+        const createdIds = await bulkAddCloudWords(newItemsPayload);
+        const withIds = newItemsPayload.map((item, i) => ({ ...item, id: createdIds[i] }));
+        const pool = [...librarySnapshot, ...withIds];
+        for (let i = 0; i < withIds.length; i++) {
+          const item = withIds[i];
+          if (item.german && item.id) {
+            await purgeVocabDuplicatesKeeping(pool as any[], item.german, targetCat, item.id);
           }
         }
         savedCount = newItemsPayload.length;
       }
 
-      // 2. Handle duplicates if overwrite is true
+      // 2. Overwrite duplicates in place (never insert a second active copy)
       if (overwrite && currentDuplicates.length > 0) {
         const cloudUpdates: Promise<void>[] = [];
         const newCloudItems: any[] = [];
 
         for (const item of currentDuplicates) {
           const { idToUpdate, isStatic, ...newItemData } = item;
-          
-          const payload: any = { ...newItemData, userId: saveToPublic ? 'PUBLIC_LIBRARY' : user?.uid, updatedAt: Date.now(), category: destination, deleted: false };
+
+          const payload: any = {
+            ...newItemData,
+            userId: targetUserId,
+            updatedAt: Date.now(),
+            category: targetCat,
+            deleted: false
+          };
           if (data?.fileName) payload.sourceFile = data.fileName;
           if (data?.fileType) payload.sourceType = data.fileType;
           Object.keys(payload).forEach(k => payload[k] === undefined && delete payload[k]);
 
-          if (isStatic) {
+          if (isStatic || !idToUpdate || String(idToUpdate).startsWith('static_')) {
             newCloudItems.push(payload);
-          } else if (idToUpdate) {
+          } else {
             cloudUpdates.push(
               updateCloudWord(idToUpdate, payload).then(() =>
                 purgeVocabDuplicatesKeeping(
-                  existingItems as any[],
+                  librarySnapshot as any[],
                   payload.german || newItemData.german,
-                  destination,
+                  targetCat,
                   idToUpdate
                 ).then(() => undefined)
               )
@@ -893,10 +922,12 @@ export default function Import() {
         }
 
         if (newCloudItems.length > 0) {
-          await bulkAddCloudWords(newCloudItems);
-          for (const item of newCloudItems) {
-            if (item.german) {
-              await purgeSoftDeletedVocabSiblings(existingItems as any[], item.german, destination);
+          const createdIds = await bulkAddCloudWords(newCloudItems);
+          const withIds = newCloudItems.map((item, i) => ({ ...item, id: createdIds[i] }));
+          const pool = [...librarySnapshot, ...withIds];
+          for (const item of withIds) {
+            if (item.german && item.id) {
+              await purgeVocabDuplicatesKeeping(pool as any[], item.german, targetCat, item.id);
             }
           }
         }
