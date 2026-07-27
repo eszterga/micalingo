@@ -97,11 +97,20 @@ export default function Layout() {
     };
   }, [t, location.pathname]);
 
+  const isNativeApp = Capacitor.isNativePlatform();
+  // Clear phone status bar (clock / wifi / notch) on mobile browser + Capacitor
+  const mobileTopInset = isNativeApp
+    ? 'max(2.5rem, calc(env(safe-area-inset-top, 0px) + 0.75rem))'
+    : 'max(2rem, calc(env(safe-area-inset-top, 0px) + 0.5rem))';
+
   return (
     <div className="flex h-screen bg-gradient-to-br from-blue-100 via-blue-50 to-white text-gray-800 flex-col relative overflow-hidden">
       <BackgroundBlobs />
       {/* Mobile Header */}
-      <div className="md:hidden bg-blue-900/70 backdrop-blur-lg text-white p-4 flex justify-between items-center shadow-sm border-b border-white/10 z-50 relative">
+      <div
+        className="md:hidden bg-blue-900/70 backdrop-blur-lg text-white px-4 pb-4 flex justify-between items-center shadow-sm border-b border-white/10 z-50 relative"
+        style={{ paddingTop: mobileTopInset }}
+      >
         <div className="flex items-center gap-3">
           {location.pathname !== '/' && (
             <button onClick={() => setIsMobileMenuOpen(true)} className="p-1 -ml-1 text-gray-300 hover:text-white" title="Menu">
@@ -166,8 +175,11 @@ export default function Layout() {
       {isMobileMenuOpen && (
         <div className="md:hidden fixed inset-0 z-50 flex">
           <div className="fixed inset-0 bg-black bg-opacity-50" onClick={() => setIsMobileMenuOpen(false)} />
-          <div className="relative flex flex-col w-64 max-w-xs bg-blue-900 text-blue-100 h-full shadow-xl animate-fade-in-left">
-            <div className="p-6 flex items-center justify-between">
+          <div
+            className="relative flex flex-col w-64 max-w-xs bg-blue-900 text-blue-100 h-full shadow-xl animate-fade-in-left"
+            style={{ paddingTop: mobileTopInset }}
+          >
+            <div className="px-6 pb-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <img src="/logo.png" alt="MicaLingo Logo" className="w-10 h-10 object-contain bg-white/90 rounded-full p-1 mt-1" width="40" height="40" />
                 <h1 className="text-2xl font-extrabold text-white tracking-wider">MicaLingo</h1>
