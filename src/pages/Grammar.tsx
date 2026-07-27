@@ -597,18 +597,18 @@ export default function Grammar() {
               const catItems = publicItems.filter(i => i.categoryId === cat.id);
               
               return (
-                <section key={cat.id} className="bg-white/60 backdrop-blur-xl rounded-[2.5rem] border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-6 md:p-8 transition-all duration-300 hover:bg-white/80">
-                  <button onClick={() => togglePublicSection(cat.id)} className="w-full flex items-center justify-between group outline-none">
-                    <div className="flex items-center gap-4 flex-1">
-                      <span className="bg-blue-100 text-blue-600 p-3 rounded-2xl text-xl shadow-sm group-hover:scale-110 transition-transform duration-300">{cat.icon}</span>
-                      <h2 className="text-2xl font-extrabold text-blue-950 m-0">{cat.title}</h2>
+                <section key={cat.id} className="bg-white/60 backdrop-blur-xl rounded-[2rem] sm:rounded-[2.5rem] border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-4 sm:p-6 md:p-8 transition-all duration-300 hover:bg-white/80 overflow-hidden">
+                  <button onClick={() => togglePublicSection(cat.id)} className="w-full flex items-center justify-between gap-2 group outline-none min-w-0">
+                    <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
+                      <span className="bg-blue-100 text-blue-600 p-2.5 sm:p-3 rounded-2xl text-lg sm:text-xl shadow-sm group-hover:scale-110 transition-transform duration-300 flex-shrink-0">{cat.icon}</span>
+                      <h2 className="text-lg sm:text-2xl font-extrabold text-blue-950 m-0 break-words text-left min-w-0">{cat.title}</h2>
                     </div>
-                    <div className={`w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-sm text-blue-600 transition-transform duration-500 ${isSectionOpen ? "rotate-180" : ""}`}><svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"></path></svg></div>
+                    <div className={`w-8 h-8 sm:w-12 sm:h-12 rounded-full bg-white flex items-center justify-center shadow-sm text-blue-600 transition-transform duration-300 flex-shrink-0 ${isSectionOpen ? "rotate-180" : ""}`}><svg className="w-4 h-4 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"></path></svg></div>
                   </button>
                   
-                  <div className={`grid transition-[grid-template-rows,opacity] duration-500 ease-in-out ${isSectionOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}>
-                    <div className="overflow-hidden">
-                      <div className="pt-4 border-t border-blue-50/50 flex flex-col gap-4 mt-6">
+                  <div className={`grid transition-[grid-template-rows,opacity] duration-300 ease-in-out ${isSectionOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}>
+                    <div className="min-h-0 overflow-hidden">
+                      <div className="pt-4 border-t border-blue-50/50 flex flex-col gap-4 mt-4 sm:mt-6">
                         {isAdmin && adminMode && (
                           <div className="flex justify-end">
                             <button onClick={() => openAddModal(true, cat.id)} className="w-full sm:w-auto justify-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-xl shadow-sm transition-colors flex items-center gap-2 text-sm">
@@ -619,24 +619,24 @@ export default function Grammar() {
                         {!catItems || catItems.length === 0 ? (
                           <div className="text-center py-8 text-gray-500 bg-white/40 rounded-xl border border-dashed border-gray-300">{t("no_items") || "No items yet."}</div>
                         ) : (
-                          <div className="space-y-6 pt-2 pb-2">
+                          <div className="space-y-4 sm:space-y-6 pt-2 pb-2">
                             {catItems.map((item: any) => (
-                              <div key={item.id} className="relative bg-white/90 backdrop-blur-xl p-5 md:p-6 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-blue-50 transition-all duration-300 group/item">
-                                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 w-full">
-                                  <button onClick={() => toggleItem(item.id)} className="flex-1 w-full flex items-center justify-between group outline-none text-left">
-                                    <div className="flex flex-col items-start gap-2 text-left pr-4">
-                                      <h3 className="font-extrabold text-gray-900 group-hover/item:text-blue-700 transition-colors text-xl m-0 leading-tight">{item.title}</h3>
+                              <div key={item.id} className="relative bg-white/90 backdrop-blur-xl p-4 sm:p-5 md:p-6 rounded-[1.5rem] sm:rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-blue-50 transition-all duration-300 group/item overflow-hidden">
+                                <div className="flex flex-col gap-3 w-full min-w-0">
+                                  <button onClick={() => toggleItem(item.id)} className="w-full flex items-start justify-between gap-2 group outline-none text-left min-w-0">
+                                    <div className="flex flex-col items-start gap-2 text-left min-w-0 flex-1">
+                                      <h3 className="font-extrabold text-gray-900 group-hover/item:text-blue-700 transition-colors text-base sm:text-xl m-0 leading-tight break-words">{item.title}</h3>
                                       {bookmarks[item.id] && (
-                                        <div className="flex items-center gap-2 mt-1">
-                                          <span onClick={(e) => handleContinueFrom(e, item.id, bookmarks[item.id])} className="inline-flex items-center gap-1.5 text-xs font-bold bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-lg shadow-sm border border-yellow-300 cursor-pointer hover:bg-yellow-200 transition-colors">🔖 {t("continue_from") || "Continue from:"} "{bookmarks[item.id].substring(0, 25)}..."</span>
-                                          <button onClick={(e) => deleteBookmark(e, item.id)} className="p-1 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors shadow-sm"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                                        <div className="flex items-center gap-2 mt-1 max-w-full">
+                                          <span onClick={(e) => handleContinueFrom(e, item.id, bookmarks[item.id])} className="inline-flex items-center gap-1.5 text-xs font-bold bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-lg shadow-sm border border-yellow-300 cursor-pointer hover:bg-yellow-200 transition-colors max-w-full truncate">🔖 {t("continue_from") || "Continue from:"} "{bookmarks[item.id].substring(0, 25)}..."</span>
+                                          <button onClick={(e) => deleteBookmark(e, item.id)} className="p-1 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors shadow-sm flex-shrink-0"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
                                         </div>
                                       )}
                                     </div>
-                                    <div className={`w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center shadow-sm text-blue-600 transition-transform duration-500 flex-shrink-0 ml-4 ${expandedItems.has(item.id) ? "rotate-180" : ""}`}><svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"></path></svg></div>
+                                    <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-blue-50 flex items-center justify-center shadow-sm text-blue-600 transition-transform duration-300 flex-shrink-0 ${expandedItems.has(item.id) ? "rotate-180" : ""}`}><svg className="w-4 h-4 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"></path></svg></div>
                                   </button>
                                   {isAdmin && adminMode && (
-                                    <div className="flex items-center gap-2 w-full sm:w-auto justify-end sm:border-l sm:border-gray-100 sm:pl-4 pt-3 sm:pt-0 border-t border-gray-100 sm:border-t-0 flex-shrink-0">
+                                    <div className="flex items-center gap-2 w-full justify-end border-t border-gray-100 pt-3 flex-shrink-0">
                                       <button onClick={(e) => { e.stopPropagation(); openEditModal(true, cat.id, item); }} className="px-3 py-2 sm:p-2 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 hover:text-blue-700 transition-colors shadow-sm flex items-center gap-2" title={t("edit_grammar_rule") || "Edit Grammar Rule"}>
                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                                         <span className="text-xs font-bold sm:hidden">{t("edit_word") || "Edit"}</span>
@@ -648,17 +648,17 @@ export default function Grammar() {
                                     </div>
                                   )}
                                 </div>
-                                <div className={`grid transition-[grid-template-rows,opacity,margin] duration-500 ease-in-out ${expandedItems.has(item.id) ? "grid-rows-[1fr] opacity-100 mt-6" : "grid-rows-[0fr] opacity-0 mt-0"}`}>
-                                  <div className="overflow-hidden">
+                                <div className={`grid transition-[grid-template-rows,opacity,margin] duration-300 ease-in-out ${expandedItems.has(item.id) ? "grid-rows-[1fr] opacity-100 mt-4 sm:mt-6" : "grid-rows-[0fr] opacity-0 mt-0"}`}>
+                                  <div className="min-h-0 overflow-hidden">
                                     <div className="pt-2 border-t border-blue-50/50 mt-2">
                                       {item.source && (
-                                        <p className="text-sm font-bold text-blue-600 mt-4 mb-6 flex items-center gap-2">
-                                          <span className="bg-blue-100 p-1.5 rounded-lg text-xs shadow-sm">✍️</span> {item.source}
+                                        <p className="text-sm font-bold text-blue-600 mt-4 mb-6 flex items-center gap-2 break-words">
+                                          <span className="bg-blue-100 p-1.5 rounded-lg text-xs shadow-sm flex-shrink-0">✍️</span> {item.source}
                                         </p>
                                       )}
-                                      <ArticleContent id={`article-content-${item.id}`} html={item.content} onImageClick={handleImageClick} onExpandTable={openTable} onMouseUp={(e) => handleMouseUp(e, item.id)} onTouchEnd={(e) => handleMouseUp(e, item.id)} className="prose prose-blue max-w-none text-gray-700 leading-relaxed space-y-4 mb-4" />
+                                      <ArticleContent id={`article-content-${item.id}`} html={item.content} onImageClick={handleImageClick} onExpandTable={openTable} onMouseUp={(e) => handleMouseUp(e, item.id)} onTouchEnd={(e) => handleMouseUp(e, item.id)} className="prose prose-blue max-w-none text-gray-700 leading-relaxed space-y-4 mb-4 overflow-x-auto" />
                                       {item.url && (
-                                        <a href={item.url} target="_blank" rel="noopener noreferrer" className="inline-block mt-4 text-blue-600 hover:text-blue-800 font-medium text-sm">
+                                        <a href={item.url} target="_blank" rel="noopener noreferrer" className="inline-block mt-4 text-blue-600 hover:text-blue-800 font-medium text-sm break-all">
                                           {t("original_source") || "Original source"} ↗
                                         </a>
                                       )}
@@ -695,28 +695,28 @@ export default function Grammar() {
                 {privateCategories.map(cat => {
                   const isSectionOpen = openPrivateSections[cat.id];
                   return (
-                    <section key={cat.id} className="bg-white/60 backdrop-blur-xl rounded-[2.5rem] border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-6 md:p-8 transition-all duration-300 hover:bg-white/80">
-                      <button onClick={() => togglePrivateSection(cat.id)} className="w-full flex items-center justify-between group outline-none">
-                        <div className="flex items-center gap-4 flex-1">
-                          <span className="bg-blue-100 text-blue-600 p-3 rounded-2xl text-xl shadow-sm group-hover:scale-110 transition-transform duration-300">{cat.icon}</span>
+                    <section key={cat.id} className="bg-white/60 backdrop-blur-xl rounded-[2rem] sm:rounded-[2.5rem] border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-4 sm:p-6 md:p-8 transition-all duration-300 hover:bg-white/80 overflow-hidden">
+                      <button onClick={() => togglePrivateSection(cat.id)} className="w-full flex items-center justify-between gap-2 group outline-none min-w-0">
+                        <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
+                          <span className="bg-blue-100 text-blue-600 p-2.5 sm:p-3 rounded-2xl text-lg sm:text-xl shadow-sm group-hover:scale-110 transition-transform duration-300 flex-shrink-0">{cat.icon}</span>
                           {editingCategory === cat.id ? (
-                            <div className="flex items-center gap-2 flex-1 max-w-sm" onClick={e => e.stopPropagation()}>
-                              <input type="text" autoFocus value={categoryTitleInput} onChange={e => setCategoryTitleInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && saveCategoryTitle(e, cat.id)} className="px-3 py-1.5 border border-blue-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-xl font-extrabold text-blue-950 bg-white/80 w-full shadow-inner" />
-                              <button onClick={e => saveCategoryTitle(e, cat.id)} className="bg-green-500 hover:bg-green-600 text-white p-2 rounded-xl shadow-sm transition-colors"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg></button>
+                            <div className="flex items-center gap-2 flex-1 min-w-0 max-w-full sm:max-w-sm" onClick={e => e.stopPropagation()}>
+                              <input type="text" autoFocus value={categoryTitleInput} onChange={e => setCategoryTitleInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && saveCategoryTitle(e, cat.id)} className="px-3 py-1.5 border border-blue-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-base sm:text-xl font-extrabold text-blue-950 bg-white/80 w-full min-w-0 shadow-inner" />
+                              <button onClick={e => saveCategoryTitle(e, cat.id)} className="bg-green-500 hover:bg-green-600 text-white p-2 rounded-xl shadow-sm transition-colors flex-shrink-0"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg></button>
                             </div>
                           ) : (
-                            <div className="flex items-center gap-3">
-                              <h2 className="text-2xl font-extrabold text-blue-950 m-0">{cat.title}</h2>
-                              <button onClick={e => { e.stopPropagation(); setEditingCategory(cat.id); setCategoryTitleInput(cat.title); }} className="text-gray-400 hover:text-blue-600 transition-colors p-1" title={t("edit_category")}><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg></button>
+                            <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                              <h2 className="text-lg sm:text-2xl font-extrabold text-blue-950 m-0 break-words text-left min-w-0">{cat.title}</h2>
+                              <button onClick={e => { e.stopPropagation(); setEditingCategory(cat.id); setCategoryTitleInput(cat.title); }} className="text-gray-400 hover:text-blue-600 transition-colors p-1 flex-shrink-0" title={t("edit_category")}><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg></button>
                             </div>
                           )}
                         </div>
-                        <div className={`w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-sm text-blue-600 transition-transform duration-500 ${isSectionOpen ? "rotate-180" : ""}`}><svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"></path></svg></div>
+                        <div className={`w-8 h-8 sm:w-12 sm:h-12 rounded-full bg-white flex items-center justify-center shadow-sm text-blue-600 transition-transform duration-300 flex-shrink-0 ${isSectionOpen ? "rotate-180" : ""}`}><svg className="w-4 h-4 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"></path></svg></div>
                       </button>
                       
-                      <div className={`grid transition-[grid-template-rows,opacity] duration-500 ease-in-out ${isSectionOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}>
-                        <div className="overflow-hidden">
-                          <div className="pt-4 border-t border-blue-50/50 flex flex-col gap-4 mt-6">
+                      <div className={`grid transition-[grid-template-rows,opacity] duration-300 ease-in-out ${isSectionOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}>
+                        <div className="min-h-0 overflow-hidden">
+                          <div className="pt-4 border-t border-blue-50/50 flex flex-col gap-4 mt-4 sm:mt-6">
                             <div className="flex justify-end">
                               <button onClick={() => openAddModal(false, cat.id)} className="w-full sm:w-auto justify-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-xl shadow-sm transition-colors flex items-center gap-2 text-sm">
                                 <span className="text-xl leading-none">+</span> {t("add_grammar_rule") || "Add Grammar Rule"}
@@ -725,23 +725,23 @@ export default function Grammar() {
                             {!cat.items || cat.items.length === 0 ? (
                               <div className="text-center py-8 text-gray-500 bg-white/40 rounded-xl border border-dashed border-gray-300">{t("no_items") || "No items yet."}</div>
                             ) : (
-                              <div className="space-y-6 pt-2 pb-2">
+                              <div className="space-y-4 sm:space-y-6 pt-2 pb-2">
                               {cat.items?.map((item: any) => (
-                                  <div key={item.id} className="relative bg-white/90 backdrop-blur-xl p-5 md:p-6 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-blue-50 transition-all duration-300 group/item">
-                                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 w-full">
-                                      <button onClick={() => toggleItem(item.id)} className="flex-1 w-full flex items-center justify-between group outline-none text-left">
-                                        <div className="flex flex-col items-start gap-2 text-left pr-4">
-                                          <h3 className="font-extrabold text-gray-900 group-hover/item:text-blue-700 transition-colors text-xl m-0 leading-tight">{item.title}</h3>
+                                  <div key={item.id} className="relative bg-white/90 backdrop-blur-xl p-4 sm:p-5 md:p-6 rounded-[1.5rem] sm:rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-blue-50 transition-all duration-300 group/item overflow-hidden">
+                                    <div className="flex flex-col gap-3 w-full min-w-0">
+                                      <button onClick={() => toggleItem(item.id)} className="w-full flex items-start justify-between gap-2 group outline-none text-left min-w-0">
+                                        <div className="flex flex-col items-start gap-2 text-left min-w-0 flex-1">
+                                          <h3 className="font-extrabold text-gray-900 group-hover/item:text-blue-700 transition-colors text-base sm:text-xl m-0 leading-tight break-words">{item.title}</h3>
                                           {bookmarks[item.id] && (
-                                            <div className="flex items-center gap-2 mt-1">
-                                              <span className="inline-flex items-center gap-1.5 text-xs font-bold bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-lg shadow-sm border border-yellow-300 cursor-pointer hover:bg-yellow-200 transition-colors">🔖 {t("continue_from") || "Continue from:"} "{bookmarks[item.id].substring(0, 25)}..."</span>
-                                              <button onClick={(e) => deleteBookmark(e, item.id)} className="p-1 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors shadow-sm"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                                            <div className="flex items-center gap-2 mt-1 max-w-full">
+                                              <span className="inline-flex items-center gap-1.5 text-xs font-bold bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-lg shadow-sm border border-yellow-300 cursor-pointer hover:bg-yellow-200 transition-colors max-w-full truncate">🔖 {t("continue_from") || "Continue from:"} "{bookmarks[item.id].substring(0, 25)}..."</span>
+                                              <button onClick={(e) => deleteBookmark(e, item.id)} className="p-1 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors shadow-sm flex-shrink-0"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
                                             </div>
                                           )}
                                         </div>
-                                        <div className={`w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center shadow-sm text-blue-600 transition-transform duration-500 flex-shrink-0 ml-4 ${expandedItems.has(item.id) ? "rotate-180" : ""}`}><svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"></path></svg></div>
+                                        <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-blue-50 flex items-center justify-center shadow-sm text-blue-600 transition-transform duration-300 flex-shrink-0 ${expandedItems.has(item.id) ? "rotate-180" : ""}`}><svg className="w-4 h-4 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"></path></svg></div>
                                       </button>
-                                      <div className="flex items-center gap-2 w-full sm:w-auto justify-end sm:border-l sm:border-gray-100 sm:pl-4 pt-3 sm:pt-0 border-t border-gray-100 sm:border-t-0 flex-shrink-0">
+                                      <div className="flex items-center gap-2 w-full justify-end border-t border-gray-100 pt-3 flex-shrink-0">
                                         <button onClick={(e) => { e.stopPropagation(); openEditModal(false, cat.id, item); }} className="px-3 py-2 sm:p-2 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-100 hover:text-blue-700 transition-colors shadow-sm flex items-center gap-2" title={t("edit_grammar_rule") || "Edit Grammar Rule"}>
                                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                                           <span className="text-xs font-bold sm:hidden">{t("edit_word") || "Edit"}</span>
@@ -752,17 +752,17 @@ export default function Grammar() {
                                         </button>
                                       </div>
                                     </div>
-                                    <div className={`grid transition-[grid-template-rows,opacity,margin] duration-500 ease-in-out ${expandedItems.has(item.id) ? "grid-rows-[1fr] opacity-100 mt-6" : "grid-rows-[0fr] opacity-0 mt-0"}`}>
-                                      <div className="overflow-hidden">
+                                    <div className={`grid transition-[grid-template-rows,opacity,margin] duration-300 ease-in-out ${expandedItems.has(item.id) ? "grid-rows-[1fr] opacity-100 mt-4 sm:mt-6" : "grid-rows-[0fr] opacity-0 mt-0"}`}>
+                                      <div className="min-h-0 overflow-hidden">
                                         <div className="pt-2 border-t border-blue-50/50 mt-2">
                                           {item.source && (
-                                            <p className="text-sm font-bold text-blue-600 mt-4 mb-6 flex items-center gap-2">
-                                              <span className="bg-blue-100 p-1.5 rounded-lg text-xs shadow-sm">✍️</span> {item.source}
+                                            <p className="text-sm font-bold text-blue-600 mt-4 mb-6 flex items-center gap-2 break-words">
+                                              <span className="bg-blue-100 p-1.5 rounded-lg text-xs shadow-sm flex-shrink-0">✍️</span> {item.source}
                                             </p>
                                           )}
-                                          <ArticleContent id={`article-content-${item.id}`} html={item.content} onImageClick={handleImageClick} onExpandTable={openTable} onMouseUp={(e) => handleMouseUp(e, item.id)} onTouchEnd={(e) => handleMouseUp(e, item.id)} className="prose prose-blue max-w-none text-gray-700 leading-relaxed space-y-4 mb-4" />
+                                          <ArticleContent id={`article-content-${item.id}`} html={item.content} onImageClick={handleImageClick} onExpandTable={openTable} onMouseUp={(e) => handleMouseUp(e, item.id)} onTouchEnd={(e) => handleMouseUp(e, item.id)} className="prose prose-blue max-w-none text-gray-700 leading-relaxed space-y-4 mb-4 overflow-x-auto" />
                                           {item.url && (
-                                            <a href={item.url} target="_blank" rel="noopener noreferrer" className="inline-block mt-4 text-blue-600 hover:text-blue-800 font-medium text-sm">
+                                            <a href={item.url} target="_blank" rel="noopener noreferrer" className="inline-block mt-4 text-blue-600 hover:text-blue-800 font-medium text-sm break-all">
                                               {t("original_source") || "Original source"} ↗
                                             </a>
                                           )}

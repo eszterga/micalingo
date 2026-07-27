@@ -997,20 +997,30 @@ export default function Import() {
           </div>
 
         {isAdmin && adminMode && (
-          <div className="flex items-center gap-2 bg-purple-50 px-4 py-2 rounded-xl border border-purple-200 shadow-sm w-full sm:w-auto">
-            <span className="text-sm font-bold text-purple-900 mr-2">Admin Target:</span>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                className="sr-only peer"
-                checked={saveToPublic}
-                onChange={(e) => setSaveToPublic(e.target.checked)}
-              />
-              <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600" />
-              <span className="ml-3 text-sm font-medium text-purple-800">
-                {saveToPublic ? 'Public Library' : 'Personal Library'}
-              </span>
-            </label>
+          <div className="w-full sm:w-auto max-w-full bg-purple-50 px-3 py-3 sm:px-4 rounded-xl border border-purple-200 shadow-sm">
+            <div className="text-xs sm:text-sm font-bold text-purple-900 mb-2">{t('admin_target') || 'Admin target'}</div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <label className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border cursor-pointer transition-colors ${!saveToPublic ? 'bg-white border-purple-400 shadow-sm' : 'bg-transparent border-purple-100 hover:bg-white/60'}`}>
+                <input
+                  type="radio"
+                  name="admin-target"
+                  className="w-4 h-4 text-purple-600 border-purple-300 focus:ring-purple-400 flex-shrink-0"
+                  checked={!saveToPublic}
+                  onChange={() => setSaveToPublic(false)}
+                />
+                <span className="text-sm font-medium text-purple-900 leading-snug break-words">{t('personal_library_target') || 'Personal library'}</span>
+              </label>
+              <label className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border cursor-pointer transition-colors ${saveToPublic ? 'bg-white border-purple-400 shadow-sm' : 'bg-transparent border-purple-100 hover:bg-white/60'}`}>
+                <input
+                  type="radio"
+                  name="admin-target"
+                  className="w-4 h-4 text-purple-600 border-purple-300 focus:ring-purple-400 flex-shrink-0"
+                  checked={saveToPublic}
+                  onChange={() => setSaveToPublic(true)}
+                />
+                <span className="text-sm font-medium text-purple-900 leading-snug break-words">{t('public_library_target') || 'Public library'}</span>
+              </label>
+            </div>
           </div>
         )}
       </div>
@@ -1477,7 +1487,7 @@ export default function Import() {
           >
             <div className="flex-1 text-left">
               <h2 className="text-2xl font-extrabold text-blue-950">
-                {t('manage_imported_files')} {isAdmin && adminMode && <span className="text-purple-600 ml-2">({saveToPublic ? 'Public' : 'Private'})</span>}
+                {t('manage_imported_files')} {isAdmin && adminMode && <span className="text-purple-600 ml-2">({saveToPublic ? (t('public_library_target') || 'Public') : (t('personal_library_target') || 'Private')})</span>}
               </h2>
               <p className="text-gray-600 text-sm mt-1">{t('manage_imported_files_desc')}</p>
             </div>
