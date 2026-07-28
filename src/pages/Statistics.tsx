@@ -172,6 +172,10 @@ export default function Statistics() {
     const parts = stripped.split('_');
     const quizId = parts.pop();
     const topic = parts.join('_');
+
+    if (topic === 'marked') {
+      return t('quiz_title_marked', { id: quizId || '' }).trim() || `${t('marked_words') || 'Marked words'} #${quizId}`;
+    }
     
     let translatedTopic = topic;
     if (topic === 'vocabulary') translatedTopic = t('vocabulary_short') || t('vocabulary') || 'Vocab';

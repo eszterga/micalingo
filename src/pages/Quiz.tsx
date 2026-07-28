@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 import { useI18n } from "../I18nContext";
-import { useCloudVocabulary, vocabCategoryKey, isReadingVocabCategory } from "../lib/firestore";
+import { useCloudVocabulary, vocabCategoryKey, isReadingVocabCategory, isMarkedVocabCategory } from "../lib/firestore";
 import { publicVocabulary, publicPhrases, publicArticles, publicPrepositions, publicAdjectives } from "../lib/public-data";
 import {
   WORDS_PER_QUIZ,
@@ -16,6 +16,15 @@ import { dbCloud } from '../lib/firebase';
 import * as XLSX from 'xlsx';
 import { Capacitor } from '@capacitor/core';
 import { App as CapacitorApp } from '@capacitor/app';
+import {
+  filterMarkedWords,
+  generateMarkedQuestions,
+  getMarkedQuizLevels,
+  getMarkedWordsForQuiz,
+  isWordMarked,
+  markWrongWord,
+  unmarkWord,
+} from "./markedWordsQuizEngine";
 
 interface Question {
   questionText: string;
@@ -53,6 +62,7 @@ export default function Quiz() {
   const topic = searchParams.get("topic");
   const quizId = parseInt(searchParams.get("quizId") || "1", 10);
   const isCustom = searchParams.get("custom") === 'true';
+  const isMarked = topic === 'marked';
   const isRedo = searchParams.get("redo") === 'true';
   const userVocabulary = useCloudVocabulary(user?.uid);
   const publicDbWordsRaw = useCloudVocabulary("PUBLIC_LIBRARY");
@@ -66,6 +76,9 @@ export default function Quiz() {
   const [score, setScore] = useState(0);
   const [quizState, setQuizState] = useState<'loading' | 'ongoing' | 'finished' | 'no_data'>('loading');
   const [showQuitModal, setShowQuitModal] = useState(false);
+  const [markBusy, setMarkBusy] = useState(false);
+  /** germanKey → firestore id (empty string = pending / known marked without id yet) */
+  const [localMarkedIds, setLocalMarkedIds] = useState<Record<string, string | null>>({});
 
   // Safeguard to prevent flashing "finished" or "no_data" while Firestore initializes from an empty local cache
   const [isInitializing, setIsInitializing] = useState(true);
@@ -85,7 +98,13 @@ export default function Quiz() {
     : topic === 'prepositions' ? t('prepositions_quiz')
     : topic === 'adjectives' ? (t('adjectives_quiz') || 'Adjectives')
     : topic === 'verbs' ? (t('verbs_quiz') || 'Verbs')
+    : topic === 'marked' ? (t('marked_words') || 'Marked words')
     : t('personalized_space');
+
+  const markedWords = useMemo(
+    () => filterMarkedWords(userVocabulary || []),
+    [userVocabulary]
+  );
 
   const publicQuizPool = useMemo(() => {
     if (!topic || !isQuizTopic(topic)) return [];
@@ -96,9 +115,12 @@ export default function Quiz() {
   }, [topic, publicDbWords, publicDbWordsRaw]);
 
   const totalQuizzes = useMemo(() => {
+    if (isMarked) {
+      return Math.max(1, getMarkedQuizLevels(markedWords));
+    }
     if (!topic || !isQuizTopic(topic)) return 0;
     return Math.max(1, Math.ceil(publicQuizPool.length / WORDS_PER_QUIZ));
-  }, [topic, publicQuizPool]);
+  }, [topic, publicQuizPool, isMarked, markedWords]);
 
   const customTopicWords = useMemo(() => {
     if (!isCustom || !topic) return [];
@@ -107,6 +129,11 @@ export default function Quiz() {
 
   const hasNextQuiz = useMemo(() => {
     if (!topic || quizId <= 0) return false;
+
+    if (isMarked) {
+      if (!userVocabulary) return true;
+      return quizId < getMarkedQuizLevels(markedWords);
+    }
 
     if (isCustom) {
       // Vocab still loading on Capacitor — don't hide Next (same idea as public undercount safeguard).
@@ -121,17 +148,20 @@ export default function Quiz() {
     // Navigating past the last quiz shows the existing "all completed" screen.
     if (totalQuizzes <= 1) return true;
     return quizId < totalQuizzes;
-  }, [topic, quizId, isCustom, userVocabulary, customTopicWords, totalQuizzes]);
+  }, [topic, quizId, isCustom, isMarked, userVocabulary, customTopicWords, markedWords, totalQuizzes]);
 
-  // Return to the same library the user started from (private custom vs public)
-  const quizzesBackPath = topic && isQuizTopic(topic)
-    ? `/quizzes/${topic}${isCustom ? '?tab=custom' : ''}`
-    : isCustom
-      ? '/quizzes?tab=personal'
-      : '/quizzes';
-
+  // Return to the same library the user started from (private custom / marked / public)
+  const quizzesBackPath = isMarked
+    ? '/quizzes?tab=marked'
+    : topic && isQuizTopic(topic)
+      ? `/quizzes/${topic}${isCustom ? '?tab=custom' : ''}`
+      : isCustom
+        ? '/quizzes?tab=personal'
+        : '/quizzes';
   let pageTitle = "";
-  if (isCustom) {
+  if (isMarked) {
+    pageTitle = t('quiz_title_marked', { id: quizId || '' }).trim();
+  } else if (isCustom) {
     pageTitle = t('quiz_title_custom', { topic: translatedTopic, id: quizId || '' }).trim();
   } else if (topic) {
     pageTitle = t('quiz_title_public', { topic: translatedTopic, id: quizId || '' }).trim();
@@ -248,7 +278,7 @@ export default function Quiz() {
 
         if (distractorPool.length < 3) {
           let fallbackSource = isCustom
-            ? (userVocabulary || []).filter((w: any) => !isReadingVocabCategory(w.category) && vocabCategoryKey(w.category) === topic)
+            ? (userVocabulary || []).filter((w: any) => !isReadingVocabCategory(w.category) && !isMarkedVocabCategory(w.category) && vocabCategoryKey(w.category) === topic)
             : (topic === 'phrases' ? publicPhrases : publicVocabulary);
           // Filter out invalid vocabulary entries (like articles) from being used as distractors.
           if (topic === 'vocabulary') {
@@ -294,11 +324,17 @@ export default function Quiz() {
       return;
     }
 
-    // useCloudVocabulary returns null while the first Firestore snapshot is pending.
-    // Treat that as loading — NOT as an empty library — otherwise higher public levels
-    // (e.g. vocabulary quiz 47, which exists only once PUBLIC_LIBRARY is merged) flash
-    // the "all completed" screen on every fresh Quiz mount (web and Capacitor alike).
-    if (!isCustom && topic && publicDbWordsRaw === null) {
+    // Marked quizzes only need the user's vocabulary — don't wait on the public library.
+    if (isMarked) {
+      if (!userVocabulary) {
+        setQuizState('loading');
+        return;
+      }
+    } else if (!isCustom && topic && publicDbWordsRaw === null) {
+      // useCloudVocabulary returns null while the first Firestore snapshot is pending.
+      // Treat that as loading — NOT as an empty library — otherwise higher public levels
+      // (e.g. vocabulary quiz 47, which exists only once PUBLIC_LIBRARY is merged) flash
+      // the "all completed" screen on every fresh Quiz mount (web and Capacitor alike).
       setQuizState('loading');
       return;
     }
@@ -311,17 +347,62 @@ export default function Quiz() {
       delete progressMap[quizKey];
       localStorage.setItem(progressKey, JSON.stringify(progressMap));
     } else if (savedProgress && savedProgress.questions && savedProgress.questions.length > 0) {
-      setQuestions(savedProgress.questions);
-      setCurrentQuestionIndex(savedProgress.index);
-      setScore(savedProgress.score);
-      setUserAnswers(savedProgress.userAnswers || []);
-      setQuizState('ongoing');
-      return;
+      // Marked pool can grow after an early partial load saved a short quiz (e.g. 4 Qs).
+      // Drop stale progress when it no longer matches the current level size.
+      if (isMarked) {
+        const expectedCount = getMarkedWordsForQuiz(markedWords, quizId).length;
+        const savedCount = savedProgress.questions.length;
+        if (expectedCount > 0 && savedCount !== expectedCount) {
+          delete progressMap[quizKey];
+          localStorage.setItem(progressKey, JSON.stringify(progressMap));
+        } else {
+          setQuestions(savedProgress.questions);
+          setCurrentQuestionIndex(savedProgress.index);
+          setScore(savedProgress.score);
+          setUserAnswers(savedProgress.userAnswers || []);
+          setQuizState('ongoing');
+          return;
+        }
+      } else {
+        setQuestions(savedProgress.questions);
+        setCurrentQuestionIndex(savedProgress.index);
+        setScore(savedProgress.score);
+        setUserAnswers(savedProgress.userAnswers || []);
+        setQuizState('ongoing');
+        return;
+      }
     }
 
     let wordsForQuiz: any[] = [];
 
-    if (isCustom) {
+    if (isMarked) {
+      if (markedWords.length < 4) {
+        if (isInitializing) {
+          setQuizState('loading');
+          return;
+        }
+        setQuizState('finished');
+        setQuestions([]);
+        return;
+      }
+      wordsForQuiz = getMarkedWordsForQuiz(markedWords, quizId).sort(() => 0.5 - Math.random());
+      if (wordsForQuiz.length === 0) {
+        if (isInitializing) {
+          setQuizState('loading');
+          return;
+        }
+        setQuizState('no_data');
+        setQuestions([]);
+        return;
+      }
+      const newQuestions = generateMarkedQuestions(wordsForQuiz, markedWords);
+      setQuestions(newQuestions);
+      setCurrentQuestionIndex(0);
+      setScore(0);
+      setUserAnswers([]);
+      setQuizState(newQuestions.length > 0 ? 'ongoing' : 'no_data');
+      return;
+    } else if (isCustom) {
       if (!userVocabulary) {
         setQuizState('loading');
         return;
@@ -355,9 +436,10 @@ export default function Quiz() {
       // Same pool / same slice as TopicQuizzes — keeps level N identical on web + app
       wordsForQuiz = getQuizLevelWords(publicQuizPool, quizId).sort(() => 0.5 - Math.random());
     } else if (userVocabulary) {
-      // Never pull "reading" (to-read) words into quiz pools
+      // Never pull "reading" (to-read) or marked words into generic quiz pools
       wordsForQuiz = [...userVocabulary].filter((word: any) =>
         !isReadingVocabCategory(word.category) &&
+        !isMarkedVocabCategory(word.category) &&
         (word.german || '').trim() !== '' &&
         (word.hungarian || '').trim() !== ''
       ).sort(() => 0.5 - Math.random()).slice(0, WORDS_PER_QUIZ);
@@ -377,7 +459,7 @@ export default function Quiz() {
       const newQuestions = generateQuestions(wordsForQuiz);
       setQuestions(newQuestions);
       setQuizState(newQuestions.length > 0 ? 'ongoing' : 'no_data');
-    } else if (isCustom) {
+    } else if (isCustom || isMarked) {
       if (isInitializing) {
         setQuizState('loading');
         return;
@@ -392,8 +474,7 @@ export default function Quiz() {
       setQuizState('no_data');
       setQuestions([]);
     }
-  }, [topic, userVocabulary, customTopicWords, quizId, isCustom, publicDbWordsRaw, publicQuizPool, isRedo, user?.uid, generateQuestions, isInitializing, searchParams]);
-
+  }, [topic, userVocabulary, customTopicWords, markedWords, quizId, isCustom, isMarked, publicDbWordsRaw, publicQuizPool, isRedo, user?.uid, generateQuestions, isInitializing, searchParams]);
   useEffect(() => {
     if (quizState === 'ongoing' && questions.length > 0) {
       const progressKey = user ? `micalingo_quiz_progress_${user.uid}` : 'micalingo_quiz_progress_guest';
@@ -575,6 +656,46 @@ export default function Quiz() {
     setQuestions([]);
   };
 
+  const currentGermanKey = (questions[currentQuestionIndex]?.german || '').toLowerCase().trim();
+  const existingMarked = isWordMarked(markedWords, questions[currentQuestionIndex]?.german);
+  const localMarkId = currentGermanKey ? localMarkedIds[currentGermanKey] : undefined;
+  const isCurrentMarked =
+    localMarkId !== undefined ? localMarkId !== null : !!existingMarked;
+
+  const handleToggleMark = async () => {
+    if (!user || markBusy || !questions[currentQuestionIndex]) return;
+    const q = questions[currentQuestionIndex];
+    const key = (q.german || '').toLowerCase().trim();
+    if (!key) return;
+
+    setMarkBusy(true);
+    try {
+      if (isCurrentMarked) {
+        const id = (localMarkId && localMarkId.length > 0 ? localMarkId : existingMarked?.id) || undefined;
+        setLocalMarkedIds((prev) => ({ ...prev, [key]: null }));
+        if (id) await unmarkWord(id);
+      } else {
+        setLocalMarkedIds((prev) => ({ ...prev, [key]: '' }));
+        const saved = await markWrongWord(user.uid, markedWords, {
+          german: q.german,
+          hungarian: q.hungarian || q.correctAnswer,
+          example: q.example,
+          sourceTopic: isMarked ? undefined : (topic || undefined),
+        });
+        setLocalMarkedIds((prev) => ({ ...prev, [key]: saved?.id || '' }));
+      }
+    } catch (e) {
+      console.error('Failed to toggle marked word:', e);
+      setLocalMarkedIds((prev) => {
+        const next = { ...prev };
+        delete next[key];
+        return next;
+      });
+    } finally {
+      setMarkBusy(false);
+    }
+  };
+
   const handleBackClick = () => {
     if (quizState === 'ongoing') {
       setShowQuitModal(true);
@@ -626,7 +747,7 @@ export default function Quiz() {
   }
 
   if (quizState === 'finished') {
-    if (questions.length === 0 && (isCustom || (!topic && userVocabulary))) {
+    if (questions.length === 0 && (isCustom || isMarked || (!topic && userVocabulary))) {
       return (
         <div className="relative min-h-[85vh] w-full flex flex-col pt-4 md:pt-8 pb-12">
           <BackgroundBlobs />
@@ -635,13 +756,20 @@ export default function Quiz() {
               <div className="w-16 h-16 bg-orange-50 text-orange-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">⚠️</div>
               <h2 className="text-3xl font-extrabold text-blue-950 mb-4">{t('not_enough_words')}</h2>
               <p className="text-lg text-blue-900/70 font-medium max-w-md mx-auto break-words">
-                {t('not_enough_words_desc', { topic: translatedTopic })}
+                {isMarked
+                  ? (t('marked_words_empty_desc') || t('not_enough_words_desc', { topic: translatedTopic }))
+                  : t('not_enough_words_desc', { topic: translatedTopic })}
               </p>
-              <p className="text-gray-500 mt-2 font-medium">{t('need_more_items', { topic: topic || 'custom' })}</p>
+              {!isMarked && (
+                <p className="text-gray-500 mt-2 font-medium">{t('need_more_items', { topic: topic || 'custom' })}</p>
+              )}
               {user && (
                 <div className="mt-8">
-                  <button onClick={() => navigate(`/import?destination=${topic}`)} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl shadow-sm transition-colors">
-                    {t('import_more_words')}
+                  <button
+                    onClick={() => navigate(isMarked ? '/quizzes?tab=marked' : `/import?destination=${topic}`)}
+                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl shadow-sm transition-colors"
+                  >
+                    {isMarked ? (t('back_to_quizzes') || 'Back') : t('import_more_words')}
                   </button>
                 </div>
               )}
@@ -750,7 +878,25 @@ export default function Quiz() {
           </div>
         </div>
         
-        <div className="bg-white/80 backdrop-blur-xl p-6 sm:p-10 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white">
+        <div className="bg-white/80 backdrop-blur-xl p-6 sm:p-10 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white relative">
+          {user && isAnswered && selectedAnswer !== currentQuestion.correctAnswer && (
+            <button
+              type="button"
+              onClick={handleToggleMark}
+              disabled={markBusy}
+              title={isCurrentMarked ? (t('unmark_word') || 'Remove mark') : (t('mark_word') || 'Mark word')}
+              aria-label={isCurrentMarked ? (t('unmark_word') || 'Remove mark') : (t('mark_word') || 'Mark word')}
+              className={`absolute top-4 right-4 sm:top-6 sm:right-6 w-11 h-11 rounded-full flex items-center justify-center transition-all shadow-sm border ${
+                isCurrentMarked
+                  ? 'bg-amber-100 border-amber-300 text-amber-500 scale-105'
+                  : 'bg-white/90 border-blue-100 text-gray-300 hover:text-amber-400 hover:border-amber-200'
+              } disabled:opacity-50`}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-6 h-6" fill={isCurrentMarked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.8">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+              </svg>
+            </button>
+          )}
           <div className="text-center mb-8 sm:mb-10">
             <p className="text-base sm:text-lg text-blue-900/60 font-bold uppercase tracking-wider mb-2 sm:mb-3">{t('choose_correct_one')}</p>
             <p className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-blue-950 break-words leading-snug sm:leading-tight">

@@ -9,6 +9,7 @@ import {
   getQuizLevelCount,
 } from "../lib/quizPool";
 import * as XLSX from 'xlsx';
+import { filterMarkedWords, getMarkedQuizLevels } from "./markedWordsQuizEngine";
 
 const BackgroundBlobs = () => (
   <>
@@ -76,6 +77,7 @@ export default function Results() {
     const parts = stripped.split('_');
     parts.pop(); // quizId
     const topic = parts.join('_');
+    if (topic === 'marked') return '/quizzes?tab=marked';
     return `/quizzes/${topic}${isCustom ? '?tab=custom' : ''}`;
   };
 
@@ -105,6 +107,12 @@ export default function Results() {
     const quizId = parseInt(parts.pop() || '0');
     const topic = parts.join('_');
 
+    if (topic === 'marked') {
+      if (!userVocabulary) return false;
+      const levels = getMarkedQuizLevels(filterMarkedWords(userVocabulary));
+      return quizId >= levels;
+    }
+
     if (isCustom) {
       if (!userVocabulary) return false; // still loading — allow Next
       const customCount = buildCustomQuizPool(topic, userVocabulary).length;
@@ -128,6 +136,10 @@ export default function Results() {
     const parts = stripped.split('_');
     const quizId = parts.pop();
     const topic = parts.join('_');
+
+    if (topic === 'marked') {
+      return t('quiz_title_marked', { id: quizId || '' }).trim();
+    }
     
     let translatedTopic = topic;
     if (topic === 'vocabulary') translatedTopic = t('vocabulary') || 'Vocabulary';

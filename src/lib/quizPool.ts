@@ -6,7 +6,7 @@ import {
   publicAdjectives,
   type PublicWord,
 } from './public-data';
-import { vocabCategoryKey, isReadingVocabCategory } from './firestore';
+import { vocabCategoryKey, isReadingVocabCategory, isMarkedVocabCategory } from './firestore';
 
 export const WORDS_PER_QUIZ = 20;
 
@@ -69,6 +69,7 @@ function wordMatchesTopic(word: { category?: string }, topic: string) {
     return true;
   }
   if (isReadingVocabCategory(word.category)) return false;
+  if (isMarkedVocabCategory(word.category)) return false;
   return vocabCategoryKey(word.category) === topic;
 }
 
@@ -181,6 +182,7 @@ export function buildCustomQuizPool(
       (w) =>
         !w.deleted &&
         !isReadingVocabCategory(w.category) &&
+        !isMarkedVocabCategory(w.category) &&
         vocabCategoryKey(w.category) === topic &&
         (w.german || '').trim() !== '' &&
         (w.hungarian || '').trim() !== ''

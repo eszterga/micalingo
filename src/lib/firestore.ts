@@ -75,9 +75,12 @@ export const QUIZ_VOCAB_CATEGORIES = [
 
 export const READING_VOCAB_CATEGORY = 'reading';
 
+/** Words starred after wrong answers — mixed practice pool, separate from topic quizzes. */
+export const MARKED_VOCAB_CATEGORY = 'marked';
+
 /**
  * Normalize a stored category. Missing/blank only defaults to vocabulary (quiz).
- * Explicit "reading" always stays reading — never mixed with quiz.
+ * Explicit "reading" / "marked" always stay in their own libraries — never mixed with topic quizzes.
  */
 export const vocabCategoryKey = (category?: string | null) => {
   const c = (category || '').trim();
@@ -86,6 +89,9 @@ export const vocabCategoryKey = (category?: string | null) => {
 
 export const isReadingVocabCategory = (category?: string | null) =>
   vocabCategoryKey(category) === READING_VOCAB_CATEGORY;
+
+export const isMarkedVocabCategory = (category?: string | null) =>
+  vocabCategoryKey(category) === MARKED_VOCAB_CATEGORY;
 
 export const isQuizVocabCategory = (category?: string | null) =>
   (QUIZ_VOCAB_CATEGORIES as readonly string[]).includes(vocabCategoryKey(category));
