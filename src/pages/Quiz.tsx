@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 import { useI18n } from "../I18nContext";
@@ -33,6 +33,38 @@ interface Question {
   example?: string;
   german?: string;
   hungarian?: string;
+}
+
+/** Module-level cache — building this from ~1k static words is expensive on mobile. */
+let staticGermanTermsCache: Set<string> | null = null;
+
+function addGermanTerm(set: Set<string>, german?: string) {
+  if (!german) return;
+  const lower = german.toLowerCase().trim();
+  set.add(lower);
+  set.add(lower.replace(/^(der|die|das)\s+/i, '').trim());
+  set.add(lower.replace(/^sich\s+/i, '').trim());
+}
+
+function getStaticGermanTerms(): Set<string> {
+  if (staticGermanTermsCache) return staticGermanTermsCache;
+  const set = new Set<string>();
+  publicVocabulary.forEach((w) => addGermanTerm(set, w.german));
+  publicPhrases.forEach((w) => addGermanTerm(set, w.german));
+  publicArticles.forEach((w) => addGermanTerm(set, w.german));
+  publicPrepositions.forEach((w) => addGermanTerm(set, w.german));
+  if (publicAdjectives) publicAdjectives.forEach((w) => addGermanTerm(set, w.german));
+  set.add('verhalten');
+  staticGermanTermsCache = set;
+  return set;
+}
+
+function shuffleInPlace<T>(arr: T[]): T[] {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
 }
 
 const BackgroundBlobs = () => (
@@ -79,13 +111,8 @@ export default function Quiz() {
   const [markBusy, setMarkBusy] = useState(false);
   /** germanKey → firestore id (empty string = pending / known marked without id yet) */
   const [localMarkedIds, setLocalMarkedIds] = useState<Record<string, string | null>>({});
-
-  // Safeguard to prevent flashing "finished" or "no_data" while Firestore initializes from an empty local cache
-  const [isInitializing, setIsInitializing] = useState(true);
-  useEffect(() => {
-    const timer = setTimeout(() => setIsInitializing(false), 800);
-    return () => clearTimeout(timer);
-  }, []);
+  /** Prevents regenerating (and flickering) when cloud vocab arrives after questions are ready. */
+  const builtQuizKeyRef = useRef<string | null>(null);
 
   const [showExamples] = useState(() => {
     const stored = localStorage.getItem('micalingo_show_examples');
@@ -108,11 +135,10 @@ export default function Quiz() {
 
   const publicQuizPool = useMemo(() => {
     if (!topic || !isQuizTopic(topic)) return [];
-    // While Firestore is still loading, only seed from static data so we don't
-    // flash "all completed" for higher levels that depend on PUBLIC_LIBRARY.
-    if (publicDbWordsRaw === null) return buildPublicQuizPool(topic, []);
+    // Merge static seed with whatever cloud data we have (cache or live).
+    // Higher levels that need PUBLIC_LIBRARY stay empty until it arrives — see quiz effect.
     return buildPublicQuizPool(topic, publicDbWords);
-  }, [topic, publicDbWords, publicDbWordsRaw]);
+  }, [topic, publicDbWords]);
 
   const totalQuizzes = useMemo(() => {
     if (isMarked) {
@@ -169,32 +195,16 @@ export default function Quiz() {
     pageTitle = t('quiz_title_personal');
   }
 
+  const germanTermsLookup = useMemo(() => {
+    const set = new Set(getStaticGermanTerms());
+    publicDbWords.forEach((w: any) => addGermanTerm(set, w.german));
+    if (userVocabulary) userVocabulary.forEach((w: any) => addGermanTerm(set, w.german));
+    return set;
+  }, [publicDbWords, userVocabulary]);
+
   const generateQuestions = useCallback((words: any[]) => {
     const selectedWords = [...words];
-
-    // Build a set of all known German terms to prevent bad data (German words in Hungarian column) from being used as distractors
-    const allGermanTerms = new Set<string>();
-    const addToSet = (german?: string) => {
-      if (!german) return;
-      const lower = german.toLowerCase().trim();
-      allGermanTerms.add(lower);
-      allGermanTerms.add(lower.replace(/^(der|die|das)\s+/i, '').trim());
-      allGermanTerms.add(lower.replace(/^sich\s+/i, '').trim());
-    };
-
-    // Add ALL possible German words to our dictionary to be absolutely sure
-    selectedWords.forEach(w => addToSet(w.german));
-    publicDbWords.forEach((w: any) => addToSet(w.german));
-    if (userVocabulary) userVocabulary.forEach((w: any) => addToSet(w.german));
-    publicVocabulary.forEach((w: any) => addToSet(w.german));
-    publicPhrases.forEach((w: any) => addToSet(w.german));
-    publicArticles.forEach((w: any) => addToSet(w.german));
-    publicPrepositions.forEach((w: any) => addToSet(w.german));
-    if (publicAdjectives) publicAdjectives.forEach((w: any) => addToSet(w.german));
-
-    // Catch any known stragglers that don't match exactly
-    allGermanTerms.add("verhalten");
-
+    const allGermanTerms = germanTermsLookup;
     return selectedWords.map(word => {
       if (topic === 'articles') {
         const match = word.german.match(/^(der|die|das)\s+(.*)/i);
@@ -204,7 +214,7 @@ export default function Quiz() {
         const correctAnswer = baseArticle;
         const allowedArticles = ["der", "die", "das"];
         const distractors = allowedArticles.filter(a => a !== correctAnswer);
-        const options = [...distractors, correctAnswer].sort(() => 0.5 - Math.random());
+        const options = shuffleInPlace([...distractors, correctAnswer]);
 
         return {
           questionText: `___ ${baseNoun} (${word.hungarian})`,
@@ -242,7 +252,7 @@ export default function Quiz() {
         const uniqueDistractors: string[] = [];
         const seenNormalized = new Set<string>([normalizedCorrect]);
 
-        distractorPool.sort(() => 0.5 - Math.random());
+        shuffleInPlace(distractorPool);
         
         for (const d of distractorPool) {
           const normD = normalize(d);
@@ -253,7 +263,7 @@ export default function Quiz() {
           if (uniqueDistractors.length === 3) break;
         }
 
-        const options = [...uniqueDistractors, correctAnswer].sort(() => 0.5 - Math.random());
+        const options = shuffleInPlace([...uniqueDistractors, correctAnswer]);
 
         return {
           questionText: word.german, // Column A (Verb + Hungarian meaning)
@@ -288,10 +298,10 @@ export default function Quiz() {
           distractorPool = Array.from(new Set([...distractorPool, ...fallbackPool]));
         }
 
-        distractorPool.sort(() => 0.5 - Math.random());
+        shuffleInPlace(distractorPool);
         const distractors = distractorPool.slice(0, 3);
 
-        const options = [...distractors, correctAnswer].sort(() => 0.5 - Math.random());
+        const options = shuffleInPlace([...distractors, correctAnswer]);
 
         return {
           questionText: word.german,
@@ -303,7 +313,7 @@ export default function Quiz() {
         };
       }
     }).filter(Boolean) as Question[];
-  }, [topic, isCustom, publicDbWords, userVocabulary]);
+  }, [topic, isCustom, germanTermsLookup, userVocabulary]);
 
   useEffect(() => {
     const quizKey = isCustom ? `custom_${topic || 'general'}_${quizId}` : `${topic || 'custom'}_${quizId}`;
@@ -318,23 +328,20 @@ export default function Quiz() {
         setScore(savedHistory.score || 0);
         setUserAnswers(savedHistory.userAnswers || []);
         setQuizState('finished');
+        builtQuizKeyRef.current = quizKey;
         return;
       }
       // finished=true but no history yet — keep in-memory completion UI (next/review/download)
       return;
     }
 
-    // Marked quizzes only need the user's vocabulary — don't wait on the public library.
-    if (isMarked) {
-      if (!userVocabulary) {
-        setQuizState('loading');
-        return;
-      }
-    } else if (!isCustom && topic && publicDbWordsRaw === null) {
-      // useCloudVocabulary returns null while the first Firestore snapshot is pending.
-      // Treat that as loading — NOT as an empty library — otherwise higher public levels
-      // (e.g. vocabulary quiz 47, which exists only once PUBLIC_LIBRARY is merged) flash
-      // the "all completed" screen on every fresh Quiz mount (web and Capacitor alike).
+    // Already built this quiz — don't rebuild when cloud vocab updates (avoids mobile flicker).
+    if (builtQuizKeyRef.current === quizKey) {
+      return;
+    }
+
+    // Marked / custom quizzes only need the user's vocabulary.
+    if ((isMarked || isCustom) && userVocabulary === null) {
       setQuizState('loading');
       return;
     }
@@ -361,6 +368,7 @@ export default function Quiz() {
           setScore(savedProgress.score);
           setUserAnswers(savedProgress.userAnswers || []);
           setQuizState('ongoing');
+          builtQuizKeyRef.current = quizKey;
           return;
         }
       } else {
@@ -369,6 +377,7 @@ export default function Quiz() {
         setScore(savedProgress.score);
         setUserAnswers(savedProgress.userAnswers || []);
         setQuizState('ongoing');
+        builtQuizKeyRef.current = quizKey;
         return;
       }
     }
@@ -377,22 +386,17 @@ export default function Quiz() {
 
     if (isMarked) {
       if (markedWords.length < 4) {
-        if (isInitializing) {
-          setQuizState('loading');
-          return;
-        }
+        // userVocabulary resolved — truly not enough marked words
         setQuizState('finished');
         setQuestions([]);
+        builtQuizKeyRef.current = quizKey;
         return;
       }
-      wordsForQuiz = getMarkedWordsForQuiz(markedWords, quizId).sort(() => 0.5 - Math.random());
+      wordsForQuiz = shuffleInPlace([...getMarkedWordsForQuiz(markedWords, quizId)]);
       if (wordsForQuiz.length === 0) {
-        if (isInitializing) {
-          setQuizState('loading');
-          return;
-        }
         setQuizState('no_data');
         setQuestions([]);
+        builtQuizKeyRef.current = quizKey;
         return;
       }
       const newQuestions = generateMarkedQuestions(wordsForQuiz, markedWords);
@@ -401,80 +405,80 @@ export default function Quiz() {
       setScore(0);
       setUserAnswers([]);
       setQuizState(newQuestions.length > 0 ? 'ongoing' : 'no_data');
+      builtQuizKeyRef.current = quizKey;
       return;
     } else if (isCustom) {
-      if (!userVocabulary) {
-        setQuizState('loading');
-        return;
-      }
       const sortedSource = customTopicWords;
 
       // Truly not enough material in the private library to run any quiz
       if (sortedSource.length < 4) {
-        if (isInitializing) {
-          setQuizState('loading');
-          return;
-        }
         setQuizState('finished');
         setQuestions([]);
+        builtQuizKeyRef.current = quizKey;
         return;
       }
 
-      wordsForQuiz = getQuizLevelWords(sortedSource, quizId).sort(() => 0.5 - Math.random());
+      wordsForQuiz = shuffleInPlace([...getQuizLevelWords(sortedSource, quizId)]);
 
       // Past the last private level — same "all completed" screen as public
       if (wordsForQuiz.length === 0) {
-        if (isInitializing) {
-          setQuizState('loading');
-          return;
-        }
         setQuizState('no_data');
         setQuestions([]);
+        builtQuizKeyRef.current = quizKey;
         return;
       }
     } else if (topic && isQuizTopic(topic)) {
       // Same pool / same slice as TopicQuizzes — keeps level N identical on web + app
-      wordsForQuiz = getQuizLevelWords(publicQuizPool, quizId).sort(() => 0.5 - Math.random());
-    } else if (userVocabulary) {
-      // Never pull "reading" (to-read) or marked words into generic quiz pools
-      wordsForQuiz = [...userVocabulary].filter((word: any) =>
-        !isReadingVocabCategory(word.category) &&
-        !isMarkedVocabCategory(word.category) &&
-        (word.german || '').trim() !== '' &&
-        (word.hungarian || '').trim() !== ''
-      ).sort(() => 0.5 - Math.random()).slice(0, WORDS_PER_QUIZ);
-    }
+      wordsForQuiz = shuffleInPlace([...getQuizLevelWords(publicQuizPool, quizId)]);
 
-    if (!isCustom && !topic && userVocabulary && wordsForQuiz.length < 4) {
-      if (isInitializing) {
+      // Level not in static seed yet and PUBLIC_LIBRARY still loading — keep spinner,
+      // do NOT flash "all completed" / empty.
+      if (wordsForQuiz.length === 0 && publicDbWordsRaw === null) {
         setQuizState('loading');
         return;
       }
+    } else if (userVocabulary) {
+      // Never pull "reading" (to-read) or marked words into generic quiz pools
+      wordsForQuiz = shuffleInPlace(
+        [...userVocabulary].filter((word: any) =>
+          !isReadingVocabCategory(word.category) &&
+          !isMarkedVocabCategory(word.category) &&
+          (word.german || '').trim() !== '' &&
+          (word.hungarian || '').trim() !== ''
+        )
+      ).slice(0, WORDS_PER_QUIZ);
+    } else if (userVocabulary === null) {
+      setQuizState('loading');
+      return;
+    }
+
+    if (!isCustom && !topic && userVocabulary && wordsForQuiz.length < 4) {
       setQuizState('finished');
       setQuestions([]);
+      builtQuizKeyRef.current = quizKey;
       return;
     }
 
     if (wordsForQuiz.length > 0) {
       const newQuestions = generateQuestions(wordsForQuiz);
       setQuestions(newQuestions);
+      setCurrentQuestionIndex(0);
+      setScore(0);
+      setUserAnswers([]);
       setQuizState(newQuestions.length > 0 ? 'ongoing' : 'no_data');
+      builtQuizKeyRef.current = quizKey;
     } else if (isCustom || isMarked) {
-      if (isInitializing) {
-        setQuizState('loading');
-        return;
-      }
       setQuizState('no_data');
       setQuestions([]);
+      builtQuizKeyRef.current = quizKey;
+    } else if (publicDbWordsRaw === null) {
+      setQuizState('loading');
     } else {
-      if (isInitializing || publicDbWordsRaw === null) {
-        setQuizState('loading');
-        return;
-      }
       setQuizState('no_data');
       setQuestions([]);
+      builtQuizKeyRef.current = quizKey;
     }
-  }, [topic, userVocabulary, customTopicWords, markedWords, quizId, isCustom, isMarked, publicDbWordsRaw, publicQuizPool, isRedo, user?.uid, generateQuestions, isInitializing, searchParams]);
+  }, [topic, userVocabulary, customTopicWords, markedWords, quizId, isCustom, isMarked, publicDbWordsRaw, publicQuizPool, isRedo, user?.uid, generateQuestions, searchParams]);
   useEffect(() => {
     if (quizState === 'ongoing' && questions.length > 0) {
       const progressKey = user ? `micalingo_quiz_progress_${user.uid}` : 'micalingo_quiz_progress_guest';
@@ -644,6 +648,7 @@ export default function Quiz() {
   const handleNextQuiz = () => {
     if (!topic || !hasNextQuiz) return;
     const nextId = quizId + 1;
+    builtQuizKeyRef.current = null;
     navigate(
       `/quiz?topic=${encodeURIComponent(topic)}&quizId=${nextId}${isCustom ? '&custom=true' : ''}`
     );
@@ -811,6 +816,7 @@ export default function Quiz() {
               </button>
               <button onClick={() => {
                 // Prefer SPA navigation over full reload — more reliable in Capacitor WebViews
+                builtQuizKeyRef.current = null;
                 navigate(`/quiz?topic=${encodeURIComponent(topic || '')}&quizId=${quizId}${isCustom ? '&custom=true' : ''}&redo=true`, { replace: true });
                 setQuizState('loading');
                 setScore(0);

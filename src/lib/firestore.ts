@@ -17,10 +17,91 @@ export interface CloudVocabularyItem {
 }
 
 const VOCAB_COLLECTION = 'vocabulary';
+const VOCAB_SESSION_PREFIX = 'micalingo_vocab_v1_';
 
-// Hook to fetch live data from Firestore for a specific user
+/** In-memory snapshot so remounts (Quiz ↔ TopicQuizzes) paint instantly. */
+const vocabMemoryCache = new Map<string, CloudVocabularyItem[]>();
+const vocabSubscribers = new Map<string, Set<(words: CloudVocabularyItem[]) => void>>();
+const vocabUnsubscribers = new Map<string, () => void>();
+
+function readVocabSessionCache(userId: string): CloudVocabularyItem[] | null {
+  try {
+    const raw = sessionStorage.getItem(VOCAB_SESSION_PREFIX + userId);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? (parsed as CloudVocabularyItem[]) : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeVocabSessionCache(userId: string, words: CloudVocabularyItem[]) {
+  try {
+    sessionStorage.setItem(VOCAB_SESSION_PREFIX + userId, JSON.stringify(words));
+  } catch {
+    // Quota / private mode — in-memory cache still helps within the session.
+  }
+}
+
+function getCachedVocabulary(userId: string): CloudVocabularyItem[] | null {
+  if (vocabMemoryCache.has(userId)) return vocabMemoryCache.get(userId)!;
+  const sessionCached = readVocabSessionCache(userId);
+  if (sessionCached) {
+    vocabMemoryCache.set(userId, sessionCached);
+    return sessionCached;
+  }
+  return null;
+}
+
+function publishVocabulary(userId: string, words: CloudVocabularyItem[]) {
+  vocabMemoryCache.set(userId, words);
+  writeVocabSessionCache(userId, words);
+  const listeners = vocabSubscribers.get(userId);
+  if (listeners) {
+    listeners.forEach((cb) => cb(words));
+  }
+}
+
+function ensureVocabSubscription(userId: string) {
+  if (vocabUnsubscribers.has(userId)) return;
+
+  const q = query(
+    collection(dbCloud, VOCAB_COLLECTION),
+    where('userId', '==', userId)
+  );
+
+  const unsubscribe = onSnapshot(
+    q,
+    (snapshot) => {
+      const data = snapshot.docs.map((d) => ({
+        id: d.id,
+        ...d.data(),
+      })) as CloudVocabularyItem[];
+      data.sort((a, b) => a.german.localeCompare(b.german));
+      publishVocabulary(userId, data);
+    },
+    (error) => {
+      console.error('Error fetching vocabulary:', error);
+      // Keep a prior warm cache if we have one; only fall back to empty on first failure.
+      if (!vocabMemoryCache.has(userId)) {
+        publishVocabulary(userId, []);
+      }
+    }
+  );
+
+  vocabUnsubscribers.set(userId, unsubscribe);
+}
+
+/**
+ * Live Firestore vocabulary for a userId (or PUBLIC_LIBRARY).
+ * Hydrates immediately from memory/session cache so quiz pages don't flicker
+ * while waiting for the first snapshot on tablet/mobile.
+ * Returns `null` only when this id has never been loaded in the session.
+ */
 export function useCloudVocabulary(userId: string | undefined) {
-  const [words, setWords] = useState<CloudVocabularyItem[] | null>(null);
+  const [words, setWords] = useState<CloudVocabularyItem[] | null>(() =>
+    userId ? getCachedVocabulary(userId) : null
+  );
 
   useEffect(() => {
     if (!userId) {
@@ -28,26 +109,30 @@ export function useCloudVocabulary(userId: string | undefined) {
       return;
     }
 
-    const q = query(
-      collection(dbCloud, VOCAB_COLLECTION),
-      where("userId", "==", userId)
-    );
+    const cached = getCachedVocabulary(userId);
+    setWords(cached);
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as CloudVocabularyItem[];
-      
-      // Sort alphabetically in memory
-      data.sort((a, b) => a.german.localeCompare(b.german));
-      setWords(data);
-    }, (error) => {
-      console.error('Error fetching vocabulary:', error);
-      setWords([]);
-    });
+    let listeners = vocabSubscribers.get(userId);
+    if (!listeners) {
+      listeners = new Set();
+      vocabSubscribers.set(userId, listeners);
+    }
+    const onUpdate = (data: CloudVocabularyItem[]) => setWords(data);
+    listeners.add(onUpdate);
+    ensureVocabSubscription(userId);
 
-    return () => unsubscribe();
+    return () => {
+      listeners!.delete(onUpdate);
+      if (listeners!.size === 0) {
+        vocabSubscribers.delete(userId);
+        const unsub = vocabUnsubscribers.get(userId);
+        if (unsub) {
+          unsub();
+          vocabUnsubscribers.delete(userId);
+        }
+        // Keep memory + session caches warm for the next mount.
+      }
+    };
   }, [userId]);
 
   return words;

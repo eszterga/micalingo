@@ -43,12 +43,6 @@ export default function TopicQuizzes() {
   const [progress, setProgress] = useState<Record<string, any>>({});
   const [activeTab, setActiveTab] = useState<'default' | 'custom'>(searchParams.get('tab') === 'custom' ? 'custom' : 'default');
 
-  const [isInitializing, setIsInitializing] = useState(true);
-  useEffect(() => {
-    const timer = setTimeout(() => setIsInitializing(false), 800);
-    return () => clearTimeout(timer);
-  }, []);
-
   useEffect(() => {
     const tab = searchParams.get('tab');
     if (tab === 'custom') setActiveTab('custom');
@@ -80,11 +74,9 @@ export default function TopicQuizzes() {
 
   const sourceData = useMemo(() => {
     if (!topic) return [];
-    // Wait for PUBLIC_LIBRARY before listing DB-backed levels so the count
-    // matches what Quiz.tsx will actually serve.
-    if (publicDbWordsRaw === null) return buildPublicQuizPool(topic, []);
+    // Show static levels immediately; cloud merges in when cache/network arrives.
     return buildPublicQuizPool(topic, publicDbWords);
-  }, [topic, publicDbWords, publicDbWordsRaw]);
+  }, [topic, publicDbWords]);
 
   const pageTitle = useMemo(() => {
     if (!topic) return "";
@@ -155,7 +147,7 @@ export default function TopicQuizzes() {
 
       {activeTab === 'default' && (
         <div className="bg-white/60 backdrop-blur-xl p-6 md:p-8 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white">
-          {publicDbWordsRaw === null || (isInitializing && quizzes.length === 0) ? (
+          {quizzes.length === 0 && publicDbWordsRaw === null ? (
             <div className="flex flex-col items-center justify-center py-12 space-y-4">
               <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
               <p className="text-blue-900/70 font-medium">{t('loading') || 'Loading...'}</p>
@@ -272,7 +264,7 @@ export default function TopicQuizzes() {
                 </button>
               </div>
             </div>
-          ) : userVocabulary === undefined || (isInitializing && customQuizzes.length === 0) ? (
+          ) : userVocabulary === null ? (
             <div className="bg-white/70 backdrop-blur-xl p-12 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white text-center">
               <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
               <p className="text-blue-900/70 font-medium">{t('loading') || 'Loading...'}</p>

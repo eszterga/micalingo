@@ -1,6 +1,12 @@
 import { initializeApp, type FirebaseApp } from 'firebase/app';
 import { getAuth, type Auth } from 'firebase/auth';
-import { getFirestore, type Firestore } from 'firebase/firestore';
+import {
+  getFirestore,
+  initializeFirestore,
+  persistentLocalCache,
+  persistentMultipleTabManager,
+  type Firestore,
+} from 'firebase/firestore';
 
 const firebaseConfig = {
     apiKey: "AIzaSyAVlTHTkaiwYYIz_-KuIJBHKA7NYaWqwTA",
@@ -14,8 +20,21 @@ const firebaseConfig = {
 // Initialize Firebase
 const app: FirebaseApp = initializeApp(firebaseConfig);
 
+// Persistent IndexedDB cache so quizzes don't wait on a full network round-trip
+// after the first load (especially important on tablet / mobile WebViews).
+let db: Firestore;
+try {
+  db = initializeFirestore(app, {
+    localCache: persistentLocalCache({
+      tabManager: persistentMultipleTabManager(),
+    }),
+  });
+} catch {
+  db = getFirestore(app);
+}
+
 // Export the necessary Firebase services
 export const auth: Auth = getAuth(app);
-export const db: Firestore = getFirestore(app);
+export { db };
 export const dbCloud: Firestore = db;
 export default app;
