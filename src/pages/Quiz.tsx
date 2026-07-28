@@ -864,7 +864,10 @@ export default function Quiz() {
   }
 
   return (
-    <div className="relative min-h-[85vh] w-full flex flex-col pt-4 md:pt-8 pb-12">
+    <div
+      className="relative min-h-[85vh] w-full flex flex-col pt-4 md:pt-8"
+      style={{ paddingBottom: 'max(3rem, calc(1.5rem + env(safe-area-inset-bottom, 0px)))' }}
+    >
       <BackgroundBlobs />
       <div className="relative z-10 w-full max-w-4xl mx-auto space-y-6 px-4 md:px-8">
         <div>
@@ -878,26 +881,30 @@ export default function Quiz() {
           </div>
         </div>
         
-        <div className="bg-white/80 backdrop-blur-xl p-6 sm:p-10 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white relative">
+        <div className="bg-white/80 backdrop-blur-xl p-5 sm:p-6 md:p-10 rounded-[2rem] sm:rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white relative">
           {user && isAnswered && selectedAnswer !== currentQuestion.correctAnswer && (
             <button
               type="button"
-              onClick={handleToggleMark}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleToggleMark();
+              }}
               disabled={markBusy}
               title={isCurrentMarked ? (t('unmark_word') || 'Remove mark') : (t('mark_word') || 'Mark word')}
               aria-label={isCurrentMarked ? (t('unmark_word') || 'Remove mark') : (t('mark_word') || 'Mark word')}
-              className={`absolute top-4 right-4 sm:top-6 sm:right-6 w-11 h-11 rounded-full flex items-center justify-center transition-all shadow-sm border ${
+              className={`absolute top-3 right-3 sm:top-5 sm:right-5 z-20 min-w-[2.75rem] min-h-[2.75rem] w-12 h-12 sm:w-11 sm:h-11 rounded-full flex items-center justify-center transition-all shadow-md border touch-manipulation active:scale-95 ${
                 isCurrentMarked
                   ? 'bg-amber-100 border-amber-300 text-amber-500 scale-105'
-                  : 'bg-white/90 border-blue-100 text-gray-300 hover:text-amber-400 hover:border-amber-200'
+                  : 'bg-white border-blue-100 text-gray-300 hover:text-amber-400 hover:border-amber-200'
               } disabled:opacity-50`}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-6 h-6" fill={isCurrentMarked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.8">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-7 h-7 sm:w-6 sm:h-6" fill={isCurrentMarked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.8">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
               </svg>
             </button>
           )}
-          <div className="text-center mb-8 sm:mb-10">
+          <div className={`text-center mb-8 sm:mb-10 ${user && isAnswered && selectedAnswer !== currentQuestion.correctAnswer ? 'pr-12 sm:pr-14' : ''}`}>
             <p className="text-base sm:text-lg text-blue-900/60 font-bold uppercase tracking-wider mb-2 sm:mb-3">{t('choose_correct_one')}</p>
             <p className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-blue-950 break-words leading-snug sm:leading-tight">
               {currentQuestion.questionText}
@@ -936,22 +943,22 @@ export default function Quiz() {
 
           {isAnswered && selectedAnswer !== currentQuestion.correctAnswer && (
             <div className="text-center mt-8 sm:mt-10 animate-fade-in-up">
-              <button onClick={handleNext} className="bg-gradient-to-r from-blue-600 to-blue-700 text-white font-extrabold px-8 sm:px-10 py-3 sm:py-4 rounded-xl shadow-lg hover:shadow-xl hover:from-blue-700 hover:to-blue-800 transition-all text-lg sm:text-xl transform hover:scale-105 active:scale-95">
+              <button onClick={handleNext} className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-blue-700 text-white font-extrabold px-8 sm:px-10 py-3.5 sm:py-4 rounded-xl shadow-lg hover:shadow-xl hover:from-blue-700 hover:to-blue-800 transition-all text-lg sm:text-xl transform hover:scale-105 active:scale-95 touch-manipulation">
                 {currentQuestionIndex < questions.length - 1 ? t('next_question') : t('finish_quiz')}
               </button>
             </div>
           )}
         </div>
 
-        <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 pt-2">
+        <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 sm:gap-4 pt-2">
           <button 
             onClick={handleBackClick} 
-            className="w-full sm:w-auto justify-center bg-white/70 backdrop-blur-md border border-white text-gray-700 font-bold px-6 py-3 rounded-xl shadow-sm hover:bg-white transition-colors flex items-center gap-2"
+            className="w-full sm:w-auto justify-center bg-white/70 backdrop-blur-md border border-white text-gray-700 font-bold px-6 py-3.5 rounded-xl shadow-sm hover:bg-white transition-colors flex items-center gap-2 touch-manipulation active:scale-[0.98]"
           >
             {t('back_to_quizzes')}
           </button>
           {hasNextQuiz && (
-            <button onClick={handleNextQuiz} className="w-full sm:w-auto justify-center bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-xl shadow-sm transition-colors flex items-center gap-2">
+            <button onClick={handleNextQuiz} className="w-full sm:w-auto justify-center bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3.5 rounded-xl shadow-sm transition-colors flex items-center gap-2 touch-manipulation active:scale-[0.98]">
               {t('next_quiz_button')}
             </button>
           )}
