@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
 
+# Canonical property: https://micalingo.com (not github.io)
 Sitemap: https://micalingo.com/sitemap.xml
