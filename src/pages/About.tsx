@@ -1,6 +1,32 @@
 import { Link } from 'react-router-dom';
 import { useI18n } from '../I18nContext';
 
+function AboutBody({ text, supportLabel }: { text: string; supportLabel: string }) {
+  const parts = text.split('{support_link}');
+
+  const openSupport = () => {
+    window.dispatchEvent(new CustomEvent('openSupportModal'));
+  };
+
+  if (parts.length < 2) {
+    return <p className="text-gray-700 leading-relaxed mb-4 whitespace-pre-line">{text}</p>;
+  }
+
+  return (
+    <p className="text-gray-700 leading-relaxed mb-4 whitespace-pre-line">
+      {parts[0]}
+      <button
+        type="button"
+        onClick={openSupport}
+        className="font-bold text-pink-600 hover:text-pink-700 underline underline-offset-2 transition-colors"
+      >
+        {supportLabel}
+      </button>
+      {parts[1]}
+    </p>
+  );
+}
+
 export default function About() {
   const { t } = useI18n();
 
@@ -17,7 +43,7 @@ export default function About() {
 
         <section>
           <h2 className="text-xl font-extrabold text-blue-900 mb-3">{t('about_heading')}</h2>
-          <p className="text-gray-700 leading-relaxed mb-4">{t('about_body')}</p>
+          <AboutBody text={t('about_body')} supportLabel={t('support_micalingo')} />
           <p className="text-gray-700 leading-relaxed">{t('about_mission')}</p>
         </section>
 

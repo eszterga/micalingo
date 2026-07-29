@@ -59,11 +59,17 @@ export default function Layout() {
         setShowConsiderSupport(true);
       }
     };
+
+    const handleOpenSupportModal = () => {
+      setIsSupportModalOpen(true);
+    };
   
     window.addEventListener('showSupportPrompt', handleShowSupportPrompt);
+    window.addEventListener('openSupportModal', handleOpenSupportModal);
   
     return () => {
       window.removeEventListener('showSupportPrompt', handleShowSupportPrompt);
+      window.removeEventListener('openSupportModal', handleOpenSupportModal);
     };
   }, []);
 

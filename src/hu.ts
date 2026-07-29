@@ -627,8 +627,8 @@ _items_save: "Nincsenek érvényes szavak a mentéshez, vagy nem vagy bejelentke
 
   about_title: "Rólunk és kapcsolat",
   about_heading: "A MicaLingo-ról",
-  about_body: "A MicaLingo egy német nyelvvizsgára felkészítő alkalmazás és webhely (micalingo.com), amely szókinccsel, nyelvtannal, kvízekkel, olvasási és hallásértési anyagokkal segíti a tanulókat. Hozd létre saját könyvtáradat, kövesd nyomon az előrehaladásodat, és tanulj a saját tempódban — a weben vagy az Android alkalmazásban.",
-  about_mission: "Célunk, hogy a strukturált némettanulást elérhetővé, gyakorlativá és a valódi vizsgafelkészülés igényeire fókuszálttá tegyük.",
+  about_body: "A MicaLingo egy német nyelvvizsgára felkészítő alkalmazás és webhely (micalingo.com), amely szókinccsel, nyelvtannal, kvízekkel, olvasási és hallásértési anyagokkal segíti a tanulókat. Saját könyvtáradat azonban használhatod más nyelvre, de akár más téma gyakorlására is! Tesztelheted tudásodat történelmi évszámokkal, fővárosok és országok neveivel, matematikai feladványokat is generálhatsz magadnak. Az oldal és az Android alkalmazás jelenleg ingyenesen elérhető, de az oldal fejlesztője támogatható tetszőleges összeggel ({support_link}). Ahhoz, hogy jelenleg ingyenesen használható legyen az oldal, reklámhirdetéseket engedélyeztünk. Megértésedet köszönjük!",
+  about_mission: "Célunk, hogy a strukturált, valódi vizsgafelkészülés igényeire fókuszálva támogassuk a fejlődésedet.",
   contact_heading: "Kapcsolat és támogatás",
   contact_body: "Kérdésed, visszajelzésed van, vagy segítségre van szükséged? Örömmel hallunk rólad.",
   contact_general_label: "Általános kapcsolat",

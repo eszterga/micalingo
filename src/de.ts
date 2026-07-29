@@ -629,8 +629,8 @@ export const de = {
 
   about_title: "Über uns & Kontakt",
   about_heading: "Über MicaLingo",
-  about_body: "MicaLingo ist eine App und Website (micalingo.com) zur Vorbereitung auf Deutschprüfungen. Lernende üben Wortschatz, Grammatik, Quizze sowie Lese- und Hörmaterialien. Erstelle deine eigene Bibliothek, verfolge deinen Fortschritt und lerne in deinem eigenen Tempo — im Web oder in der Android-App.",
-  about_mission: "Unser Ziel ist es, strukturiertes Deutschlernen zugänglich, praxisnah und auf echte Prüfungsvorbereitung ausgerichtet zu machen.",
+  about_body: "MicaLingo ist eine App und Website (micalingo.com) zur Vorbereitung auf Deutschprüfungen und hilft Lernenden mit Wortschatz, Grammatik, Quizzen sowie Lese- und Hörmaterialien. Deine persönliche Bibliothek kannst du jedoch auch für andere Sprachen — oder sogar ganz andere Themen — nutzen! Teste dein Wissen mit historischen Jahreszahlen, Hauptstädten und Ländernnamen, oder erstelle dir selbst Mathematikaufgaben. Die Website und die Android-App sind derzeit kostenlos nutzbar, aber du kannst die Entwicklerin mit einem beliebigen Betrag unterstützen ({support_link}). Damit der Dienst vorerst kostenlos bleiben kann, haben wir Werbung freigeschaltet. Vielen Dank für dein Verständnis!",
+  about_mission: "Unser Ziel ist es, deinen Fortschritt zu unterstützen und dabei die Anforderungen einer strukturierten, echten Prüfungsvorbereitung in den Mittelpunkt zu stellen.",
   contact_heading: "Kontakt & Support",
   contact_body: "Hast du eine Frage, Feedback oder brauchst du Hilfe? Wir freuen uns von dir zu hören.",
   contact_general_label: "Allgemeiner Kontakt",

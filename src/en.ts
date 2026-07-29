@@ -629,8 +629,8 @@ export const en = {
 
   about_title: "About & Contact",
   about_heading: "About MicaLingo",
-  about_body: "MicaLingo is a German exam preparation app and website (micalingo.com) that helps learners practise vocabulary, grammar, quizzes, reading, and listening materials. Create your own library, track your progress, and study at your own pace — on the web or in the Android app.",
-  about_mission: "Our goal is to make structured German learning accessible, practical, and focused on real exam preparation needs.",
+  about_body: "MicaLingo is a German exam preparation app and website (micalingo.com) that helps learners with vocabulary, grammar, quizzes, reading, and listening materials. You can also use your personal library for other languages — or even completely different topics! Test your knowledge with historical dates, capital cities and country names, or generate maths challenges for yourself. The website and Android app are currently free to use, but you can support the developer with any amount ({support_link}). To keep the Service free for now, we have enabled advertisements. Thank you for your understanding!",
+  about_mission: "Our goal is to support your progress by focusing on the needs of structured, real exam preparation.",
   contact_heading: "Contact & Support",
   contact_body: "Have a question, feedback, or need help? We would love to hear from you.",
   contact_general_label: "General contact",
