@@ -217,6 +217,18 @@ export default function Layout() {
                   </a>
                 </div>
               )}
+
+              <div className="mt-4 pt-4 border-t border-blue-800 flex flex-col gap-1">
+                <Link to="/privacy" onClick={() => setIsMobileMenuOpen(false)} className="px-4 py-2.5 rounded text-sm text-blue-200 hover:bg-blue-800 hover:text-white transition-colors">
+                  {t('footer_privacy') || 'Privacy Policy'}
+                </Link>
+                <Link to="/terms" onClick={() => setIsMobileMenuOpen(false)} className="px-4 py-2.5 rounded text-sm text-blue-200 hover:bg-blue-800 hover:text-white transition-colors">
+                  {t('footer_terms') || 'Terms of Service'}
+                </Link>
+                <Link to="/about" onClick={() => setIsMobileMenuOpen(false)} className="px-4 py-2.5 rounded text-sm text-blue-200 hover:bg-blue-800 hover:text-white transition-colors">
+                  {t('footer_about') || 'About & Contact'}
+                </Link>
+              </div>
             </nav>
           </div>
         </div>
@@ -284,8 +296,20 @@ export default function Layout() {
         </header>
 
         <main className="flex-1 overflow-y-auto p-4 md:p-8">
-          <div className="max-w-6xl mx-auto h-full">
-            <Outlet />
+          <div className="max-w-6xl mx-auto h-full flex flex-col min-h-full">
+            <div className="flex-1">
+              <Outlet />
+            </div>
+            <footer className="mt-10 pt-6 pb-20 md:pb-8 border-t border-blue-200/40 text-center relative z-10">
+              <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm font-bold text-blue-800/80 mb-3">
+                <Link to="/privacy" className="hover:text-blue-950 transition-colors">{t('footer_privacy') || 'Privacy Policy'}</Link>
+                <Link to="/terms" className="hover:text-blue-950 transition-colors">{t('footer_terms') || 'Terms of Service'}</Link>
+                <Link to="/about" className="hover:text-blue-950 transition-colors">{t('footer_about') || 'About & Contact'}</Link>
+              </nav>
+              <p className="text-xs text-blue-900/50 font-medium">
+                © {new Date().getFullYear()} MicaLingo · {t('footer_rights') || 'All rights reserved.'}
+              </p>
+            </footer>
           </div>
         </main>
       </div>

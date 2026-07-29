@@ -35,6 +35,9 @@ const PublicAudioCategory = React.lazy(() => import("./pages/PublicAudioCategory
 const GrammarCategory = React.lazy(() => import("./pages/GrammarCategory"));
 const PrivateMaterials = React.lazy(() => import("./pages/PrivateMaterials"));
 const ProtectedRoute = React.lazy(() => import("./components/ProtectedRoute"));
+const Privacy = React.lazy(() => import("./pages/Privacy"));
+const Terms = React.lazy(() => import("./pages/Terms"));
+const About = React.lazy(() => import("./pages/About"));
 
 // Main Application Router
 export default function App() {
@@ -70,6 +73,9 @@ export default function App() {
             <Route path="/learning-materials/listening/podcasts/:categoryId" element={<PublicAudioCategory type="podcasts" />} />
             <Route path="/learning-materials/listening/audiobooks/:categoryId" element={<PublicAudioCategory type="audiobooks" />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/about" element={<About />} />
             
             {/* Personalized sections requiring login */}
             <Route element={<ProtectedRoute />}>
