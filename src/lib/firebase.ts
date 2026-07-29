@@ -1,5 +1,11 @@
+import { Capacitor } from '@capacitor/core';
 import { initializeApp, type FirebaseApp } from 'firebase/app';
-import { getAuth, type Auth } from 'firebase/auth';
+import {
+  getAuth,
+  indexedDBLocalPersistence,
+  initializeAuth,
+  type Auth,
+} from 'firebase/auth';
 import {
   getFirestore,
   initializeFirestore,
@@ -33,8 +39,23 @@ try {
   db = getFirestore(app);
 }
 
+// On native, IndexedDB persistence keeps the JS auth session across app restarts
+// (required when bridging native Google Sign-In into the Firebase JS SDK).
+function createAuth(firebaseApp: FirebaseApp): Auth {
+  if (Capacitor.isNativePlatform()) {
+    try {
+      return initializeAuth(firebaseApp, {
+        persistence: indexedDBLocalPersistence,
+      });
+    } catch {
+      return getAuth(firebaseApp);
+    }
+  }
+  return getAuth(firebaseApp);
+}
+
 // Export the necessary Firebase services
-export const auth: Auth = getAuth(app);
+export const auth: Auth = createAuth(app);
 export { db };
 export const dbCloud: Firestore = db;
 export default app;

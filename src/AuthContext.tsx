@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
-import { type User, onAuthStateChanged, signOut as firebaseSignOut } from 'firebase/auth';
+import { type User, onAuthStateChanged } from 'firebase/auth';
 import { auth } from './lib/firebase';
+import { signOutFromApp } from './lib/googleAuth';
 
 interface AuthContextType {
   user: User | null;
@@ -45,7 +46,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     sessionStorage.removeItem("adminPromptShown");
     sessionStorage.removeItem("micalingo_admin_mode");
     setAdminModeState(false);
-    await firebaseSignOut(auth);
+    await signOutFromApp();
   };
 
   return (
