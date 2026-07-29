@@ -301,7 +301,7 @@ export const en = {
   required_format: "Required Format:",
   download_template: "Download Template",
   go_to_import_page: "Go to Import Page →",
-  instructions_articles: "Column A should be the article ('der', 'die', 'das'). Column B should be the noun (and the plural version, fully written with article). Column C is the Hungarian meaning. Column D is optional for example sentences.",
+  instructions_articles: "Column A = article ('der', 'die', 'das') — the quiz answer. Column B = noun; column C = Hungarian meaning — shown together as the question (e.g. Mann (a férfi)). Column D = optional example sentence shown as a hint when examples are enabled.",
   instructions_prepositions: "Column A should be the German preposition, Column B the Hungarian meaning. These are mandatory. Column C is optional for examples.",
   instructions_vocabulary: "Column A should be the German Word (you can add with plural, in the same column, e.g., 'das Haus, die Häuser'). Column B is the Hungarian meaning. These are mandatory fields. Column C is optional for example sentences.",
   instructions_phrases: "Column A should be the German sentence or phrase. Column B is the Hungarian meaning. These are mandatory fields. Column C is optional for example sentences.",

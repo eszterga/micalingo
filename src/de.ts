@@ -301,7 +301,7 @@ export const de = {
   required_format: "Erforderliches Format:",
   download_template: "Vorlage herunterladen",
   go_to_import_page: "Zur Importseite gehen →",
-  instructions_articles: "Spalte A = Artikel, Spalte B = Substantiv, Spalte C = Ungarisch.",
+  instructions_articles: "Spalte A = Artikel ('der', 'die', 'das') — Quiz-Antwort. Spalte B = Substantiv; Spalte C = ungarische Bedeutung — zusammen als Frage (z. B. Mann (a férfi)). Spalte D = optionaler Beispielsatz als Hinweis, wenn Beispiele aktiv sind.",
   instructions_prepositions: "Spalte A = Präposition, Spalte B = Ungarisch.",
   instructions_vocabulary: "Spalte A = Deutsch, Spalte B = Ungarisch.",
   instructions_phrases: "Spalte A = Phrase, Spalte B = Ungarisch.",

@@ -301,7 +301,7 @@ _items_save: "Nincsenek érvényes szavak a mentéshez, vagy nem vagy bejelentke
   required_format: "Elvárt formátum:",
   download_template: "Sablon letöltése",
   go_to_import_page: "Tovább az importáláshoz →",
-  instructions_articles: "Az A oszlop legyen a névelő ('der', 'die', 'das'). A B oszlop legyen a főnév (és a többes szám, teljesen kiírva névelővel). A C oszlop a magyar jelentés. A D oszlop opcionális a példamondatokhoz.",
+  instructions_articles: "Az A oszlop = névelő ('der', 'die', 'das') — a kvíz válasza. A B oszlop = főnév; a C oszlop = magyar jelentés — együtt jelennek meg a kérdésben (pl. Mann (a férfi)). A D oszlop = opcionális példamondat, ha be vannak kapcsolva a példák.",
   instructions_prepositions: "Az A oszlop legyen a német elöljárószó, a B oszlop a magyar jelentés. Ezek kötelezőek. A C oszlop opcionális a példákhoz.",
   instructions_vocabulary: "Az A oszlop legyen a német szó (hozzáadhatod a többes számot is ugyanabban az oszlopban, pl. 'das Haus, die Häuser'). A B oszlop a magyar jelentés. Ezek kötelező mezők. A C oszlop opcionális a példamondatokhoz.",
   instructions_phrases: "Az A oszlopba a német kifejezés vagy mondat kerüljön. A B oszlop a magyar jelentés. Ezek kötelező mezők. A C oszlop opcionális a példamondatokhoz.",

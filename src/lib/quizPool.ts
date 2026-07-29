@@ -10,6 +10,95 @@ import { vocabCategoryKey, isReadingVocabCategory, isMarkedVocabCategory } from 
 
 export const WORDS_PER_QUIZ = 20;
 
+const ARTICLE_LABELS = ['der', 'die', 'das'] as const;
+export type ArticleLabel = (typeof ARTICLE_LABELS)[number];
+
+export function isArticleLabel(value: string | undefined | null): value is ArticleLabel {
+  const h = (value || '').toLowerCase().trim();
+  return (ARTICLE_LABELS as readonly string[]).includes(h);
+}
+
+/** Correct article (column A): must be a der/die/das prefix on `german`. */
+export function getArticleFromQuizWord(word: { german?: string }): ArticleLabel {
+  const match = (word.german || '').match(/^(der|die|das)\b/i);
+  if (match) return match[1].toLowerCase() as ArticleLabel;
+  return 'der';
+}
+
+/** Question noun (column B) — text after the article prefix. */
+export function getNounFromArticleQuizWord(word: { german?: string }): string {
+  const match = (word.german || '').trim().match(/^(der|die|das)\s+(.+)/i);
+  return match ? match[2].trim() : (word.german || '').trim();
+}
+
+/** Optional post-answer hint from column D (`example` only — not Hungarian in column C). */
+export function getArticleQuizHint(word: { example?: string }): string | undefined {
+  const ex = (word.example || '').trim();
+  return ex || undefined;
+}
+
+function articleStoredHungarian(hungarian?: string): string {
+  const h = (hungarian || '').trim();
+  return isArticleLabel(h) ? '' : h;
+}
+
+/**
+ * Canonical articles-quiz row: column A + B in `german`, optional C/D in example/note.
+ * Legacy static rows (noun in german, article in hungarian) are upgraded here only — not in the UI.
+ */
+export function normalizeArticleQuizWord(word: {
+  german?: string;
+  hungarian?: string;
+  example?: string;
+  note?: string;
+  category?: string;
+  deleted?: boolean;
+}): QuizWord | null {
+  const match = (word.german || '').trim().match(/^(der|die|das)\s+(.+)/i);
+  if (match) {
+    const article = match[1].toLowerCase() as ArticleLabel;
+    const noun = match[2].trim();
+    if (!noun) return null;
+    return {
+      german: `${article} ${noun}`,
+      hungarian: articleStoredHungarian(word.hungarian),
+      example: word.example,
+      note: word.note,
+      category: word.category,
+      deleted: word.deleted,
+    };
+  }
+  const legacyNoun = (word.german || '').trim();
+  if (legacyNoun && isArticleLabel(word.hungarian)) {
+    const article = word.hungarian.toLowerCase() as ArticleLabel;
+    return {
+      german: `${article} ${legacyNoun}`,
+      hungarian: '',
+      example: word.example,
+      note: word.note,
+      category: word.category,
+      deleted: word.deleted,
+    };
+  }
+  return null;
+}
+
+function orderPoolForArticleQuizzes(pool: QuizWord[]): QuizWord[] {
+  const buckets: Record<ArticleLabel, QuizWord[]> = { der: [], die: [], das: [] };
+  for (const w of pool) {
+    buckets[getArticleFromQuizWord(w)].push(w);
+  }
+  const mixed: QuizWord[] = [];
+  const maxLen = Math.max(buckets.der.length, buckets.die.length, buckets.das.length);
+  for (let i = 0; i < maxLen; i++) {
+    for (const art of ARTICLE_LABELS) {
+      const item = buckets[art][i];
+      if (item) mixed.push(item);
+    }
+  }
+  return mixed;
+}
+
 export const QUIZ_TOPICS = [
   'vocabulary',
   'phrases',
@@ -29,6 +118,7 @@ export type QuizWord = {
   german: string;
   hungarian: string;
   example?: string;
+  note?: string;
   category?: string;
   deleted?: boolean;
 };
@@ -53,14 +143,34 @@ export function getStaticSourceForTopic(topic: string): PublicWord[] {
  * Listing pages and the quiz runner MUST use the same rule, otherwise a level
  * can appear in the UI (e.g. vocabulary quiz 47) and then open empty.
  */
-export function isQuizableWord(word: { german?: string; hungarian?: string }, topic: string) {
+export function isQuizableWord(
+  word: { german?: string; hungarian?: string; example?: string; note?: string },
+  topic: string
+) {
   const german = (word.german || '').trim();
+  if (!german) return false;
+  if (topic === 'articles') {
+    return normalizeArticleQuizWord(word) !== null;
+  }
   const hungarian = (word.hungarian || '').trim();
-  if (!german || !hungarian) return false;
+  if (!hungarian) return false;
   if (topic === 'vocabulary' && ['der', 'die', 'das'].includes(german.toLowerCase())) {
     return false;
   }
   return true;
+}
+
+function toQuizWord(word: QuizWord | PublicWord, topic: string): QuizWord | null {
+  if (topic === 'articles') {
+    return normalizeArticleQuizWord(word);
+  }
+  return {
+    german: (word.german || '').trim(),
+    hungarian: (word.hungarian || '').trim(),
+    example: word.example,
+    note: word.note,
+    category: topic,
+  };
 }
 
 function wordMatchesTopic(word: { category?: string }, topic: string) {
@@ -82,7 +192,7 @@ function wordMatchesTopic(word: { category?: string }, topic: string) {
  * Rules:
  * - Seed from static public data, then apply PUBLIC_LIBRARY adds/deletes
  * - Skip reading-library entries
- * - Keep only words with both german + hungarian (needed for questions)
+ * - Keep only quizable rows (articles: der/die/das + noun; others: german + hungarian)
  * - Drop bare article tokens from vocabulary quizzes
  * - Sort alphabetically by german so level N is identical on web and app
  */
@@ -100,13 +210,12 @@ export function buildPublicQuizPool(
     const key = germanKey(word.german);
     if (!key || seen.has(key) || (word as QuizWord).deleted) continue;
     if (!isQuizableWord(word, topic)) continue;
-    seen.add(key);
-    unique.push({
-      german: (word.german || '').trim(),
-      hungarian: (word.hungarian || '').trim(),
-      example: word.example,
-      category: topic,
-    });
+    const entry = toQuizWord({ ...(word as QuizWord), category: topic }, topic);
+    if (!entry) continue;
+    const entryKey = germanKey(entry.german);
+    if (!entryKey || seen.has(entryKey)) continue;
+    seen.add(entryKey);
+    unique.push(entry);
   }
 
   const dbSource = (publicDbWords || []).filter(
@@ -127,13 +236,19 @@ export function buildPublicQuizPool(
     if (!isQuizableWord(word, topic)) continue;
 
     if (!seen.has(key)) {
+      const entry = toQuizWord(
+        {
+          german: (word.german || '').trim(),
+          hungarian: (word.hungarian || '').trim(),
+          example: typeof word.example === 'string' ? word.example : undefined,
+          note: typeof (word as QuizWord).note === 'string' ? (word as QuizWord).note : undefined,
+          category: topic,
+        },
+        topic
+      );
+      if (!entry) continue;
       seen.add(key);
-      unique.push({
-        german: (word.german || '').trim(),
-        hungarian: (word.hungarian || '').trim(),
-        example: typeof word.example === 'string' ? word.example : undefined,
-        category: topic,
-      });
+      unique.push(entry);
     }
   }
 
@@ -141,11 +256,12 @@ export function buildPublicQuizPool(
   return unique;
 }
 
-/** Slice one quiz level out of a pool (1-based quizId). */
-export function getQuizLevelWords(pool: QuizWord[], quizId: number): QuizWord[] {
+/** Slice one quiz level out of a pool (1-based quizId). Articles levels interleave der/die/das. */
+export function getQuizLevelWords(pool: QuizWord[], quizId: number, topic?: string): QuizWord[] {
   if (!quizId || quizId < 1) return [];
+  const ordered = topic === 'articles' ? orderPoolForArticleQuizzes(pool) : pool;
   const startIndex = (quizId - 1) * WORDS_PER_QUIZ;
-  return pool.slice(startIndex, startIndex + WORDS_PER_QUIZ);
+  return ordered.slice(startIndex, startIndex + WORDS_PER_QUIZ);
 }
 
 export function getQuizLevelCount(poolLength: number): number {
@@ -184,14 +300,19 @@ export function buildCustomQuizPool(
         !isReadingVocabCategory(w.category) &&
         !isMarkedVocabCategory(w.category) &&
         vocabCategoryKey(w.category) === topic &&
-        (w.german || '').trim() !== '' &&
-        (w.hungarian || '').trim() !== ''
+        isQuizableWord(w, topic)
     )
-    .map((w) => ({
-      german: (w.german || '').trim(),
-      hungarian: (w.hungarian || '').trim(),
-      example: w.example,
-      category: w.category,
-    }))
+    .map((w) => {
+      if (topic === 'articles') {
+        return normalizeArticleQuizWord({ ...w, category: w.category })!;
+      }
+      return {
+        german: (w.german || '').trim(),
+        hungarian: (w.hungarian || '').trim(),
+        example: w.example,
+        note: (w as { note?: string }).note,
+        category: w.category,
+      };
+    })
     .sort((a, b) => a.german.localeCompare(b.german, 'de'));
 }

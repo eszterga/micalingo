@@ -236,12 +236,17 @@ export default function Import() {
         }
 
         if (destination === 'articles') {
-          // Per user request, strictly parse 3 columns for articles: Article, Noun, Hungarian.
           if (!p0.trim() || !p1.trim() || !p2.trim()) {
             console.warn(`Skipping incomplete article row: article="${p0}" | noun="${p1}" | hungarian="${p2}"`);
             continue;
           }
-          items.push({ article: p0, noun: p1, hungarian: p2, example: '', german: `${p0} ${p1}`.trim() });
+          items.push({
+            article: p0.trim(),
+            noun: p1.trim(),
+            hungarian: p2.trim(),
+            example: p3.trim(),
+            german: `${p0.trim()} ${p1.trim()}`.trim(),
+          });
         } else if (destination === 'false_friends' || destination === 'idioms') {
           items.push({ german: p0, hungarian: p1, example: p2, note: p3 });
         } else if (destination === 'verbs') {
@@ -692,14 +697,14 @@ export default function Import() {
           [t('template_article_header')]: 'der',
           [t('template_noun_header')]: 'Mann, die Männer',
           [t('template_hungarian_header')]: 'a férfi',
-          [t('template_example_header')]: 'Der Mann arbeitet.'
+          [t('template_example_header')]: 'Der Mann arbeitet.',
         },
         {
           [t('template_article_header')]: 'die',
           [t('template_noun_header')]: 'Frau, die Frauen',
           [t('template_hungarian_header')]: 'a nő',
-          [t('template_example_header')]: 'Die Frau trinkt einen Kaffee.'
-        }
+          [t('template_example_header')]: 'Die Frau trinkt einen Kaffee.',
+        },
       ];
     } else if (type === 'adjectives') {
       templateData = [
@@ -803,9 +808,14 @@ export default function Import() {
     // Collapse same-file duplicates (last row wins) so we never insert twin rows
     const uniquePreview = new Map<string, any>();
     for (const item of previewItems) {
-      const german = item.german?.trim() || '';
-      const hungarian = item.hungarian?.trim() || '';
-      if (!german || !hungarian) continue;
+      let german = item.german?.trim() || '';
+      let hungarian = item.hungarian?.trim() || '';
+      if (destination === 'articles') {
+        german = german || `${item.article || ''} ${item.noun || ''}`.trim();
+        if (!german || !/^(der|die|das)\s+/i.test(german) || !hungarian) continue;
+      } else if (!german || !hungarian) {
+        continue;
+      }
       uniquePreview.set(vocabGermanKey(german), { ...item, german, hungarian });
     }
 
@@ -1198,6 +1208,7 @@ export default function Import() {
                         <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('article')} <span className="text-xs font-normal text-gray-500 block">{t('column_a')}</span></th>
                         <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('noun')} <span className="text-xs font-normal text-gray-500 block">{t('column_b')}</span></th>
                         <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('hungarian')} <span className="text-xs font-normal text-gray-500 block">{t('column_c')}</span></th>
+                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('example')} <span className="text-xs font-normal text-gray-500 block">{t('column_d')}</span></th>
                       </>
                     ) : destination === 'false_friends' || destination === 'idioms' ? (
                       <>
@@ -1242,6 +1253,7 @@ export default function Import() {
                           <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.article || ''} onChange={(e) => handleItemChange(idx, 'article', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-base sm:text-sm" /></td>
                           <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.noun || ''} onChange={(e) => handleItemChange(idx, 'noun', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-base sm:text-sm" /></td>
                           <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleItemChange(idx, 'hungarian', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-base sm:text-sm" /></td>
+                          <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.example || ''} onChange={(e) => handleItemChange(idx, 'example', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-base sm:text-sm" /></td>
                         </>
                       ) : destination === 'prepositions' ? (
                         <>

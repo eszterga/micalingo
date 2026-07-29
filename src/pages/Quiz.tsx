@@ -10,6 +10,10 @@ import {
   buildPublicQuizPool,
   buildCustomQuizPool,
   getQuizLevelWords,
+  getArticleFromQuizWord,
+  getNounFromArticleQuizWord,
+  getArticleQuizHint,
+  isArticleLabel,
 } from "../lib/quizPool";
 import { doc, setDoc } from 'firebase/firestore';
 import { dbCloud } from '../lib/firebase';
@@ -207,22 +211,25 @@ export default function Quiz() {
     const allGermanTerms = germanTermsLookup;
     return selectedWords.map(word => {
       if (topic === 'articles') {
-        const match = word.german.match(/^(der|die|das)\s+(.*)/i);
-        const baseArticle = match ? match[1].toLowerCase() : "der";
-        const baseNoun = match ? match[2].trim() : word.german;
+        const baseArticle = getArticleFromQuizWord(word);
+        const baseNoun = getNounFromArticleQuizWord(word);
+        const hint = getArticleQuizHint(word);
+        const translation = (word.hungarian || '').trim();
+        const meaning =
+          translation && !isArticleLabel(translation) ? ` (${translation})` : '';
 
         const correctAnswer = baseArticle;
-        const allowedArticles = ["der", "die", "das"];
-        const distractors = allowedArticles.filter(a => a !== correctAnswer);
+        const allowedArticles = ['der', 'die', 'das'];
+        const distractors = allowedArticles.filter((a) => a !== correctAnswer);
         const options = shuffleInPlace([...distractors, correctAnswer]);
 
         return {
-          questionText: `___ ${baseNoun} (${word.hungarian})`,
+          questionText: `___ ${baseNoun}${meaning}`,
           options,
           correctAnswer,
-          example: word.example,
+          example: hint,
           german: word.german,
-          hungarian: word.hungarian
+          hungarian: translation && !isArticleLabel(translation) ? translation : undefined,
         };
       } else if (topic === 'prepositions') {
         const correctAnswer = word.hungarian || '';
@@ -418,7 +425,7 @@ export default function Quiz() {
         return;
       }
 
-      wordsForQuiz = shuffleInPlace([...getQuizLevelWords(sortedSource, quizId)]);
+      wordsForQuiz = shuffleInPlace([...getQuizLevelWords(sortedSource, quizId, topic ?? undefined)]);
 
       // Past the last private level — same "all completed" screen as public
       if (wordsForQuiz.length === 0) {
@@ -429,7 +436,7 @@ export default function Quiz() {
       }
     } else if (topic && isQuizTopic(topic)) {
       // Same pool / same slice as TopicQuizzes — keeps level N identical on web + app
-      wordsForQuiz = shuffleInPlace([...getQuizLevelWords(publicQuizPool, quizId)]);
+      wordsForQuiz = shuffleInPlace([...getQuizLevelWords(publicQuizPool, quizId, topic ?? undefined)]);
 
       // Level not in static seed yet and PUBLIC_LIBRARY still loading — keep spinner,
       // do NOT flash "all completed" / empty.
@@ -798,57 +805,75 @@ export default function Quiz() {
             <h2 className="text-3xl font-extrabold text-blue-950 mb-4">{t('quiz_complete')}</h2>
             <p className="text-xl text-blue-900/70 font-medium">{t('your_score')} <span className="font-bold text-blue-600 text-2xl">{score}</span> / {questions.length}</p>
 
-            {/* Primary CTA first — must stay above the fold on Capacitor WebViews */}
-            {hasNextQuiz && (
-              <div className="mt-8">
+            <div
+              className={`mt-8 grid gap-3 w-full max-w-5xl mx-auto ${
+                hasNextQuiz
+                  ? 'grid-cols-1 min-[420px]:grid-cols-2 lg:grid-cols-5'
+                  : 'grid-cols-1 min-[420px]:grid-cols-2 lg:grid-cols-4'
+              }`}
+            >
+              {hasNextQuiz && (
                 <button
+                  type="button"
                   onClick={handleNextQuiz}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-xl shadow-sm transition-colors text-lg"
+                  className="w-full min-h-[3rem] bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl shadow-sm transition-colors text-sm sm:text-base touch-manipulation active:scale-[0.98]"
                 >
                   {t('next_quiz_button') || t('go_to_level', { level: quizId + 1 })}
                 </button>
-              </div>
-            )}
-
-            <div className={`flex flex-col sm:flex-row justify-center gap-4 flex-wrap ${hasNextQuiz ? 'mt-4' : 'mt-8'}`}>
-              <button onClick={() => navigate(quizzesBackPath)} className="w-full sm:w-auto bg-white border border-gray-200 text-gray-700 font-bold py-3 px-8 rounded-xl hover:bg-gray-50 transition-colors shadow-sm">
+              )}
+              <button
+                type="button"
+                onClick={() => navigate(quizzesBackPath)}
+                className="w-full min-h-[3rem] bg-white border border-gray-200 text-gray-700 font-bold py-3 px-4 rounded-xl hover:bg-gray-50 transition-colors shadow-sm text-sm sm:text-base touch-manipulation active:scale-[0.98]"
+              >
                 {t('back_to_quizzes')}
               </button>
-              <button onClick={() => {
-                // Prefer SPA navigation over full reload — more reliable in Capacitor WebViews
-                builtQuizKeyRef.current = null;
-                navigate(`/quiz?topic=${encodeURIComponent(topic || '')}&quizId=${quizId}${isCustom ? '&custom=true' : ''}&redo=true`, { replace: true });
-                setQuizState('loading');
-                setScore(0);
-                setCurrentQuestionIndex(0);
-                setIsAnswered(false);
-                setSelectedAnswer(null);
-                setUserAnswers([]);
-                setQuestions([]);
-              }} className="w-full sm:w-auto bg-blue-100 text-blue-700 font-bold py-3 px-8 rounded-xl hover:bg-blue-200 transition-colors shadow-sm">
+              <button
+                type="button"
+                onClick={() => {
+                  builtQuizKeyRef.current = null;
+                  navigate(`/quiz?topic=${encodeURIComponent(topic || '')}&quizId=${quizId}${isCustom ? '&custom=true' : ''}&redo=true`, { replace: true });
+                  setQuizState('loading');
+                  setScore(0);
+                  setCurrentQuestionIndex(0);
+                  setIsAnswered(false);
+                  setSelectedAnswer(null);
+                  setUserAnswers([]);
+                  setQuestions([]);
+                }}
+                className="w-full min-h-[3rem] bg-blue-100 text-blue-700 font-bold py-3 px-4 rounded-xl hover:bg-blue-200 transition-colors shadow-sm text-sm sm:text-base touch-manipulation active:scale-[0.98]"
+              >
                 {t('retry_quiz')}
               </button>
-              <button onClick={() => navigate(`/results?quizKey=${quizKey}`)} className="w-full sm:w-auto bg-purple-100 text-purple-700 font-bold py-3 px-8 rounded-xl hover:bg-purple-200 transition-colors shadow-sm">
+              <button
+                type="button"
+                onClick={() => navigate(`/results?quizKey=${quizKey}`)}
+                className="w-full min-h-[3rem] bg-purple-100 text-purple-700 font-bold py-3 px-4 rounded-xl hover:bg-purple-200 transition-colors shadow-sm text-sm sm:text-base touch-manipulation active:scale-[0.98]"
+              >
                 {t('review_answers') || 'Review Answers'}
               </button>
-              <button onClick={() => {
-                const exportData = questions.map((q: any, i: number) => {
-                  const userAnswer = userAnswers[i] || '';
-                  const isCorrect = userAnswer === q.correctAnswer;
-                  return {
-                    [t('csv_question') || 'Question']: q.questionText || '',
-                    [t('your_answer') || 'Your Answer']: userAnswer,
-                    [t('correct_answer') || 'Correct Answer']: isCorrect ? '' : (q.correctAnswer || ''),
-                    [t('csv_result') || 'Result']: isCorrect ? '✅' : '❌'
-                  };
-                });
+              <button
+                type="button"
+                onClick={() => {
+                  const exportData = questions.map((q: any, i: number) => {
+                    const userAnswer = userAnswers[i] || '';
+                    const isCorrect = userAnswer === q.correctAnswer;
+                    return {
+                      [t('csv_question') || 'Question']: q.questionText || '',
+                      [t('your_answer') || 'Your Answer']: userAnswer,
+                      [t('correct_answer') || 'Correct Answer']: isCorrect ? '' : (q.correctAnswer || ''),
+                      [t('csv_result') || 'Result']: isCorrect ? '✅' : '❌',
+                    };
+                  });
 
-                const worksheet = XLSX.utils.json_to_sheet(exportData);
-                worksheet['!cols'] = [{ wch: 50 }, { wch: 30 }, { wch: 30 }, { wch: 15 }];
-                const workbook = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(workbook, worksheet, 'Results');
-                XLSX.writeFile(workbook, `${quizKey}_results.xlsx`);
-              }} className="w-full sm:w-auto bg-green-100 text-green-700 font-bold py-3 px-8 rounded-xl hover:bg-green-200 transition-colors shadow-sm">
+                  const worksheet = XLSX.utils.json_to_sheet(exportData);
+                  worksheet['!cols'] = [{ wch: 50 }, { wch: 30 }, { wch: 30 }, { wch: 15 }];
+                  const workbook = XLSX.utils.book_new();
+                  XLSX.utils.book_append_sheet(workbook, worksheet, 'Results');
+                  XLSX.writeFile(workbook, `${quizKey}_results.xlsx`);
+                }}
+                className="w-full min-h-[3rem] bg-green-100 text-green-700 font-bold py-3 px-4 rounded-xl hover:bg-green-200 transition-colors shadow-sm text-sm sm:text-base touch-manipulation active:scale-[0.98]"
+              >
                 {t('download_button') || 'Download Excel'}
               </button>
             </div>
