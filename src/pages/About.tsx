@@ -52,13 +52,6 @@ export default function About() {
           <p className="text-gray-700 leading-relaxed mb-6">{t('contact_body')}</p>
           <div className="grid gap-4 sm:grid-cols-1">
             <a
-              href="mailto:micalingo@gmail.com"
-              className="flex flex-col gap-1 p-5 rounded-2xl bg-blue-50/80 border border-blue-100 hover:border-blue-300 hover:bg-blue-50 transition-colors"
-            >
-              <span className="text-xs font-bold uppercase tracking-wider text-blue-700/70">{t('contact_general_label')}</span>
-              <span className="text-lg font-bold text-blue-950">micalingo@gmail.com</span>
-            </a>
-            <a
               href="mailto:support.micalingo@gmail.com"
               className="flex flex-col gap-1 p-5 rounded-2xl bg-blue-50/80 border border-blue-100 hover:border-blue-300 hover:bg-blue-50 transition-colors"
             >

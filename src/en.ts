@@ -576,7 +576,7 @@ export const en = {
   privacy_title: "Privacy Policy",
   privacy_intro: "This Privacy Policy explains how MicaLingo (\"we\", \"us\", or \"our\") processes personal data when you use our website at micalingo.com and our mobile application (together, the \"Service\"). We process personal data in accordance with the EU General Data Protection Regulation (GDPR) and applicable data-protection laws.",
   privacy_s1_title: "1. Data Controller",
-  privacy_s1_body: "The data controller responsible for your personal data in connection with the Service is MicaLingo. For privacy-related requests, contact us at micalingo@gmail.com or support.micalingo@gmail.com.",
+  privacy_s1_body: "The data controller responsible for your personal data in connection with the Service is MicaLingo. For privacy-related requests, contact us at support.micalingo@gmail.com.",
   privacy_s2_title: "2. Information We Process",
   privacy_s2_body: "Sign-in is provided exclusively through Google Sign-In (Google Authentication). When you choose to sign in, Google may share with us a limited set of account information (such as your Google account identifier, display name, profile photo URL, and email address) as permitted by Google’s authentication APIs and your Google account settings. We do not operate an independent password-based account system, and we do not have visibility into your Google password or the full contents of your Google account. We may also store learning progress, imported vocabulary, and similar content that you voluntarily create or upload within the Service, linked to your authenticated account.",
   privacy_s3_title: "3. Cookies and Tracking",
@@ -590,7 +590,7 @@ export const en = {
   privacy_s7_title: "7. Data Retention",
   privacy_s7_body: "We retain account-related and user-generated learning data for as long as your account remains active or as needed to provide the Service. You may request deletion of your personal data subject to legal retention obligations. Local progress stored on your device can typically be cleared from the Settings area of the app.",
   privacy_s8_title: "8. Your Rights (EU / EEA)",
-  privacy_s8_body: "If you are located in the European Union or European Economic Area, you have the right to request access to, rectification of, erasure of, or restriction of processing of your personal data; the right to data portability where applicable; the right to object to processing based on legitimate interests; and the right to withdraw consent where processing is based on consent. You also have the right to lodge a complaint with your local supervisory authority. To exercise your rights, contact us at the email addresses listed below.",
+  privacy_s8_body: "If you are located in the European Union or European Economic Area, you have the right to request access to, rectification of, erasure of, or restriction of processing of your personal data; the right to data portability where applicable; the right to object to processing based on legitimate interests; and the right to withdraw consent where processing is based on consent. You also have the right to lodge a complaint with your local supervisory authority. To exercise your rights, contact us at the email address listed below.",
   privacy_s9_title: "9. International Transfers",
   privacy_s9_body: "Because we use Google authentication and cloud infrastructure, personal data may be processed in countries outside your country of residence, including outside the EU/EEA. Where required, such transfers are carried out with appropriate safeguards consistent with applicable law (for example, Standard Contractual Clauses used by relevant providers).",
   privacy_s10_title: "10. Children’s Privacy",
@@ -598,7 +598,7 @@ export const en = {
   privacy_s11_title: "11. Changes to This Policy",
   privacy_s11_body: "We may update this Privacy Policy from time to time to reflect changes in our practices or legal requirements. The \"Last updated\" date at the top of this page indicates when this Policy was last revised. Continued use of the Service after an update constitutes acknowledgment of the revised Policy where permitted by law.",
   privacy_s12_title: "12. Contact",
-  privacy_s12_body: "For privacy questions or data-subject requests, contact: micalingo@gmail.com or support.micalingo@gmail.com. Website: https://micalingo.com",
+  privacy_s12_body: "For privacy questions or data-subject requests, contact: support.micalingo@gmail.com. Website: https://micalingo.com",
 
   terms_title: "Terms of Service",
   terms_intro: "These Terms of Service (\"Terms\") govern your access to and use of MicaLingo’s website at micalingo.com and our mobile application (the \"Service\"). By accessing or using the Service, you agree to be bound by these Terms. If you do not agree, do not use the Service.",
@@ -625,7 +625,7 @@ export const en = {
   terms_s11_title: "11. Governing Law",
   terms_s11_body: "These Terms are governed by the laws applicable in the European Union and the relevant Member State laws that apply to consumers, without prejudice to mandatory consumer-protection rules of your country of residence.",
   terms_s12_title: "12. Contact",
-  terms_s12_body: "For questions about these Terms, contact: micalingo@gmail.com or support.micalingo@gmail.com. Website: https://micalingo.com",
+  terms_s12_body: "For questions about these Terms, contact: support.micalingo@gmail.com. Website: https://micalingo.com",
 
   about_title: "About & Contact",
   about_heading: "About MicaLingo",
@@ -633,7 +633,6 @@ export const en = {
   about_mission: "Our goal is to support your progress by focusing on the needs of structured, real exam preparation.",
   contact_heading: "Contact & Support",
   contact_body: "Have a question, feedback, or need help? We would love to hear from you.",
-  contact_general_label: "General contact",
   contact_support_label: "Support & feedback",
   contact_website_label: "Website",
 };

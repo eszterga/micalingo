@@ -576,7 +576,7 @@ export const de = {
   privacy_title: "Datenschutzerklärung",
   privacy_intro: "Diese Datenschutzerklärung erläutert, wie MicaLingo („wir“, „uns“ oder „unser“) personenbezogene Daten verarbeitet, wenn Sie unsere Website micalingo.com und unsere mobile Anwendung (zusammen der „Dienst“) nutzen. Wir verarbeiten personenbezogene Daten gemäß der EU-Datenschutz-Grundverordnung (DSGVO) und den geltenden Datenschutzgesetzen.",
   privacy_s1_title: "1. Verantwortlicher",
-  privacy_s1_body: "Verantwortlicher für Ihre personenbezogenen Daten im Zusammenhang mit dem Dienst ist MicaLingo. Für datenschutzbezogene Anfragen kontaktieren Sie uns unter micalingo@gmail.com oder support.micalingo@gmail.com.",
+  privacy_s1_body: "Verantwortlicher für Ihre personenbezogenen Daten im Zusammenhang mit dem Dienst ist MicaLingo. Für datenschutzbezogene Anfragen kontaktieren Sie uns unter support.micalingo@gmail.com.",
   privacy_s2_title: "2. Welche Informationen wir verarbeiten",
   privacy_s2_body: "Die Anmeldung erfolgt ausschließlich über Google Sign-In (Google Authentication). Wenn Sie sich anmelden, kann Google gemäß den Google-Authentifizierungs-APIs und Ihren Google-Kontoeinstellungen eine begrenzte Menge an Kontoinformationen mit uns teilen (z. B. Google-Konto-ID, Anzeigename, Profilbild-URL und E-Mail-Adresse). Wir betreiben kein eigenständiges passwortbasiertes Kontosystem und haben keinen Einblick in Ihr Google-Passwort oder den vollständigen Inhalt Ihres Google-Kontos. Wir speichern möglicherweise auch Lernfortschritt, importierten Wortschatz und ähnliche Inhalte, die Sie freiwillig im Dienst erstellen oder hochladen, verknüpft mit Ihrem authentifizierten Konto.",
   privacy_s3_title: "3. Cookies und Tracking",
@@ -590,7 +590,7 @@ export const de = {
   privacy_s7_title: "7. Speicherdauer",
   privacy_s7_body: "Wir speichern kontobezogene und von Nutzern erstellte Lerndaten so lange, wie Ihr Konto aktiv ist oder wie es zur Bereitstellung des Dienstes erforderlich ist. Sie können die Löschung Ihrer personenbezogenen Daten verlangen, vorbehaltlich gesetzlicher Aufbewahrungspflichten. Lokal auf Ihrem Gerät gespeicherter Fortschritt kann in der Regel im Einstellungsbereich der App gelöscht werden.",
   privacy_s8_title: "8. Ihre Rechte (EU / EWR)",
-  privacy_s8_body: "Wenn Sie sich in der Europäischen Union oder im Europäischen Wirtschaftsraum befinden, haben Sie das Recht, Auskunft über, Berichtigung, Löschung oder Einschränkung der Verarbeitung Ihrer personenbezogenen Daten zu verlangen; das Recht auf Datenübertragbarkeit, soweit anwendbar; das Recht, einer auf berechtigten Interessen beruhenden Verarbeitung zu widersprechen; sowie das Recht, eine Einwilligung zu widerrufen, soweit die Verarbeitung auf Einwilligung beruht. Sie haben außerdem das Recht, eine Beschwerde bei Ihrer örtlichen Aufsichtsbehörde einzureichen. Zur Ausübung Ihrer Rechte kontaktieren Sie uns unter den unten genannten E-Mail-Adressen.",
+  privacy_s8_body: "Wenn Sie sich in der Europäischen Union oder im Europäischen Wirtschaftsraum befinden, haben Sie das Recht, Auskunft über, Berichtigung, Löschung oder Einschränkung der Verarbeitung Ihrer personenbezogenen Daten zu verlangen; das Recht auf Datenübertragbarkeit, soweit anwendbar; das Recht, einer auf berechtigten Interessen beruhenden Verarbeitung zu widersprechen; sowie das Recht, eine Einwilligung zu widerrufen, soweit die Verarbeitung auf Einwilligung beruht. Sie haben außerdem das Recht, eine Beschwerde bei Ihrer örtlichen Aufsichtsbehörde einzureichen. Zur Ausübung Ihrer Rechte kontaktieren Sie uns unter der unten genannten E-Mail-Adresse.",
   privacy_s9_title: "9. Internationale Übermittlungen",
   privacy_s9_body: "Da wir Google-Authentifizierung und Cloud-Infrastruktur nutzen, können personenbezogene Daten in Ländern außerhalb Ihres Wohnsitzlandes verarbeitet werden, einschließlich außerhalb der EU/des EWR. Soweit erforderlich, erfolgen solche Übermittlungen mit angemessenen Garantien im Einklang mit dem geltenden Recht (z. B. Standardvertragsklauseln der jeweiligen Anbieter).",
   privacy_s10_title: "10. Datenschutz von Kindern",
@@ -598,7 +598,7 @@ export const de = {
   privacy_s11_title: "11. Änderungen dieser Erklärung",
   privacy_s11_body: "Wir können diese Datenschutzerklärung von Zeit zu Zeit aktualisieren, um Änderungen unserer Praktiken oder gesetzlicher Anforderungen widerzuspiegeln. Das Datum „Zuletzt aktualisiert“ oben auf dieser Seite gibt an, wann diese Erklärung zuletzt überarbeitet wurde. Die fortgesetzte Nutzung des Dienstes nach einer Aktualisierung gilt – soweit gesetzlich zulässig – als Kenntnisnahme der überarbeiteten Erklärung.",
   privacy_s12_title: "12. Kontakt",
-  privacy_s12_body: "Bei Datenschutzfragen oder Betroffenenanfragen kontaktieren Sie: micalingo@gmail.com oder support.micalingo@gmail.com. Website: https://micalingo.com",
+  privacy_s12_body: "Bei Datenschutzfragen oder Betroffenenanfragen kontaktieren Sie: support.micalingo@gmail.com. Website: https://micalingo.com",
 
   terms_title: "Nutzungsbedingungen",
   terms_intro: "Diese Nutzungsbedingungen („Bedingungen“) regeln Ihren Zugang zu und die Nutzung der Website von MicaLingo unter micalingo.com sowie unserer mobilen Anwendung (der „Dienst“). Durch den Zugriff auf oder die Nutzung des Dienstes erklären Sie sich mit diesen Bedingungen einverstanden. Wenn Sie nicht einverstanden sind, nutzen Sie den Dienst nicht.",
@@ -625,7 +625,7 @@ export const de = {
   terms_s11_title: "11. Anwendbares Recht",
   terms_s11_body: "Diese Bedingungen unterliegen dem in der Europäischen Union anwendbaren Recht sowie den für Verbraucher geltenden Vorschriften der jeweiligen Mitgliedstaaten, unbeschadet zwingender Verbraucherschutzvorschriften Ihres Wohnsitzlandes.",
   terms_s12_title: "12. Kontakt",
-  terms_s12_body: "Bei Fragen zu diesen Bedingungen kontaktieren Sie: micalingo@gmail.com oder support.micalingo@gmail.com. Website: https://micalingo.com",
+  terms_s12_body: "Bei Fragen zu diesen Bedingungen kontaktieren Sie: support.micalingo@gmail.com. Website: https://micalingo.com",
 
   about_title: "Über uns & Kontakt",
   about_heading: "Über MicaLingo",
@@ -633,7 +633,6 @@ export const de = {
   about_mission: "Unser Ziel ist es, deinen Fortschritt zu unterstützen und dabei die Anforderungen einer strukturierten, echten Prüfungsvorbereitung in den Mittelpunkt zu stellen.",
   contact_heading: "Kontakt & Support",
   contact_body: "Hast du eine Frage, Feedback oder brauchst du Hilfe? Wir freuen uns von dir zu hören.",
-  contact_general_label: "Allgemeiner Kontakt",
   contact_support_label: "Support & Feedback",
   contact_website_label: "Website",
 };

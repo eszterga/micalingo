@@ -574,7 +574,7 @@ _items_save: "Nincsenek érvényes szavak a mentéshez, vagy nem vagy bejelentke
   privacy_title: "Adatvédelmi irányelvek",
   privacy_intro: "Ez az Adatvédelmi irányelv ismerteti, hogyan kezeli a MicaLingo („mi”, „minket” vagy „saját”) a személyes adatokat, amikor Ön a micalingo.com webhelyünket és mobilalkalmazásunkat (együttesen: a „Szolgáltatás”) használja. A személyes adatokat az EU általános adatvédelmi rendelete (GDPR) és a vonatkozó adatvédelmi jogszabályok szerint kezeljük.",
   privacy_s1_title: "1. Adatkezelő",
-  privacy_s1_body: "A Szolgáltatással összefüggésben az Ön személyes adataiért felelős adatkezelő a MicaLingo. Adatvédelmi megkereséseivel forduljon hozzánk a következő címeken: micalingo@gmail.com vagy support.micalingo@gmail.com.",
+  privacy_s1_body: "A Szolgáltatással összefüggésben az Ön személyes adataiért felelős adatkezelő a MicaLingo. Adatvédelmi megkereséseivel forduljon hozzánk a következő címen: support.micalingo@gmail.com.",
   privacy_s2_title: "2. Az általunk kezelt információk",
   privacy_s2_body: "A bejelentkezés kizárólag Google Bejelentkezésen (Google Authentication) keresztül történik. Ha Ön a bejelentkezést választja, a Google a Google hitelesítési API-k és az Ön Google-fiókbeállításai szerint korlátozott fiókadatokat oszthat meg velünk (például Google-fiókazonosító, megjelenített név, profilkép URL-je és e-mail-cím). Nem üzemeltetünk önálló, jelszóalapú fiókrendszert, és nincs rálátásunk az Ön Google-jelszavára vagy Google-fiókjának teljes tartalmára. A Szolgáltatásban Ön által önként létrehozott vagy feltöltött tanulási előrehaladást, importált szókincset és hasonló tartalmakat is tárolhatjuk, az Ön hitelesített fiókjához kapcsolva.",
   privacy_s3_title: "3. Sütik és nyomkövetés",
@@ -588,7 +588,7 @@ _items_save: "Nincsenek érvényes szavak a mentéshez, vagy nem vagy bejelentke
   privacy_s7_title: "7. Adatmegőrzés",
   privacy_s7_body: "A fiókhoz kapcsolódó és a felhasználó által létrehozott tanulási adatokat addig őrizzük meg, amíg a fiók aktív, illetve amíg a Szolgáltatás nyújtásához szükséges. Kérheti személyes adatai törlését, a jogszabályi megőrzési kötelezettségek figyelembevételével. Az eszközön tárolt helyi előrehaladás általában az alkalmazás Beállítások területén törölhető.",
   privacy_s8_title: "8. Az Ön jogai (EU / EGT)",
-  privacy_s8_body: "Ha az Európai Unióban vagy az Európai Gazdasági Térségben tartózkodik, joga van kérni személyes adataihoz való hozzáférést, azok helyesbítését, törlését vagy az adatkezelés korlátozását; ahol alkalmazható, az adathordozhatósághoz való jogot; a jogos érdeken alapuló adatkezelés elleni tiltakozás jogát; valamint a hozzájárulás visszavonásának jogát, ha az adatkezelés hozzájáruláson alapul. Emellett joga van panaszt tenni a helyi felügyeleti hatóságnál. Jogai gyakorlásához vegye fel velünk a kapcsolatot az alábbi e-mail-címeken.",
+  privacy_s8_body: "Ha az Európai Unióban vagy az Európai Gazdasági Térségben tartózkodik, joga van kérni személyes adataihoz való hozzáférést, azok helyesbítését, törlését vagy az adatkezelés korlátozását; ahol alkalmazható, az adathordozhatósághoz való jogot; a jogos érdeken alapuló adatkezelés elleni tiltakozás jogát; valamint a hozzájárulás visszavonásának jogát, ha az adatkezelés hozzájáruláson alapul. Emellett joga van panaszt tenni a helyi felügyeleti hatóságnál. Jogai gyakorlásához vegye fel velünk a kapcsolatot az alábbi e-mail-címen.",
   privacy_s9_title: "9. Nemzetközi adattovábbítás",
   privacy_s9_body: "Mivel Google-hitelesítést és felhőinfrastruktúrát használunk, a személyes adatok az Ön lakóhelye szerinti országon kívül is feldolgozásra kerülhetnek, ideértve az EU/EGT-n kívüli országokat is. Ahol szükséges, az ilyen továbbítások a vonatkozó jogszabályokkal összhangban megfelelő garanciákkal történnek (például a szolgáltatók által alkalmazott általános szerződési kikötések).",
   privacy_s10_title: "10. Gyermekek adatainak védelme",
@@ -596,7 +596,7 @@ _items_save: "Nincsenek érvényes szavak a mentéshez, vagy nem vagy bejelentke
   privacy_s11_title: "11. Az irányelv módosításai",
   privacy_s11_body: "Ezt az Adatvédelmi irányelvet időről időre frissíthetjük gyakorlataink vagy a jogszabályi követelmények változásainak megfelelően. Az oldal tetején található „Utolsó frissítés” dátum jelzi, mikor került sor a legutóbbi módosításra. A Szolgáltatás frissítés utáni további használata – ahol a jogszabályok ezt lehetővé teszik – a módosított Irányelv tudomásulvételének minősül.",
   privacy_s12_title: "12. Kapcsolat",
-  privacy_s12_body: "Adatvédelmi kérdésekkel vagy érintetti kérelmekkel forduljon hozzánk: micalingo@gmail.com vagy support.micalingo@gmail.com. Webhely: https://micalingo.com",
+  privacy_s12_body: "Adatvédelmi kérdésekkel vagy érintetti kérelmekkel forduljon hozzánk: support.micalingo@gmail.com. Webhely: https://micalingo.com",
 
   terms_title: "Általános szerződési feltételek",
   terms_intro: "Ezek az Általános szerződési feltételek („Feltételek”) szabályozzák a MicaLingo micalingo.com webhelyéhez és mobilalkalmazásához (a „Szolgáltatás”) való hozzáférését és azok használatát. A Szolgáltatás elérésével vagy használatával Ön elfogadja ezeket a Feltételeket. Ha nem ért egyet, ne használja a Szolgáltatást.",
@@ -623,7 +623,7 @@ _items_save: "Nincsenek érvényes szavak a mentéshez, vagy nem vagy bejelentke
   terms_s11_title: "11. Irányadó jog",
   terms_s11_body: "Ezekre a Feltételekre az Európai Unióban alkalmazandó jog, valamint a fogyasztókra vonatkozó tagállami jogszabályok az irányadók, az Ön lakóhelye szerinti ország kötelező fogyasztóvédelmi szabályainak sérelme nélkül.",
   terms_s12_title: "12. Kapcsolat",
-  terms_s12_body: "A Feltételekkel kapcsolatos kérdésekben forduljon hozzánk: micalingo@gmail.com vagy support.micalingo@gmail.com. Webhely: https://micalingo.com",
+  terms_s12_body: "A Feltételekkel kapcsolatos kérdésekben forduljon hozzánk: support.micalingo@gmail.com. Webhely: https://micalingo.com",
 
   about_title: "Rólunk és kapcsolat",
   about_heading: "A MicaLingo-ról",
@@ -631,7 +631,6 @@ _items_save: "Nincsenek érvényes szavak a mentéshez, vagy nem vagy bejelentke
   about_mission: "Célunk, hogy a strukturált, valódi vizsgafelkészülés igényeire fókuszálva támogassuk a fejlődésedet.",
   contact_heading: "Kapcsolat és támogatás",
   contact_body: "Kérdésed, visszajelzésed van, vagy segítségre van szükséged? Örömmel hallunk rólad.",
-  contact_general_label: "Általános kapcsolat",
   contact_support_label: "Támogatás és visszajelzés",
   contact_website_label: "Webhely",
 };
