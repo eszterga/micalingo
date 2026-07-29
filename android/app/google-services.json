@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "751419081791",
+    "project_id": "micalingo",
+    "storage_bucket": "micalingo.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:751419081791:android:973bcc0e2e682d859ea48a",
+        "android_client_info": {
+          "package_name": "com.micalingo.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "751419081791-491n8uq92jfnqv85bnd1rivs4c8sdvk7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.micalingo.app",
+            "certificate_hash": "1c464243a253630b844ab134409b78b88992f2cb"
+          }
+        },
+        {
+          "client_id": "751419081791-ef3454q2ja8u3h4mhdlc5qoq34ed4psh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyASc7Ukz3FJR4nMEZXh4-jfjAtw9oVQN-Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "751419081791-ef3454q2ja8u3h4mhdlc5qoq34ed4psh.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
