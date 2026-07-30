@@ -229,8 +229,8 @@ export default function Layout() {
               {!Capacitor.isNativePlatform() && (
                 <div className="mt-4 pt-4 border-t border-blue-800">
                   <a 
-                    href="/MicaLingo_v6.apk" 
-                    download="MicaLingo_v6.apk"
+                    href="/MicaLingo_v7.apk" 
+                    download="MicaLingo_v7.apk"
                     onClick={() => setIsMobileMenuOpen(false)}
                     className="flex items-center gap-3 px-4 py-3 rounded-lg bg-purple-600/20 text-purple-200 hover:bg-purple-600/40 transition-colors border border-purple-500/30"
                   >
