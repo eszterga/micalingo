@@ -136,7 +136,7 @@ export default function ListeningMaterials() {
               </div>
             </button>
             <div className={`grid transition-[grid-template-rows,opacity] duration-500 ease-in-out ${openSections.music ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}>
-              <div className="overflow-hidden">
+              <div className="min-h-0 overflow-hidden">
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 pt-8 pb-2">
                   {musicCategories.map(cat => (
                     <Link key={cat.id} to={`/learning-materials/listening/music/${cat.id}`} className="group relative flex flex-col items-start justify-between p-6 md:p-8 rounded-[2rem] bg-white/90 backdrop-blur-xl border border-blue-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500 overflow-hidden">
@@ -164,7 +164,7 @@ export default function ListeningMaterials() {
               </div>
             </button>
             <div className={`grid transition-[grid-template-rows,opacity] duration-500 ease-in-out ${openSections.podcasts ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}>
-              <div className="overflow-hidden">
+              <div className="min-h-0 overflow-hidden">
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 pt-8 pb-2">
                   {podcastsCategories.map(cat => (
                     <Link key={cat.id} to={`/learning-materials/listening/podcasts/${cat.id}`} className="group relative flex flex-col items-start justify-between p-6 md:p-8 rounded-[2rem] bg-white/90 backdrop-blur-xl border border-blue-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500 overflow-hidden">
@@ -192,7 +192,7 @@ export default function ListeningMaterials() {
               </div>
             </button>
             <div className={`grid transition-[grid-template-rows,opacity] duration-500 ease-in-out ${openSections.audiobooks ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}>
-              <div className="overflow-hidden">
+              <div className="min-h-0 overflow-hidden">
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 pt-8 pb-2">
                   {audiobooksCategories.map(cat => (
                     <Link key={cat.id} to={`/learning-materials/listening/audiobooks/${cat.id}`} className="group relative flex flex-col items-start justify-between p-6 md:p-8 rounded-[2rem] bg-white/90 backdrop-blur-xl border border-blue-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500 overflow-hidden">

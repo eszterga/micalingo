@@ -109,6 +109,24 @@ export default function Layout() {
     ? 'max(2.5rem, calc(env(safe-area-inset-top, 0px) + 0.75rem))'
     : 'max(2rem, calc(env(safe-area-inset-top, 0px) + 0.5rem))';
 
+  const supportTiers = [
+    { href: 'https://donate.stripe.com/5kQ6oAcYegUV77K5GQ4Ja00', label: t('support_tier_1') || 'Coffee Tier', amount: '€2', featured: false },
+    { href: 'https://donate.stripe.com/28EcMYcYecEFcs4d9i4Ja01', label: t('support_tier_2') || 'Snack Tier', amount: '€5', featured: false },
+    { href: 'https://donate.stripe.com/9B6bIU8HYeMN1Nq0mw4Ja02', label: t('support_tier_3') || 'Lunch Tier', amount: '€8', featured: false },
+    { href: 'https://donate.stripe.com/9B67sE5vMawxfEgb1a4Ja03', label: t('support_tier_4') || 'Hero Tier 🚀', amount: '€10', featured: true },
+  ];
+
+  // On Capacitor, target=_blank often no-ops. Top-level navigation to a non-allowlisted
+  // host is handed off to the system browser, matching desktop "open Stripe" behavior.
+  const openDonateUrl = (url: string) => {
+    setIsSupportModalOpen(false);
+    if (Capacitor.isNativePlatform()) {
+      window.location.href = url;
+      return;
+    }
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
   return (
     <div className="flex h-screen bg-gradient-to-br from-blue-100 via-blue-50 to-white text-gray-800 flex-col relative overflow-hidden">
       <BackgroundBlobs />
@@ -225,6 +243,16 @@ export default function Layout() {
               )}
 
               <div className="mt-4 pt-4 border-t border-blue-800 flex flex-col gap-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    setIsSupportModalOpen(true);
+                  }}
+                  className="px-4 py-2.5 rounded text-sm text-left text-pink-200 hover:bg-pink-600/30 hover:text-white transition-colors font-bold"
+                >
+                  💖 {t('support_micalingo') || 'Support MicaLingo'}
+                </button>
                 <Link to="/privacy" onClick={() => setIsMobileMenuOpen(false)} className="px-4 py-2.5 rounded text-sm text-blue-200 hover:bg-blue-800 hover:text-white transition-colors">
                   {t('footer_privacy') || 'Privacy Policy'}
                 </Link>
@@ -320,75 +348,122 @@ export default function Layout() {
         </main>
       </div>
 
-      <button 
+      <button
+        type="button"
         onClick={() => setIsSupportModalOpen(true)}
-        className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-40 flex items-center gap-2 p-3 md:px-4 md:py-2 bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold rounded-full shadow-lg hover:scale-105 hover:shadow-xl transition-all duration-300"
+        aria-label={t('support_micalingo') || 'Support MicaLingo'}
+        className="fixed z-40 flex items-center gap-2 px-4 py-2.5 max-w-[calc(100vw-2rem)] bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold rounded-full shadow-lg hover:scale-105 hover:shadow-xl transition-all duration-300 text-sm md:text-base"
+        style={{
+          bottom: 'max(1rem, calc(env(safe-area-inset-bottom, 0px) + 0.75rem))',
+          right: 'max(1rem, calc(env(safe-area-inset-right, 0px) + 0.75rem))',
+        }}
       >
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 md:h-5 md:w-5" viewBox="0 0 20 20" fill="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 shrink-0" viewBox="0 0 20 20" fill="currentColor">
           <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
         </svg>
-        <span className="hidden md:inline">{t('support_micalingo') || 'Support MicaLingo'}</span>
+        <span className="truncate">{t('support_micalingo') || 'Support MicaLingo'}</span>
       </button>
 
       {isSupportModalOpen && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-blue-950/40 backdrop-blur-sm transition-opacity">
-          <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm overflow-hidden flex flex-col animate-fade-in-up border border-white">
-            <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-              <h2 className="text-xl font-extrabold text-blue-950 flex items-center gap-2">
-                <span className="text-2xl">💖</span> {t('support_micalingo') || 'Support MicaLingo'}
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-blue-950/40 backdrop-blur-sm transition-opacity"
+          style={{
+            paddingTop: 'max(1rem, env(safe-area-inset-top, 0px))',
+            paddingBottom: 'max(1rem, env(safe-area-inset-bottom, 0px))',
+            paddingLeft: 'max(1rem, env(safe-area-inset-left, 0px))',
+            paddingRight: 'max(1rem, env(safe-area-inset-right, 0px))',
+          }}
+          onClick={() => setIsSupportModalOpen(false)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="support-modal-title"
+            className="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm max-h-full overflow-y-auto flex flex-col animate-fade-in-up border border-white"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-4 sm:p-6 border-b border-gray-100 flex justify-between items-start gap-3 bg-gray-50/50 sticky top-0 z-10">
+              <h2 id="support-modal-title" className="text-lg sm:text-xl font-extrabold text-blue-950 flex items-center gap-2 min-w-0">
+                <span className="text-2xl shrink-0" aria-hidden="true">💖</span>
+                <span className="leading-tight">{t('support_micalingo') || 'Support MicaLingo'}</span>
               </h2>
-              <button onClick={() => setIsSupportModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-full hover:bg-gray-200">
+              <button
+                type="button"
+                onClick={() => setIsSupportModalOpen(false)}
+                className="shrink-0 text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-full hover:bg-gray-200"
+                aria-label={t('close') || 'Close'}
+              >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             </div>
-            <div className="p-6 flex flex-col gap-3">
-              <p className="text-gray-600 text-center font-medium mb-3 text-sm">
+            <div className="p-4 sm:p-6 flex flex-col gap-3">
+              <p className="text-gray-600 text-center font-medium mb-1 sm:mb-3 text-sm">
                 {t('support_desc') || 'Choose an amount to support our project. Every contribution helps!'}
               </p>
-              <a onClick={() => setIsSupportModalOpen(false)} href="https://donate.stripe.com/5kQ6oAcYegUV77K5GQ4Ja00" target="_blank" rel="noopener noreferrer" className="w-full flex items-center justify-between px-6 py-3.5 bg-blue-50 hover:bg-blue-100 text-blue-800 font-bold rounded-xl transition-colors border border-blue-200">
-                <span>{t('support_tier_1') || 'Coffee Tier'}</span>
-                <span>€2</span>
-              </a>
-              <a onClick={() => setIsSupportModalOpen(false)} href="https://donate.stripe.com/28EcMYcYecEFcs4d9i4Ja01" target="_blank" rel="noopener noreferrer" className="w-full flex items-center justify-between px-6 py-3.5 bg-blue-50 hover:bg-blue-100 text-blue-800 font-bold rounded-xl transition-colors border border-blue-200">
-                <span>{t('support_tier_2') || 'Snack Tier'}</span>
-                <span>€5</span>
-              </a>
-              <a onClick={() => setIsSupportModalOpen(false)} href="https://donate.stripe.com/9B6bIU8HYeMN1Nq0mw4Ja02" target="_blank" rel="noopener noreferrer" className="w-full flex items-center justify-between px-6 py-3.5 bg-blue-50 hover:bg-blue-100 text-blue-800 font-bold rounded-xl transition-colors border border-blue-200">
-                <span>{t('support_tier_3') || 'Lunch Tier'}</span>
-                <span>€8</span>
-              </a>
-              <a onClick={() => setIsSupportModalOpen(false)} href="https://donate.stripe.com/9B67sE5vMawxfEgb1a4Ja03" target="_blank" rel="noopener noreferrer" className="w-full flex items-center justify-between px-6 py-3.5 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-bold rounded-xl transition-all shadow-md">
-                <span>{t('support_tier_4') || 'Hero Tier 🚀'}</span>
-                <span>€10</span>
-              </a>
+              {supportTiers.map((tier) => (
+                <a
+                  key={tier.href}
+                  href={tier.href}
+                  target={isNativeApp ? undefined : '_blank'}
+                  rel="noopener noreferrer"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    openDonateUrl(tier.href);
+                  }}
+                  className={
+                    tier.featured
+                      ? 'w-full flex items-center justify-between gap-3 px-5 sm:px-6 py-3.5 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-bold rounded-xl transition-all shadow-md active:scale-[0.98]'
+                      : 'w-full flex items-center justify-between gap-3 px-5 sm:px-6 py-3.5 bg-blue-50 hover:bg-blue-100 text-blue-800 font-bold rounded-xl transition-colors border border-blue-200 active:scale-[0.98]'
+                  }
+                >
+                  <span className="min-w-0 text-left leading-snug">{tier.label}</span>
+                  <span className="shrink-0">{tier.amount}</span>
+                </a>
+              ))}
             </div>
           </div>
         </div>
       )}
 
       {showConsiderSupport && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-blue-950/40 backdrop-blur-sm transition-opacity">
-          <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm overflow-hidden flex flex-col animate-fade-in-up border border-white text-center p-6 md:p-8">
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-blue-950/40 backdrop-blur-sm transition-opacity"
+          style={{
+            paddingTop: 'max(1rem, env(safe-area-inset-top, 0px))',
+            paddingBottom: 'max(1rem, env(safe-area-inset-bottom, 0px))',
+            paddingLeft: 'max(1rem, env(safe-area-inset-left, 0px))',
+            paddingRight: 'max(1rem, env(safe-area-inset-right, 0px))',
+          }}
+          onClick={() => setShowConsiderSupport(false)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            className="bg-white rounded-[2rem] shadow-2xl w-full max-w-sm max-h-full overflow-y-auto flex flex-col animate-fade-in-up border border-white text-center p-6 md:p-8"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="w-16 h-16 bg-pink-100 text-pink-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
               💖
             </div>
-            <h2 className="text-2xl font-extrabold text-blue-950 mb-2">
+            <h2 className="text-xl sm:text-2xl font-extrabold text-blue-950 mb-2">
               {t('enjoying_micalingo_title') || 'Enjoying MicaLingo?'}
             </h2>
-            <p className="text-gray-600 mb-8 font-medium">
+            <p className="text-gray-600 mb-8 font-medium text-sm sm:text-base">
               {t('consider_donation_desc') || 'Please consider supporting the project to keep it running and ad-free.'}
             </p>
             <div className="flex flex-col gap-3">
               <button
+                type="button"
                 onClick={() => {
                   setShowConsiderSupport(false);
                   setIsSupportModalOpen(true);
                 }}
-                className="w-full py-3.5 bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold rounded-xl hover:shadow-lg transition-all"
+                className="w-full py-3.5 bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold rounded-xl hover:shadow-lg transition-all active:scale-[0.98]"
               >
                 {t('yes_support') || 'Yes, show me how!'}
               </button>
               <button
+                type="button"
                 onClick={() => { setShowConsiderSupport(false); sessionStorage.setItem('micalingo_support_prompt_dismissed', 'true'); }}
                 className="w-full py-3.5 text-gray-600 font-bold hover:bg-gray-100 rounded-xl transition-colors"
               >

@@ -624,7 +624,7 @@ export default function GrammarCategory() {
                   </div>
                   
                   <div className={`grid transition-[grid-template-rows,opacity,margin] duration-500 ease-in-out ${isExpanded ? "grid-rows-[1fr] opacity-100 mt-6" : "grid-rows-[0fr] opacity-0 mt-0"}`}>
-                    <div className="overflow-hidden">
+                    <div className="min-h-0 overflow-hidden">
                       <div className="pt-2 border-t border-blue-50/50 mt-2">
                         {item.source && (
                           <p className="text-sm font-bold text-blue-600 mt-4 mb-6 flex items-center gap-2">

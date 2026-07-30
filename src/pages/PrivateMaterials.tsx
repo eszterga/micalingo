@@ -703,7 +703,7 @@ export default function PrivateMaterials({ type }: { type: 'reading' | 'listenin
               </button>
               
               <div className={`grid transition-[grid-template-rows,opacity,margin] duration-500 ease-in-out ${expandedCategories[cat.id] ? "grid-rows-[1fr] opacity-100 mt-6" : "grid-rows-[0fr] opacity-0 mt-0"}`}>
-                <div className="overflow-hidden">
+                <div className="min-h-0 overflow-hidden">
                   <div className="pt-4 border-t border-blue-50/50 flex flex-col gap-4">
                     <div className="flex justify-end">
                       <button onClick={() => openAddModal(cat.id)} className="w-full sm:w-auto justify-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-xl shadow-sm transition-colors flex items-center gap-2 text-sm">
@@ -752,7 +752,7 @@ export default function PrivateMaterials({ type }: { type: 'reading' | 'listenin
                               </div>
                               
                               <div className={`grid transition-[grid-template-rows,opacity,margin] duration-500 ease-in-out ${isItemExpanded ? "grid-rows-[1fr] opacity-100 mt-6" : "grid-rows-[0fr] opacity-0 mt-0"}`}>
-                                <div className="overflow-hidden">
+                                <div className="min-h-0 overflow-hidden">
                                   <div className="pt-2 border-t border-blue-50/50 mt-2">
                                     {item.source && (
                                       <p className="text-sm font-bold text-blue-600 mt-4 mb-6 flex items-center gap-2">
