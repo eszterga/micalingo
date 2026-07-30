@@ -11,11 +11,40 @@
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
+
+  <!-- Main navigation -->
   <url>
     <loc>https://micalingo.com/#/quizzes</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
+  <url>
+    <loc>https://micalingo.com/#/library</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://micalingo.com/#/grammar</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://micalingo.com/#/statistics</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://micalingo.com/#/vocabulary</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://micalingo.com/#/practice</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Quizzes -->
   <url>
     <loc>https://micalingo.com/#/quizzes?tab=personal</loc>
     <changefreq>weekly</changefreq>
@@ -56,21 +85,72 @@
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
+
+  <!-- Practice topics -->
   <url>
-    <loc>https://micalingo.com/#/library</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://micalingo.com/#/vocabulary</loc>
+    <loc>https://micalingo.com/#/practice/vocabulary</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://micalingo.com/#/grammar</loc>
+    <loc>https://micalingo.com/#/practice/articles</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://micalingo.com/#/practice/phrases</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://micalingo.com/#/practice/prepositions</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://micalingo.com/#/practice/adjectives</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://micalingo.com/#/practice/verbs</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+  </url>
+
+  <!-- Grammar categories -->
+  <url>
+    <loc>https://micalingo.com/#/grammar/cases</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
+  <url>
+    <loc>https://micalingo.com/#/grammar/tenses</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://micalingo.com/#/grammar/articles</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://micalingo.com/#/grammar/adjectives</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://micalingo.com/#/grammar/prepositions</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://micalingo.com/#/grammar/sentence-structure</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Learning materials -->
   <url>
     <loc>https://micalingo.com/#/learning-materials</loc>
     <changefreq>weekly</changefreq>
@@ -82,13 +162,35 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://micalingo.com/#/learning-materials/reading/false-friends</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.65</priority>
+  </url>
+  <url>
+    <loc>https://micalingo.com/#/learning-materials/reading/idioms</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.65</priority>
+  </url>
+  <url>
     <loc>https://micalingo.com/#/learning-materials/listening</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
+
+  <!-- Legal & info -->
   <url>
-    <loc>https://micalingo.com/#/practice</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
+    <loc>https://micalingo.com/#/about</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://micalingo.com/#/privacy</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://micalingo.com/#/terms</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
   </url>
 </urlset>
