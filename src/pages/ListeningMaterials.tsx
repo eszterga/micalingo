@@ -31,10 +31,9 @@ export default function ListeningMaterials() {
   const [openSections, setOpenSections] = useState<{ music: boolean; podcasts: boolean; audiobooks: boolean }>(() => {
     try {
       const saved = sessionStorage.getItem('micalingo_listening_sections_v2');
-      // Default open so guests/mobile users immediately see public category tiles
-      return saved ? JSON.parse(saved) : { music: true, podcasts: true, audiobooks: true };
+      return saved ? JSON.parse(saved) : { music: false, podcasts: false, audiobooks: false };
     } catch (e) {
-      return { music: true, podcasts: true, audiobooks: true };
+      return { music: false, podcasts: false, audiobooks: false };
     }
   });
   const [isEditorOpen, setIsEditorOpen] = useState(false);

@@ -31,10 +31,9 @@ export default function ReadingMaterials() {
   const [openSections, setOpenSections] = useState<{ interesting: boolean; articles: boolean; books: boolean }>(() => {
     try {
       const saved = sessionStorage.getItem('micalingo_reading_sections_v2');
-      // Default open so guests/mobile users immediately see public category tiles
-      return saved ? JSON.parse(saved) : { interesting: true, articles: true, books: true };
+      return saved ? JSON.parse(saved) : { interesting: false, articles: false, books: false };
     } catch (e) {
-      return { interesting: true, articles: true, books: true };
+      return { interesting: false, articles: false, books: false };
     }
   });
   const [isEditorOpen, setIsEditorOpen] = useState(false);

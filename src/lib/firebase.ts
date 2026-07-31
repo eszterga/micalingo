@@ -26,15 +26,19 @@ const firebaseConfig = {
 // Initialize Firebase
 const app: FirebaseApp = initializeApp(firebaseConfig);
 
-// Persistent IndexedDB cache so quizzes don't wait on a full network round-trip
-// after the first load (especially important on tablet / mobile WebViews).
+// Persistent IndexedDB cache helps desktop quizzes; on native WebViews it often
+// serves stale empty results for library pages — use memory cache there instead.
 let db: Firestore;
 try {
-  db = initializeFirestore(app, {
-    localCache: persistentLocalCache({
-      tabManager: persistentMultipleTabManager(),
-    }),
-  });
+  if (Capacitor.isNativePlatform()) {
+    db = getFirestore(app);
+  } else {
+    db = initializeFirestore(app, {
+      localCache: persistentLocalCache({
+        tabManager: persistentMultipleTabManager(),
+      }),
+    });
+  }
 } catch {
   db = getFirestore(app);
 }

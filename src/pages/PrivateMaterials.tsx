@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { doc, getDoc, setDoc, deleteDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { doc, getDocFromServer, setDoc, deleteDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { dbCloud } from '../lib/firebase';
 import { useAuth } from '../AuthContext';
 import { useI18n } from '../I18nContext';
@@ -67,12 +67,13 @@ export default function PrivateMaterials({ type }: { type: 'reading' | 'listenin
   ], [defaultIcon]);
 
   const [categories, setCategories] = useState<any[]>(defaultCategories);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>(() => {
     try {
       const saved = sessionStorage.getItem(`micalingo_private_${type}_sections_v2`);
-      return saved ? JSON.parse(saved) : { cat1: true, cat2: true, cat3: true, cat4: true, cat5: true };
+      return saved ? JSON.parse(saved) : {};
     } catch (e) {
-      return { cat1: true, cat2: true, cat3: true, cat4: true, cat5: true };
+      return {};
     }
   });
   const [editingCategory, setEditingCategory] = useState<string | null>(null);
@@ -213,26 +214,11 @@ export default function PrivateMaterials({ type }: { type: 'reading' | 'listenin
   useEffect(() => {
     try {
       const saved = sessionStorage.getItem(`micalingo_private_${type}_sections_v2`);
-      setExpandedCategories(saved ? JSON.parse(saved) : { cat1: true, cat2: true, cat3: true, cat4: true, cat5: true });
+      setExpandedCategories(saved ? JSON.parse(saved) : {});
     } catch (e) {
-      setExpandedCategories({ cat1: true, cat2: true, cat3: true, cat4: true, cat5: true });
+      setExpandedCategories({});
     }
   }, [type]);
-
-  // Ensure every loaded category defaults to open on mobile (unless user already toggled it)
-  useEffect(() => {
-    setExpandedCategories(prev => {
-      let changed = false;
-      const next = { ...prev };
-      for (const cat of categories) {
-        if (next[cat.id] === undefined) {
-          next[cat.id] = true;
-          changed = true;
-        }
-      }
-      return changed ? next : prev;
-    });
-  }, [categories]);
 
   useEffect(() => {
     const fetchBookmarks = async () => {
@@ -267,39 +253,44 @@ export default function PrivateMaterials({ type }: { type: 'reading' | 'listenin
 
   useEffect(() => {
     const loadData = async () => {
-      if (user) {
-        try {
-          const docRef = doc(dbCloud, collectionName, user.uid);
-          const snapshot = await getDoc(docRef);
-          if (snapshot.exists() && snapshot.data().categories) {
-            setCategories(snapshot.data().categories);
-          } else {
-            const localData = localStorage.getItem(`micalingo_${collectionName}_${user.uid}`);
-            if (localData) {
-              try {
-                const parsed = JSON.parse(localData);
-                if (parsed && Array.isArray(parsed) && parsed.length > 0) {
-                  setCategories(parsed);
-                  setDoc(docRef, { categories: parsed }, { merge: true });
-                } else {
-                  setCategories(defaultCategories);
-                }
-              } catch {
-                setCategories(defaultCategories);
-              }
-            } else {
-              setCategories(defaultCategories);
-            }
-          }
-        } catch (e) {
-          console.error(`Error loading ${collectionName} data:`, e);
+      if (!user) {
+        setCategoriesLoading(false);
+        return;
+      }
+      setCategoriesLoading(true);
+      try {
+        const docRef = doc(dbCloud, collectionName, user.uid);
+        const snapshot = await getDocFromServer(docRef);
+        if (snapshot.exists() && snapshot.data().categories) {
+          setCategories(snapshot.data().categories);
+        } else {
           const localData = localStorage.getItem(`micalingo_${collectionName}_${user.uid}`);
           if (localData) {
-            try { setCategories(JSON.parse(localData)); } catch { setCategories(defaultCategories); }
+            try {
+              const parsed = JSON.parse(localData);
+              if (parsed && Array.isArray(parsed) && parsed.length > 0) {
+                setCategories(parsed);
+                setDoc(docRef, { categories: parsed }, { merge: true });
+              } else {
+                setCategories(defaultCategories);
+              }
+            } catch {
+              setCategories(defaultCategories);
+            }
           } else {
             setCategories(defaultCategories);
           }
         }
+      } catch (e) {
+        console.error(`Error loading ${collectionName} data:`, e);
+        const localData = localStorage.getItem(`micalingo_${collectionName}_${user.uid}`);
+        if (localData) {
+          try { setCategories(JSON.parse(localData)); } catch { setCategories(defaultCategories); }
+        } else {
+          setCategories(defaultCategories);
+        }
+      } finally {
+        setCategoriesLoading(false);
       }
     };
     loadData();
@@ -695,7 +686,12 @@ export default function PrivateMaterials({ type }: { type: 'reading' | 'listenin
             {t("bookmark_instructions_logged_in") || "Highlight any text while reading to save a bookmark, or save the highlighted text directly to your personal vocabulary database or into your quizzes!"}
           </div>
 
-          {categories.map((cat) => (
+          {categoriesLoading ? (
+            <div className="bg-white/70 backdrop-blur-xl p-12 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white text-center">
+              <div className="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4" />
+              <p className="text-blue-900/70 text-lg font-medium">{t("loading") || "Loading..."}</p>
+            </div>
+          ) : categories.map((cat) => (
             <section key={cat.id} className="bg-white/60 backdrop-blur-xl rounded-[2.5rem] border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-6 md:p-8 transition-all duration-300 hover:bg-white/80">
               <button onClick={() => toggleCategory(cat.id)} className="w-full flex items-center justify-between group outline-none">
                 <div className="flex items-center gap-4 flex-1">

@@ -5,6 +5,7 @@ import { dbCloud } from '../lib/firebase';
 import { useAuth } from '../AuthContext';
 import { useI18n } from '../I18nContext';
 import { addCloudWord, useCloudVocabulary, findVocabDuplicate, vocabCategoryKey } from '../lib/firestore';
+import { fetchVisibleLibraryItems } from '../lib/libraryContent';
 import { ImageLightbox, useImageLightbox } from '../components/ImageLightbox';
 import ArticleContent from '../components/ArticleContent';
 
@@ -58,6 +59,7 @@ export default function PublicAudioCategory({ type }: { type: 'music' | 'podcast
   const publicVocabulary = useCloudVocabulary("PUBLIC_LIBRARY") || [];
   
   const [items, setItems] = useState<any[]>([]);
+  const [itemsLoading, setItemsLoading] = useState(true);
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const [bookmarks, setBookmarks] = useState<Record<string, string>>({});
   const [bookmarkPopup, setBookmarkPopup] = useState<{ itemId: string, text: string, x: number, y: number } | null>(null);
@@ -215,39 +217,16 @@ export default function PublicAudioCategory({ type }: { type: 'music' | 'podcast
   }, [categoryId, user?.uid]);
 
   const fetchItems = useCallback(async () => {
-    // Guest: PUBLIC_LIBRARY (+ legacy docs missing userId). Logged-in: those + own.
-    // Merge several queries so older uploads still show even if one path fails under rules.
-    const byId = new Map<string, any>();
-    const ingest = (docs: { id: string; data: () => any }[]) => {
-      docs.forEach(d => {
-        const item = { id: d.id, ...d.data() };
-        if (item.categoryId !== categoryId) return;
-        const isPublic = item.userId === "PUBLIC_LIBRARY" || !item.userId;
-        const isOwn = !!user?.uid && item.userId === user.uid;
-        if (!isPublic && !isOwn) return;
-        byId.set(d.id, item);
-      });
-    };
-
-    const results = await Promise.allSettled([
-      getDocs(query(collection(dbCloud, "audio"), where("userId", "==", "PUBLIC_LIBRARY"))),
-      user?.uid
-        ? getDocs(query(collection(dbCloud, "audio"), where("userId", "==", user.uid)))
-        : Promise.resolve(null),
-      getDocs(query(collection(dbCloud, "audio"), where("categoryId", "==", categoryId))),
-    ]);
-
-    for (const result of results) {
-      if (result.status === "fulfilled" && result.value) {
-        ingest(result.value.docs);
-      } else if (result.status === "rejected") {
-        console.error("Error fetching audio:", result.reason);
-      }
+    setItemsLoading(true);
+    try {
+      const data = await fetchVisibleLibraryItems("audio", categoryId, user?.uid);
+      setItems(data);
+    } catch (e) {
+      console.error("Error fetching audio:", e);
+      setItems([]);
+    } finally {
+      setItemsLoading(false);
     }
-
-    const data = Array.from(byId.values());
-    data.sort((a: any, b: any) => (b.updatedAt || 0) - (a.updatedAt || 0));
-    setItems(data);
   }, [categoryId, user?.uid]);
 
   useEffect(() => {
@@ -623,7 +602,12 @@ export default function PublicAudioCategory({ type }: { type: 'music' | 'podcast
           </div>
         )}
 
-        {items.length > 0 ? (
+        {itemsLoading ? (
+          <div className="bg-white/70 backdrop-blur-xl p-12 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white text-center">
+            <div className="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4" />
+            <p className="text-blue-900/70 text-lg font-medium">{t("loading") || "Loading..."}</p>
+          </div>
+        ) : items.length > 0 ? (
           <div className="space-y-8">
             {items.map((item, index) => {
               const isExpanded = expandedItems.has(item.id);
