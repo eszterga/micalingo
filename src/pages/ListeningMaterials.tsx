@@ -30,10 +30,11 @@ export default function ListeningMaterials() {
   const { user, isAdmin, adminMode } = useAuth();
   const [openSections, setOpenSections] = useState<{ music: boolean; podcasts: boolean; audiobooks: boolean }>(() => {
     try {
-      const saved = sessionStorage.getItem('micalingo_listening_sections');
-      return saved ? JSON.parse(saved) : { music: false, podcasts: false, audiobooks: false };
+      const saved = sessionStorage.getItem('micalingo_listening_sections_v2');
+      // Default open so guests/mobile users immediately see public category tiles
+      return saved ? JSON.parse(saved) : { music: true, podcasts: true, audiobooks: true };
     } catch (e) {
-      return { music: false, podcasts: false, audiobooks: false };
+      return { music: true, podcasts: true, audiobooks: true };
     }
   });
   const [isEditorOpen, setIsEditorOpen] = useState(false);
@@ -41,7 +42,7 @@ export default function ListeningMaterials() {
   const toggleSection = (section: 'music' | 'podcasts' | 'audiobooks') => {
     setOpenSections(prev => {
       const next = { ...prev, [section]: !prev[section] };
-      sessionStorage.setItem('micalingo_listening_sections', JSON.stringify(next));
+      sessionStorage.setItem('micalingo_listening_sections_v2', JSON.stringify(next));
       return next;
     });
   };
@@ -135,8 +136,7 @@ export default function ListeningMaterials() {
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"></path></svg>
               </div>
             </button>
-            <div className={`grid transition-[grid-template-rows,opacity] duration-500 ease-in-out ${openSections.music ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}>
-              <div className="min-h-0 overflow-hidden">
+            {openSections.music && (
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 pt-8 pb-2">
                   {musicCategories.map(cat => (
                     <Link key={cat.id} to={`/learning-materials/listening/music/${cat.id}`} className="group relative flex flex-col items-start justify-between p-6 md:p-8 rounded-[2rem] bg-white/90 backdrop-blur-xl border border-blue-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500 overflow-hidden">
@@ -148,8 +148,7 @@ export default function ListeningMaterials() {
                     </Link>
                   ))}
                 </div>
-              </div>
-            </div>
+            )}
           </section>
 
           {/* Podcasts Section */}
@@ -163,8 +162,7 @@ export default function ListeningMaterials() {
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"></path></svg>
               </div>
             </button>
-            <div className={`grid transition-[grid-template-rows,opacity] duration-500 ease-in-out ${openSections.podcasts ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}>
-              <div className="min-h-0 overflow-hidden">
+            {openSections.podcasts && (
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 pt-8 pb-2">
                   {podcastsCategories.map(cat => (
                     <Link key={cat.id} to={`/learning-materials/listening/podcasts/${cat.id}`} className="group relative flex flex-col items-start justify-between p-6 md:p-8 rounded-[2rem] bg-white/90 backdrop-blur-xl border border-blue-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500 overflow-hidden">
@@ -176,8 +174,7 @@ export default function ListeningMaterials() {
                     </Link>
                   ))}
                 </div>
-              </div>
-            </div>
+            )}
           </section>
 
           {/* Audiobooks Section */}
@@ -191,8 +188,7 @@ export default function ListeningMaterials() {
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"></path></svg>
               </div>
             </button>
-            <div className={`grid transition-[grid-template-rows,opacity] duration-500 ease-in-out ${openSections.audiobooks ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}>
-              <div className="min-h-0 overflow-hidden">
+            {openSections.audiobooks && (
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 pt-8 pb-2">
                   {audiobooksCategories.map(cat => (
                     <Link key={cat.id} to={`/learning-materials/listening/audiobooks/${cat.id}`} className="group relative flex flex-col items-start justify-between p-6 md:p-8 rounded-[2rem] bg-white/90 backdrop-blur-xl border border-blue-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500 overflow-hidden">
@@ -204,8 +200,7 @@ export default function ListeningMaterials() {
                     </Link>
                   ))}
                 </div>
-              </div>
-            </div>
+            )}
           </section>
         </div>
       </div>

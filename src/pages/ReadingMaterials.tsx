@@ -30,10 +30,11 @@ export default function ReadingMaterials() {
   const { user, isAdmin, adminMode } = useAuth();
   const [openSections, setOpenSections] = useState<{ interesting: boolean; articles: boolean; books: boolean }>(() => {
     try {
-      const saved = sessionStorage.getItem('micalingo_reading_sections');
-      return saved ? JSON.parse(saved) : { interesting: false, articles: false, books: false };
+      const saved = sessionStorage.getItem('micalingo_reading_sections_v2');
+      // Default open so guests/mobile users immediately see public category tiles
+      return saved ? JSON.parse(saved) : { interesting: true, articles: true, books: true };
     } catch (e) {
-      return { interesting: false, articles: false, books: false };
+      return { interesting: true, articles: true, books: true };
     }
   });
   const [isEditorOpen, setIsEditorOpen] = useState(false);
@@ -41,7 +42,7 @@ export default function ReadingMaterials() {
   const toggleSection = (section: 'interesting' | 'articles' | 'books') => {
     setOpenSections(prev => {
       const next = { ...prev, [section]: !prev[section] };
-      sessionStorage.setItem('micalingo_reading_sections', JSON.stringify(next));
+      sessionStorage.setItem('micalingo_reading_sections_v2', JSON.stringify(next));
       return next;
     });
   };
@@ -130,8 +131,7 @@ export default function ReadingMaterials() {
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"></path></svg>
               </div>
             </button>
-            <div className={`grid transition-[grid-template-rows,opacity] duration-500 ease-in-out ${openSections.interesting ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}>
-              <div className="min-h-0 overflow-hidden">
+            {openSections.interesting && (
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 pt-8 pb-2">
                   <Link to="/learning-materials/reading/false-friends" className="group relative flex flex-col items-start justify-between p-6 md:p-8 rounded-[2rem] bg-white/90 backdrop-blur-xl border border-blue-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500 overflow-hidden">
                     <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center text-3xl mb-10 group-hover:scale-110 transition-transform duration-500 border border-gray-100">🤔</div>
@@ -148,8 +148,7 @@ export default function ReadingMaterials() {
                     </div>
                   </Link>
                 </div>
-              </div>
-            </div>
+            )}
           </section>
 
           {/* Articles Section */}
@@ -163,8 +162,7 @@ export default function ReadingMaterials() {
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"></path></svg>
               </div>
             </button>
-            <div className={`grid transition-[grid-template-rows,opacity] duration-500 ease-in-out ${openSections.articles ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}>
-              <div className="min-h-0 overflow-hidden">
+            {openSections.articles && (
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 pt-8 pb-2">
                   {articlesCategories.map(cat => (
                     <Link key={cat.id} to={`/learning-materials/reading/articles/${cat.id}`} className="group relative flex flex-col items-start justify-between p-6 md:p-8 rounded-[2rem] bg-white/90 backdrop-blur-xl border border-blue-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500 overflow-hidden">
@@ -176,8 +174,7 @@ export default function ReadingMaterials() {
                     </Link>
                   ))}
                 </div>
-              </div>
-            </div>
+            )}
           </section>
 
           {/* Books Section */}
@@ -191,8 +188,7 @@ export default function ReadingMaterials() {
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"></path></svg>
               </div>
             </button>
-            <div className={`grid transition-[grid-template-rows,opacity] duration-500 ease-in-out ${openSections.books ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}>
-              <div className="min-h-0 overflow-hidden">
+            {openSections.books && (
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 pt-8 pb-2">
                   {booksCategories.map(cat => (
                     <Link key={cat.id} to={`/learning-materials/reading/books/${cat.id}`} className="group relative flex flex-col items-start justify-between p-6 md:p-8 rounded-[2rem] bg-white/90 backdrop-blur-xl border border-blue-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500 overflow-hidden">
@@ -204,8 +200,7 @@ export default function ReadingMaterials() {
                     </Link>
                   ))}
                 </div>
-              </div>
-            </div>
+            )}
           </section>
         </div>
       </div>

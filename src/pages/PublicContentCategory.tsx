@@ -193,15 +193,39 @@ export default function PublicContentCategory({ type }: { type: 'articles' | 'bo
   }, [categoryId, user?.uid]);
 
   const fetchItems = useCallback(async () => {
-    try {
-      const q = query(collection(dbCloud, collectionName), where("categoryId", "==", categoryId));
-      const snapshot = await getDocs(q);
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).filter((m: any) => m.userId === "PUBLIC_LIBRARY" || m.userId === user?.uid);
-      data.sort((a: any, b: any) => (b.updatedAt || 0) - (a.updatedAt || 0));
-      setItems(data);
-    } catch (e) {
-      console.error("Error fetching items:", e);
+    // Guest: PUBLIC_LIBRARY (+ legacy docs missing userId). Logged-in: those + own.
+    // Merge several queries so older uploads still show even if one path fails under rules.
+    const byId = new Map<string, any>();
+    const ingest = (docs: { id: string; data: () => any }[]) => {
+      docs.forEach(d => {
+        const item = { id: d.id, ...d.data() };
+        if (item.categoryId !== categoryId) return;
+        const isPublic = item.userId === "PUBLIC_LIBRARY" || !item.userId;
+        const isOwn = !!user?.uid && item.userId === user.uid;
+        if (!isPublic && !isOwn) return;
+        byId.set(d.id, item);
+      });
+    };
+
+    const results = await Promise.allSettled([
+      getDocs(query(collection(dbCloud, collectionName), where("userId", "==", "PUBLIC_LIBRARY"))),
+      user?.uid
+        ? getDocs(query(collection(dbCloud, collectionName), where("userId", "==", user.uid)))
+        : Promise.resolve(null),
+      getDocs(query(collection(dbCloud, collectionName), where("categoryId", "==", categoryId))),
+    ]);
+
+    for (const result of results) {
+      if (result.status === "fulfilled" && result.value) {
+        ingest(result.value.docs);
+      } else if (result.status === "rejected") {
+        console.error("Error fetching items:", result.reason);
+      }
     }
+
+    const data = Array.from(byId.values());
+    data.sort((a: any, b: any) => (b.updatedAt || 0) - (a.updatedAt || 0));
+    setItems(data);
   }, [categoryId, collectionName, user?.uid]);
 
   useEffect(() => {
@@ -368,7 +392,7 @@ export default function PublicContentCategory({ type }: { type: 'articles' | 'bo
         if (editingId) {
           await setDoc(doc(dbCloud, collectionName, editingId), payload, { merge: true });
         } else {
-          payload.userId = isAdmin && adminMode ? "PUBLIC_LIBRARY" : user?.uid;
+          payload.userId = (isAdmin && adminMode && saveToPublic) ? "PUBLIC_LIBRARY" : user?.uid;
           await setDoc(doc(collection(dbCloud, collectionName)), payload);
         }
         closeModal();
@@ -623,9 +647,8 @@ export default function PublicContentCategory({ type }: { type: 'articles' | 'bo
                     )}
                   </div>
                   
-                  <div className={`grid transition-[grid-template-rows,opacity,margin] duration-500 ease-in-out ${isExpanded ? "grid-rows-[1fr] opacity-100 mt-6" : "grid-rows-[0fr] opacity-0 mt-0"}`}>
-                    <div className="min-h-0 overflow-hidden">
-                      <div className="pt-2 border-t border-blue-50/50 mt-2">
+                  {isExpanded && (
+                      <div className="pt-2 border-t border-blue-50/50 mt-6">
                         {item.source && (
                           <p className="text-sm font-bold text-blue-600 mt-4 mb-6 flex items-center gap-2">
                             <span className="bg-blue-100 p-1.5 rounded-lg text-xs shadow-sm">{type === 'articles' ? '📰' : '📚'}</span> {item.source}
@@ -638,8 +661,7 @@ export default function PublicContentCategory({ type }: { type: 'articles' | 'bo
                           </a>
                         )}
                       </div>
-                    </div>
-                  </div>
+                  )}
                 </div>
               );
             })}

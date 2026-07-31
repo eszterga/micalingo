@@ -215,15 +215,39 @@ export default function PublicAudioCategory({ type }: { type: 'music' | 'podcast
   }, [categoryId, user?.uid]);
 
   const fetchItems = useCallback(async () => {
-    try {
-      const q = query(collection(dbCloud, "audio"), where("categoryId", "==", categoryId));
-      const snapshot = await getDocs(q);
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).filter((m: any) => m.userId === "PUBLIC_LIBRARY" || m.userId === user?.uid);
-      data.sort((a: any, b: any) => (b.updatedAt || 0) - (a.updatedAt || 0));
-      setItems(data);
-    } catch (e) {
-      console.error("Error fetching audio:", e);
+    // Guest: PUBLIC_LIBRARY (+ legacy docs missing userId). Logged-in: those + own.
+    // Merge several queries so older uploads still show even if one path fails under rules.
+    const byId = new Map<string, any>();
+    const ingest = (docs: { id: string; data: () => any }[]) => {
+      docs.forEach(d => {
+        const item = { id: d.id, ...d.data() };
+        if (item.categoryId !== categoryId) return;
+        const isPublic = item.userId === "PUBLIC_LIBRARY" || !item.userId;
+        const isOwn = !!user?.uid && item.userId === user.uid;
+        if (!isPublic && !isOwn) return;
+        byId.set(d.id, item);
+      });
+    };
+
+    const results = await Promise.allSettled([
+      getDocs(query(collection(dbCloud, "audio"), where("userId", "==", "PUBLIC_LIBRARY"))),
+      user?.uid
+        ? getDocs(query(collection(dbCloud, "audio"), where("userId", "==", user.uid)))
+        : Promise.resolve(null),
+      getDocs(query(collection(dbCloud, "audio"), where("categoryId", "==", categoryId))),
+    ]);
+
+    for (const result of results) {
+      if (result.status === "fulfilled" && result.value) {
+        ingest(result.value.docs);
+      } else if (result.status === "rejected") {
+        console.error("Error fetching audio:", result.reason);
+      }
     }
+
+    const data = Array.from(byId.values());
+    data.sort((a: any, b: any) => (b.updatedAt || 0) - (a.updatedAt || 0));
+    setItems(data);
   }, [categoryId, user?.uid]);
 
   useEffect(() => {
@@ -638,9 +662,8 @@ export default function PublicAudioCategory({ type }: { type: 'music' | 'podcast
                     )}
                   </div>
                   
-                  <div className={`grid transition-[grid-template-rows,opacity,margin] duration-500 ease-in-out ${isExpanded ? "grid-rows-[1fr] opacity-100 mt-6" : "grid-rows-[0fr] opacity-0 mt-0"}`}>
-                    <div className="min-h-0 overflow-hidden">
-                      <div className="pt-6 border-t border-blue-50/50 mt-2 flex flex-col lg:flex-row gap-8 items-start">
+                  {isExpanded && (
+                      <div className="pt-6 border-t border-blue-50/50 mt-6 flex flex-col lg:flex-row gap-8 items-start">
                         <div className="flex-1 w-full order-2 lg:order-1">
                           {item.source && (
                             <p className="text-sm font-bold text-blue-600 mb-6 flex items-center gap-2">
@@ -661,8 +684,7 @@ export default function PublicAudioCategory({ type }: { type: 'music' | 'podcast
                           </div>
                         )}
                       </div>
-                    </div>
-                  </div>
+                  )}
                 </div>
               );
             })}

@@ -69,10 +69,10 @@ export default function PrivateMaterials({ type }: { type: 'reading' | 'listenin
   const [categories, setCategories] = useState<any[]>(defaultCategories);
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>(() => {
     try {
-      const saved = sessionStorage.getItem(`micalingo_private_${type}_sections`);
-      return saved ? JSON.parse(saved) : {};
+      const saved = sessionStorage.getItem(`micalingo_private_${type}_sections_v2`);
+      return saved ? JSON.parse(saved) : { cat1: true, cat2: true, cat3: true, cat4: true, cat5: true };
     } catch (e) {
-      return {};
+      return { cat1: true, cat2: true, cat3: true, cat4: true, cat5: true };
     }
   });
   const [editingCategory, setEditingCategory] = useState<string | null>(null);
@@ -212,12 +212,27 @@ export default function PrivateMaterials({ type }: { type: 'reading' | 'listenin
 
   useEffect(() => {
     try {
-      const saved = sessionStorage.getItem(`micalingo_private_${type}_sections`);
-      setExpandedCategories(saved ? JSON.parse(saved) : {});
+      const saved = sessionStorage.getItem(`micalingo_private_${type}_sections_v2`);
+      setExpandedCategories(saved ? JSON.parse(saved) : { cat1: true, cat2: true, cat3: true, cat4: true, cat5: true });
     } catch (e) {
-      setExpandedCategories({});
+      setExpandedCategories({ cat1: true, cat2: true, cat3: true, cat4: true, cat5: true });
     }
   }, [type]);
+
+  // Ensure every loaded category defaults to open on mobile (unless user already toggled it)
+  useEffect(() => {
+    setExpandedCategories(prev => {
+      let changed = false;
+      const next = { ...prev };
+      for (const cat of categories) {
+        if (next[cat.id] === undefined) {
+          next[cat.id] = true;
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+  }, [categories]);
 
   useEffect(() => {
     const fetchBookmarks = async () => {
@@ -310,7 +325,7 @@ export default function PrivateMaterials({ type }: { type: 'reading' | 'listenin
 
   const toggleCategory = (id: string) => setExpandedCategories(prev => {
     const next = { ...prev, [id]: !prev[id] };
-    sessionStorage.setItem(`micalingo_private_${type}_sections`, JSON.stringify(next));
+    sessionStorage.setItem(`micalingo_private_${type}_sections_v2`, JSON.stringify(next));
     return next;
   });
   
@@ -702,9 +717,8 @@ export default function PrivateMaterials({ type }: { type: 'reading' | 'listenin
                 </div>
               </button>
               
-              <div className={`grid transition-[grid-template-rows,opacity,margin] duration-500 ease-in-out ${expandedCategories[cat.id] ? "grid-rows-[1fr] opacity-100 mt-6" : "grid-rows-[0fr] opacity-0 mt-0"}`}>
-                <div className="min-h-0 overflow-hidden">
-                  <div className="pt-4 border-t border-blue-50/50 flex flex-col gap-4">
+              {expandedCategories[cat.id] && (
+                <div className="pt-4 border-t border-blue-50/50 flex flex-col gap-4 mt-6">
                     <div className="flex justify-end">
                       <button onClick={() => openAddModal(cat.id)} className="w-full sm:w-auto justify-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-xl shadow-sm transition-colors flex items-center gap-2 text-sm">
                         <span className="text-xl leading-none">+</span> {t((type === 'reading' ? "add_article" : "add_audio") as any)}
@@ -751,9 +765,8 @@ export default function PrivateMaterials({ type }: { type: 'reading' | 'listenin
                                 </div>
                               </div>
                               
-                              <div className={`grid transition-[grid-template-rows,opacity,margin] duration-500 ease-in-out ${isItemExpanded ? "grid-rows-[1fr] opacity-100 mt-6" : "grid-rows-[0fr] opacity-0 mt-0"}`}>
-                                <div className="min-h-0 overflow-hidden">
-                                  <div className="pt-2 border-t border-blue-50/50 mt-2">
+                              {isItemExpanded && (
+                                  <div className="pt-2 border-t border-blue-50/50 mt-6">
                                     {item.source && (
                                       <p className="text-sm font-bold text-blue-600 mt-4 mb-6 flex items-center gap-2">
                                         <span className="bg-blue-100 p-1.5 rounded-lg text-xs shadow-sm">{type === 'reading' ? '📰' : type === 'listening' ? '🎧' : '✍️'}</span> {item.source}
@@ -780,16 +793,14 @@ export default function PrivateMaterials({ type }: { type: 'reading' | 'listenin
                                     </>
                                   )} 
                                   </div>
-                                </div>
-                              </div>
+                              )}
                             </div>
                           );
                         })}
                       </div>
                     )}
-                  </div>
                 </div>
-              </div>
+              )}
             </section>
           ))}
         </div>
