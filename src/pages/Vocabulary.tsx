@@ -16,7 +16,7 @@ import {
   READING_VOCAB_CATEGORY,
   type CloudVocabularyItem 
 } from "../lib/firestore";
-import { signInWithGoogle } from '../lib/googleAuth';
+import { isUserCancelledAuthError, signInWithGoogle } from '../lib/googleAuth';
 import { useI18n } from "../I18nContext";
 
 const BackgroundBlobs = () => (
@@ -95,6 +95,7 @@ export default function Vocabulary() {
     try {
       await signInWithGoogle();
     } catch (error) {
+      if (isUserCancelledAuthError(error)) return;
       console.error("Login failed:", error);
       alert(t('alert_login_failed'));
     }

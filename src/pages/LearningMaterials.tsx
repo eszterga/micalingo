@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { useI18n } from '../I18nContext';
-import { signInWithGoogle } from '../lib/googleAuth';
+import { isUserCancelledAuthError, signInWithGoogle } from '../lib/googleAuth';
 
 const BackgroundBlobs = () => (
   <>
@@ -47,6 +47,7 @@ export default function LearningMaterials() {
     try {
       await signInWithGoogle();
     } catch (error) {
+      if (isUserCancelledAuthError(error)) return;
       console.error("Login failed:", error);
       alert(t("alert_login_failed"));
     }

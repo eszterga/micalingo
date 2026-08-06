@@ -1,6 +1,6 @@
 import { Outlet } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
-import { signInWithGoogle } from '../lib/googleAuth';
+import { isUserCancelledAuthError, signInWithGoogle } from '../lib/googleAuth';
 import { useI18n } from '../I18nContext';
 
 export default function ProtectedRoute() {
@@ -11,6 +11,7 @@ export default function ProtectedRoute() {
     try {
       await signInWithGoogle();
     } catch (error) {
+      if (isUserCancelledAuthError(error)) return;
       console.error("Login failed:", error);
       alert("Failed to log in with Google.");
     }

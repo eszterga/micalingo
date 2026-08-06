@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { Link, useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../AuthContext";
-import { signInWithGoogle } from '../lib/googleAuth';
+import { isUserCancelledAuthError, signInWithGoogle } from '../lib/googleAuth';
 import { useCloudVocabulary } from "../lib/firestore";
 import { useI18n } from "../I18nContext";
 import {
@@ -68,6 +68,7 @@ export default function TopicQuizzes() {
     try {
       await signInWithGoogle();
     } catch (error) {
+      if (isUserCancelledAuthError(error)) return;
       console.error("Login failed:", error);
     }
   };

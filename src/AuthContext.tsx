@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { type User, onAuthStateChanged } from 'firebase/auth';
 import { auth } from './lib/firebase';
-import { signOutFromApp } from './lib/googleAuth';
+import { completeGoogleRedirectSignIn, signOutFromApp } from './lib/googleAuth';
 
 interface AuthContextType {
   user: User | null;
@@ -30,11 +30,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isAdmin = user?.email ? adminEmails.includes(user.email) : false;
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      setLoading(false);
-    });
-    return unsubscribe;
+    let unsubscribe = () => {};
+    let cancelled = false;
+
+    (async () => {
+      // Finish redirect-based Google sign-in (used on Firefox / popup fallback)
+      // before subscribing so AuthContext sees the user on return.
+      try {
+        await completeGoogleRedirectSignIn();
+      } catch (error) {
+        console.error('Google redirect sign-in failed:', error);
+      }
+      if (cancelled) return;
+
+      unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+        setUser(currentUser);
+        setLoading(false);
+      });
+    })();
+
+    return () => {
+      cancelled = true;
+      unsubscribe();
+    };
   }, []);
   
   const setAdminMode = (isDevMode: boolean) => {

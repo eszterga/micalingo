@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { useI18n } from '../I18nContext';
-import { signInWithGoogle } from '../lib/googleAuth';
+import { isUserCancelledAuthError, signInWithGoogle } from '../lib/googleAuth';
 
 export default function Login() {
   const { user, loading } = useAuth();
@@ -22,13 +22,14 @@ export default function Login() {
   const handleGoogleLogin = async () => {
     setIsLoggingIn(true);
     try {
-      await signInWithGoogle();
-      // On the web this resolves once signed in; on native, AuthContext's
-      // onAuthStateChanged listener picks up the sign-in and the effect
-      // above handles the redirect.
+      const result = await signInWithGoogle();
+      // null => full-page redirect started (Firefox / popup fallback); the
+      // page will unload. Otherwise navigate once credentials are ready.
+      if (!result) return;
       const redirectUrl = searchParams.get('redirect') || '/';
       navigate(redirectUrl, { replace: true });
     } catch (error) {
+      if (isUserCancelledAuthError(error)) return;
       console.error("Login failed:", error);
       alert(t('alert_login_failed'));
     } finally {

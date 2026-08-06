@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { useI18n } from "../I18nContext";
 import { useAuth } from "../AuthContext";
-import { signInWithGoogle } from '../lib/googleAuth';
+import { isUserCancelledAuthError, signInWithGoogle } from '../lib/googleAuth';
 import { useCloudVocabulary } from "../lib/firestore";
 import {
   filterMarkedWords,
@@ -70,6 +70,7 @@ export default function Quizzes() {
     try {
       await signInWithGoogle();
     } catch (error) {
+      if (isUserCancelledAuthError(error)) return;
       console.error("Login failed:", error);
       alert(t('alert_login_failed'));
     }
