@@ -1,5 +1,14 @@
 User-agent: *
 Allow: /
 
+# Private / session routes - keep out of the index
+Disallow: /login
+Disallow: /import
+Disallow: /create-quiz
+Disallow: /quiz
+Disallow: /results
+Disallow: /settings
+Disallow: /learning-materials/private/
+
 # Canonical property: https://micalingo.com (not github.io)
 Sitemap: https://micalingo.com/sitemap.xml

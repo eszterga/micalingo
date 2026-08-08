@@ -1,195 +1,200 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <!-- Canonical site: https://micalingo.com (HashRouter routes use #/) -->
   <url>
     <loc>https://micalingo.com/</loc>
+    <lastmod>2026-08-08</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://micalingo.com/#/</loc>
-    <changefreq>daily</changefreq>
-    <priority>1.0</priority>
-  </url>
-
-  <!-- Main navigation -->
-  <url>
-    <loc>https://micalingo.com/#/quizzes</loc>
+    <loc>https://micalingo.com/quizzes</loc>
+    <lastmod>2026-08-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://micalingo.com/#/library</loc>
+    <loc>https://micalingo.com/library</loc>
+    <lastmod>2026-08-08</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://micalingo.com/#/grammar</loc>
+    <loc>https://micalingo.com/grammar</loc>
+    <lastmod>2026-08-08</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://micalingo.com/#/statistics</loc>
+    <loc>https://micalingo.com/statistics</loc>
+    <lastmod>2026-08-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://micalingo.com/vocabulary</loc>
+    <lastmod>2026-08-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://micalingo.com/#/vocabulary</loc>
+    <loc>https://micalingo.com/practice</loc>
+    <lastmod>2026-08-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://micalingo.com/#/practice</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-
-  <!-- Quizzes -->
-  <url>
-    <loc>https://micalingo.com/#/quizzes?tab=personal</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.85</priority>
-  </url>
-  <url>
-    <loc>https://micalingo.com/#/quizzes?tab=marked</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.85</priority>
-  </url>
-  <url>
-    <loc>https://micalingo.com/#/quizzes/vocabulary</loc>
+    <loc>https://micalingo.com/quizzes/vocabulary</loc>
+    <lastmod>2026-08-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://micalingo.com/#/quizzes/articles</loc>
+    <loc>https://micalingo.com/quizzes/articles</loc>
+    <lastmod>2026-08-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://micalingo.com/#/quizzes/phrases</loc>
+    <loc>https://micalingo.com/quizzes/phrases</loc>
+    <lastmod>2026-08-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://micalingo.com/#/quizzes/prepositions</loc>
+    <loc>https://micalingo.com/quizzes/prepositions</loc>
+    <lastmod>2026-08-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://micalingo.com/#/quizzes/adjectives</loc>
+    <loc>https://micalingo.com/quizzes/adjectives</loc>
+    <lastmod>2026-08-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://micalingo.com/#/quizzes/verbs</loc>
+    <loc>https://micalingo.com/quizzes/verbs</loc>
+    <lastmod>2026-08-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
-
-  <!-- Practice topics -->
   <url>
-    <loc>https://micalingo.com/#/practice/vocabulary</loc>
+    <loc>https://micalingo.com/practice/vocabulary</loc>
+    <lastmod>2026-08-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://micalingo.com/#/practice/articles</loc>
+    <loc>https://micalingo.com/practice/articles</loc>
+    <lastmod>2026-08-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://micalingo.com/#/practice/phrases</loc>
+    <loc>https://micalingo.com/practice/phrases</loc>
+    <lastmod>2026-08-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://micalingo.com/#/practice/prepositions</loc>
+    <loc>https://micalingo.com/practice/prepositions</loc>
+    <lastmod>2026-08-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://micalingo.com/#/practice/adjectives</loc>
+    <loc>https://micalingo.com/practice/adjectives</loc>
+    <lastmod>2026-08-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://micalingo.com/#/practice/verbs</loc>
+    <loc>https://micalingo.com/practice/verbs</loc>
+    <lastmod>2026-08-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>
-
-  <!-- Grammar categories -->
   <url>
-    <loc>https://micalingo.com/#/grammar/cases</loc>
+    <loc>https://micalingo.com/grammar/cases</loc>
+    <lastmod>2026-08-08</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://micalingo.com/#/grammar/tenses</loc>
+    <loc>https://micalingo.com/grammar/tenses</loc>
+    <lastmod>2026-08-08</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://micalingo.com/#/grammar/articles</loc>
+    <loc>https://micalingo.com/grammar/articles</loc>
+    <lastmod>2026-08-08</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://micalingo.com/#/grammar/adjectives</loc>
+    <loc>https://micalingo.com/grammar/adjectives</loc>
+    <lastmod>2026-08-08</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://micalingo.com/#/grammar/prepositions</loc>
+    <loc>https://micalingo.com/grammar/prepositions</loc>
+    <lastmod>2026-08-08</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://micalingo.com/#/grammar/sentence-structure</loc>
+    <loc>https://micalingo.com/grammar/sentence-structure</loc>
+    <lastmod>2026-08-08</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
-
-  <!-- Learning materials -->
   <url>
-    <loc>https://micalingo.com/#/learning-materials</loc>
+    <loc>https://micalingo.com/learning-materials</loc>
+    <lastmod>2026-08-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
   </url>
   <url>
-    <loc>https://micalingo.com/#/learning-materials/reading</loc>
+    <loc>https://micalingo.com/learning-materials/reading</loc>
+    <lastmod>2026-08-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://micalingo.com/#/learning-materials/reading/false-friends</loc>
+    <loc>https://micalingo.com/learning-materials/reading/false-friends</loc>
+    <lastmod>2026-08-08</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.65</priority>
   </url>
   <url>
-    <loc>https://micalingo.com/#/learning-materials/reading/idioms</loc>
+    <loc>https://micalingo.com/learning-materials/reading/idioms</loc>
+    <lastmod>2026-08-08</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.65</priority>
   </url>
   <url>
-    <loc>https://micalingo.com/#/learning-materials/listening</loc>
+    <loc>https://micalingo.com/learning-materials/listening</loc>
+    <lastmod>2026-08-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
-
-  <!-- Legal & info -->
   <url>
-    <loc>https://micalingo.com/#/about</loc>
+    <loc>https://micalingo.com/about</loc>
+    <lastmod>2026-08-08</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://micalingo.com/#/privacy</loc>
+    <loc>https://micalingo.com/privacy</loc>
+    <lastmod>2026-08-08</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://micalingo.com/#/terms</loc>
+    <loc>https://micalingo.com/terms</loc>
+    <lastmod>2026-08-08</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
