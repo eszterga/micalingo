@@ -1,7 +1,8 @@
-import { HashRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import React, { Suspense } from "react";
 import Layout from "./components/Layout";
 import AdminPrompt from "./components/AdminPrompt";
+import SeoManager from "./components/SeoManager";
 
 // Create a simple loading component for lazy-loaded pages
 const PageLoader = () => (
@@ -42,7 +43,8 @@ const About = React.lazy(() => import("./pages/About"));
 // Main Application Router
 export default function App() {
   return (
-    <HashRouter>
+    <BrowserRouter>
+      <SeoManager />
       <AdminPrompt />
       <Suspense fallback={<PageLoader />}>
         <Routes>
@@ -87,6 +89,6 @@ export default function App() {
           </Route>
         </Routes>
       </Suspense>
-    </HashRouter>
+    </BrowserRouter>
   );
 }

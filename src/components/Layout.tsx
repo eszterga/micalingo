@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, Outlet, useLocation } from 'react-router-dom';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { useI18n } from '../I18nContext';
 import { Capacitor } from '@capacitor/core';
@@ -26,6 +26,7 @@ const BackgroundBlobs = () => (
 
 export default function Layout() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { t, language, setLanguage } = useI18n();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -77,7 +78,6 @@ export default function Layout() {
     if (!Capacitor.isNativePlatform()) return;
 
     const listener: any = CapacitorApp.addListener('backButton', ({ canGoBack }: { canGoBack: boolean }) => {
-      // HashRouter: use react-router location, not window.location.pathname
       // Let the Quiz page handle its own quit-confirm trap
       if (location.pathname === '/quiz') return;
 
@@ -86,7 +86,7 @@ export default function Layout() {
         window.history.back();
       } else if (location.pathname !== '/') {
         // Deep link / cold start on a subpage with empty history → go home instead of exiting
-        window.location.hash = '#/';
+        navigate('/', { replace: true });
       } else {
         if (window.confirm(t('confirm_exit_app') || 'Are you sure you want to exit the app?')) {
           CapacitorApp.exitApp();
@@ -101,7 +101,7 @@ export default function Layout() {
         listener.remove();
       }
     };
-  }, [t, location.pathname]);
+  }, [t, location.pathname, navigate]);
 
   const isNativeApp = Capacitor.isNativePlatform();
   // Clear phone status bar (clock / wifi / notch) on mobile browser + Capacitor
