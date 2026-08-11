@@ -8,6 +8,12 @@ import { signInWithGoogle } from '../lib/googleAuth';
 import { addCloudWord, useCloudVocabulary, findVocabDuplicate, vocabCategoryKey } from '../lib/firestore';
 import { ImageLightbox, useImageLightbox } from '../components/ImageLightbox';
 import ArticleContent from '../components/ArticleContent';
+import {
+  applyEditorColor,
+  getSelectionBookmark,
+  restoreSelectionBookmark,
+  type SelectionBookmark,
+} from '../lib/richTextSelection';
 
 const BackgroundBlobs = () => (
   <>
@@ -114,18 +120,25 @@ export default function Grammar() {
   const [selectedTable, setSelectedTable] = useState<HTMLTableElement | null>(null);
   const { image: lightboxImage, handleImageClick, openTable, closeLightbox } = useImageLightbox();
 
-  const savedSelection = useRef<Range | null>(null);
+  const savedSelection = useRef<SelectionBookmark | null>(null);
   const saveSelection = () => {
-    const sel = window.getSelection();
-    if (sel && sel.rangeCount > 0) {
-      savedSelection.current = sel.getRangeAt(0);
-    }
+    const bookmark = getSelectionBookmark(contentRef.current);
+    if (bookmark) savedSelection.current = bookmark;
   };
   const restoreSelection = () => {
-    if (savedSelection.current) {
-      const sel = window.getSelection();
-      sel?.removeAllRanges();
-      sel?.addRange(savedSelection.current);
+    restoreSelectionBookmark(contentRef.current, savedSelection.current);
+  };
+  const applyColor = (command: 'foreColor' | 'hiliteColor', color: string) => {
+    // Capture again in case the picker opened before mouseUp saved the range
+    saveSelection();
+    savedSelection.current = applyEditorColor(
+      contentRef.current,
+      command,
+      color,
+      savedSelection.current
+    );
+    if (contentRef.current) {
+      setEditData(prev => ({ ...prev, content: contentRef.current!.innerHTML }));
     }
   };
 
@@ -839,10 +852,24 @@ export default function Grammar() {
                       <option value="">Size</option><option value="1">Small</option><option value="3">Normal</option><option value="5">Large</option><option value="7">Huge</option>
                     </select>
                     <div className="flex items-center border border-gray-300 rounded bg-white shadow-sm px-1" title="Text Color">
-                      <span className="text-xs text-gray-500 px-1 font-serif">A</span><input type="color" onChange={(e) => { restoreSelection(); document.execCommand("foreColor", false, e.target.value); setEditData(prev => ({ ...prev, content: contentRef.current!.innerHTML })); }} className="w-5 h-5 p-0 border-0 bg-transparent cursor-pointer" />
+                      <span className="text-xs text-gray-500 px-1 font-serif">A</span>
+                      <input
+                        type="color"
+                        onMouseDown={saveSelection}
+                        onInput={(e) => applyColor('foreColor', (e.target as HTMLInputElement).value)}
+                        onChange={(e) => applyColor('foreColor', e.target.value)}
+                        className="w-5 h-5 p-0 border-0 bg-transparent cursor-pointer"
+                      />
                     </div>
                     <div className="flex items-center border border-gray-300 rounded bg-white shadow-sm px-1" title="Highlight Color">
-                      <span className="text-xs text-gray-500 px-1 font-serif bg-yellow-200">A</span><input type="color" onChange={(e) => { restoreSelection(); document.execCommand("hiliteColor", false, e.target.value); setEditData(prev => ({ ...prev, content: contentRef.current!.innerHTML })); }} className="w-5 h-5 p-0 border-0 bg-transparent cursor-pointer" />
+                      <span className="text-xs text-gray-500 px-1 font-serif bg-yellow-200">A</span>
+                      <input
+                        type="color"
+                        onMouseDown={saveSelection}
+                        onInput={(e) => applyColor('hiliteColor', (e.target as HTMLInputElement).value)}
+                        onChange={(e) => applyColor('hiliteColor', e.target.value)}
+                        className="w-5 h-5 p-0 border-0 bg-transparent cursor-pointer"
+                      />
                     </div>
                     <button type="button" onClick={handleInsertTable} className="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-sm text-gray-700 transition-colors shadow-sm font-medium flex items-center gap-1">📊 Table</button>
                     <input type="file" accept="image/*" ref={fileInputRef} onChange={handleImageUpload} className="hidden" />

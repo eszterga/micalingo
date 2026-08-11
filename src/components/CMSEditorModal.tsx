@@ -1,5 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ImageLightbox, useImageLightbox } from './ImageLightbox';
+import {
+  applyEditorColor,
+  getSelectionBookmark,
+  type SelectionBookmark,
+} from '../lib/richTextSelection';
 
 export interface MaterialData {
   id?: string;
@@ -67,24 +72,28 @@ export default function CMSEditorModal({ isOpen, onClose, onSave, initialData, t
 
   const embedUrl = type === 'listening' ? getEmbedUrl(mediaLink) : null;
 
-  // Store selection state
-  const savedSelection = useRef<Range | null>(null);
+  // Character-offset bookmark survives DOM wraps from color/highlight commands
+  const savedSelection = useRef<SelectionBookmark | null>(null);
   const saveSelection = () => {
-    const sel = window.getSelection();
-    if (sel && sel.rangeCount > 0) {
-      savedSelection.current = sel.getRangeAt(0);
-    }
+    const bookmark = getSelectionBookmark(editorRef.current);
+    if (bookmark) savedSelection.current = bookmark;
   };
 
   // Rich Text Formatting execution
   const executeCommand = (e: React.MouseEvent, command: string, value: string | undefined = undefined) => {
     e.preventDefault();
-    if (savedSelection.current && (command === 'hiliteColor' || command === 'foreColor')) {
-      const sel = window.getSelection();
-      sel?.removeAllRanges();
-      sel?.addRange(savedSelection.current);
+    saveSelection();
+    if ((command === 'hiliteColor' || command === 'foreColor') && value !== undefined) {
+      savedSelection.current = applyEditorColor(
+        editorRef.current,
+        command,
+        value,
+        savedSelection.current
+      );
+    } else {
+      editorRef.current?.focus();
+      document.execCommand(command, false, value);
     }
-    document.execCommand(command, false, value);
     setContent(editorRef.current?.innerHTML || '');
     editorRef.current?.focus();
   };
@@ -241,9 +250,9 @@ export default function CMSEditorModal({ isOpen, onClose, onSave, initialData, t
                 <div className="w-px h-6 bg-gray-300 mx-1"></div>
                 
                 {/* Highlight Colors */}
-                <button onClick={(e) => executeCommand(e, 'hiliteColor', '#fef08a')} className="w-8 h-8 flex items-center justify-center bg-yellow-200 border border-gray-200 rounded hover:bg-yellow-300" title="Highlight Yellow">H</button>
-                <button onClick={(e) => executeCommand(e, 'hiliteColor', '#bbf7d0')} className="w-8 h-8 flex items-center justify-center bg-green-200 border border-gray-200 rounded hover:bg-green-300" title="Highlight Green">H</button>
-                <button onClick={(e) => executeCommand(e, 'hiliteColor', 'transparent')} className="px-2 h-8 text-xs font-medium bg-white border border-gray-200 rounded hover:bg-gray-100 flex items-center" title="Remove Highlight">
+                <button onMouseDown={saveSelection} onClick={(e) => executeCommand(e, 'hiliteColor', '#fef08a')} className="w-8 h-8 flex items-center justify-center bg-yellow-200 border border-gray-200 rounded hover:bg-yellow-300" title="Highlight Yellow">H</button>
+                <button onMouseDown={saveSelection} onClick={(e) => executeCommand(e, 'hiliteColor', '#bbf7d0')} className="w-8 h-8 flex items-center justify-center bg-green-200 border border-gray-200 rounded hover:bg-green-300" title="Highlight Green">H</button>
+                <button onMouseDown={saveSelection} onClick={(e) => executeCommand(e, 'hiliteColor', 'transparent')} className="px-2 h-8 text-xs font-medium bg-white border border-gray-200 rounded hover:bg-gray-100 flex items-center" title="Remove Highlight">
                   <svg className="w-4 h-4 text-red-500 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /></svg>
                   Clear
                 </button>
