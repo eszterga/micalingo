@@ -119,7 +119,7 @@ export const en = {
   download_template_desc: "Download an Excel template to easily fill in your data.",
   vocab_template: "Vocabulary reading/quiz template",
   articles_template: "Articles quiz template",
-  verbs_template: "Verbsquiz template",
+  verbs_template: "Verbs quiz template",
   prepositions_template: "Prepositions quiz template",
   template_german_verb_header: "German Verb + Hungarian",
   template_prep_case_header: "Preposition + Case",
