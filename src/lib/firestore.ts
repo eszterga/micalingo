@@ -77,7 +77,8 @@ function ensureVocabSubscription(userId: string) {
         id: d.id,
         ...d.data(),
       })) as CloudVocabularyItem[];
-      data.sort((a, b) => a.german.localeCompare(b.german));
+      // Do not sort by german — quiz pools mix themselves. Keep a stable recency order.
+      data.sort((a, b) => (a.dateAdded || 0) - (b.dateAdded || 0) || (a.id || '').localeCompare(b.id || ''));
       publishVocabulary(userId, data);
     },
     (error) => {

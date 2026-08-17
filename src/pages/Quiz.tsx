@@ -209,7 +209,7 @@ export default function Quiz() {
   const generateQuestions = useCallback((words: any[]) => {
     const selectedWords = [...words];
     const allGermanTerms = germanTermsLookup;
-    return selectedWords.map(word => {
+    const built = selectedWords.map(word => {
       if (topic === 'articles') {
         const baseArticle = getArticleFromQuizWord(word);
         const baseNoun = getNounFromArticleQuizWord(word);
@@ -320,6 +320,7 @@ export default function Quiz() {
         };
       }
     }).filter(Boolean) as Question[];
+    return shuffleInPlace(built);
   }, [topic, isCustom, germanTermsLookup, userVocabulary]);
 
   useEffect(() => {
@@ -353,7 +354,7 @@ export default function Quiz() {
       return;
     }
 
-    const progressKey = user ? `micalingo_quiz_progress_${user.uid}` : 'micalingo_quiz_progress_guest';
+    const progressKey = user ? `micalingo_quiz_progress_v2_${user.uid}` : 'micalingo_quiz_progress_v2_guest';
     const progressMap = JSON.parse(localStorage.getItem(progressKey) || '{}');
     const savedProgress = progressMap[quizKey];
 
@@ -415,17 +416,17 @@ export default function Quiz() {
       builtQuizKeyRef.current = quizKey;
       return;
     } else if (isCustom) {
-      const sortedSource = customTopicWords;
+      const customSource = customTopicWords;
 
       // Truly not enough material in the private library to run any quiz
-      if (sortedSource.length < 4) {
+      if (customSource.length < 4) {
         setQuizState('finished');
         setQuestions([]);
         builtQuizKeyRef.current = quizKey;
         return;
       }
 
-      wordsForQuiz = shuffleInPlace([...getQuizLevelWords(sortedSource, quizId, topic ?? undefined)]);
+      wordsForQuiz = shuffleInPlace([...getQuizLevelWords(customSource, quizId, topic ?? undefined)]);
 
       // Past the last private level — same "all completed" screen as public
       if (wordsForQuiz.length === 0) {
@@ -488,7 +489,7 @@ export default function Quiz() {
   }, [topic, userVocabulary, customTopicWords, markedWords, quizId, isCustom, isMarked, publicDbWordsRaw, publicQuizPool, isRedo, user?.uid, generateQuestions, searchParams]);
   useEffect(() => {
     if (quizState === 'ongoing' && questions.length > 0) {
-      const progressKey = user ? `micalingo_quiz_progress_${user.uid}` : 'micalingo_quiz_progress_guest';
+      const progressKey = user ? `micalingo_quiz_progress_v2_${user.uid}` : 'micalingo_quiz_progress_v2_guest';
       const progressMap = JSON.parse(localStorage.getItem(progressKey) || '{}');
       const quizKey = isCustom ? `custom_${topic || 'general'}_${quizId}` : `${topic || 'custom'}_${quizId}`;
 
@@ -588,7 +589,7 @@ export default function Quiz() {
       }
     }
 
-    const progressKey = user ? `micalingo_quiz_progress_${user.uid}` : 'micalingo_quiz_progress_guest';
+    const progressKey = user ? `micalingo_quiz_progress_v2_${user.uid}` : 'micalingo_quiz_progress_v2_guest';
     const progressMap = JSON.parse(localStorage.getItem(progressKey) || '{}');
     if (progressMap[quizKey]) {
       delete progressMap[quizKey];

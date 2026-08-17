@@ -13,6 +13,7 @@ import {
   type CloudVocabularyItem,
   vocabGermanKey,
 } from '../lib/firestore';
+import { mixPoolStable, shuffleArray } from '../lib/quizPool';
 
 export const MARKED_WORDS_PER_QUIZ = 20;
 
@@ -39,14 +40,14 @@ export function getMarkedQuizLevels(markedWords: CloudVocabularyItem[]): number 
   return Math.max(0, Math.ceil(markedWords.length / MARKED_WORDS_PER_QUIZ));
 }
 
-/** Deterministic slice for a marked-words quiz level (then shuffled by the caller/UI). */
+/** Mixed slice for a marked-words quiz level (then shuffled again by the caller/UI). */
 export function getMarkedWordsForQuiz(
   markedWords: CloudVocabularyItem[],
   quizId: number
 ): CloudVocabularyItem[] {
-  const sorted = [...markedWords].sort((a, b) => (a.german || '').localeCompare(b.german || ''));
+  const mixed = mixPoolStable(markedWords);
   const start = (Math.max(1, quizId) - 1) * MARKED_WORDS_PER_QUIZ;
-  return sorted.slice(start, start + MARKED_WORDS_PER_QUIZ);
+  return mixed.slice(start, start + MARKED_WORDS_PER_QUIZ);
 }
 
 export function isWordMarked(
@@ -119,22 +120,21 @@ export function generateMarkedQuestions(
     )
   );
 
-  return words
+  const questions = words
     .map((word) => {
       const correctAnswer = (word.hungarian || '').trim();
       const german = (word.german || '').trim();
       if (!correctAnswer || !german) return null;
 
-      const distractors = allHungarians
-        .filter((h) => h.toLowerCase() !== correctAnswer.toLowerCase())
-        .sort(() => 0.5 - Math.random())
-        .slice(0, 3);
+      const distractors = shuffleArray(
+        allHungarians.filter((h) => h.toLowerCase() !== correctAnswer.toLowerCase())
+      ).slice(0, 3);
 
       while (distractors.length < 3) {
         distractors.push(`—${distractors.length + 1}`);
       }
 
-      const options = [...distractors, correctAnswer].sort(() => 0.5 - Math.random());
+      const options = shuffleArray([...distractors, correctAnswer]);
 
       return {
         questionText: german,
@@ -153,4 +153,6 @@ export function generateMarkedQuestions(
     german: string;
     hungarian: string;
   }>;
+
+  return shuffleArray(questions);
 }

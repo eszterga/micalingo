@@ -60,7 +60,7 @@ export default function TopicQuizzes() {
     const key = user ? `micalingo_scores_${user.uid}` : 'micalingo_guest_scores';
     setScores(JSON.parse(localStorage.getItem(key) || '{}'));
 
-    const progressKey = user ? `micalingo_quiz_progress_${user.uid}` : 'micalingo_quiz_progress_guest';
+    const progressKey = user ? `micalingo_quiz_progress_v2_${user.uid}` : 'micalingo_quiz_progress_v2_guest';
     setProgress(JSON.parse(localStorage.getItem(progressKey) || '{}'));
   }, [user?.uid]);
 

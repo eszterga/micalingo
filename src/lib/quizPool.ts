@@ -127,6 +127,41 @@ function germanKey(german?: string) {
   return (german || '').toLowerCase().trim();
 }
 
+/** FNV-1a — stable across web/app, independent of alphabet and upload order. */
+function hashKey(s: string): number {
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
+/**
+ * Stable mixed order for quiz levels: not A–Z, not upload order.
+ * The same pool always yields the same mix so level N stays identical.
+ */
+export function mixPoolStable<T extends { german?: string }>(pool: T[]): T[] {
+  return [...pool].sort((a, b) => {
+    const ka = germanKey(a.german);
+    const kb = germanKey(b.german);
+    const ha = hashKey(ka);
+    const hb = hashKey(kb);
+    if (ha !== hb) return ha < hb ? -1 : 1;
+    return ka < kb ? -1 : ka > kb ? 1 : 0;
+  });
+}
+
+/** Fisher–Yates shuffle for question / option order at quiz time. */
+export function shuffleArray<T>(arr: T[]): T[] {
+  const copy = [...arr];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
 /** Static seed words shipped with the app for a public quiz topic. */
 export function getStaticSourceForTopic(topic: string): PublicWord[] {
   if (topic === 'vocabulary') return publicVocabulary;
@@ -194,7 +229,8 @@ function wordMatchesTopic(word: { category?: string }, topic: string) {
  * - Skip reading-library entries
  * - Keep only quizable rows (articles: der/die/das + noun; others: german + hungarian)
  * - Drop bare article tokens from vocabulary quizzes
- * - Sort alphabetically by german so level N is identical on web and app
+ * - Keep authored seed order (thematic / CEFR groups). Never sort A–Z.
+ *   Extra PUBLIC_LIBRARY words are mixed stably, not alphabetically.
  */
 export function buildPublicQuizPool(
   topic: string,
@@ -222,6 +258,8 @@ export function buildPublicQuizPool(
     (w) => wordMatchesTopic(w, topic)
   );
 
+  const extras: QuizWord[] = [];
+
   for (const word of dbSource) {
     const key = germanKey(word.german);
     if (!key) continue;
@@ -248,12 +286,11 @@ export function buildPublicQuizPool(
       );
       if (!entry) continue;
       seen.add(key);
-      unique.push(entry);
+      extras.push(entry);
     }
   }
 
-  unique.sort((a, b) => a.german.localeCompare(b.german, 'de'));
-  return unique;
+  return unique.concat(mixPoolStable(extras));
 }
 
 /** Slice one quiz level out of a pool (1-based quizId). Articles levels interleave der/die/das. */
@@ -279,7 +316,8 @@ export function getItemsInQuizLevel(poolLength: number, quizId: number): number 
 }
 
 /**
- * Private-library quiz pool for a topic. Sorted by german for stable levels.
+ * Private-library quiz pool for a topic.
+ * Mixed stably (not A–Z, not upload order) so level N is identical on web and app.
  */
 export function buildCustomQuizPool(
   topic: string,
@@ -293,7 +331,7 @@ export function buildCustomQuizPool(
 ): QuizWord[] {
   if (!topic || !userVocabulary) return [];
 
-  return userVocabulary
+  const pool = userVocabulary
     .filter(
       (w) =>
         !w.deleted &&
@@ -313,6 +351,7 @@ export function buildCustomQuizPool(
         note: (w as { note?: string }).note,
         category: w.category,
       };
-    })
-    .sort((a, b) => a.german.localeCompare(b.german, 'de'));
+    });
+
+  return mixPoolStable(pool);
 }
