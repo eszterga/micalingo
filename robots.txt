@@ -1,14 +1,25 @@
 User-agent: *
 Allow: /
 
+# Quiz listing pages must stay crawlable. "Disallow: /quiz" would also
+# block /quizzes because robots.txt matching is prefix-based.
+Allow: /quizzes
+Allow: /quizzes/
+
 # Private / session routes - keep out of the index
 Disallow: /login
+Disallow: /login/
 Disallow: /import
+Disallow: /import/
 Disallow: /create-quiz
-Disallow: /quiz
+Disallow: /create-quiz/
+Disallow: /quiz$
+Disallow: /quiz/
 Disallow: /results
+Disallow: /results/
 Disallow: /settings
+Disallow: /settings/
 Disallow: /learning-materials/private/
 
-# Canonical property: https://micalingo.com (not github.io)
+# Canonical property: https://micalingo.com (not www, not github.io)
 Sitemap: https://micalingo.com/sitemap.xml
