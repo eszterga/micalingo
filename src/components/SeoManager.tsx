@@ -180,8 +180,10 @@ function titleize(value: string) {
 }
 
 function canonicalHref(pathname: string) {
-  if (!pathname || pathname === '/') return `${SITE_ORIGIN}/`;
-  return `${SITE_ORIGIN}${pathname}`;
+  const clean = pathname.replace(/\/+$/, '') || '/';
+  if (clean === '/') return `${SITE_ORIGIN}/`;
+  // GitHub Pages serves directory indexes at /path/ (200) and 301s /path.
+  return `${SITE_ORIGIN}${clean}/`;
 }
 
 /**

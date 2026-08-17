@@ -14,6 +14,9 @@ if (!fs.existsSync(indexHtmlPath)) {
 
 const indexHtml = fs.readFileSync(indexHtmlPath, 'utf8');
 
+// Prevent Jekyll from rewriting or hiding files on GitHub Pages.
+fs.writeFileSync(path.join(distDir, '.nojekyll'), '');
+
 // GitHub Pages SPA fallback for unknown deep links (still HTTP 404 status).
 fs.copyFileSync(indexHtmlPath, path.join(distDir, '404.html'));
 

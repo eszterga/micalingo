@@ -82,5 +82,8 @@ export const SITEMAP_ENTRIES = [
 
 export function absoluteUrl(path) {
   if (!path || path === '/') return `${SITE_ORIGIN}/`;
-  return `${SITE_ORIGIN}${path.startsWith('/') ? path : `/${path}`}`;
+  const withSlash = path.startsWith('/') ? path : `/${path}`;
+  const trimmed = withSlash.replace(/\/+$/, '');
+  // GitHub Pages 301s /quizzes → /quizzes/, so canonicals must use the slash.
+  return `${SITE_ORIGIN}${trimmed}/`;
 }
