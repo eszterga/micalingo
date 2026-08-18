@@ -8,6 +8,10 @@ html, body, #root {
   background-color: #f9fafb; /* gray-50 */
 }
 
+html {
+  --admob-banner-height: 0px;
+}
+
 .prose img {
   cursor: zoom-in;
 }

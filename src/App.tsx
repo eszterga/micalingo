@@ -4,6 +4,7 @@ import Layout from "./components/Layout";
 import AdminPrompt from "./components/AdminPrompt";
 import SeoManager from "./components/SeoManager";
 import CookieBanner from "./components/CookieBanner";
+import AdController from "./components/AdController";
 
 // Create a simple loading component for lazy-loaded pages
 const PageLoader = () => (
@@ -105,6 +106,7 @@ export default function App() {
     <BrowserRouter>
       <SeoManager />
       <AdminPrompt />
+      <AdController />
       <CookieBanner />
       <Suspense fallback={<PageLoader />}>
         <AppRoutes />

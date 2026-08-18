@@ -351,7 +351,7 @@ export default function Layout() {
             <div className="flex-1">
               <Outlet />
             </div>
-            <footer className="mt-10 pt-6 pb-20 md:pb-8 border-t border-blue-200/40 text-center relative z-10">
+            <footer className="mt-10 pt-6 pb-20 md:pb-8 border-t border-blue-200/40 text-center relative z-10" style={{ paddingBottom: 'max(5rem, calc(2rem + var(--admob-banner-height, 0px)))' }}>
               <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm font-bold text-blue-800/80 mb-3">
                 <Link to="/privacy" className="hover:text-blue-950 transition-colors">{t('footer_privacy') || 'Privacy Policy'}</Link>
                 <Link to="/terms" className="hover:text-blue-950 transition-colors">{t('footer_terms') || 'Terms of Service'}</Link>
@@ -380,7 +380,7 @@ export default function Layout() {
         aria-label={t('support_micalingo') || 'Support MicaLingo'}
         className="fixed z-40 flex items-center gap-2 px-4 py-2.5 max-w-[calc(100vw-2rem)] bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold rounded-full shadow-lg hover:scale-105 hover:shadow-xl transition-all duration-300 text-sm md:text-base"
         style={{
-          bottom: 'max(1rem, calc(env(safe-area-inset-bottom, 0px) + 0.75rem))',
+          bottom: 'max(1rem, calc(env(safe-area-inset-bottom, 0px) + var(--admob-banner-height, 0px) + 0.75rem))',
           right: 'max(1rem, calc(env(safe-area-inset-right, 0px) + 0.75rem))',
         }}
       >
