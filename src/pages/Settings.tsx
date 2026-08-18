@@ -12,6 +12,7 @@ import { publicVocabulary, publicPhrases, publicArticles, publicPrepositions, pu
 import * as XLSX from 'xlsx';
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { dbCloud } from "../lib/firebase";
+import { CONSENT_CHANGED_EVENT, openCookieSettings, readConsent } from "../lib/consent";
 
 const BackgroundBlobs = () => (
   <>
@@ -70,7 +71,14 @@ export default function Settings() {
   const [deletedEditItemIds, setDeletedEditItemIds] = useState<string[]>([]);
   const [isSavingEdit, setIsSavingEdit] = useState(false);
   const [modalSearchTerm, setModalSearchTerm] = useState("");
+  const [cookieConsent, setCookieConsent] = useState(() => readConsent());
   const itemsPerPage = 10;
+
+  useEffect(() => {
+    const syncConsent = () => setCookieConsent(readConsent());
+    window.addEventListener(CONSENT_CHANGED_EVENT, syncConsent);
+    return () => window.removeEventListener(CONSENT_CHANGED_EVENT, syncConsent);
+  }, []);
 
   useEffect(() => {
     setSaveToPublic(isAdmin ? adminMode : false);
@@ -535,6 +543,30 @@ export default function Settings() {
               <option value="de">{t('german') || 'German'}</option>
               <option value="hu">{t('hungarian') || 'Hungarian'}</option>
             </select>
+          </div>
+        </div>
+
+        <hr className="border-blue-50/50" />
+
+        {/* Cookie preferences (GDPR) */}
+        <div>
+          <h2 className="text-2xl font-extrabold text-blue-950 mb-2">{t('cookie_settings_title')}</h2>
+          <p className="text-blue-900/70 text-sm mb-4 font-medium">{t('cookie_settings_desc')}</p>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between p-5 bg-white/50 rounded-2xl border border-blue-50 shadow-sm gap-4">
+            <p className="text-sm font-medium text-blue-900/70">
+              {cookieConsent == null
+                ? t('cookie_settings_status_unset')
+                : cookieConsent.advertising
+                  ? t('cookie_settings_status_accepted')
+                  : t('cookie_settings_status_rejected')}
+            </p>
+            <button
+              type="button"
+              onClick={openCookieSettings}
+              className="px-4 py-2.5 rounded-xl bg-blue-700 text-white font-bold hover:bg-blue-800 transition-colors shrink-0"
+            >
+              {t('cookie_settings_manage')}
+            </button>
           </div>
         </div>
 

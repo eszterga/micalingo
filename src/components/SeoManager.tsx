@@ -74,6 +74,14 @@ const ROUTE_SEO: Record<string, SeoConfig> = {
     title: 'Terms of Service | MicaLingo',
     description: 'Terms of service for using MicaLingo.',
   },
+  '/cookies': {
+    title: 'Cookie Policy | MicaLingo',
+    description: 'How MicaLingo and Google use cookies, including advertising cookies for AdSense.',
+  },
+  '/impressum': {
+    title: 'Impressum | MicaLingo',
+    description: 'Legal notice and operator information for the MicaLingo website and app.',
+  },
   '/login': {
     title: 'Log in | MicaLingo',
     description: 'Sign in to MicaLingo to save your German learning progress.',

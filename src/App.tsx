@@ -3,6 +3,7 @@ import React, { Suspense } from "react";
 import Layout from "./components/Layout";
 import AdminPrompt from "./components/AdminPrompt";
 import SeoManager from "./components/SeoManager";
+import CookieBanner from "./components/CookieBanner";
 
 // Create a simple loading component for lazy-loaded pages
 const PageLoader = () => (
@@ -39,6 +40,8 @@ const ProtectedRoute = React.lazy(() => import("./components/ProtectedRoute"));
 const Privacy = React.lazy(() => import("./pages/Privacy"));
 const Terms = React.lazy(() => import("./pages/Terms"));
 const About = React.lazy(() => import("./pages/About"));
+const Cookies = React.lazy(() => import("./pages/Cookies"));
+const Impressum = React.lazy(() => import("./pages/Impressum"));
 
 function AppRoutes() {
   const location = useLocation();
@@ -81,6 +84,8 @@ function AppRoutes() {
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/about" element={<About />} />
+        <Route path="/cookies" element={<Cookies />} />
+        <Route path="/impressum" element={<Impressum />} />
 
         {/* Personalized sections requiring login */}
         <Route element={<ProtectedRoute />}>
@@ -100,6 +105,7 @@ export default function App() {
     <BrowserRouter>
       <SeoManager />
       <AdminPrompt />
+      <CookieBanner />
       <Suspense fallback={<PageLoader />}>
         <AppRoutes />
       </Suspense>

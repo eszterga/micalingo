@@ -73,6 +73,8 @@ export default function About() {
         <nav className="flex flex-wrap gap-4 pt-2 border-t border-blue-100 text-sm font-bold">
           <Link to="/privacy" className="text-blue-700 hover:text-blue-900">{t('footer_privacy')}</Link>
           <Link to="/terms" className="text-blue-700 hover:text-blue-900">{t('footer_terms')}</Link>
+          <Link to="/cookies" className="text-blue-700 hover:text-blue-900">{t('footer_cookies')}</Link>
+          <Link to="/impressum" className="text-blue-700 hover:text-blue-900">{t('footer_impressum')}</Link>
         </nav>
       </article>
     </div>

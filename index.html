@@ -26,6 +26,34 @@
     
     <!-- Google Site Verification -->
     <meta name="google-site-verification" content="VvaBqH5_lcQocPDdMvrdbf2t2FJrE-io7LN0BtmYvvo" />
+
+    <!-- Google Consent Mode v2: deny ads until the user chooses in the cookie banner -->
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('consent', 'default', {
+        ad_storage: 'denied',
+        ad_user_data: 'denied',
+        ad_personalization: 'denied',
+        analytics_storage: 'denied',
+        functionality_storage: 'granted',
+        security_storage: 'granted',
+        wait_for_update: 500
+      });
+      try {
+        var stored = localStorage.getItem('micalingo_cookie_consent');
+        if (stored) {
+          var consent = JSON.parse(stored);
+          if (consent && consent.advertising === true) {
+            gtag('consent', 'update', {
+              ad_storage: 'granted',
+              ad_user_data: 'granted',
+              ad_personalization: 'granted'
+            });
+          }
+        }
+      } catch (e) {}
+    </script>
     
     <!-- Open Graph / Social Media -->
     <meta property="og:type" content="website" />

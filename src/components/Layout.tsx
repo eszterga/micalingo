@@ -4,6 +4,7 @@ import { useAuth } from '../AuthContext';
 import { useI18n } from '../I18nContext';
 import { Capacitor } from '@capacitor/core';
 import { App as CapacitorApp } from '@capacitor/app';
+import { openCookieSettings } from '../lib/consent';
 
 const BackgroundBlobs = () => (
   <>
@@ -259,9 +260,25 @@ export default function Layout() {
                 <Link to="/terms" onClick={() => setIsMobileMenuOpen(false)} className="px-4 py-2.5 rounded text-sm text-blue-200 hover:bg-blue-800 hover:text-white transition-colors">
                   {t('footer_terms') || 'Terms of Service'}
                 </Link>
+                <Link to="/cookies" onClick={() => setIsMobileMenuOpen(false)} className="px-4 py-2.5 rounded text-sm text-blue-200 hover:bg-blue-800 hover:text-white transition-colors">
+                  {t('footer_cookies') || 'Cookie Policy'}
+                </Link>
+                <Link to="/impressum" onClick={() => setIsMobileMenuOpen(false)} className="px-4 py-2.5 rounded text-sm text-blue-200 hover:bg-blue-800 hover:text-white transition-colors">
+                  {t('footer_impressum') || 'Impressum'}
+                </Link>
                 <Link to="/about" onClick={() => setIsMobileMenuOpen(false)} className="px-4 py-2.5 rounded text-sm text-blue-200 hover:bg-blue-800 hover:text-white transition-colors">
                   {t('footer_about') || 'About & Contact'}
                 </Link>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    openCookieSettings();
+                  }}
+                  className="px-4 py-2.5 rounded text-sm text-left text-blue-200 hover:bg-blue-800 hover:text-white transition-colors"
+                >
+                  {t('footer_cookie_settings') || 'Cookie settings'}
+                </button>
               </div>
             </nav>
           </div>
@@ -338,7 +355,16 @@ export default function Layout() {
               <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm font-bold text-blue-800/80 mb-3">
                 <Link to="/privacy" className="hover:text-blue-950 transition-colors">{t('footer_privacy') || 'Privacy Policy'}</Link>
                 <Link to="/terms" className="hover:text-blue-950 transition-colors">{t('footer_terms') || 'Terms of Service'}</Link>
+                <Link to="/cookies" className="hover:text-blue-950 transition-colors">{t('footer_cookies') || 'Cookie Policy'}</Link>
+                <Link to="/impressum" className="hover:text-blue-950 transition-colors">{t('footer_impressum') || 'Impressum'}</Link>
                 <Link to="/about" className="hover:text-blue-950 transition-colors">{t('footer_about') || 'About & Contact'}</Link>
+                <button
+                  type="button"
+                  onClick={openCookieSettings}
+                  className="hover:text-blue-950 transition-colors"
+                >
+                  {t('footer_cookie_settings') || 'Cookie settings'}
+                </button>
               </nav>
               <p className="text-xs text-blue-900/50 font-medium">
                 © {new Date().getFullYear()} MicaLingo · {t('footer_rights') || 'All rights reserved.'}

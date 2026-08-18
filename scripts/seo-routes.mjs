@@ -39,6 +39,8 @@ export const PUBLIC_SPA_ROUTES = [
   '/about',
   '/privacy',
   '/terms',
+  '/cookies',
+  '/impressum',
   '/settings',
   '/login',
 ];
@@ -78,6 +80,8 @@ export const SITEMAP_ENTRIES = [
   { path: '/about', changefreq: 'monthly', priority: '0.5' },
   { path: '/privacy', changefreq: 'yearly', priority: '0.3' },
   { path: '/terms', changefreq: 'yearly', priority: '0.3' },
+  { path: '/cookies', changefreq: 'yearly', priority: '0.3' },
+  { path: '/impressum', changefreq: 'yearly', priority: '0.3' },
 ];
 
 export function absoluteUrl(path) {
