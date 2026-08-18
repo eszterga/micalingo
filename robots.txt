@@ -22,4 +22,15 @@ Disallow: /settings/
 Disallow: /learning-materials/private/
 
 # Canonical property: https://micalingo.com (not www, not github.io)
+Allow: /about
+Allow: /about/
+Allow: /privacy
+Allow: /privacy/
+Allow: /terms
+Allow: /terms/
+Allow: /cookies
+Allow: /cookies/
+Allow: /impressum
+Allow: /impressum/
+
 Sitemap: https://micalingo.com/sitemap.xml
