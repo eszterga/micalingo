@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
+    <title>MicaLingo - German Exam Preparation</title>
+    <meta name="description" content="Improve your German skills with MicaLingo. Create custom quizzes, practice vocabulary, learn grammar, and prepare for your German exams effectively." />
+    <meta name="keywords" content="German, learning, exam preparation, vocabulary, grammar, quizzes, language learning, MicaLingo" />
+    <link rel="icon" type="image/png" href="/logo.png" sizes="32x32 192x192" />
+
+    <!-- PWA & Mobile -->
+    <link rel="apple-touch-icon" href="/logo.png" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#3b82f6" />
+    
+    <!-- Preconnect to critical third-party origins -->
+    <link rel="preconnect" href="https://micalingo.firebaseapp.com" crossOrigin="true" />
+    <link rel="preconnect" href="https://www.googleapis.com" crossOrigin="true" />
+    <link rel="preconnect" href="https://apis.google.com" crossOrigin="true" />
+
+    <link rel="canonical" href="https://micalingo.com/cookies/" />
+
+    <!-- Explicitly tell Google to index the page and follow links -->
+    <meta name="robots" content="index, follow" />
+    <meta name="googlebot" content="index, follow" />
+    
+    <!-- Google Site Verification -->
+    <meta name="google-site-verification" content="VvaBqH5_lcQocPDdMvrdbf2t2FJrE-io7LN0BtmYvvo" />
+
+    <!-- Google Consent Mode v2: deny ads until the user chooses in the cookie banner -->
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('consent', 'default', {
+        ad_storage: 'denied',
+        ad_user_data: 'denied',
+        ad_personalization: 'denied',
+        analytics_storage: 'denied',
+        functionality_storage: 'granted',
+        security_storage: 'granted',
+        wait_for_update: 500
+      });
+      try {
+        var stored = localStorage.getItem('micalingo_cookie_consent');
+        if (stored) {
+          var consent = JSON.parse(stored);
+          if (consent && consent.advertising === true) {
+            gtag('consent', 'update', {
+              ad_storage: 'granted',
+              ad_user_data: 'granted',
+              ad_personalization: 'granted'
+            });
+          }
+        }
+      } catch (e) {}
+    </script>
+    
+    <!-- Open Graph / Social Media -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="MicaLingo" />
+    <meta property="og:title" content="MicaLingo - German Exam Preparation" />
+    <meta property="og:description" content="Improve your German skills with custom quizzes and vocabulary practice." />
+    <meta property="og:image" content="https://micalingo.com/logo.png" />
+    <meta property="og:url" content="https://micalingo.com/cookies/" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="MicaLingo - German Exam Preparation" />
+    <meta name="twitter:description" content="Improve your German skills with custom quizzes and vocabulary practice." />
+    <meta name="twitter:image" content="https://micalingo.com/logo.png" />
+    <script type="module" crossorigin src="/assets/index-BOv1xkv4.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/vendor-B9mFYrhS.js">
+    <link rel="stylesheet" crossorigin href="/assets/index-CSPRJxTr.css">
+  </head>
+  <body>
+    <script>
+      // Migrate legacy HashRouter links (#/quizzes) → clean paths (/quizzes) for SEO & bookmarks.
+      (function () {
+        var hash = window.location.hash || '';
+        if (!hash || hash === '#' || hash === '#/') {
+          if (hash === '#/' && (!window.location.pathname || window.location.pathname === '/')) {
+            window.history.replaceState(null, '', '/' + window.location.search);
+          }
+          return;
+        }
+        if (hash.charAt(0) !== '#') return;
+        var raw = hash.slice(1);
+        if (!raw) return;
+        var path = raw.charAt(0) === '/' ? raw : '/' + raw;
+        var qIndex = path.indexOf('?');
+        var pathOnly = qIndex === -1 ? path : path.slice(0, qIndex);
+        var hashQuery = qIndex === -1 ? '' : path.slice(qIndex);
+        var search = window.location.search || hashQuery;
+        if (hashQuery && window.location.search) {
+          search = window.location.search + '&' + hashQuery.slice(1);
+        }
+        window.location.replace(pathOnly + search);
+      })();
+    </script>
+    <div id="root"></div>
+
+  </body>
+</html>
