@@ -1,5 +1,6 @@
 export const en = {
   title: "German Exam Preparation",
+  home_h1: "Learn German: Quizzes, Grammar & Vocabulary",
 
   // Settings
   settings_title: "Settings",
@@ -37,21 +38,21 @@ export const en = {
   clear_local_data_desc: "Wipe local quiz scores and progress. Does not delete cloud vocabulary.",
 
   // Quizzes
-  quizzes_title: "Quizzes",
-  quizzes_subtitle: "Choose a topic to practice.",
-  test_your_knowledge: "Test your knowledge",
-  test_your_knowledge_subtitle: "Practice with our public database.",
+  quizzes_title: "German Quizzes",
+  quizzes_subtitle: "Free German quizzes for vocabulary, articles (der, die, das), verbs, adjectives, phrases, and prepositions.",
+  test_your_knowledge: "Test your German",
+  test_your_knowledge_subtitle: "Practice with our public German quiz library.",
   vocabulary: "Vocabulary",
-  vocabulary_quiz_subtitle: "Practice essential words.",
-  articles_quiz: "Articles",
-  articles_quiz_subtitle: "Practice der, die, das.",
+  vocabulary_quiz_subtitle: "Learn German vocabulary with interactive word quizzes.",
+  articles_quiz: "Articles (der, die, das)",
+  articles_quiz_subtitle: "Practice German articles der, die, das and noun genders.",
   phrases_quiz: "Phrases and sentences",
-  phrases_quiz_subtitle: "Useful everyday phrases and sentences.",
+  phrases_quiz_subtitle: "Useful everyday German phrases and sentences.",
   phrases_sentences_quiz: "Phrases and sentences",
   prepositions_quiz: "Prepositions",
-  prepositions_quiz_subtitle: "Practice prepositions and cases.",
-  verbs_quiz: "Verbs",
-  verbs_quiz_subtitle: "Practice German verbs and past forms.",
+  prepositions_quiz_subtitle: "Practice German prepositions and cases (Dativ, Akkusativ).",
+  verbs_quiz: "German Verbs",
+  verbs_quiz_subtitle: "Practice German verbs, conjugation, and past tenses.",
   create_your_own_quizzes: "Custom Quizzes",
   create_your_own_quizzes_subtitle_loggedin: "Practice with your own imported words.",
   vocabulary_quiz: "Vocabulary",
@@ -88,7 +89,7 @@ export const en = {
 
   // Home
   welcome_back: "Welcome, nice to see you here!",
-  ready_to_learn: "Ready to improve your German? Create your own library, quizzes and learning materials, test your knowledge now!",
+  ready_to_learn: "Learn German online with free quizzes for vocabulary, grammar, articles (der, die, das), and verbs. Build your library and prepare for German exams.",
   import_data: "Import and manage data",
   upload_new_materials: "Upload new words and phrases.",
   login_required: "Login required",
@@ -167,7 +168,7 @@ export const en = {
 
   // Vocabulary Page
   vocab_title: "Vocabulary",
-  vocab_subtitle: "Browse and manage your learned words.",
+  vocab_subtitle: "Browse German word lists and manage the vocabulary you have learned.",
   add_word: "Add Word",
   open_library: "Open Library",
   personalized_space: "Private Space",
@@ -240,7 +241,7 @@ export const en = {
   // Dropdown Categories
   dropdown_vocabulary: "Vocabulary Quiz",
   dropdown_reading: "Vocabulary (to read)",
-  vocab_reading_subtitle: "Words uploaded for reading only — separate from quiz libraries.",
+  vocab_reading_subtitle: "German words to read and review — separate from quiz libraries.",
   copy_to_quiz: "Also add to quiz...",
   copy_to_quiz_hint: "Creates a separate quiz copy. The word stays in Vocabulary (to read).",
   category_separation_hint: "Reading and quiz libraries are separate — the same word can exist in both.",
@@ -315,8 +316,8 @@ export const en = {
   template_example_optional_header: "Example (Optional)",
 
   // Grammar & Statistics
-  grammar_page_title: "Grammar",
-  grammar_page_subtitle: "Review grammar rules and explanations.",
+  grammar_page_title: "German Grammar",
+  grammar_page_subtitle: "Learn German cases, tenses, articles (der, die, das), adjective endings, prepositions, and sentence structure.",
   grammar_cases: "Cases (Fälle)",
   grammar_tenses: "Tenses (Zeitformen)",
   grammar_articles: "Articles & Genders",
@@ -383,10 +384,10 @@ export const en = {
   table_preview: "Table preview",
 
   // Library & Learning Materials
-  library: "Library",
-  library_subtitle: "Access your vocabulary and learning resources.",
-  learning_materials: "Resources",
-  learning_materials_subtitle: "Read texts, listen to audio, and more.",
+  library: "German Library",
+  library_subtitle: "German vocabulary lists plus reading and listening materials for exam prep.",
+  learning_materials: "German Learning Materials",
+  learning_materials_subtitle: "German reading and listening: articles, idioms, books, music, and podcasts.",
   read_materials: "Reading",
   read_materials_desc: "Read texts, articles, and stories.",
   listen_materials: "Listening",
@@ -513,8 +514,8 @@ export const en = {
   private_category_4: "Category 4",
   private_category_5: "Category 5",
   edit_category: "Edit Category",
-  adjectives_quiz: 'Adjectives',
-  adjectives_quiz_subtitle: 'Practice German adjectives.',
+  adjectives_quiz: 'German Adjectives',
+  adjectives_quiz_subtitle: 'Practice German adjective endings, declension, and comparison.',
   custom_adjectives_desc: 'Your personal adjectives.',
   template_adjective_header: 'Adjective (mandatory)',
   template_levels_header: 'Levels (e.g., besser, am besten)',
@@ -690,4 +691,21 @@ export const en = {
   cookie_settings_status_accepted: "Advertising cookies: allowed",
   cookie_settings_status_rejected: "Advertising cookies: blocked",
   cookie_settings_status_unset: "You have not made a cookie choice yet.",
+
+  seo_practice_heading: "Practice German",
+  seo_intro_quizzes: "Choose a German quiz: vocabulary, articles (der, die, das), verbs, adjectives, phrases, or prepositions.",
+  seo_intro_vocabulary: "German vocabulary quizzes with translations and example sentences. Learn German words by level.",
+  seo_intro_articles: "German articles quiz for der, die, das. Practice noun genders and definite articles.",
+  seo_intro_verbs: "German verbs quiz: conjugation, Präsens, Präteritum, Perfekt, and common irregular verbs.",
+  seo_intro_phrases: "German phrases and sentences for everyday conversation, travel, and exams.",
+  seo_intro_prepositions: "German prepositions quiz covering Akkusativ, Dativ, and two-way (Wechsel) prepositions.",
+  seo_intro_adjectives: "German adjectives quiz: endings, declension, and comparative forms.",
+  seo_faq_heading: "German learning FAQ",
+  seo_faq_q1: "How can I learn German for free on MicaLingo?",
+  seo_faq_a1: "Use free quizzes for vocabulary, grammar, articles (der, die, das), verbs, adjectives, and prepositions, plus reading and listening materials.",
+  seo_faq_q2: "How do I practice German articles der, die, das?",
+  seo_faq_a2: "Open Quizzes and start the Articles quiz to train der, die, das and German noun genders.",
+  seo_faq_q3: "Are there German verb and grammar quizzes?",
+  seo_faq_a3: "Yes. Practice German verbs (conjugation and past tense) and study grammar: cases, tenses, adjectives, prepositions, and sentence structure.",
+  footer_tagline: "Learn German with quizzes, grammar, vocabulary, articles (der, die, das), and verbs. Deutsch lernen. Német tanulás.",
 };

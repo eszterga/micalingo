@@ -1,213 +1,1054 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://micalingo.com/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/?lang=de</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/?lang=hu</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/" />
   </url>
   <url>
     <loc>https://micalingo.com/quizzes/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/quizzes/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/quizzes/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/quizzes/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/quizzes/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/quizzes/?lang=de</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/quizzes/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/quizzes/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/quizzes/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/quizzes/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/quizzes/?lang=hu</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/quizzes/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/quizzes/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/quizzes/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/quizzes/" />
   </url>
   <url>
     <loc>https://micalingo.com/library/</loc>
-    <lastmod>2026-08-17</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/library/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/library/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/library/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/library/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/library/?lang=de</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/library/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/library/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/library/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/library/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/library/?lang=hu</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/library/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/library/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/library/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/library/" />
   </url>
   <url>
     <loc>https://micalingo.com/grammar/</loc>
-    <lastmod>2026-08-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/grammar/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/grammar/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/grammar/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/grammar/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/grammar/?lang=de</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/grammar/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/grammar/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/grammar/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/grammar/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/grammar/?lang=hu</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/grammar/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/grammar/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/grammar/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/grammar/" />
   </url>
   <url>
     <loc>https://micalingo.com/statistics/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/statistics/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/statistics/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/statistics/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/statistics/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/statistics/?lang=de</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/statistics/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/statistics/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/statistics/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/statistics/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/statistics/?lang=hu</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/statistics/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/statistics/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/statistics/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/statistics/" />
   </url>
   <url>
     <loc>https://micalingo.com/vocabulary/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/vocabulary/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/vocabulary/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/vocabulary/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/vocabulary/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/vocabulary/?lang=de</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/vocabulary/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/vocabulary/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/vocabulary/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/vocabulary/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/vocabulary/?lang=hu</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/vocabulary/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/vocabulary/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/vocabulary/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/vocabulary/" />
   </url>
   <url>
     <loc>https://micalingo.com/practice/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/practice/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/practice/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/practice/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/practice/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/practice/?lang=de</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/practice/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/practice/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/practice/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/practice/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/practice/?lang=hu</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/practice/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/practice/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/practice/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/practice/" />
   </url>
   <url>
     <loc>https://micalingo.com/quizzes/vocabulary/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/quizzes/vocabulary/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/quizzes/vocabulary/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/quizzes/vocabulary/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/quizzes/vocabulary/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/quizzes/vocabulary/?lang=de</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/quizzes/vocabulary/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/quizzes/vocabulary/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/quizzes/vocabulary/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/quizzes/vocabulary/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/quizzes/vocabulary/?lang=hu</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/quizzes/vocabulary/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/quizzes/vocabulary/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/quizzes/vocabulary/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/quizzes/vocabulary/" />
   </url>
   <url>
     <loc>https://micalingo.com/quizzes/articles/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/quizzes/articles/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/quizzes/articles/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/quizzes/articles/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/quizzes/articles/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/quizzes/articles/?lang=de</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/quizzes/articles/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/quizzes/articles/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/quizzes/articles/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/quizzes/articles/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/quizzes/articles/?lang=hu</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/quizzes/articles/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/quizzes/articles/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/quizzes/articles/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/quizzes/articles/" />
   </url>
   <url>
     <loc>https://micalingo.com/quizzes/phrases/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/quizzes/phrases/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/quizzes/phrases/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/quizzes/phrases/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/quizzes/phrases/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/quizzes/phrases/?lang=de</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/quizzes/phrases/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/quizzes/phrases/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/quizzes/phrases/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/quizzes/phrases/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/quizzes/phrases/?lang=hu</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/quizzes/phrases/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/quizzes/phrases/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/quizzes/phrases/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/quizzes/phrases/" />
   </url>
   <url>
     <loc>https://micalingo.com/quizzes/prepositions/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/quizzes/prepositions/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/quizzes/prepositions/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/quizzes/prepositions/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/quizzes/prepositions/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/quizzes/prepositions/?lang=de</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/quizzes/prepositions/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/quizzes/prepositions/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/quizzes/prepositions/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/quizzes/prepositions/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/quizzes/prepositions/?lang=hu</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/quizzes/prepositions/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/quizzes/prepositions/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/quizzes/prepositions/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/quizzes/prepositions/" />
   </url>
   <url>
     <loc>https://micalingo.com/quizzes/adjectives/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/quizzes/adjectives/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/quizzes/adjectives/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/quizzes/adjectives/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/quizzes/adjectives/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/quizzes/adjectives/?lang=de</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/quizzes/adjectives/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/quizzes/adjectives/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/quizzes/adjectives/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/quizzes/adjectives/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/quizzes/adjectives/?lang=hu</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/quizzes/adjectives/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/quizzes/adjectives/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/quizzes/adjectives/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/quizzes/adjectives/" />
   </url>
   <url>
     <loc>https://micalingo.com/quizzes/verbs/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/quizzes/verbs/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/quizzes/verbs/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/quizzes/verbs/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/quizzes/verbs/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/quizzes/verbs/?lang=de</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/quizzes/verbs/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/quizzes/verbs/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/quizzes/verbs/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/quizzes/verbs/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/quizzes/verbs/?lang=hu</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/quizzes/verbs/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/quizzes/verbs/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/quizzes/verbs/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/quizzes/verbs/" />
   </url>
   <url>
     <loc>https://micalingo.com/practice/vocabulary/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.75</priority>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/practice/vocabulary/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/practice/vocabulary/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/practice/vocabulary/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/practice/vocabulary/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/practice/vocabulary/?lang=de</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/practice/vocabulary/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/practice/vocabulary/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/practice/vocabulary/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/practice/vocabulary/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/practice/vocabulary/?lang=hu</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/practice/vocabulary/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/practice/vocabulary/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/practice/vocabulary/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/practice/vocabulary/" />
   </url>
   <url>
     <loc>https://micalingo.com/practice/articles/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.75</priority>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/practice/articles/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/practice/articles/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/practice/articles/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/practice/articles/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/practice/articles/?lang=de</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/practice/articles/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/practice/articles/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/practice/articles/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/practice/articles/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/practice/articles/?lang=hu</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/practice/articles/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/practice/articles/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/practice/articles/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/practice/articles/" />
   </url>
   <url>
     <loc>https://micalingo.com/practice/phrases/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.75</priority>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/practice/phrases/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/practice/phrases/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/practice/phrases/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/practice/phrases/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/practice/phrases/?lang=de</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/practice/phrases/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/practice/phrases/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/practice/phrases/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/practice/phrases/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/practice/phrases/?lang=hu</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/practice/phrases/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/practice/phrases/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/practice/phrases/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/practice/phrases/" />
   </url>
   <url>
     <loc>https://micalingo.com/practice/prepositions/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.75</priority>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/practice/prepositions/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/practice/prepositions/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/practice/prepositions/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/practice/prepositions/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/practice/prepositions/?lang=de</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/practice/prepositions/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/practice/prepositions/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/practice/prepositions/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/practice/prepositions/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/practice/prepositions/?lang=hu</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/practice/prepositions/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/practice/prepositions/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/practice/prepositions/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/practice/prepositions/" />
   </url>
   <url>
     <loc>https://micalingo.com/practice/adjectives/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.75</priority>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/practice/adjectives/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/practice/adjectives/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/practice/adjectives/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/practice/adjectives/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/practice/adjectives/?lang=de</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/practice/adjectives/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/practice/adjectives/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/practice/adjectives/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/practice/adjectives/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/practice/adjectives/?lang=hu</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/practice/adjectives/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/practice/adjectives/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/practice/adjectives/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/practice/adjectives/" />
   </url>
   <url>
     <loc>https://micalingo.com/practice/verbs/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.75</priority>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/practice/verbs/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/practice/verbs/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/practice/verbs/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/practice/verbs/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/practice/verbs/?lang=de</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/practice/verbs/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/practice/verbs/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/practice/verbs/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/practice/verbs/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/practice/verbs/?lang=hu</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/practice/verbs/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/practice/verbs/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/practice/verbs/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/practice/verbs/" />
   </url>
   <url>
     <loc>https://micalingo.com/grammar/cases/</loc>
-    <lastmod>2026-08-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/grammar/cases/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/grammar/cases/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/grammar/cases/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/grammar/cases/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/grammar/cases/?lang=de</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/grammar/cases/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/grammar/cases/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/grammar/cases/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/grammar/cases/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/grammar/cases/?lang=hu</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/grammar/cases/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/grammar/cases/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/grammar/cases/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/grammar/cases/" />
   </url>
   <url>
     <loc>https://micalingo.com/grammar/tenses/</loc>
-    <lastmod>2026-08-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/grammar/tenses/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/grammar/tenses/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/grammar/tenses/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/grammar/tenses/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/grammar/tenses/?lang=de</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/grammar/tenses/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/grammar/tenses/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/grammar/tenses/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/grammar/tenses/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/grammar/tenses/?lang=hu</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/grammar/tenses/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/grammar/tenses/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/grammar/tenses/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/grammar/tenses/" />
   </url>
   <url>
     <loc>https://micalingo.com/grammar/articles/</loc>
-    <lastmod>2026-08-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/grammar/articles/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/grammar/articles/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/grammar/articles/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/grammar/articles/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/grammar/articles/?lang=de</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/grammar/articles/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/grammar/articles/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/grammar/articles/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/grammar/articles/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/grammar/articles/?lang=hu</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/grammar/articles/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/grammar/articles/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/grammar/articles/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/grammar/articles/" />
   </url>
   <url>
     <loc>https://micalingo.com/grammar/adjectives/</loc>
-    <lastmod>2026-08-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/grammar/adjectives/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/grammar/adjectives/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/grammar/adjectives/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/grammar/adjectives/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/grammar/adjectives/?lang=de</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/grammar/adjectives/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/grammar/adjectives/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/grammar/adjectives/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/grammar/adjectives/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/grammar/adjectives/?lang=hu</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/grammar/adjectives/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/grammar/adjectives/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/grammar/adjectives/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/grammar/adjectives/" />
   </url>
   <url>
     <loc>https://micalingo.com/grammar/prepositions/</loc>
-    <lastmod>2026-08-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/grammar/prepositions/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/grammar/prepositions/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/grammar/prepositions/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/grammar/prepositions/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/grammar/prepositions/?lang=de</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/grammar/prepositions/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/grammar/prepositions/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/grammar/prepositions/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/grammar/prepositions/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/grammar/prepositions/?lang=hu</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/grammar/prepositions/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/grammar/prepositions/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/grammar/prepositions/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/grammar/prepositions/" />
   </url>
   <url>
     <loc>https://micalingo.com/grammar/sentence-structure/</loc>
-    <lastmod>2026-08-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/grammar/sentence-structure/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/grammar/sentence-structure/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/grammar/sentence-structure/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/grammar/sentence-structure/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/grammar/sentence-structure/?lang=de</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/grammar/sentence-structure/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/grammar/sentence-structure/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/grammar/sentence-structure/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/grammar/sentence-structure/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/grammar/sentence-structure/?lang=hu</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/grammar/sentence-structure/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/grammar/sentence-structure/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/grammar/sentence-structure/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/grammar/sentence-structure/" />
   </url>
   <url>
     <loc>https://micalingo.com/learning-materials/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.75</priority>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/learning-materials/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/learning-materials/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/learning-materials/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/learning-materials/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/learning-materials/?lang=de</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/learning-materials/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/learning-materials/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/learning-materials/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/learning-materials/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/learning-materials/?lang=hu</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/learning-materials/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/learning-materials/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/learning-materials/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/learning-materials/" />
   </url>
   <url>
     <loc>https://micalingo.com/learning-materials/reading/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/learning-materials/reading/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/learning-materials/reading/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/learning-materials/reading/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/learning-materials/reading/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/learning-materials/reading/?lang=de</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/learning-materials/reading/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/learning-materials/reading/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/learning-materials/reading/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/learning-materials/reading/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/learning-materials/reading/?lang=hu</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/learning-materials/reading/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/learning-materials/reading/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/learning-materials/reading/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/learning-materials/reading/" />
   </url>
   <url>
     <loc>https://micalingo.com/learning-materials/reading/false-friends/</loc>
-    <lastmod>2026-08-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.65</priority>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/learning-materials/reading/false-friends/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/learning-materials/reading/false-friends/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/learning-materials/reading/false-friends/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/learning-materials/reading/false-friends/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/learning-materials/reading/false-friends/?lang=de</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/learning-materials/reading/false-friends/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/learning-materials/reading/false-friends/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/learning-materials/reading/false-friends/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/learning-materials/reading/false-friends/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/learning-materials/reading/false-friends/?lang=hu</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/learning-materials/reading/false-friends/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/learning-materials/reading/false-friends/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/learning-materials/reading/false-friends/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/learning-materials/reading/false-friends/" />
   </url>
   <url>
     <loc>https://micalingo.com/learning-materials/reading/idioms/</loc>
-    <lastmod>2026-08-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.65</priority>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/learning-materials/reading/idioms/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/learning-materials/reading/idioms/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/learning-materials/reading/idioms/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/learning-materials/reading/idioms/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/learning-materials/reading/idioms/?lang=de</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/learning-materials/reading/idioms/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/learning-materials/reading/idioms/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/learning-materials/reading/idioms/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/learning-materials/reading/idioms/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/learning-materials/reading/idioms/?lang=hu</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/learning-materials/reading/idioms/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/learning-materials/reading/idioms/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/learning-materials/reading/idioms/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/learning-materials/reading/idioms/" />
   </url>
   <url>
     <loc>https://micalingo.com/learning-materials/listening/</loc>
-    <lastmod>2026-08-17</lastmod>
+    <lastmod>2026-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/learning-materials/listening/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/learning-materials/listening/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/learning-materials/listening/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/learning-materials/listening/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/learning-materials/listening/?lang=de</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/learning-materials/listening/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/learning-materials/listening/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/learning-materials/listening/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/learning-materials/listening/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/learning-materials/listening/?lang=hu</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/learning-materials/listening/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/learning-materials/listening/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/learning-materials/listening/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/learning-materials/listening/" />
   </url>
   <url>
     <loc>https://micalingo.com/about/</loc>
     <lastmod>2026-08-18</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
+    <changefreq>weekly</changefreq>
+    <priority>0.3</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/about/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/about/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/about/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/about/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/about/?lang=de</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.3</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/about/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/about/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/about/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/about/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/about/?lang=hu</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.3</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/about/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/about/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/about/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/about/" />
   </url>
   <url>
     <loc>https://micalingo.com/privacy/</loc>
     <lastmod>2026-08-18</lastmod>
-    <changefreq>yearly</changefreq>
+    <changefreq>weekly</changefreq>
     <priority>0.3</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/privacy/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/privacy/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/privacy/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/privacy/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/privacy/?lang=de</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.3</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/privacy/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/privacy/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/privacy/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/privacy/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/privacy/?lang=hu</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.3</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/privacy/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/privacy/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/privacy/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/privacy/" />
   </url>
   <url>
     <loc>https://micalingo.com/terms/</loc>
     <lastmod>2026-08-18</lastmod>
-    <changefreq>yearly</changefreq>
+    <changefreq>weekly</changefreq>
     <priority>0.3</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/terms/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/terms/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/terms/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/terms/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/terms/?lang=de</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.3</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/terms/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/terms/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/terms/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/terms/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/terms/?lang=hu</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.3</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/terms/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/terms/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/terms/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/terms/" />
   </url>
   <url>
     <loc>https://micalingo.com/cookies/</loc>
     <lastmod>2026-08-18</lastmod>
-    <changefreq>yearly</changefreq>
+    <changefreq>weekly</changefreq>
     <priority>0.3</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/cookies/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/cookies/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/cookies/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/cookies/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/cookies/?lang=de</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.3</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/cookies/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/cookies/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/cookies/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/cookies/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/cookies/?lang=hu</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.3</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/cookies/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/cookies/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/cookies/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/cookies/" />
   </url>
   <url>
     <loc>https://micalingo.com/impressum/</loc>
     <lastmod>2026-08-18</lastmod>
-    <changefreq>yearly</changefreq>
+    <changefreq>weekly</changefreq>
     <priority>0.3</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/impressum/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/impressum/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/impressum/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/impressum/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/impressum/?lang=de</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.3</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/impressum/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/impressum/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/impressum/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/impressum/" />
+  </url>
+  <url>
+    <loc>https://micalingo.com/impressum/?lang=hu</loc>
+    <lastmod>2026-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.3</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/impressum/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/impressum/?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/impressum/?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/impressum/" />
   </url>
 </urlset>

@@ -145,8 +145,8 @@ export default function Layout() {
             </button>
           )}
           <Link to="/" className="flex items-center gap-2">
-            <img src="/logo.png" alt="MicaLingo Logo" className="w-10 h-10 object-contain mt-1" width="40" height="40" />
-            <h1 className="text-2xl font-extrabold tracking-wider">MicaLingo</h1>
+            <img src="/logo.png" alt="MicaLingo — learn German" className="w-10 h-10 object-contain mt-1" width="40" height="40" />
+            <span className="text-2xl font-extrabold tracking-wider">MicaLingo</span>
           </Link>
         </div>
         <div className="flex items-center gap-3">
@@ -206,8 +206,8 @@ export default function Layout() {
           >
             <div className="px-6 pb-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <img src="/logo.png" alt="MicaLingo Logo" className="w-10 h-10 object-contain bg-white/90 rounded-full p-1 mt-1" width="40" height="40" />
-                <h1 className="text-2xl font-extrabold text-white tracking-wider">MicaLingo</h1>
+                <img src="/logo.png" alt="MicaLingo — learn German" className="w-10 h-10 object-contain bg-white/90 rounded-full p-1 mt-1" width="40" height="40" />
+                <span className="text-2xl font-extrabold text-white tracking-wider">MicaLingo</span>
               </div>
               <button onClick={() => setIsMobileMenuOpen(false)} className="text-blue-300 hover:text-white">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -289,8 +289,8 @@ export default function Layout() {
         {/* Desktop Header */}
         <header className="hidden md:flex justify-between items-center px-8 py-4 bg-white/30 backdrop-blur-lg border-b border-white/40 shadow-sm z-50 relative">
           <Link to="/" className="flex items-center gap-3 hover:scale-105 transition-transform">
-            <img src="/logo.png" alt="MicaLingo Logo" className="w-12 h-12 object-contain drop-shadow-sm mt-1.5" width="48" height="48" />
-            <h1 className="text-3xl font-extrabold text-blue-900 tracking-wider">MicaLingo</h1>
+            <img src="/logo.png" alt="MicaLingo — learn German" className="w-12 h-12 object-contain drop-shadow-sm mt-1.5" width="48" height="48" />
+            <span className="text-3xl font-extrabold text-blue-900 tracking-wider">MicaLingo</span>
           </Link>
           <div className="flex items-center gap-6">
             <div className="relative">
@@ -368,6 +368,9 @@ export default function Layout() {
               </nav>
               <p className="text-xs text-blue-900/50 font-medium">
                 © {new Date().getFullYear()} MicaLingo · {t('footer_rights') || 'All rights reserved.'}
+              </p>
+              <p className="mt-2 text-xs text-blue-900/50 font-medium max-w-xl mx-auto leading-relaxed">
+                {t('footer_tagline')}
               </p>
             </footer>
           </div>

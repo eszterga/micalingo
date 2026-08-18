@@ -90,6 +90,9 @@ export default function TopicQuizzes() {
       : "";
   }, [topic, t]);
 
+  const topicIntro = topic ? t(`seo_intro_${topic}`) : '';
+  const topicIntroText = topicIntro && topicIntro !== `seo_intro_${topic}` ? topicIntro : '';
+
   const totalQuizzes = getQuizLevelCount(sourceData.length);
   const quizzes = Array.from({ length: totalQuizzes }, (_, i) => i + 1);
 
@@ -128,6 +131,7 @@ export default function TopicQuizzes() {
           <div>
             <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600 tracking-tight pb-2">{pageTitle} {t('quizzes_title') || 'Quizzes'}</h1>
             <p className="text-lg text-blue-900/70 font-medium mt-1">{t('select_level_to_start') || 'Select a level to start practicing.'}</p>
+            {topicIntroText && <p className="text-sm text-blue-900/55 font-medium mt-2 max-w-2xl">{topicIntroText}</p>}
           </div>
         </div>
 

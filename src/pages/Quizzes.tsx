@@ -121,6 +121,7 @@ export default function Quizzes() {
           <div className="min-w-0">
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600 tracking-tight pb-1 sm:pb-2">{t('quizzes_title')}</h1>
             <p className="text-base sm:text-lg text-blue-900/70 font-medium mt-0.5 sm:mt-1">{t('quizzes_subtitle')}</p>
+            <p className="text-sm text-blue-900/55 font-medium mt-2 max-w-2xl">{t('seo_intro_quizzes')}</p>
           </div>
         </div>
 

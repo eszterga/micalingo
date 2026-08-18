@@ -1,5 +1,6 @@
 export const hu = {
   title: "Német vizsga előkészítő",
+  home_h1: "Német tanulás: kvízek, nyelvtan és szókincs",
 
   // Settings
   settings_title: "Beállítások",
@@ -37,21 +38,21 @@ export const hu = {
   hard_reset_success: "Adatbázis teljesen törölve! Tiszta lappal kezdesz.",
 
   // Quizzes
-  quizzes_title: "Kvízek",
-  quizzes_subtitle: "Válassz egy kategóriát a gyakorláshoz.",
-  test_your_knowledge: "Teszteld a tudásod",
-  test_your_knowledge_subtitle: "Gyakorolj a nyilvános adatbázisunkkal.",
+  quizzes_title: "Német kvízek",
+  quizzes_subtitle: "Ingyenes német kvízek: szókincs, névelők (der, die, das), igék, melléknevek, kifejezések és prepozíciók.",
+  test_your_knowledge: "Teszteld a németed",
+  test_your_knowledge_subtitle: "Gyakorolj a nyilvános német kvízkönyvtárral.",
   vocabulary: "Szókincs",
-  vocabulary_quiz_subtitle: "Gyakorold az alapvető szavakat.",
-  articles_quiz: "Névelők",
-  articles_quiz_subtitle: "Gyakorold a der, die, das névelőket.",
+  vocabulary_quiz_subtitle: "Tanulj német szókincset interaktív szó kvízekkel.",
+  articles_quiz: "Névelők (der, die, das)",
+  articles_quiz_subtitle: "Gyakorold a der, die, das névelőket és a főnevek nemét.",
   phrases_quiz: "Kifejezések és mondatok",
-  phrases_quiz_subtitle: "Hasznos mindennapi kifejezések és mondatok.",
+  phrases_quiz_subtitle: "Hasznos mindennapi német kifejezések és mondatok.",
   phrases_sentences_quiz: "Kifejezések és mondatok",
   prepositions_quiz: "Elöljárószavak",
-  prepositions_quiz_subtitle: "Gyakorold az elöljárószavakat és eseteket.",
-  verbs_quiz: "Igék",
-  verbs_quiz_subtitle: "Gyakorold a német igéket és múlt időket.",
+  prepositions_quiz_subtitle: "Gyakorold a német prepozíciókat és eseteket (Dativ, Akkusativ).",
+  verbs_quiz: "Német igék",
+  verbs_quiz_subtitle: "Gyakorold a német igéket, ragozást és múlt időket.",
   create_your_own_quizzes: "Saját kvízek",
   create_your_own_quizzes_subtitle_loggedin: "Gyakorolj a saját importált szavaiddal.",
   vocabulary_quiz: "Szókincs",
@@ -88,7 +89,7 @@ export const hu = {
 
   // Home
   welcome_back: "Üdvözlünk, jó, hogy itt vagy!",
-  ready_to_learn: "Készen állsz a német tudásod fejlesztésére? Hozd létre saját könyvtáradat, kvízeidet és tananyagaidat, és teszteld a tudásod most!",
+  ready_to_learn: "Tanulj németül online ingyenes kvízekkel: szókincs, nyelvtan, névelők (der, die, das) és igék. Építsd a könyvtárad, és készülj német vizsgára.",
   import_data: "Adatok importálása és kezelése",
   upload_new_materials: "Tölts fel új szavakat és kifejezéseket.",
   login_required: "Bejelentkezés szükséges",
@@ -167,7 +168,7 @@ _items_save: "Nincsenek érvényes szavak a mentéshez, vagy nem vagy bejelentke
 
   // Vocabulary Page
   vocab_title: "Szótár",
-  vocab_subtitle: "Böngéssz és kezeld a tanult szavaidat.",
+  vocab_subtitle: "Böngéssz német szólistákat, és kezeld a tanult szavakat.",
   add_word: "Szó hozzáadása",
   open_library: "Nyilvános könyvtár",
   personalized_space: "Privát tér",
@@ -240,7 +241,7 @@ _items_save: "Nincsenek érvényes szavak a mentéshez, vagy nem vagy bejelentke
   // Dropdown Categories
   dropdown_vocabulary: "Szókincs kvíz",
   dropdown_reading: "Szókincs (olvasnivaló)",
-  vocab_reading_subtitle: "Csak olvasáshoz feltöltött szavak — külön a kvíz könyvtáraktól.",
+  vocab_reading_subtitle: "Német szavak olvasáshoz és ismétléshez — külön a kvíz könyvtáraktól.",
   copy_to_quiz: "Hozzáadás kvízhez is...",
   copy_to_quiz_hint: "Külön kvíz-másolatot készít. A szó megmarad a Szókincs (olvasnivaló) könyvtárban.",
   category_separation_hint: "Az olvasnivaló és a kvíz könyvtárak külön vannak — ugyanaz a szó lehet mindkettőben.",
@@ -315,8 +316,8 @@ _items_save: "Nincsenek érvényes szavak a mentéshez, vagy nem vagy bejelentke
   template_example_optional_header: "Példa (Opcionális)",
 
   // Grammar & Statistics
-  grammar_page_title: "Nyelvtan",
-  grammar_page_subtitle: "Nyelvtani szabályok és magyarázatok áttekintése.",
+  grammar_page_title: "Német nyelvtan",
+  grammar_page_subtitle: "Tanuld a német eseteket, igeidőket, névelőket (der, die, das), melléknévvégződéseket, prepozíciókat és a szórendet.",
   grammar_cases: "Esetek",
   grammar_tenses: "Igeidők",
   grammar_articles: "Névelők és nemek",
@@ -381,10 +382,10 @@ _items_save: "Nincsenek érvényes szavak a mentéshez, vagy nem vagy bejelentke
   close: "Bezárás",
 
   // Library & Learning Materials
-  library: "Könyvtár",
-  library_subtitle: "Férj hozzá a szótáradhoz és a segédanyagaidhoz.",
-  learning_materials: "Segédanyagok",
-  learning_materials_subtitle: "Olvass cikkeket, hallgass hanganyagokat és zenéket.",
+  library: "Német könyvtár",
+  library_subtitle: "Német szókincslisták, olvasnivaló és hallásértési anyagok a vizsgafelkészüléshez.",
+  learning_materials: "Német tananyagok",
+  learning_materials_subtitle: "Német olvasás és hallásértés: cikkek, szólások, könyvek, zene és podcastok.",
   read_materials: "Olvasás",
   read_materials_desc: "Olvass szövegeket, cikkeket és történeteket.",
   listen_materials: "Hallgatás",
@@ -511,8 +512,8 @@ _items_save: "Nincsenek érvényes szavak a mentéshez, vagy nem vagy bejelentke
   private_category_4: "4. Kategória",
   private_category_5: "5. Kategória",
   edit_category: "Kategória szerkesztése",
-  adjectives_quiz: 'Melléknevek',
-  adjectives_quiz_subtitle: 'Gyakorold a német mellékneveket.',
+  adjectives_quiz: 'Német melléknevek',
+  adjectives_quiz_subtitle: 'Gyakorold a német melléknévvégződéseket, ragozást és fokozást.',
   custom_adjectives_desc: 'Saját mellékneveid.',
   template_adjective_header: 'Melléknév (kötelező)',
   template_levels_header: 'Fokozás (pl. jobb, legjobb)',
@@ -688,4 +689,21 @@ _items_save: "Nincsenek érvényes szavak a mentéshez, vagy nem vagy bejelentke
   cookie_settings_status_accepted: "Hirdetési sütik: engedélyezve",
   cookie_settings_status_rejected: "Hirdetési sütik: tiltva",
   cookie_settings_status_unset: "Még nem választott süti beállítást.",
+
+  seo_practice_heading: "Német gyakorlás",
+  seo_intro_quizzes: "Válassz német kvízt: szókincs, névelők (der, die, das), igék, melléknevek, kifejezések vagy prepozíciók.",
+  seo_intro_vocabulary: "Német szókincs kvízek fordításokkal és példamondatokkal. Tanulj német szavakat szintenként.",
+  seo_intro_articles: "Névelők kvíz: der, die, das. Gyakorold a főnevek nemét és a határozott névelőket.",
+  seo_intro_verbs: "Német ige kvíz: ragozás, Präsens, Präteritum, Perfekt és gyakori rendhagyó igék.",
+  seo_intro_phrases: "Német kifejezések és mondatok hétköznapi beszélgetéshez, utazáshoz és vizsgához.",
+  seo_intro_prepositions: "Német prepozíciók kvíz: Akkusativ, Dativ és Wechselpräpositionen.",
+  seo_intro_adjectives: "Német melléknevek kvíz: végződések, ragozás és fokozás.",
+  seo_faq_heading: "Gyakori kérdések a német tanulásról",
+  seo_faq_q1: "Hogyan tanulhatok ingyen németet a MicaLingo-n?",
+  seo_faq_a1: "Használj ingyenes kvízeket szókinccsel, nyelvtannal, névelőkkel (der, die, das), igékkel, melléknevekkel és prepozíciókkal, plusz olvasási és hallásértési anyagokat.",
+  seo_faq_q2: "Hogyan gyakoroljam a der, die, das névelőket?",
+  seo_faq_a2: "Nyisd meg a Kvízeket, és indítsd a névelők kvízt a der, die, das és a főnevek nemének gyakorlásához.",
+  seo_faq_q3: "Van kvíz a német igékhez és a nyelvtanhoz?",
+  seo_faq_a3: "Igen. Gyakorold a német igéket (ragozás és múlt idő), és tanuld a nyelvtant: esetek, igeidők, melléknevek, prepozíciók és szórend.",
+  footer_tagline: "Tanulj németül kvízekkel, nyelvtannal, szókinccsel, névelőkkel (der, die, das) és igékkel. Deutsch lernen. Learn German.",
 };

@@ -1,11 +1,21 @@
-import { createContext, useState, useContext, ReactNode, useCallback } from 'react';
+import { createContext, useState, useContext, ReactNode, useCallback, useEffect } from 'react';
 import { en } from './en';
 import { de } from './de';
 import { hu } from './hu';
 
-type Language = 'en' | 'de' | 'hu';
+export type Language = 'en' | 'de' | 'hu';
 
 const translations: Record<string, any> = { en, de, hu };
+
+function readLangFromUrl(): Language | null {
+  try {
+    const lang = new URLSearchParams(window.location.search).get('lang');
+    if (lang === 'en' || lang === 'de' || lang === 'hu') return lang;
+  } catch {
+    /* ignore */
+  }
+  return null;
+}
 
 interface I18nContextType {
   language: Language;
@@ -17,6 +27,11 @@ const I18nContext = createContext<I18nContextType | undefined>(undefined);
 
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<Language>(() => {
+    const fromUrl = readLangFromUrl();
+    if (fromUrl) {
+      localStorage.setItem('micalingo_language', fromUrl);
+      return fromUrl;
+    }
     const storedLang = localStorage.getItem('micalingo_language');
     return (storedLang && ['en', 'de', 'hu'].includes(storedLang)) ? storedLang as Language : 'en';
   });
@@ -25,6 +40,10 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('micalingo_language', lang);
     setLanguageState(lang);
   };
+
+  useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
 
   const t = useCallback((key: string, replacements?: Record<string, string | number>): string => {
     let translation = translations[language]?.[key] || translations['en'][key] || key;

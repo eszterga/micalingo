@@ -1,5 +1,6 @@
 export const de = {
   title: "Deutschprüfung Vorbereitung",
+  home_h1: "Deutsch lernen: Quizze, Grammatik & Wortschatz",
 
   // Settings
   settings_title: "Einstellungen",
@@ -37,21 +38,21 @@ export const de = {
   clear_local_data_desc: "Lösche lokale Quiz-Ergebnisse und Fortschritte. Löscht keine Cloud-Vokabeln.",
 
   // Quizzes
-  quizzes_title: "Quizze",
-  quizzes_subtitle: "Wähle ein Thema zum Üben.",
-  test_your_knowledge: "Teste dein Wissen",
-  test_your_knowledge_subtitle: "Übe mit unserer öffentlichen Datenbank.",
+  quizzes_title: "Deutsch-Quizze",
+  quizzes_subtitle: "Kostenlose Deutsch-Quizze zu Wortschatz, Artikeln (der, die, das), Verben, Adjektiven, Redewendungen und Präpositionen.",
+  test_your_knowledge: "Teste dein Deutsch",
+  test_your_knowledge_subtitle: "Übe mit unserer öffentlichen Deutsch-Quiz-Bibliothek.",
   vocabulary: "Wortschatz",
-  vocabulary_quiz_subtitle: "Übe wesentliche Wörter.",
-  articles_quiz: "Artikel",
-  articles_quiz_subtitle: "Übe der, die, das.",
+  vocabulary_quiz_subtitle: "Lerne deutschen Wortschatz mit interaktiven Wort-Quizzen.",
+  articles_quiz: "Artikel (der, die, das)",
+  articles_quiz_subtitle: "Übe deutsche Artikel der, die, das und das Genus der Nomen.",
   phrases_quiz: "Redewendungen und Sätze",
-  phrases_quiz_subtitle: "Nützliche alltägliche Redewendungen und Sätze.",
+  phrases_quiz_subtitle: "Nützliche alltägliche deutsche Redewendungen und Sätze.",
   phrases_sentences_quiz: "Redewendungen und Sätze",
   prepositions_quiz: "Präpositionen",
-  prepositions_quiz_subtitle: "Übe Präpositionen und Fälle.",
-  verbs_quiz: "Verben",
-  verbs_quiz_subtitle: "Übe deutsche Verben und Vergangenheitsformen.",
+  prepositions_quiz_subtitle: "Übe deutsche Präpositionen und Fälle (Dativ, Akkusativ).",
+  verbs_quiz: "Deutsche Verben",
+  verbs_quiz_subtitle: "Übe deutsche Verben, Konjugation und Vergangenheitsformen.",
   create_your_own_quizzes: "Benutzerdefinierte Quizze",
   create_your_own_quizzes_subtitle_loggedin: "Übe mit deinen eigenen importierten Wörtern.",
   vocabulary_quiz: "Wortschatz",
@@ -88,7 +89,7 @@ export const de = {
 
   // Home
   welcome_back: "Willkommen, schön dich hier zu sehen!",
-  ready_to_learn: "Bereit, dein Deutsch zu verbessern? Erstelle deine eigene Bibliothek, Quizze und Lernmaterialien, teste jetzt dein Wissen!",
+  ready_to_learn: "Lerne Deutsch online mit kostenlosen Quizzen zu Wortschatz, Grammatik, Artikeln (der, die, das) und Verben. Baue deine Bibliothek auf und bereite dich auf Deutschprüfungen vor.",
   import_data: "Daten importieren und verwalten",
   upload_new_materials: "Neue Wörter und Sätze hochladen.",
   login_required: "Anmeldung erforderlich",
@@ -167,7 +168,7 @@ export const de = {
 
   // Vocabulary Page
   vocab_title: "Wortschatz",
-  vocab_subtitle: "Durchsuche und verwalte deine gelernten Wörter.",
+  vocab_subtitle: "Deutsche Wortlisten durchsuchen und Vokabeln verwalten.",
   add_word: "Wort hinzufügen",
   open_library: "Offene Bibliothek",
   personalized_space: "Privater Bereich",
@@ -240,7 +241,7 @@ export const de = {
   // Dropdown Categories
   dropdown_vocabulary: "Wortschatz-Quiz",
   dropdown_reading: "Wortschatz (zum Lesen)",
-  vocab_reading_subtitle: "Nur zum Lesen hochgeladene Wörter — getrennt von den Quiz-Bibliotheken.",
+  vocab_reading_subtitle: "Deutsche Wörter zum Lesen und Wiederholen — getrennt von den Quiz-Bibliotheken.",
   copy_to_quiz: "Auch zum Quiz hinzufügen...",
   copy_to_quiz_hint: "Erstellt eine separate Quiz-Kopie. Das Wort bleibt in Wortschatz (zum Lesen).",
   category_separation_hint: "Lese- und Quiz-Bibliotheken sind getrennt — dasselbe Wort kann in beiden vorkommen.",
@@ -315,8 +316,8 @@ export const de = {
   template_example_optional_header: "Beispiel (Optional)",
 
   // Grammar & Statistics
-  grammar_page_title: "Grammatik",
-  grammar_page_subtitle: "Grammatikregeln und Erklärungen.",
+  grammar_page_title: "Deutsche Grammatik",
+  grammar_page_subtitle: "Lerne deutsche Fälle, Zeitformen, Artikel (der, die, das), Adjektivendungen, Präpositionen und Satzbau.",
   grammar_cases: "Fälle (Kasus)",
   grammar_tenses: "Zeitformen (Tempora)",
   grammar_articles: "Artikel & Geschlechter",
@@ -383,10 +384,10 @@ export const de = {
   table_preview: "Tabellenvorschau",
 
   // Library & Learning Materials
-  library: "Bibliothek",
-  library_subtitle: "Greife auf deine Vokabeln zu.",
-  learning_materials: "Die Unterlagen",
-  learning_materials_subtitle: "Texte lesen, Audio hören.",
+  library: "Deutsch-Bibliothek",
+  library_subtitle: "Deutsche Wortschatzlisten sowie Lese- und Hörmaterialien für die Prüfungsvorbereitung.",
+  learning_materials: "Deutsch Lernmaterialien",
+  learning_materials_subtitle: "Deutsch lesen und hören: Artikel, Redewendungen, Bücher, Musik und Podcasts.",
   read_materials: "Lesen",
   read_materials_desc: "Texte, Artikel und Geschichten lesen.",
   listen_materials: "Hören",
@@ -513,8 +514,8 @@ export const de = {
   private_category_4: "Kategorie 4",
   private_category_5: "Kategorie 5",
   edit_category: "Kategorie bearbeiten",
-  adjectives_quiz: 'Adjektive',
-  adjectives_quiz_subtitle: 'Übe deutsche Adjektive.',
+  adjectives_quiz: 'Deutsche Adjektive',
+  adjectives_quiz_subtitle: 'Übe deutsche Adjektivendungen, Deklination und Steigerung.',
   custom_adjectives_desc: 'Deine persönlichen Adjektive.',
   template_adjective_header: 'Adjektiv (erforderlich)',
   template_levels_header: 'Steigerung (z.B. besser, am besten)',
@@ -690,4 +691,21 @@ export const de = {
   cookie_settings_status_accepted: "Werbe-Cookies: erlaubt",
   cookie_settings_status_rejected: "Werbe-Cookies: blockiert",
   cookie_settings_status_unset: "Sie haben noch keine Cookie-Auswahl getroffen.",
+
+  seo_practice_heading: "Deutsch üben",
+  seo_intro_quizzes: "Wähle ein Deutsch-Quiz: Wortschatz, Artikel (der, die, das), Verben, Adjektive, Redewendungen oder Präpositionen.",
+  seo_intro_vocabulary: "Wortschatz-Quizze mit Übersetzungen und Beispielsätzen. Lerne deutsche Wörter nach Level.",
+  seo_intro_articles: "Artikel-Quiz für der, die, das. Übe das Genus deutscher Nomen und bestimmte Artikel.",
+  seo_intro_verbs: "Verben-Quiz: Konjugation, Präsens, Präteritum, Perfekt und häufige unregelmäßige Verben.",
+  seo_intro_phrases: "Deutsche Redewendungen und Sätze für Alltag, Reise und Prüfung.",
+  seo_intro_prepositions: "Präpositionen-Quiz zu Akkusativ, Dativ und Wechselpräpositionen.",
+  seo_intro_adjectives: "Adjektive-Quiz: Endungen, Deklination und Steigerung.",
+  seo_faq_heading: "Häufige Fragen zum Deutschlernen",
+  seo_faq_q1: "Wie kann ich bei MicaLingo kostenlos Deutsch lernen?",
+  seo_faq_a1: "Nutze kostenlose Quizze zu Wortschatz, Grammatik, Artikeln (der, die, das), Verben, Adjektiven und Präpositionen sowie Lese- und Hörmaterialien.",
+  seo_faq_q2: "Wie übe ich deutsche Artikel der, die, das?",
+  seo_faq_a2: "Öffne Quizze und starte das Artikel-Quiz, um der, die, das und das Genus zu trainieren.",
+  seo_faq_q3: "Gibt es Quizze zu Verben und Grammatik?",
+  seo_faq_a3: "Ja. Übe deutsche Verben (Konjugation und Vergangenheit) und lerne Grammatik: Fälle, Zeitformen, Adjektive, Präpositionen und Satzbau.",
+  footer_tagline: "Deutsch lernen mit Quizzen, Grammatik, Wortschatz, Artikeln (der, die, das) und Verben. Learn German. Német tanulás.",
 };

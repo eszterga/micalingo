@@ -582,6 +582,13 @@ export default function Grammar() {
           <div>
             <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600 tracking-tight pb-2">{t('grammar_page_title')}</h1>
             <p className="text-lg text-blue-900/70 font-medium mt-1">{t('grammar_page_subtitle')}</p>
+            <nav className="flex flex-wrap gap-2 mt-3" aria-label={t('grammar_page_title')}>
+              {publicCategories.map((cat) => (
+                <Link key={cat.id} to={`/grammar/${cat.id}`} className="px-3 py-1 rounded-full bg-white/80 border border-blue-100 text-xs sm:text-sm font-bold text-blue-800 hover:border-blue-300 hover:bg-white transition-colors">
+                  {cat.title}
+                </Link>
+              ))}
+            </nav>
           </div>
         </div>
 
