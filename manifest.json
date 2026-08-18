@@ -1,11 +1,11 @@
 {
-  "name": "MicaLingo - German Exam Preparation",
+  "name": "MicaLingo — Learn German: Quizzes, Grammar & Vocabulary",
   "short_name": "MicaLingo",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#3b82f6",
-  "description": "Improve your German skills with MicaLingo. Create custom quizzes, practice vocabulary, learn grammar, and prepare for your German exams effectively.",
+  "description": "Learn German with free quizzes for vocabulary, grammar, articles (der, die, das), and verbs. Deutsch lernen. Német tanulás.",
   "icons": [
     {
       "src": "../icons/icon-48.webp",
