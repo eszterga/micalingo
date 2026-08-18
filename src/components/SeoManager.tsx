@@ -65,22 +65,27 @@ const ROUTE_SEO: Record<string, SeoConfig> = {
   '/about': {
     title: 'About MicaLingo',
     description: 'About MicaLingo — German exam preparation with quizzes, vocabulary, and grammar practice.',
+    noindex: false,
   },
   '/privacy': {
     title: 'Privacy Policy | MicaLingo',
     description: 'Privacy policy for the MicaLingo website and mobile application.',
+    noindex: false,
   },
   '/terms': {
     title: 'Terms of Service | MicaLingo',
     description: 'Terms of service for using MicaLingo.',
+    noindex: false,
   },
   '/cookies': {
     title: 'Cookie Policy | MicaLingo',
     description: 'How MicaLingo and Google use cookies, including advertising cookies for AdSense.',
+    noindex: false,
   },
   '/impressum': {
     title: 'Impressum | MicaLingo',
     description: 'Legal notice and operator information for the MicaLingo website and app.',
+    noindex: false,
   },
   '/login': {
     title: 'Log in | MicaLingo',
