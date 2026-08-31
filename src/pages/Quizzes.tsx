@@ -2,6 +2,9 @@ import { useState, useEffect, useMemo } from "react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { useI18n } from "../I18nContext";
 import { useAuth } from "../AuthContext";
+import ArticleBody from "../components/ArticleBody";
+import { quizIndexArticle } from "../lib/learnContent";
+import type { LearnLang } from "../lib/learnContent";
 import { isUserCancelledAuthError, signInWithGoogle } from '../lib/googleAuth';
 import { useCloudVocabulary } from "../lib/firestore";
 import {
@@ -33,7 +36,7 @@ const BackgroundBlobs = () => (
 type QuizTab = 'library' | 'personal' | 'marked';
 
 export default function Quizzes() {
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -123,6 +126,10 @@ export default function Quizzes() {
             <p className="text-base sm:text-lg text-blue-900/70 font-medium mt-0.5 sm:mt-1">{t('quizzes_subtitle')}</p>
             <p className="text-sm text-blue-900/55 font-medium mt-2 max-w-2xl">{t('seo_intro_quizzes')}</p>
           </div>
+        </div>
+
+        <div className="bg-white/70 backdrop-blur-xl border border-white rounded-[1.5rem] p-5 md:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+          <ArticleBody markdown={quizIndexArticle(language as LearnLang)} />
         </div>
 
       {/* Navigation Tabs — scrollable on phone / tablet */}

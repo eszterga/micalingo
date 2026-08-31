@@ -48,6 +48,21 @@ export default function About() {
         </section>
 
         <section>
+          <h2 className="text-xl font-extrabold text-blue-900 mb-3">{t('about_who_heading')}</h2>
+          <p className="text-gray-700 leading-relaxed whitespace-pre-line">{t('about_who_body')}</p>
+        </section>
+
+        <section>
+          <h2 className="text-xl font-extrabold text-blue-900 mb-3">{t('about_how_heading')}</h2>
+          <p className="text-gray-700 leading-relaxed whitespace-pre-line">{t('about_how_body')}</p>
+        </section>
+
+        <section>
+          <h2 className="text-xl font-extrabold text-blue-900 mb-3">{t('about_for_heading')}</h2>
+          <p className="text-gray-700 leading-relaxed whitespace-pre-line">{t('about_for_body')}</p>
+        </section>
+
+        <section>
           <h2 className="text-xl font-extrabold text-blue-900 mb-3">{t('contact_heading')}</h2>
           <p className="text-gray-700 leading-relaxed mb-6">{t('contact_body')}</p>
           <div className="grid gap-4 sm:grid-cols-1">
@@ -71,6 +86,7 @@ export default function About() {
         </section>
 
         <nav className="flex flex-wrap gap-4 pt-2 border-t border-blue-100 text-sm font-bold">
+          <Link to="/learn" className="text-blue-700 hover:text-blue-900">{t('learn_hub_title')}</Link>
           <Link to="/privacy" className="text-blue-700 hover:text-blue-900">{t('footer_privacy')}</Link>
           <Link to="/terms" className="text-blue-700 hover:text-blue-900">{t('footer_terms')}</Link>
           <Link to="/cookies" className="text-blue-700 hover:text-blue-900">{t('footer_cookies')}</Link>

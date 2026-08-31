@@ -1,3 +1,5 @@
+import { getLearnGuide, guideDescription, guideTitle } from './learnContent';
+
 export type SeoLang = 'en' | 'de' | 'hu';
 
 export const SITE_ORIGIN = 'https://micalingo.com';
@@ -242,8 +244,8 @@ const ROUTES: Record<string, Localized> = {
   '/about': {
     en: {
       title: 'About MicaLingo — Learn German Online',
-      description: 'MicaLingo is a free German learning site with quizzes, vocabulary, grammar, and exam preparation.',
-      keywords: 'MicaLingo, learn German, German exam preparation',
+      description: 'Who runs MicaLingo, how the German quizzes and grammar notes are made, and how to contact the independently operated exam-prep project.',
+      keywords: 'MicaLingo, learn German, German exam preparation, about',
     },
     de: {
       title: 'Über MicaLingo — Deutsch online lernen',
@@ -254,6 +256,23 @@ const ROUTES: Record<string, Localized> = {
       title: 'A MicaLingo-ról — német tanulás online',
       description: 'A MicaLingo ingyenes némettanuló oldal kvízekkel, szókinccsel, nyelvtannal és vizsgafelkészüléssel.',
       keywords: 'MicaLingo, német tanulás, vizsgafelkészülés',
+    },
+  },
+  '/learn': {
+    en: {
+      title: 'German Study Guides: Exam Prep, Articles & Cases | MicaLingo',
+      description: 'Original German study guides for Goethe, telc and ÖSD prep, der/die/das, German cases, and a weekly practice plan.',
+      keywords: 'German study guides, Goethe exam prep, telc Deutsch, der die das, German cases',
+    },
+    de: {
+      title: 'Deutsch-Lernratgeber: Prüfung, Artikel & Fälle | MicaLingo',
+      description: 'Eigene Ratgeber zur Goethe-, telc- und ÖSD-Vorbereitung, der/die/das, deutsche Fälle und ein Wochenplan.',
+      keywords: 'Deutsch Lernratgeber, Goethe Vorbereitung, telc Deutsch, der die das, Kasus',
+    },
+    hu: {
+      title: 'Német tanulási útmutatók: vizsga, névelők, esetek | MicaLingo',
+      description: 'Saját útmutatók Goethe, telc és ÖSD felkészüléshez, der/die/das, német esetek és heti gyakorlóterv.',
+      keywords: 'német útmutató, Goethe vizsga, telc, der die das, német esetek',
     },
   },
   '/privacy': {
@@ -526,12 +545,13 @@ const NOINDEX_PATHS = new Set([
   '/create-quiz',
   '/quiz',
   '/results',
+  '/statistics',
 ]);
 
 export type ResolvedSeo = SeoCopy & {
   canonicalPath: string;
   noindex: boolean;
-  pageType: 'home' | 'quizTopic' | 'grammarCat' | 'page';
+  pageType: 'home' | 'quizTopic' | 'grammarCat' | 'learnGuide' | 'page';
   topic?: string;
 };
 
@@ -541,6 +561,15 @@ function pick(map: Localized, lang: SeoLang): SeoCopy {
 
 export function resolveSeo(pathname: string, lang: SeoLang): ResolvedSeo {
   const clean = pathname.replace(/\/+$/, '') || '/';
+
+  if (clean === '/practice') {
+    return {
+      ...pick(ROUTES['/quizzes'], lang),
+      canonicalPath: '/quizzes',
+      noindex: true,
+      pageType: 'page',
+    };
+  }
 
   if (ROUTES[clean]) {
     return {
@@ -574,16 +603,46 @@ export function resolveSeo(pathname: string, lang: SeoLang): ResolvedSeo {
     const topic = practiceTopic[1];
     const copy = QUIZ_TOPICS[topic];
     if (copy) {
-      const localized = pick(copy, lang);
       return {
-        ...localized,
-        title: localized.title.replace('Quiz', lang === 'de' ? 'Übung' : lang === 'hu' ? 'gyakorlás' : 'Practice'),
-        canonicalPath: clean,
-        noindex: false,
+        ...pick(copy, lang),
+        canonicalPath: `/quizzes/${topic}`,
+        noindex: true,
         pageType: 'quizTopic',
         topic,
       };
     }
+    return {
+      title: `${capitalize(topic)} Quizzes | MicaLingo`,
+      description: `Practice German ${topic} with MicaLingo quizzes.`,
+      keywords: `German ${topic} quiz, learn German`,
+      canonicalPath: '/quizzes',
+      noindex: true,
+      pageType: 'quizTopic',
+      topic,
+    };
+  }
+
+  const learnGuide = clean.match(/^\/learn\/([^/]+)$/);
+  if (learnGuide) {
+    const topic = learnGuide[1];
+    const guide = getLearnGuide(topic);
+    if (guide) {
+      return {
+        title: `${guideTitle(guide, lang)} | MicaLingo`,
+        description: guideDescription(guide, lang),
+        keywords: `German ${topic.replace(/-/g, ' ')}, learn German, MicaLingo`,
+        canonicalPath: clean,
+        noindex: false,
+        pageType: 'learnGuide',
+        topic,
+      };
+    }
+    return {
+      ...pick(ROUTES['/learn'], lang),
+      canonicalPath: '/learn',
+      noindex: true,
+      pageType: 'page',
+    };
   }
 
   const grammarCat = clean.match(/^\/grammar\/([^/]+)$/);
@@ -676,6 +735,7 @@ export function buildJsonLd(seo: ResolvedSeo, lang: SeoLang, canonical: string) 
       url: `${SITE_ORIGIN}/`,
       logo: `${SITE_ORIGIN}/logo.png`,
       description: HOME.en.description,
+      email: 'support.micalingo@gmail.com',
       knowsAbout: [
         'German language',
         'German grammar',
@@ -737,6 +797,23 @@ export function buildJsonLd(seo: ResolvedSeo, lang: SeoLang, canonical: string) 
     });
   }
 
+  if (seo.pageType === 'learnGuide' && seo.topic) {
+    const guide = getLearnGuide(seo.topic);
+    graph.push({
+      '@type': 'Article',
+      headline: seo.title,
+      description: seo.description,
+      datePublished: guide?.published || '2026-08-31',
+      dateModified: guide?.published || '2026-08-31',
+      inLanguage: lang,
+      isAccessibleForFree: true,
+      url: canonical,
+      author: { '@id': `${SITE_ORIGIN}/#org` },
+      publisher: { '@id': `${SITE_ORIGIN}/#org` },
+      mainEntityOfPage: { '@id': `${canonical}#webpage` },
+    });
+  }
+
   return { '@context': 'https://schema.org', '@graph': graph };
 }
 
@@ -759,6 +836,14 @@ function homeFaq(lang: SeoLang): { q: string; a: string }[] {
         q: 'In welchen Sprachen ist MicaLingo verfügbar?',
         a: 'Die Oberfläche gibt es auf Englisch, Deutsch und Ungarisch. Die Lerninhalte sind Deutsch.',
       },
+      {
+        q: 'Hilft MicaLingo bei Goethe, telc oder ÖSD?',
+        a: 'Ja. Die Quizze trainieren Artikel, Verben, Präpositionen, Wortschatz und Grammatik. Offizielle Proben des Prüfungsanbieters nutzt du für Aufgabentyp und Zeit.',
+      },
+      {
+        q: 'Brauche ich ein Konto zum Üben?',
+        a: 'Nein. Öffentliche Quizze, Grammatik-Primer und Ratgeber funktionieren ohne Login. Ein Konto braucht es nur für private Bibliothek, markierte Wörter und Importe.',
+      },
     ];
   }
   if (lang === 'hu') {
@@ -779,6 +864,14 @@ function homeFaq(lang: SeoLang): { q: string; a: string }[] {
         q: 'Milyen nyelveken érhető el a MicaLingo?',
         a: 'A felület angolul, németül és magyarul működik. A tananyag német.',
       },
+      {
+        q: 'Hasznos a MicaLingo Goethe, telc vagy ÖSD vizsgához?',
+        a: 'Igen. A kvízek névelőket, igéket, prepozíciókat, szókincset és nyelvtant edzenek. A hivatalos mintafeladatok a feladattípushoz és az időhöz kellenek.',
+      },
+      {
+        q: 'Kell fiók a gyakorláshoz?',
+        a: 'Nem. A nyilvános kvízek, nyelvtan-bevezetők és útmutatók belépés nélkül mennek. Fiók csak a saját könyvtárhoz kell.',
+      },
     ];
   }
   return [
@@ -797,6 +890,14 @@ function homeFaq(lang: SeoLang): { q: string; a: string }[] {
     {
       q: 'Which languages is MicaLingo available in?',
       a: 'The interface is available in English, German, and Hungarian. The learning content is German.',
+    },
+    {
+      q: 'Is MicaLingo useful for Goethe, telc or ÖSD?',
+      a: 'Yes. The quizzes train articles, verbs, prepositions, vocabulary and grammar. Use official sample papers from the exam organiser for task types and timing.',
+    },
+    {
+      q: 'Do I need an account to practise?',
+      a: 'No. Public quizzes, grammar primers and study guides work without login. An account is only needed to save a private library, marked words and imported files.',
     },
   ];
 }
@@ -827,21 +928,13 @@ export const SITEMAP_PATHS = [
   '/quizzes/',
   '/library/',
   '/grammar/',
-  '/statistics/',
   '/vocabulary/',
-  '/practice/',
   '/quizzes/vocabulary/',
   '/quizzes/articles/',
   '/quizzes/phrases/',
   '/quizzes/prepositions/',
   '/quizzes/adjectives/',
   '/quizzes/verbs/',
-  '/practice/vocabulary/',
-  '/practice/articles/',
-  '/practice/phrases/',
-  '/practice/prepositions/',
-  '/practice/adjectives/',
-  '/practice/verbs/',
   '/grammar/cases/',
   '/grammar/tenses/',
   '/grammar/articles/',
@@ -853,6 +946,11 @@ export const SITEMAP_PATHS = [
   '/learning-materials/reading/false-friends/',
   '/learning-materials/reading/idioms/',
   '/learning-materials/listening/',
+  '/learn/',
+  '/learn/german-exam-prep/',
+  '/learn/der-die-das/',
+  '/learn/german-cases/',
+  '/learn/weekly-german-practice/',
   '/about/',
   '/privacy/',
   '/terms/',

@@ -8,6 +8,9 @@ import { signInWithGoogle } from '../lib/googleAuth';
 import { addCloudWord, useCloudVocabulary, findVocabDuplicate, vocabCategoryKey } from '../lib/firestore';
 import { ImageLightbox, useImageLightbox } from '../components/ImageLightbox';
 import ArticleContent from '../components/ArticleContent';
+import ArticleBody from '../components/ArticleBody';
+import { grammarIndexArticle } from '../lib/learnContent';
+import type { LearnLang } from '../lib/learnContent';
 import {
   applyEditorColor,
   getSelectionBookmark,
@@ -35,7 +38,7 @@ const BackgroundBlobs = () => (
 );
 
 export default function Grammar() {
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const { user, isAdmin, adminMode } = useAuth();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -588,8 +591,15 @@ export default function Grammar() {
                   {cat.title}
                 </Link>
               ))}
+              <Link to="/learn" className="px-3 py-1 rounded-full bg-white/80 border border-blue-100 text-xs sm:text-sm font-bold text-blue-800 hover:border-blue-300 hover:bg-white transition-colors">
+                {t('learn_hub_title')}
+              </Link>
             </nav>
           </div>
+        </div>
+
+        <div className="bg-white/70 backdrop-blur-xl border border-white rounded-[1.5rem] p-5 md:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+          <ArticleBody markdown={grammarIndexArticle(language as LearnLang)} />
         </div>
 
         <div className="flex overflow-x-auto whitespace-nowrap border-b border-white/60">

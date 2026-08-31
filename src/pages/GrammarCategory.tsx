@@ -8,6 +8,9 @@ import { addCloudWord, useCloudVocabulary, findVocabDuplicate, vocabCategoryKey 
 import { fetchVisibleLibraryItems } from '../lib/libraryContent';
 import { ImageLightbox, useImageLightbox } from '../components/ImageLightbox';
 import ArticleContent from '../components/ArticleContent';
+import ArticleBody from '../components/ArticleBody';
+import { grammarPrimer } from '../lib/learnContent';
+import type { LearnLang } from '../lib/learnContent';
 import {
   applyEditorColor,
   getSelectionBookmark,
@@ -36,17 +39,19 @@ const BackgroundBlobs = () => (
 
 export default function GrammarCategory() {
   const { categoryId } = useParams<{ categoryId: string }>();
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const { user, isAdmin, adminMode } = useAuth();
   const userVocabulary = useCloudVocabulary(user?.uid) || [];
   const publicVocabulary = useCloudVocabulary("PUBLIC_LIBRARY") || [];
   
   const categoryName = t(`grammar_${categoryId}` as any) || categoryId?.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || "Grammar";
   const collectionName = 'grammar_materials';
+  const primer = grammarPrimer(categoryId, language as LearnLang);
   
   const [items, setItems] = useState<any[]>([]);
   const [itemsLoading, setItemsLoading] = useState(true);
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
+  const autoExpandedFor = useRef<string | null>(null);
   const [bookmarks, setBookmarks] = useState<Record<string, string>>({});
   const [bookmarkPopup, setBookmarkPopup] = useState<{ itemId: string, text: string, x: number, y: number } | null>(null);
   
@@ -222,6 +227,13 @@ export default function GrammarCategory() {
   useEffect(() => {
     fetchItems();
   }, [fetchItems]);
+
+  useEffect(() => {
+    if (itemsLoading || !items[0]?.id || !categoryId) return;
+    if (autoExpandedFor.current === categoryId) return;
+    autoExpandedFor.current = categoryId;
+    setExpandedItems(new Set([items[0].id]));
+  }, [itemsLoading, items, categoryId]);
 
   useEffect(() => {
     const handleGlobalClick = (e: MouseEvent | TouchEvent) => {
@@ -586,6 +598,16 @@ export default function GrammarCategory() {
           </div>
         </div>
 
+        {primer && (
+          <div className="bg-white/80 backdrop-blur-xl border border-white rounded-[1.75rem] p-5 md:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+            <h2 className="text-xl font-extrabold text-blue-950 mb-3">{t("grammar_primer_heading")}</h2>
+            <ArticleBody markdown={primer} />
+            <p className="mt-4 text-sm font-bold">
+              <Link to="/learn" className="text-blue-700 hover:text-blue-900">{t("learn_hub_title")} →</Link>
+            </p>
+          </div>
+        )}
+
         <div className="bg-blue-50/80 backdrop-blur-sm border border-blue-200/60 text-blue-900 p-5 rounded-[1.5rem] shadow-sm text-sm font-medium mb-6 flex items-center gap-3">
           <span className="text-xl">🔖</span>
           {user ? (t("bookmark_instructions_logged_in") || "Highlight any text while reading to save a bookmark, or save the highlighted text directly to your personal vocabulary database or into your quizzes!") : (t("bookmark_instructions_guest") || "Highlight any text while reading to save a bookmark, or save the highlighted text directly to your personal vocabulary database or into your quizzes! (This feature is exclusively available for logged-in users. Log in to use it!)")}
@@ -664,8 +686,8 @@ export default function GrammarCategory() {
           </div>
         ) : (
           <div className="bg-white/70 backdrop-blur-xl p-12 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white text-center">
-            <h2 className="text-3xl font-extrabold text-blue-950 mb-3">{t("no_items") || "No content in this category yet."}</h2>
-            <p className="text-blue-900/70 text-lg font-medium">{t("check_back_later")}</p>
+            <h2 className="text-2xl font-extrabold text-blue-950 mb-3">{t("no_items") || "No extra notes in this category yet."}</h2>
+            <p className="text-blue-900/70 text-lg font-medium">{t("grammar_more_notes_later")}</p>
           </div>
         )}
       </div>

@@ -24,6 +24,8 @@ Disallow: /learning-materials/private/
 # Canonical property: https://micalingo.com (not www, not github.io)
 Allow: /about
 Allow: /about/
+Allow: /learn
+Allow: /learn/
 Allow: /privacy
 Allow: /privacy/
 Allow: /terms

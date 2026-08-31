@@ -4,6 +4,9 @@ import { useAuth } from "../AuthContext";
 import { isUserCancelledAuthError, signInWithGoogle } from '../lib/googleAuth';
 import { useCloudVocabulary } from "../lib/firestore";
 import { useI18n } from "../I18nContext";
+import ArticleBody from "../components/ArticleBody";
+import { quizPrimer } from "../lib/learnContent";
+import type { LearnLang } from "../lib/learnContent";
 import {
   buildPublicQuizPool,
   buildCustomQuizPool,
@@ -35,7 +38,7 @@ export default function TopicQuizzes() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const publicDbWordsRaw = useCloudVocabulary("PUBLIC_LIBRARY");
   const publicDbWords = publicDbWordsRaw || [];
   const userVocabulary = useCloudVocabulary(user?.uid);
@@ -92,6 +95,8 @@ export default function TopicQuizzes() {
 
   const topicIntro = topic ? t(`seo_intro_${topic}`) : '';
   const topicIntroText = topicIntro && topicIntro !== `seo_intro_${topic}` ? topicIntro : '';
+  const primer = quizPrimer(topic, language as LearnLang);
+  const sampleWords = sourceData.slice(0, 6);
 
   const totalQuizzes = getQuizLevelCount(sourceData.length);
   const quizzes = Array.from({ length: totalQuizzes }, (_, i) => i + 1);
@@ -134,6 +139,12 @@ export default function TopicQuizzes() {
             {topicIntroText && <p className="text-sm text-blue-900/55 font-medium mt-2 max-w-2xl">{topicIntroText}</p>}
           </div>
         </div>
+
+        {primer && (
+          <div className="bg-white/70 backdrop-blur-xl border border-white rounded-[1.5rem] p-5 md:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+            <ArticleBody markdown={primer} />
+          </div>
+        )}
 
       <div className="flex overflow-x-auto whitespace-nowrap border-b border-white/60">
         <button
@@ -377,6 +388,31 @@ export default function TopicQuizzes() {
           )}
         </div>
       )}
+
+        {sampleWords.length > 0 && (
+          <div className="bg-white/70 backdrop-blur-xl border border-white rounded-[1.5rem] p-5 md:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+            <h2 className="text-lg font-extrabold text-blue-950 mb-2">{t('sample_words_heading')}</h2>
+            <p className="text-sm text-blue-900/70 font-medium mb-3">{t('sample_words_intro')}</p>
+            <div className="overflow-x-auto rounded-2xl border border-blue-100 bg-white/80">
+              <table className="min-w-full text-sm">
+                <thead>
+                  <tr className="bg-blue-50 text-blue-950">
+                    <th className="text-left font-extrabold px-3 py-2.5">{t('german') || 'German'}</th>
+                    <th className="text-left font-extrabold px-3 py-2.5">{t('hungarian') || 'Meaning'}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sampleWords.map((word, i) => (
+                    <tr key={`${word.german}-${i}`} className="border-t border-blue-50">
+                      <td className="px-3 py-2 font-bold text-gray-900">{word.german}</td>
+                      <td className="px-3 py-2 text-gray-700">{word.hungarian}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

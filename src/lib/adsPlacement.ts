@@ -24,6 +24,11 @@ export function isAdExcludedLocation(pathname: string, search: string): boolean 
   const custom = (params.get('custom') || '').toLowerCase();
 
   if (path === '/quiz' || path.startsWith('/quiz/')) return true;
+  if (path === '/results' || path.startsWith('/results/')) return true;
+  if (path === '/login' || path.startsWith('/login/')) return true;
+  if (path === '/settings' || path.startsWith('/settings/')) return true;
+  if (path === '/statistics' || path.startsWith('/statistics/')) return true;
+  if (path === '/practice' || path.startsWith('/practice/')) return true;
   if (path.startsWith('/learning-materials/private')) return true;
   if (path === '/import' || path.startsWith('/import/')) return true;
   if (path === '/create-quiz') return true;

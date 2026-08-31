@@ -75,7 +75,7 @@ export default function SeoManager() {
     document.documentElement.lang = lang;
 
     upsertMeta('name', 'description', seo.description);
-    upsertMeta('name', 'keywords', seo.keywords);
+    document.head.querySelector('meta[name="keywords"]')?.remove();
     upsertMeta('name', 'robots', robots);
     upsertMeta('name', 'googlebot', robots);
     upsertMeta('property', 'og:title', seo.title);

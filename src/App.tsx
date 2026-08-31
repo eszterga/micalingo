@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, Navigate, useParams } from "react-router-dom";
 import React, { Suspense } from "react";
 import Layout from "./components/Layout";
 import AdminPrompt from "./components/AdminPrompt";
@@ -18,7 +18,6 @@ const Login = React.lazy(() => import("./pages/Login"));
 const Home = React.lazy(() => import("./pages/Home"));
 const Import = React.lazy(() => import("./pages/Import"));
 const Vocabulary = React.lazy(() => import("./pages/Vocabulary"));
-const Practice = React.lazy(() => import("./pages/Practice"));
 const TopicQuizzes = React.lazy(() => import("./pages/TopicQuizzes"));
 const Quiz = React.lazy(() => import("./pages/Quiz"));
 const Results = React.lazy(() => import("./pages/Results"));
@@ -41,8 +40,15 @@ const ProtectedRoute = React.lazy(() => import("./components/ProtectedRoute"));
 const Privacy = React.lazy(() => import("./pages/Privacy"));
 const Terms = React.lazy(() => import("./pages/Terms"));
 const About = React.lazy(() => import("./pages/About"));
+const Learn = React.lazy(() => import("./pages/Learn"));
+const LearnGuide = React.lazy(() => import("./pages/LearnGuide"));
 const Cookies = React.lazy(() => import("./pages/Cookies"));
 const Impressum = React.lazy(() => import("./pages/Impressum"));
+
+function PracticeTopicRedirect() {
+  const { topic } = useParams();
+  return <Navigate to={topic ? `/quizzes/${topic}` : '/quizzes'} replace />;
+}
 
 function AppRoutes() {
   const location = useLocation();
@@ -59,8 +65,8 @@ function AppRoutes() {
       <Route element={<Layout />}>
         {/* Publicly shared sections */}
         <Route path="/" element={<Home />} />
-        <Route path="/practice" element={<Practice />} />
-        <Route path="/practice/:topic" element={<TopicQuizzes />} />
+        <Route path="/practice" element={<Navigate to="/quizzes" replace />} />
+        <Route path="/practice/:topic" element={<PracticeTopicRedirect />} />
         <Route path="/quiz" element={<Quiz />} />
         <Route path="/results" element={<Results />} />
         <Route path="/grammar" element={<Grammar />} />
@@ -85,6 +91,8 @@ function AppRoutes() {
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/about" element={<About />} />
+        <Route path="/learn" element={<Learn />} />
+        <Route path="/learn/:slug" element={<LearnGuide />} />
         <Route path="/cookies" element={<Cookies />} />
         <Route path="/impressum" element={<Impressum />} />
 

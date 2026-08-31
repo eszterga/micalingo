@@ -47,6 +47,7 @@ export default function Layout() {
     { path: '/quizzes', label: t('quizzes') || 'Quizzes' },
     { path: '/library', label: t('library') || 'Library' },
     { path: '/grammar', label: t('grammar') || 'Grammar' },
+    { path: '/learn', label: t('learn_card_title') || 'Study guides' },
     { path: '/statistics', label: t('statistics') || 'Statistics' },
     ...(user ? [{ path: '/import', label: t('import') || 'Import' }] : []),
     { path: '/settings', label: t('settings') || 'Settings' }
@@ -269,6 +270,9 @@ export default function Layout() {
                 <Link to="/about" onClick={() => setIsMobileMenuOpen(false)} className="px-4 py-2.5 rounded text-sm text-blue-200 hover:bg-blue-800 hover:text-white transition-colors">
                   {t('footer_about') || 'About & Contact'}
                 </Link>
+                <Link to="/learn" onClick={() => setIsMobileMenuOpen(false)} className="px-4 py-2.5 rounded text-sm text-blue-200 hover:bg-blue-800 hover:text-white transition-colors">
+                  {t('learn_card_title') || 'Study guides'}
+                </Link>
                 <button
                   type="button"
                   onClick={() => {
@@ -292,6 +296,12 @@ export default function Layout() {
             <img src="/logo.png" alt="MicaLingo — learn German" className="w-12 h-12 object-contain drop-shadow-sm mt-1.5" width="48" height="48" />
             <span className="text-3xl font-extrabold text-blue-900 tracking-wider">MicaLingo</span>
           </Link>
+          <nav className="hidden lg:flex items-center gap-5 text-sm font-extrabold text-blue-900">
+            <Link to="/quizzes" className="hover:text-blue-700 transition-colors">{t('quizzes')}</Link>
+            <Link to="/grammar" className="hover:text-blue-700 transition-colors">{t('grammar')}</Link>
+            <Link to="/learn" className="hover:text-blue-700 transition-colors">{t('learn_card_title')}</Link>
+            <Link to="/about" className="hover:text-blue-700 transition-colors">{t('footer_about')}</Link>
+          </nav>
           <div className="flex items-center gap-6">
             <div className="relative">
               <button onClick={() => setIsDesktopLangMenuOpen(!isDesktopLangMenuOpen)} className="flex items-center gap-2 p-2 text-gray-700 hover:text-gray-900 transition-colors rounded-lg hover:bg-white/60 font-medium" title={t('language_preferences') || 'Language Preferences'}>
@@ -358,6 +368,7 @@ export default function Layout() {
                 <Link to="/cookies" className="hover:text-blue-950 transition-colors">{t('footer_cookies') || 'Cookie Policy'}</Link>
                 <Link to="/impressum" className="hover:text-blue-950 transition-colors">{t('footer_impressum') || 'Impressum'}</Link>
                 <Link to="/about" className="hover:text-blue-950 transition-colors">{t('footer_about') || 'About & Contact'}</Link>
+                <Link to="/learn" className="hover:text-blue-950 transition-colors">{t('learn_card_title') || 'Study guides'}</Link>
                 <button
                   type="button"
                   onClick={openCookieSettings}
