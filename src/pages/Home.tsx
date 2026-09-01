@@ -61,7 +61,7 @@ export default function Home() {
 
       <div className="text-center z-10 mb-16 relative w-full max-w-4xl mx-auto px-4" style={{ animation: "0.8s ease-out 0s 1 normal both running fade-in-up" }}>
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/70 border border-white shadow-sm backdrop-blur-md mb-6 text-blue-800 font-bold text-sm tracking-wider uppercase">
-          <span className="text-lg leading-none">🚀</span> {t("title") || "German Exam Preparation"}
+          <span className="text-lg leading-none">🚀</span> {t("title") || "Learn German — self-study quizzes"}
         </div>
         <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600 pb-3 leading-tight tracking-tight">
           {t("home_h1") || "Learn German: Quizzes, Grammar & Vocabulary"}

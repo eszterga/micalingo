@@ -38,6 +38,7 @@ export const PUBLIC_SPA_ROUTES = [
   '/learning-materials/listening',
   '/learn',
   '/learn/german-exam-prep',
+  '/learn/public-and-private',
   '/learn/der-die-das',
   '/learn/german-cases',
   '/learn/weekly-german-practice',
@@ -75,7 +76,7 @@ export const SITEMAP_ENTRIES = [
   { path: '/learning-materials/reading/idioms', changefreq: 'monthly', priority: '0.65' },
   { path: '/learning-materials/listening', changefreq: 'weekly', priority: '0.7' },
   { path: '/learn', changefreq: 'weekly', priority: '0.9' },
-  { path: '/learn/german-exam-prep', changefreq: 'monthly', priority: '0.85' },
+  { path: '/learn/public-and-private', changefreq: 'monthly', priority: '0.85' },
   { path: '/learn/der-die-das', changefreq: 'monthly', priority: '0.85' },
   { path: '/learn/german-cases', changefreq: 'monthly', priority: '0.85' },
   { path: '/learn/weekly-german-practice', changefreq: 'monthly', priority: '0.85' },
@@ -114,7 +115,7 @@ export const PAGE_META = {
   '/': {
     title: 'Learn German: Quizzes, Grammar & Vocabulary | MicaLingo',
     description:
-      'Learn German online with free quizzes for vocabulary, grammar, articles (der, die, das), verbs, adjectives, and prepositions. Exam prep for Goethe, telc, and more.',
+      'Learn German online with free German–Hungarian quizzes for vocabulary, grammar, articles (der, die, das), verbs, adjectives, and prepositions. Sign in with Google to build private quizzes in any languages.',
   },
   '/quizzes': {
     title: 'German Quizzes: Vocabulary, Articles & Verbs | MicaLingo',
@@ -123,7 +124,7 @@ export const PAGE_META = {
   },
   '/quizzes/vocabulary': {
     title: 'German Vocabulary Quiz | Learn German Words | MicaLingo',
-    description: 'Practice German vocabulary with interactive quizzes. Learn German words, translations, and example sentences for exams and everyday use.',
+    description: 'Practice German vocabulary with interactive quizzes. Learn German words, translations, and example sentences for everyday use.',
   },
   '/quizzes/articles': {
     title: 'German Articles Quiz: der, die, das | MicaLingo',
@@ -131,7 +132,7 @@ export const PAGE_META = {
   },
   '/quizzes/phrases': {
     title: 'German Phrases & Sentences Quiz | MicaLingo',
-    description: 'Practice useful German phrases and sentences for conversation, travel, and exams with interactive quizzes.',
+    description: 'Practice useful German phrases and sentences for conversation and travel with interactive quizzes.',
   },
   '/quizzes/prepositions': {
     title: 'German Prepositions Quiz | Cases & Usage | MicaLingo',
@@ -147,7 +148,7 @@ export const PAGE_META = {
   },
   '/library': {
     title: 'German Learning Library: Vocabulary & Materials | MicaLingo',
-    description: 'Browse German vocabulary lists plus reading and listening materials. Organize words, articles, and audio for exam preparation.',
+    description: 'Browse public German–Hungarian vocabulary lists plus reading and listening materials. After Google login, organise a private library in any languages.',
   },
   '/grammar': {
     title: 'German Grammar: Cases, Tenses, Articles & More | MicaLingo',
@@ -183,7 +184,7 @@ export const PAGE_META = {
   },
   '/vocabulary': {
     title: 'German Vocabulary List: Words to Learn & Review | MicaLingo',
-    description: 'Build German vocabulary with searchable word lists, example sentences, and translations. Review German words for exams and everyday use.',
+    description: 'Build German vocabulary with searchable word lists, example sentences, and translations. Review German words for everyday use.',
   },
   '/practice': {
     title: 'German Practice Exercises | MicaLingo',
@@ -199,7 +200,7 @@ export const PAGE_META = {
   },
   '/practice/phrases': {
     title: 'German Phrases Practice | MicaLingo',
-    description: 'Practice German phrases and sentences for conversation and exams.',
+    description: 'Practice German phrases and sentences for conversation.',
   },
   '/practice/prepositions': {
     title: 'German Prepositions Practice | MicaLingo',
@@ -227,19 +228,19 @@ export const PAGE_META = {
   },
   '/learning-materials/reading/idioms': {
     title: 'German Idioms & Everyday Expressions | MicaLingo',
-    description: 'Study useful German idioms and expressions to sound more natural in conversation and exams.',
+    description: 'Study useful German idioms and expressions to sound more natural in conversation.',
   },
   '/learning-materials/listening': {
     title: 'German Listening Practice: Music, Podcasts & Audio | MicaLingo',
     description: 'Improve German listening with music, podcasts, and audiobooks selected for language learners.',
   },
   '/learn': {
-    title: 'German Study Guides: Exam Prep, Articles & Cases | MicaLingo',
-    description: 'Original German study guides for Goethe, telc and ÖSD prep, der/die/das, German cases, and a weekly practice plan.',
+    title: 'German Study Guides: Articles, Cases & Practice | MicaLingo',
+    description: 'Original German study guides for self-learners: public vs private library, der/die/das, German cases, and a weekly practice plan.',
   },
-  '/learn/german-exam-prep': {
-    title: 'How to prepare for Goethe, telc and ÖSD exams | MicaLingo',
-    description: 'A practical study plan for German language exams: what the papers test, which skills to train first, and how to use MicaLingo quizzes.',
+  '/learn/public-and-private': {
+    title: 'Public German–Hungarian library vs your own quizzes | MicaLingo',
+    description: 'How MicaLingo works for self-learners: public quizzes are German–Hungarian; a Google login lets you build a private library in any languages.',
   },
   '/learn/der-die-das': {
     title: 'How to learn German articles der, die, das | MicaLingo',
@@ -247,11 +248,11 @@ export const PAGE_META = {
   },
   '/learn/german-cases': {
     title: 'German cases without panic | MicaLingo',
-    description: 'Nominativ, Akkusativ, Dativ and Genitiv for exam prep, plus Wechselpräpositionen for location vs direction.',
+    description: 'Nominativ, Akkusativ, Dativ and Genitiv for self-learners, plus Wechselpräpositionen for location vs direction.',
   },
   '/learn/weekly-german-practice': {
     title: 'A weekly German practice plan that sticks | MicaLingo',
-    description: 'A realistic weekday schedule for German exam prep with short sessions and a review loop.',
+    description: 'A realistic weekday schedule for self-learning German with short sessions and a review loop.',
   },
   '/about': {
     title: 'About MicaLingo — Learn German Online',

@@ -1,3 +1,5 @@
+import { publicPrivateGuide } from './publicPrivateGuide';
+
 export type LearnLang = 'en' | 'de' | 'hu';
 
 export type LearnGuide = {
@@ -14,194 +16,7 @@ function pick<T>(map: Record<LearnLang, T>, lang: LearnLang): T {
 }
 
 export const LEARN_GUIDES: LearnGuide[] = [
-  {
-    slug: 'german-exam-prep',
-    published: '2026-08-31',
-    minutes: 12,
-    title: {
-      en: 'How to prepare for Goethe, telc and ÖSD exams',
-      de: 'Vorbereitung auf Goethe, telc und ÖSD',
-      hu: 'Felkészülés Goethe, telc és ÖSD vizsgára',
-    },
-    description: {
-      en: 'A practical study plan for German language exams: what the papers actually test, which skills to train first, and how to use MicaLingo quizzes without wasting time.',
-      de: 'Ein praktischer Plan für Deutschprüfungen: was wirklich geprüft wird, welche Fertigkeiten zuerst trainiert werden sollten und wie du MicaLingo sinnvoll nutzt.',
-      hu: 'Gyakorlati terv német nyelvvizsgához: mit mérnek a feladatok, mely készségeket érdemes először gyakorolni, és hogyan használd a MicaLingo kvízeket felesleges időveszteség nélkül.',
-    },
-    body: {
-      en: `German exams such as Goethe-Zertifikat, telc Deutsch and ÖSD look different on the certificate, but they score the same four skills: reading, listening, writing and speaking. From B1 upwards they also punish weak grammar in the “language elements” or writing paper. If you only collect vocabulary lists and never train articles, verbs and word order under time pressure, the exam will feel harder than your real level.
-
-## What the exam actually rewards
-
-Examiners do not give extra points for rare words. They reward language you can use accurately:
-
-- **Reading:** find information quickly, distinguish similar answers, and understand opinion vs fact.
-- **Listening:** catch names, times, reasons and the speaker’s attitude — often after one hearing.
-- **Writing:** a clear structure, the right register (formal letter vs informal message), and grammar that does not hide the meaning.
-- **Speaking:** react, ask back, and keep going when you forget a word.
-
-Grammar is not a fifth paper at every level, but it leaks into everything. A candidate who writes *Ich gehe in der Stadt* instead of *in die Stadt* can still be understood — and still lose marks.
-
-## Map exam skills to daily practice
-
-You do not need a new textbook every week. You need a loop: learn a small set, test it, review mistakes, then read or listen with those words in context.
-
-| Exam skill | Useful MicaLingo practice | Why it helps |
-| --- | --- | --- |
-| Language elements / accuracy | [Articles quiz](/quizzes/articles/), [verbs](/quizzes/verbs/), [prepositions](/quizzes/prepositions/) | These are the fastest ways to lose marks in gap-fill and writing. |
-| Vocabulary range | [Vocabulary quizzes](/quizzes/vocabulary/) and the [word list](/vocabulary/) | Exams recycle everyday topics: work, health, travel, housing, education. |
-| Reading | [Reading materials](/learning-materials/reading/) plus [false friends](/learning-materials/reading/false-friends/) | Short authentic-style texts train scanning and traps. |
-| Listening | [Listening materials](/learning-materials/listening/) | Even 10 minutes of German audio daily beats a Sunday cram session. |
-| Grammar explanations | [Cases](/grammar/cases/), [tenses](/grammar/tenses/), [sentence structure](/grammar/sentence-structure/) | Read the rule, then immediately quiz the same pattern. |
-
-If you are preparing for B1, spend more time on **der/die/das**, **Perfekt**, and **Dativ/Akkusativ after prepositions**. If you are aiming at B2, add adjective endings, relative clauses, and Konjunktiv II for polite requests and hypotheticals.
-
-## A four-week rhythm that fits a job or school week
-
-This plan assumes 25–40 minutes on weekdays and a longer session at the weekend. Adjust the minutes; do not skip the review step.
-
-1. **Week 1 — accuracy:** articles and the 40 most common verbs in Präsens and Perfekt. Write five original sentences every evening.
-2. **Week 2 — cases in real phrases:** prepositions, then short messages (“I am going to the doctor”, “I am waiting for the bus”). Mark every quiz item you miss.
-3. **Week 3 — input:** one reading text and one audio item on a typical exam topic (work, environment, digital life). Collect 8–12 new words, not 80.
-4. **Week 4 — mixed papers:** timed vocabulary and grammar quizzes, then a short formal email. Speak out loud for five minutes: describe your day, then give an opinion.
-
-The week before the exam, stop adding large new lists. Review marked words, reread two model emails, and practise saying *Entschuldigung, können Sie das bitte wiederholen?* until it is automatic.
-
-## Mistakes that cost marks even when you “know German”
-
-- Learning a noun without its article (*Haus* instead of *das Haus*).
-- Mixing location and direction: *Ich bin in die Küche* vs *Ich gehe in die Küche*.
-- Using Präteritum in speech where Perfekt is natural (*Ich machte* instead of *Ich habe gemacht*), or the opposite in a written story.
-- Translating word-for-word from English or Hungarian (*Ich bin warm*, *Ich nézem a tévét* → *Ich schaue fern*).
-- Writing long sentences with three *weil* clauses and a lost verb at the end.
-
-Keep a personal “error notebook” — on MicaLingo that is the marked-words list after you log in. Quiz that list until it is boring. Boring means ready.
-
-## Official information and honest limits
-
-MicaLingo is a practice tool, not an exam centre. For dates, fees, ID rules and the current format of a paper, use the official organisers:
-
-- Goethe-Institut: exam descriptions and sample papers
-- telc: level overviews and practice material
-- ÖSD: exam regulations for your city
-
-Use those samples to learn the **task types**. Use MicaLingo to build the **language** those tasks require. That split is how candidates stop feeling busy and start getting better.
-
-## Next step
-
-If articles still feel random, read [How to learn der, die, das](/learn/der-die-das/) and then take the [articles quiz](/quizzes/articles/). If cases are the weak point, start with [German cases without panic](/learn/german-cases/). For a weekday timetable, see [A weekly German practice plan](/learn/weekly-german-practice/).`,
-      de: `Deutschprüfungen wie Goethe-Zertifikat, telc Deutsch und ÖSD sehen auf dem Blatt unterschiedlich aus, prüfen aber dieselben vier Fertigkeiten: Lesen, Hören, Schreiben und Sprechen. Ab B1 wird unsichere Grammatik in den sprachlichen Strukturen oder im Schreiben teuer. Wer nur Vokabellisten sammelt und Artikel, Verben und Wortstellung nie unter Zeitdruck übt, erlebt die Prüfung schwerer als das eigene Niveau.
-
-## Was die Prüfung wirklich belohnt
-
-Prüferinnen und Prüfer geben keine Extra-Punkte für seltene Wörter. Sie belohnen Sprache, die du sicher verwenden kannst:
-
-- **Lesen:** Informationen schnell finden, ähnliche Antworten unterscheiden, Meinung und Tatsache trennen.
-- **Hören:** Namen, Zeiten, Gründe und die Haltung der Sprecherin erfassen — oft nach einmaligem Hören.
-- **Schreiben:** klare Struktur, passendes Register (formeller Brief oder informelle Nachricht) und Grammatik, die den Sinn nicht verdeckt.
-- **Sprechen:** reagieren, nachfragen und weiterreden, wenn ein Wort fehlt.
-
-Grammatik ist nicht immer eine eigene Prüfung, sie sitzt aber überall. *Ich gehe in der Stadt* statt *in die Stadt* wird verstanden — und trotzdem abgewertet.
-
-## Fertigkeiten auf die tägliche Übung legen
-
-Du brauchst nicht jede Woche ein neues Lehrbuch. Du brauchst eine Schleife: kleine Menge lernen, testen, Fehler wiederholen, dann Lesen oder Hören mit denselben Wörtern.
-
-| Prüfungsfertigkeit | Sinnvolle Übung auf MicaLingo | Warum |
-| --- | --- | --- |
-| Sprachbausteine / Genauigkeit | [Artikel-Quiz](/quizzes/articles/), [Verben](/quizzes/verbs/), [Präpositionen](/quizzes/prepositions/) | Hier verliert man in Lückentexten und im Schreiben am schnellsten Punkte. |
-| Wortschatz | [Wortschatz-Quizze](/quizzes/vocabulary/) und die [Wortliste](/vocabulary/) | Prüfungen drehen Alltagsthemen: Arbeit, Gesundheit, Reisen, Wohnen, Bildung. |
-| Lesen | [Lesematerial](/learning-materials/reading/) und [falsche Freunde](/learning-materials/reading/false-friends/) | Kurze Texte trainieren Überfliegen und Fallen. |
-| Hören | [Hörmaterial](/learning-materials/listening/) | Zehn Minuten Deutsch täglich schlagen eine Sonntags-Marathon-Session. |
-| Grammatik | [Fälle](/grammar/cases/), [Zeitformen](/grammar/tenses/), [Satzbau](/grammar/sentence-structure/) | Regel lesen, dasselbe Muster sofort quizen. |
-
-Für B1: **der/die/das**, **Perfekt** und **Präpositionen mit Dativ/Akkusativ**. Für B2: Adjektivendungen, Relativsätze und Konjunktiv II für höfliche Bitten.
-
-## Ein Vier-Wochen-Rhythmus neben Job oder Schule
-
-25–40 Minuten unter der Woche, am Wochenende länger. Die Minuten darfst du kürzen — die Wiederholung nicht.
-
-1. **Woche 1 — Genauigkeit:** Artikel und die 40 häufigsten Verben in Präsens und Perfekt. Jeden Abend fünf eigene Sätze.
-2. **Woche 2 — Fälle in Phrasen:** Präpositionen, dann kurze Nachrichten. Jeden Fehler markieren.
-3. **Woche 3 — Input:** ein Lesetext und ein Hörtext zu einem Prüfungsthema. 8–12 neue Wörter, nicht 80.
-4. **Woche 4 — gemischte Aufgaben:** timed Quizze, dann eine kurze formelle E-Mail. Fünf Minuten laut sprechen.
-
-In der letzten Woche keine großen neuen Listen. Markierte Wörter wiederholen, zwei Muster-E-Mails lesen, und *Entschuldigung, können Sie das bitte wiederholen?* automatisieren.
-
-## Fehler, die Punkte kosten, obwohl du „Deutsch kannst“
-
-- Nomen ohne Artikel lernen (*Haus* statt *das Haus*).
-- Ort und Richtung verwechseln.
-- Präteritum und Perfekt in der falschen Sorte Text verwenden.
-- Wort-für-Wort aus dem Englischen oder Ungarischen übersetzen.
-- Sätze mit drei *weil*-Nebensätzen, in denen das Verb verloren geht.
-
-Dein Fehlerheft auf MicaLingo ist die Liste der markierten Wörter nach dem Login. Quizze sie, bis sie langweilig ist. Langweilig heißt prüfungsreif.
-
-## Offizielle Infos und klare Grenze
-
-MicaLingo ist ein Übungswerkzeug, kein Prüfungszentrum. Termine, Gebühren und das aktuelle Format stehen bei Goethe-Institut, telc und ÖSD. Deren Proben lehren die **Aufgabentypen**. MicaLingo baut die **Sprache**, die diese Aufgaben brauchen.
-
-## Nächster Schritt
-
-Wenn Artikel noch würfeln: [der, die, das lernen](/learn/der-die-das/) und dann das [Artikel-Quiz](/quizzes/articles/). Bei Fällen: [Deutsche Fälle ohne Panik](/learn/german-cases/). Für den Wochenplan: [Wöchentlicher Übungsplan](/learn/weekly-german-practice/).`,
-      hu: `A Goethe-Zertifikat, a telc Deutsch és az ÖSD más papíron jelenik meg, de ugyanazt a négy készséget méri: olvasás, hallásértés, írás és beszéd. B1-től a gyenge nyelvtan a „nyelvi elemek” feladatban vagy az írásban pontot visz. Ha csak szólistákat gyűjtesz, és soha nem gyakorlod időre a névelőket, az igéket és a szórendet, a vizsga nehezebbnek tűnik, mint a valódi szinted.
-
-## Mit díjaz a vizsga
-
-A vizsgáztató nem ad pluszpontot ritka szavakért. Olyan nyelvet díjaz, amit pontosan használsz:
-
-- **Olvasás:** gyorsan megtalálni az infót, megkülönböztetni a hasonló válaszokat, szétválasztani a véleményt és a tényt.
-- **Hallásértés:** nevek, időpontok, okok és a beszélő viszonyulása — gyakran egy hallás után.
-- **Írás:** átlátható szerkezet, megfelelő stílus (hivatalos levél vs. baráti üzenet), és nyelvtan, ami nem fedi el a jelentést.
-- **Beszéd:** reagálni, visszakérdezni, és folytatni, ha kiesik egy szó.
-
-A nyelvtan nem mindig külön vizsgarész, de mindenbe beszivárog. Az *Ich gehe in der Stadt* a *in die Stadt* helyett érthető — és mégis pontlevonás.
-
-## Vizsgakészség és napi gyakorlat
-
-Nem kell hetente új tankönyv. Kell egy kör: kis adag tanulás, teszt, hibák ismétlése, aztán olvasás vagy hallgatás ugyanazokkal a szavakkal.
-
-| Vizsgakészség | Hasznos MicaLingo gyakorlat | Miért |
-| --- | --- | --- |
-| Nyelvi elemek / pontosság | [Névelők kvíz](/quizzes/articles/), [igék](/quizzes/verbs/), [prepozíciók](/quizzes/prepositions/) | Itt lehet a leggyorsabban pontot veszíteni a kiegészítéses feladatokban és az írásban. |
-| Szókincs | [Szókincs kvízek](/quizzes/vocabulary/) és a [szólista](/vocabulary/) | A vizsgák hétköznapi témákat forgatnak: munka, egészség, utazás, lakhatás, tanulás. |
-| Olvasás | [Olvasnivaló](/learning-materials/reading/) és [hamis barátok](/learning-materials/reading/false-friends/) | Rövid szövegek tanítanak átfutni és csapdákat észrevenni. |
-| Hallásértés | [Hallásértési anyagok](/learning-materials/listening/) | Napi 10 perc német hang jobb, mint a vasárnapi maraton. |
-| Nyelvtan | [Esetek](/grammar/cases/), [igeidők](/grammar/tenses/), [szórend](/grammar/sentence-structure/) | Olvasd a szabályt, majd azonnal kvízezd ugyanazt a mintát. |
-
-B1-hez: **der/die/das**, **Perfekt**, és **prepozíció + Dativ/Akkusativ**. B2-höz: melléknévvégződések, vonatkozó mellékmondatok, Konjunktiv II udvarias kéréshez.
-
-## Négyhetes ritmus munka vagy iskola mellett
-
-Hétköznap 25–40 perc, hétvégén hosszabb. A perceket rövidítheted; az ismétlést ne.
-
-1. **1. hét — pontosság:** névelők és a 40 leggyakoribb ige Präsensben és Perfektben. Este öt saját mondat.
-2. **2. hét — esetek kifejezésekben:** prepozíciók, majd rövid üzenetek. Minden hibát jelölj meg.
-3. **3. hét — bevitel:** egy olvasott és egy hallott szöveg vizsgatémán. 8–12 új szó, ne 80.
-4. **4. hét — vegyes feladatok:** időre kvízek, majd egy rövid hivatalos e-mail. Öt perc hangos beszéd.
-
-A vizsga előtti héten ne kezdj nagy új listákat. Ismételd a megjelölt szavakat, olvass el két mintalevelet, és automatizáld: *Entschuldigung, können Sie das bitte wiederholen?*
-
-## Hibák, amik pontot visznek, noha „tudsz németül”
-
-- Főnevet névelő nélkül tanulni (*Haus* a *das Haus* helyett).
-- Helyszín és irány keverése.
-- Präteritum és Perfekt rossz szövegtípusban.
-- Szóról szóra fordítás magyarból vagy angolból (*Ich bin warm*).
-- Három *weil*-es mondat, amelynek a végén elveszik az ige.
-
-A MicaLingo-n a hibafüzet a bejelentkezés utáni megjelölt szavak listája. Kvízezd, amíg unalmas. Az unalmas azt jelenti: kész.
-
-## Hivatalos infó és őszinte határ
-
-A MicaLingo gyakorlóeszköz, nem vizsgaközpont. Időpont, díj és aktuális feladattípus: Goethe-Institut, telc, ÖSD. Az ő mintáik a **feladattípust** tanítják. A MicaLingo a **nyelvet** építi, amire azok a feladatok épülnek.
-
-## Következő lépés
-
-Ha a névelők még dobókocka: [Hogyan tanuld a der, die, das-t](/learn/der-die-das/), aztán a [névelők kvíz](/quizzes/articles/). Ha az esetek a gyenge pont: [Német esetek pánik nélkül](/learn/german-cases/). Heti beosztáshoz: [Heti német gyakorlóterv](/learn/weekly-german-practice/).`,
-    },
-  },
+  publicPrivateGuide as LearnGuide,
   {
     slug: 'der-die-das',
     published: '2026-08-31',
@@ -212,9 +27,9 @@ Ha a névelők még dobókocka: [Hogyan tanuld a der, die, das-t](/learn/der-die
       hu: 'Hogyan tanuld a der, die, das névelőket',
     },
     description: {
-      en: 'A method for German noun gender that exam candidates can actually keep: learn the article with the noun, use reliable ending patterns, and quiz the rest.',
-      de: 'Eine Methode für das Genus, die in der Prüfung hält: Artikel mit dem Nomen lernen, verlässliche Endungen nutzen, den Rest quizen.',
-      hu: 'Módszer a német főnévnemhez, ami a vizsgán is megmarad: a névelőt a főnévvel együtt tanulni, megbízható végződéseket használni, a többit kvízezni.',
+      en: 'A method for German noun gender that actually sticks: learn the article with the noun, use reliable ending patterns, and quiz the rest.',
+      de: 'Eine Methode für das Genus, die hält: Artikel mit dem Nomen lernen, verlässliche Endungen nutzen, den Rest quizen.',
+      hu: 'Módszer a német főnévnemhez, ami megmarad: a névelőt a főnévvel együtt tanulni, megbízható végződéseket használni, a többit kvízezni.',
     },
     body: {
       en: `German has three grammatical genders. They are not the biological sex of the thing. *Das Mädchen* is neuter even though the girl is female. *Der Löffel* (spoon) is masculine for historical reasons, not because a spoon is male. If you try to “feel” the gender, you will guess forever.
@@ -238,7 +53,7 @@ Treat these as shortcuts, not laws. When a noun breaks the pattern, mark it and 
 
 ## Articles change in the sentence
 
-Learning only *der Tisch* is not enough for exams. The form moves with the case:
+Learning only *der Tisch* is not enough in real sentences. The form moves with the case:
 
 - Nominative: *Der Tisch ist groß.*
 - Accusative: *Ich kaufe den Tisch.*
@@ -273,7 +88,7 @@ You have the articles under control when you can:
 - change *der* to *den/dem* without counting on fingers;
 - notice your own mistake and correct it in the same sentence.
 
-That is exam-ready accuracy. It does not require knowing *das Quarkonium*. It does require boring, repeated contact with *das Brot, die Milch, der Käse*.
+That is usable accuracy. It does not require knowing *das Quarkonium*. It does require boring, repeated contact with *das Brot, die Milch, der Käse*.
 
 Start with the [articles quiz](/quizzes/articles/), keep the grammar notes on [articles and genders](/grammar/articles/), and add new nouns only with their article attached.`,
       de: `Deutsch hat drei grammatische Geschlechter. Das ist nicht das biologische Geschlecht. *Das Mädchen* ist sächlich. *Der Löffel* ist maskulin aus historischen Gründen. Wer das Genus „spüren“ will, rät ewig.
@@ -296,7 +111,7 @@ Das sind Abkürzungen, keine Gesetze. Brüche markieren und drillen.
 
 ## Der Artikel verändert sich im Satz
 
-Nur *der Tisch* reicht in der Prüfung nicht:
+Nur *der Tisch* reicht in echten Sätzen nicht:
 
 - Nominativ: *Der Tisch ist groß.*
 - Akkusativ: *Ich kaufe den Tisch.*
@@ -385,7 +200,7 @@ A hamis barátok rontanak rajta. Használd a [listát](/learning-materials/readi
 - *der* → *den/dem* ujjszámolás nélkül
 - a saját hibát ugyanabban a mondatban javítod
 
-Ez vizsgaérett pontosság. Nem kell hozzá a *das Quarkonium*, hanem unalmas ismétlés: *das Brot, die Milch, der Käse*.
+Ez használható pontosság. Nem kell hozzá a *das Quarkonium*, hanem unalmas ismétlés: *das Brot, die Milch, der Käse*.
 
 Kezdd a [névelők kvízzel](/quizzes/articles/), tartsd meg a [névelők és nemek](/grammar/articles/) magyarázatát, és új főnevet csak névelővel vegyél fel.`,
     },
@@ -400,12 +215,12 @@ Kezdd a [névelők kvízzel](/quizzes/articles/), tartsd meg a [névelők és ne
       hu: 'Német esetek pánik nélkül: Nominativ, Akkusativ, Dativ, Genitiv',
     },
     description: {
-      en: 'A plain-language guide to German cases for exam prep: who does what in the sentence, which prepositions freeze the case, and how to practise Wechselpräpositionen.',
-      de: 'Fälle in klarer Sprache für die Prüfung: wer im Satz was tut, welche Präpositionen den Kasus festlegen, und wie du Wechselpräpositionen übst.',
-      hu: 'Közérthető útmutató a német esetekhez vizsgára: ki mit csinál a mondatban, mely prepozíciók rögzítik az esetet, és hogyan gyakorold a Wechselpräpositionen-t.',
+      en: 'A plain-language guide to German cases for self-learners: who does what in the sentence, which prepositions freeze the case, and how to practise Wechselpräpositionen.',
+      de: 'Fälle in klarer Sprache zum Selbstlernen: wer im Satz was tut, welche Präpositionen den Kasus festlegen, und wie du Wechselpräpositionen übst.',
+      hu: 'Közérthető útmutató a német esetekhez önálló tanuláshoz: ki mit csinál a mondatban, mely prepozíciók rögzítik az esetet, és hogyan gyakorold a Wechselpräpositionen-t.',
     },
     body: {
-      en: `German cases look like a wall of tables. For exams you need a smaller question: **what is the noun doing in this sentence?** Once that is clear, the article and pronoun follow.
+      en: `German cases look like a wall of tables. For everyday German you need a smaller question: **what is the noun doing in this sentence?** Once that is clear, the article and pronoun follow.
 
 ## Four jobs, not four mysterious labels
 
@@ -444,7 +259,7 @@ Location (where?) → Dativ. Direction (where to?) → Akkusativ.
 - *Das Buch liegt **auf dem** Tisch.* (it is already there)
 - *Ich lege das Buch **auf den** Tisch.* (I move it there)
 
-If you remember only one contrast from this page, remember *liegen / stellen / legen* plus *in/auf* + Dativ vs Akkusativ. Goethe and telc love it.
+If you remember only one contrast from this page, remember *liegen / stellen / legen* plus *in/auf* + Dativ vs Akkusativ. It shows up in almost every conversation about rooms and travel.
 
 ## A drill you can finish in one coffee break
 
@@ -468,7 +283,7 @@ You do not need every Genitiv adjective ending on day one. You do need:
 - not mixing *in der Arbeit* (at work, location) with *in die Arbeit* (going to work) unless that is what you mean.
 
 Cases become calm when they are attached to **phrases you actually say**, not to a poster of 16 endings. Build those phrases, then let the [quizzes](/quizzes/) catch the leftovers.`,
-      de: `Deutsche Fälle wirken wie eine Mauer aus Tabellen. Für die Prüfung reicht eine kleinere Frage: **was tut das Nomen in diesem Satz?** Danach folgen Artikel und Pronomen.
+      de: `Deutsche Fälle wirken wie eine Mauer aus Tabellen. Zum Selbstlernen reicht eine kleinere Frage: **was tut das Nomen in diesem Satz?** Danach folgen Artikel und Pronomen.
 
 ## Vier Aufgaben, keine geheimnisvollen Etiketten
 
@@ -501,7 +316,7 @@ Ort (wo?) → Dativ. Richtung (wohin?) → Akkusativ.
 - *Das Buch liegt **auf dem** Tisch.*
 - *Ich lege das Buch **auf den** Tisch.*
 
-Wenn du dir ein Kontrastpaar merkst, dann *liegen/stellen/legen* plus *in/auf*. Goethe und telc mögen das.
+Wenn du dir ein Kontrastpaar merkst, dann *liegen/stellen/legen* plus *in/auf*. Das brauchst du ständig bei Räumen und Wegen.
 
 ## Eine Übung in einer Kaffeepause
 
@@ -549,7 +364,7 @@ Hol van? → Dativ. Hová megy? → Akkusativ.
 - *Das Buch liegt **auf dem** Tisch.*
 - *Ich lege das Buch **auf den** Tisch.*
 
-Ha egy kontrasztot jegyzel meg erről az oldalról: *liegen / stellen / legen* + *in/auf*. A Goethe és a telc szereti.
+Ha egy kontrasztot jegyzel meg erről az oldalról: *liegen / stellen / legen* + *in/auf*. Szobáknál és útnál folyton előjön.
 
 ## Gyakorlat egy kávészünetben
 
@@ -576,12 +391,12 @@ Az esetek akkor nyugszanak meg, ha **mondatokhoz tapadnak, amiket tényleg kimon
       hu: 'Heti német gyakorlóterv, ami megmarad',
     },
     description: {
-      en: 'A realistic weekday schedule for German exam prep: short sessions, mixed skills, and a review loop so new words do not disappear by Friday.',
-      de: 'Ein realistischer Wochenplan für die Deutschprüfung: kurze Einheiten, gemischte Fertigkeiten und eine Wiederholungsschleife, damit neue Wörter nicht bis Freitag verschwinden.',
-      hu: 'Reális heti beosztás német vizsgára: rövid körök, kevert készségek, és ismétlő hurkok, hogy a új szavak ne tűnjenek el péntekre.',
+      en: 'A realistic weekday schedule for self-learning German: short sessions, mixed skills, and a review loop so new words do not disappear by Friday.',
+      de: 'Ein realistischer Wochenplan zum Selbstlernen: kurze Einheiten, gemischte Fertigkeiten und eine Wiederholungsschleife, damit neue Wörter nicht bis Freitag verschwinden.',
+      hu: 'Reális heti beosztás önálló német tanuláshoz: rövid körök, kevert készségek, és ismétlő hurkok, hogy az új szavak ne tűnjenek el péntekre.',
     },
     body: {
-      en: `Most learners fail the week, not the motivation. They study for two hours on Sunday, add 60 new words, and by Wednesday the articles have evaporated. Exams reward **returning** to the same material, not collecting it.
+      en: `Most learners fail the week, not the motivation. They study for two hours on Sunday, add 60 new words, and by Wednesday the articles have evaporated. Real progress rewards **returning** to the same material, not collecting it.
 
 This plan uses MicaLingo the way a good notebook works: a little new input, a lot of retrieval, and one longer session for reading or listening.
 
@@ -607,20 +422,18 @@ If you only have 15 minutes, do Friday’s job: retrieve old items. New lists wi
 - **Reuse yesterday’s mistakes first.** That is the whole point of marked words and quiz scores.
 - **Once a week, write.** Quizzes recognise; writing reveals the holes.
 
-## How this maps to Goethe / telc weeks
-
-In an exam month, keep the template but change Saturday: use an official sample reading or listening from the organiser’s site. Sunday becomes a timed writing (15–20 minutes, no dictionary). MicaLingo still covers the language elements on weekdays so the sample paper is not the first time you see *dem* vs *den*.
+## Keep speaking in the mix
 
 If speaking is the scare, add a five-minute voice note after Thursday: describe a picture or your last weekend. Fluency is a muscle. Silence does not train it.
 
 ## When life gets busy
 
-Skip Wednesday and Thursday before you skip Friday and Sunday. Retrieval and output protect the exam score. Adding another 40 nouns does not.
+Skip Wednesday and Thursday before you skip Friday and Sunday. Retrieval and output protect what you already know. Adding another 40 nouns does not.
 
-A calmer explanation of the exam papers is in [How to prepare for Goethe, telc and ÖSD](/learn/german-exam-prep/). If cases keep breaking your writing, read [German cases without panic](/learn/german-cases/) on a Thursday instead of starting a new quiz set.
+If cases keep breaking your writing, read [German cases without panic](/learn/german-cases/) on a Thursday instead of starting a new quiz set. If you want your own language pair, see [public vs private library](/learn/public-and-private/).
 
-Consistency looks boring in a screenshot. It is also what AdSense cannot fake and what examiners can hear in the first minute of the oral.`,
-      de: `Die meisten Lernenden verlieren die Woche, nicht die Motivation. Sonntag zwei Stunden, 60 neue Wörter — Mittwoch sind die Artikel weg. Prüfungen belohnen **Zurückkommen**, nicht Sammeln.
+Consistency looks boring in a screenshot. It is also what actually makes the language stick.`,
+      de: `Die meisten Lernenden verlieren die Woche, nicht die Motivation. Sonntag zwei Stunden, 60 neue Wörter — Mittwoch sind die Artikel weg. Fortschritt belohnt **Zurückkommen**, nicht Sammeln.
 
 Dieser Plan nutzt MicaLingo wie ein gutes Heft: wenig Input, viel Abrufen, eine längere Einheit für Lesen oder Hören.
 
@@ -646,18 +459,16 @@ Bei nur 15 Minuten: Freitagsaufgabe. Abrufen schlägt neue Listen.
 - Gestern Fehler zuerst.
 - Einmal pro Woche schreiben.
 
-## Im Prüfungsmonat
+## Sprechen nicht weglassen
 
-Vorlage behalten, Samstag: offizielle Lese- oder Hörprobe. Sonntag: Schreiben mit Zeit, ohne Wörterbuch. Wochentags bleibt MicaLingo für die Sprachbausteine.
-
-Wenn Sprechen Angst macht: nach Donnerstag fünf Minuten Sprachnachricht. Stille trainiert keine mündliche Prüfung.
+Wenn Sprechen Angst macht: nach Donnerstag fünf Minuten Sprachnachricht. Stille trainiert keine mündliche Sprache.
 
 ## Wenn wenig Zeit ist
 
-Mittwoch und Donnerstag opfern, bevor Freitag und Sonntag sterben. Abrufen und Output schützen die Note.
+Mittwoch und Donnerstag opfern, bevor Freitag und Sonntag sterben. Abrufen und Output schützen, was du schon kannst.
 
-Mehr zum Prüfungsformat: [Goethe, telc und ÖSD](/learn/german-exam-prep/). Bei Fällen: [Fälle ohne Panik](/learn/german-cases/).`,
-      hu: `A legtöbb tanuló a hetet veszíti el, nem a motivációt. Vasárnap két óra, 60 új szó — szerdára a névelők elpárolognak. A vizsga a **visszatérést** díjazza, nem a gyűjtést.
+Bei Fällen: [Fälle ohne Panik](/learn/german-cases/). Für eigene Sprachenpaare: [öffentlich vs privat](/learn/public-and-private/).`,
+      hu: `A legtöbb tanuló a hetet veszíti el, nem a motivációt. Vasárnap két óra, 60 új szó — szerdára a névelők elpárolognak. A haladás a **visszatérést** díjazza, nem a gyűjtést.
 
 Ez a terv úgy használja a MicaLingo-t, mint egy jó füzet: kevés új input, sok előhívás, egy hosszabb olvasás vagy hallgatás.
 
@@ -683,17 +494,15 @@ Ha csak 15 perc van: pénteki feladat. Az előhívás nyer az új listákkal sze
 - Először a tegnapi hibák.
 - Hetente egyszer írj.
 
-## Vizsgahónapban
-
-A sablon marad, szombat: hivatalos olvasott vagy hallott minta. Vasárnap: időre írás, szótár nélkül. Hétköznap a MicaLingo viszi a nyelvi elemeket.
+## A beszédet se hagyd ki
 
 Ha a beszéd ijeszt: csütörtök után öt perc hangüzenet. A csend nem edzi a szóbelit.
 
 ## Ha kevés az idő
 
-A szerdát és csütörtököt áldozd, mielőtt a péntek és vasárnap meghal. Az előhívás és a kimenet védi a pontot.
+A szerdát és csütörtököt áldozd, mielőtt a péntek és vasárnap meghal. Az előhívás és a kimenet védi, amit már tudsz.
 
-Vizsgaformátum: [Goethe, telc, ÖSD](/learn/german-exam-prep/). Esetekhez: [Német esetek pánik nélkül](/learn/german-cases/).`,
+Esetekhez: [Német esetek pánik nélkül](/learn/german-cases/). Saját nyelvpárhoz: [nyilvános vs saját könyvtár](/learn/public-and-private/).`,
     },
   },
 ];
@@ -702,18 +511,18 @@ const GRAMMAR_PRIMERS: Record<string, Record<LearnLang, string>> = {
   cases: {
     en: `German cases tell you the job of a noun in the sentence. **Nominativ** is the subject (*Der Hund schläft*). **Akkusativ** is the direct object (*Ich sehe den Hund*). **Dativ** is often the person who receives something (*Ich gebe dem Kind den Ball*). **Genitiv** shows belonging (*das Auto des Lehrers*).
 
-Many exam mistakes are not “I forgot the table” but mixing location and direction after *in, an, auf*: *Ich bin in der Schule* (already there, Dativ) vs *Ich gehe in die Schule* (movement, Akkusativ). Learn verbs and prepositions as chunks (*helfen + Dativ*, *warten auf + Akkusativ*), then practise with the [cases guide](/learn/german-cases/) and the [prepositions quiz](/quizzes/prepositions/).`,
+Many common mistakes are not “I forgot the table” but mixing location and direction after *in, an, auf*: *Ich bin in der Schule* (already there, Dativ) vs *Ich gehe in die Schule* (movement, Akkusativ). Learn verbs and prepositions as chunks (*helfen + Dativ*, *warten auf + Akkusativ*), then practise with the [cases guide](/learn/german-cases/) and the [prepositions quiz](/quizzes/prepositions/).`,
     de: `Fälle sagen, welche Aufgabe ein Nomen im Satz hat. **Nominativ** ist das Subjekt (*Der Hund schläft*). **Akkusativ** das direkte Objekt (*Ich sehe den Hund*). **Dativ** oft die Person, die etwas bekommt (*Ich gebe dem Kind den Ball*). **Genitiv** zeigt Zugehörigkeit (*das Auto des Lehrers*).
 
-Viele Prüfungsfehler sind Ort vs Richtung nach *in, an, auf*: *Ich bin in der Schule* (Dativ) gegen *Ich gehe in die Schule* (Akkusativ). Verben und Präpositionen als Chunks lernen, dann der [Fälle-Guide](/learn/german-cases/) und das [Präpositionen-Quiz](/quizzes/prepositions/).`,
+Viele Fehler sind Ort vs Richtung nach *in, an, auf*: *Ich bin in der Schule* (Dativ) gegen *Ich gehe in die Schule* (Akkusativ). Verben und Präpositionen als Chunks lernen, dann der [Fälle-Guide](/learn/german-cases/) und das [Präpositionen-Quiz](/quizzes/prepositions/).`,
     hu: `Az eset megmondja, milyen szerepe van a főnévnek a mondatban. **Nominativ** az alany (*Der Hund schläft*). **Akkusativ** a közvetlen tárgy (*Ich sehe den Hund*). **Dativ** gyakran az, aki kap valamit (*Ich gebe dem Kind den Ball*). **Genitiv** a birtok (*das Auto des Lehrers*).
 
-Sok vizsgahiba nem a táblázat, hanem a hely vs irány: *Ich bin in der Schule* (Dativ) és *Ich gehe in die Schule* (Akkusativ). Tanuld az igéket és prepozíciókat kész darabként, aztán a [esetek útmutató](/learn/german-cases/) és a [prepozíciók kvíz](/quizzes/prepositions/).`,
+Sok hiba nem a táblázat, hanem a hely vs irány: *Ich bin in der Schule* (Dativ) és *Ich gehe in die Schule* (Akkusativ). Tanuld az igéket és prepozíciókat kész darabként, aztán a [esetek útmutató](/learn/german-cases/) és a [prepozíciók kvíz](/quizzes/prepositions/).`,
   },
   tenses: {
     en: `For spoken German and most B1 writing, you need a clean **Präsens** and a reliable **Perfekt** (*Ich habe gestern gearbeitet*). **Präteritum** is the narrative past in writing and the normal past of *sein* and *haben* (*ich war, ich hatte*). **Futur I** with *werden* is useful, but Germans often use present + a time word (*Morgen fahre ich*).
 
-Exam tip: in emails about the past, Perfekt sounds natural. In a story paragraph, a few Präteritum forms (*ging, sagte, war*) make the text look more written. Practise both in the [verbs quiz](/quizzes/verbs/).`,
+Writing tip: in emails about the past, Perfekt sounds natural. In a story paragraph, a few Präteritum forms (*ging, sagte, war*) make the text look more written. Practise both in the [verbs quiz](/quizzes/verbs/).`,
     de: `Fürs Sprechen und die meisten B1-Texte brauchst du ein klares **Präsens** und ein sicheres **Perfekt**. **Präteritum** ist die Erzählzeit und die normale Vergangenheit von *sein* und *haben*. **Futur I** mit *werden* geht, oft reicht Präsens plus Zeitangabe (*Morgen fahre ich*).
 
 In E-Mails über die Vergangenheit klingt Perfekt natürlich. In einer Geschichte wirken ein paar Präteritumformen schriftlicher. Beides im [Verben-Quiz](/quizzes/verbs/).`,
@@ -746,37 +555,37 @@ Ne az egész posztert tanuld az első este. Először Nominativ és Akkusativ ha
   prepositions: {
     en: `German prepositions are easier when you stop translating them one-to-one. Some always take Akkusativ (*für, ohne, um, durch, gegen*), some always Dativ (*mit, zu, von, bei, nach, aus, seit*). Two-way prepositions (*in, an, auf, …*) take Dativ for location and Akkusativ for direction.
 
-Memorise a tiny set of exam sentences: *Ich warte auf den Bus. Ich fahre mit der Bahn. Das Geschenk ist für die Mutter. Ich bin bei meinem Freund.* Then expand. The [prepositions quiz](/quizzes/prepositions/) and the [cases guide](/learn/german-cases/) are the matching pair.`,
+Memorise a tiny set of everyday sentences: *Ich warte auf den Bus. Ich fahre mit der Bahn. Das Geschenk ist für die Mutter. Ich bin bei meinem Freund.* Then expand. The [prepositions quiz](/quizzes/prepositions/) and the [cases guide](/learn/german-cases/) are the matching pair.`,
     de: `Präpositionen werden leichter, wenn du sie nicht 1:1 übersetzt. Manche immer Akkusativ (*für, ohne, um, durch, gegen*), manche immer Dativ (*mit, zu, von, bei, nach, aus, seit*). Wechselpräpositionen: Dativ bei Ort, Akkusativ bei Richtung.
 
-Kleine Prüfungssätze merken: *Ich warte auf den Bus. Ich fahre mit der Bahn. Das Geschenk ist für die Mutter.* Dann erweitern. Passend: [Präpositionen-Quiz](/quizzes/prepositions/) und [Fälle-Guide](/learn/german-cases/).`,
+Kleine Alltagssätze merken: *Ich warte auf den Bus. Ich fahre mit der Bahn. Das Geschenk ist für die Mutter.* Dann erweitern. Passend: [Präpositionen-Quiz](/quizzes/prepositions/) und [Fälle-Guide](/learn/german-cases/).`,
     hu: `A német prepozíciók könnyebbek, ha nem szó szerint fordítod őket. Van, ami mindig Akkusativ (*für, ohne, um, durch, gegen*), van, ami mindig Dativ (*mit, zu, von, bei, nach, aus, seit*). A Wechsel: Dativ helyre, Akkusativ irányra.
 
-Jegyezz meg néhány vizsgamondatot: *Ich warte auf den Bus. Ich fahre mit der Bahn. Das Geschenk ist für die Mutter.* Aztán bővítsd. Páros: [prepozíciók kvíz](/quizzes/prepositions/) és [esetek útmutató](/learn/german-cases/).`,
+Jegyezz meg néhány hétköznapi mondatot: *Ich warte auf den Bus. Ich fahre mit der Bahn. Das Geschenk ist für die Mutter.* Aztán bővítsd. Páros: [prepozíciók kvíz](/quizzes/prepositions/) és [esetek útmutató](/learn/german-cases/).`,
   },
   'sentence-structure': {
     en: `German main clauses put the **conjugated verb second**: *Heute gehe ich ins Kino* — the verb stays in position two even if you start with *Heute*. In yes/no questions the verb comes first: *Gehst du mit?* In *weil, dass, ob* clauses the conjugated verb moves to the **end**: *Ich bleibe zu Hause, weil ich müde bin.*
 
-That last rule is a classic exam trap. Learners start the *weil* clause and forget the verb. Practise by writing ten *weil/dass* sentences about your week, then reading them aloud. Combine with [verbs](/quizzes/verbs/) so the form you park at the end is actually correct.`,
+That last rule is a classic trap. Learners start the *weil* clause and forget the verb. Practise by writing ten *weil/dass* sentences about your week, then reading them aloud. Combine with [verbs](/quizzes/verbs/) so the form you park at the end is actually correct.`,
     de: `Im Hauptsatz steht das **konjugierte Verb an zweiter Stelle**: *Heute gehe ich ins Kino*. In Ja/Nein-Fragen das Verb vorn: *Gehst du mit?* In *weil-, dass-, ob*-Sätzen ans **Ende**: *Ich bleibe zu Hause, weil ich müde bin.*
 
-Klassische Prüfungsfalle: der *weil*-Satz ohne Verb am Ende. Zehn *weil/dass*-Sätze über die Woche schreiben und laut lesen. Dazu [Verben](/quizzes/verbs/), damit die Form am Ende stimmt.`,
+Klassische Falle: der *weil*-Satz ohne Verb am Ende. Zehn *weil/dass*-Sätze über die Woche schreiben und laut lesen. Dazu [Verben](/quizzes/verbs/), damit die Form am Ende stimmt.`,
     hu: `Főmondatban a **ragozott ige a második helyen** van: *Heute gehe ich ins Kino*. Eleldöntendő kérdésben előre: *Gehst du mit?* *weil, dass, ob* mellett a ragozott ige a **végre** megy: *Ich bleibe zu Hause, weil ich müde bin.*
 
-Klasszikus vizsgacsapda: a *weil*-mondat ige nélkül. Írj tíz *weil/dass* mondatot a hetedről, olvasd hangosan. Mellé [igék](/quizzes/verbs/), hogy a végére tett alak helyes legyen.`,
+Klasszikus csapda: a *weil*-mondat ige nélkül. Írj tíz *weil/dass* mondatot a hetedről, olvasd hangosan. Mellé [igék](/quizzes/verbs/), hogy a végére tett alak helyes legyen.`,
   },
 };
 
 const QUIZ_PRIMERS: Record<string, Record<LearnLang, string>> = {
   vocabulary: {
-    en: `These levels recycle high-frequency German words with translations and example sentences. Study them in small sets: say the German aloud, hide the translation, then check. For exams, pair this with [articles](/quizzes/articles/) so you never store a noun without *der/die/das*. A weekly rhythm is in the [practice plan](/learn/weekly-german-practice/).`,
-    de: `Diese Level wiederholen häufige deutsche Wörter mit Übersetzung und Beispielsatz. Kleine Mengen: Deutsch laut sagen, Übersetzung verdecken, prüfen. Für Prüfungen mit [Artikeln](/quizzes/articles/) koppeln. Wochenplan: [Übungsplan](/learn/weekly-german-practice/).`,
-    hu: `Ezek a szintek gyakori német szavakat forgatnak fordítással és példamondattal. Kis adagokban: mondd hangosan a németet, takard a fordítást, ellenőrizd. Vizsgához kösd a [névelőkhöz](/quizzes/articles/). Heti ritmus: [gyakorlóterv](/learn/weekly-german-practice/).`,
+    en: `These levels recycle high-frequency German words with Hungarian meanings. Study them in small sets: say the German aloud, hide the translation, then check. Pair this with [articles](/quizzes/articles/) so you never store a noun without *der/die/das*. A weekly rhythm is in the [practice plan](/learn/weekly-german-practice/).`,
+    de: `Diese Level wiederholen häufige deutsche Wörter mit ungarischer Bedeutung. Kleine Mengen: Deutsch laut sagen, Übersetzung verdecken, prüfen. Mit [Artikeln](/quizzes/articles/) koppeln. Wochenplan: [Übungsplan](/learn/weekly-german-practice/).`,
+    hu: `Ezek a szintek gyakori német szavakat forgatnak magyar jelentéssel és példamondattal. Kis adagokban: mondd hangosan a németet, takard a fordítást, ellenőrizd. Kösd a [névelőkhöz](/quizzes/articles/). Heti ritmus: [gyakorlóterv](/learn/weekly-german-practice/).`,
   },
   articles: {
-    en: `Each item asks for **der, die or das** (and later the form that fits the case). Guessing by “how the word feels” fails in a timed paper. Use ending patterns (*-ung* → *die*) and always learn the noun with its article. Full method: [How to learn der, die, das](/learn/der-die-das/).`,
-    de: `Jedes Item fragt **der, die oder das** (später die Kasusform). Nach Gefühl raten scheitert in der Prüfung. Endungen nutzen und Nomen immer mit Artikel lernen. Methode: [Artikel lernen](/learn/der-die-das/).`,
-    hu: `Minden tétel **der, die vagy das** (később az esetnek megfelelő alak). Az „érzésre” tippelés időre megbukik. Végződések + főnév névelővel. Módszer: [der, die, das](/learn/der-die-das/).`,
+    en: `Each item asks for **der, die or das** (and later the form that fits the case). Guessing by “how the word feels” fails under pressure. Use ending patterns (*-ung* → *die*) and always learn the noun with its article. Full method: [How to learn der, die, das](/learn/der-die-das/).`,
+    de: `Jedes Item fragt **der, die oder das** (später die Kasusform). Nach Gefühl raten scheitert unter Druck. Endungen nutzen und Nomen immer mit Artikel lernen. Methode: [Artikel lernen](/learn/der-die-das/).`,
+    hu: `Minden tétel **der, die vagy das** (később az esetnek megfelelő alak). Az „érzésre” tippelés nyomás alatt megbukik. Végződések + főnév névelővel. Módszer: [der, die, das](/learn/der-die-das/).`,
   },
   verbs: {
     en: `Verb quizzes mix conjugation, Präsens, Perfekt and common irregulars (*gehen, sehen, nehmen, essen*). For B1 speaking, Perfekt of everyday verbs matters more than rare Präteritum forms — except *war* and *hatte*, which you need constantly. After a level, write four original sentences with the verbs you missed.`,
@@ -794,25 +603,25 @@ const QUIZ_PRIMERS: Record<string, Record<LearnLang, string>> = {
     hu: `Akkusativ, Dativ és Wechsel. Kérdezd: **már ott van**, vagy **oda mozog**? Ettől lesz *auf dem Tisch* vagy *auf den Tisch*. Hosszabban: [esetek](/learn/german-cases/).`,
   },
   phrases: {
-    en: `Phrase quizzes are exam gold: they store word order, articles and verbs together. Learn them as ready replies for speaking (*Könnten Sie das bitte wiederholen?*, *Das wäre schön.*). After each level, reuse three phrases in a new context — a café, an email, a complaint.`,
-    de: `Redemittel-Quizze sind Prüfungsgold: Wortstellung, Artikel und Verb sitzen zusammen. Als fertige Repliken lernen. Nach jedem Level drei Phrasen in einem neuen Kontext wiederverwenden.`,
-    hu: `A kifejezés kvízek vizsgaarany: szórend, névelő és ige együtt ül. Kész válaszként tanuld. Szint után három kifejezést új helyzetben használd — kávézó, e-mail, panasz.`,
+    en: `Phrase quizzes store word order, articles and verbs together. Learn them as ready replies for speaking (*Könnten Sie das bitte wiederholen?*, *Das wäre schön.*). After each level, reuse three phrases in a new context — a café, an email, a complaint.`,
+    de: `Redemittel-Quizze speichern Wortstellung, Artikel und Verb zusammen. Als fertige Repliken lernen. Nach jedem Level drei Phrasen in einem neuen Kontext wiederverwenden.`,
+    hu: `A kifejezés kvízekben szórend, névelő és ige együtt ül. Kész válaszként tanuld. Szint után három kifejezést új helyzetben használd — kávézó, e-mail, panasz.`,
   },
 };
 
 export const HOME_ARTICLE: Record<LearnLang, string> = {
-  en: `MicaLingo is a free German exam-preparation site. It is built for people who need **repeatable practice** — articles, verbs, prepositions, vocabulary and short grammar notes — not another page that only lists “10 tips to get fluent”.
+  en: `MicaLingo is a free **self-learning** site. The public quizzes are built for **German–Hungarian** learners who need repeatable practice — articles, verbs, prepositions, vocabulary and short grammar notes — not another page that only lists “10 tips to get fluent”.
 
-You can start without an account: open [Quizzes](/quizzes/), pick a topic, and work through levels. Sign in if you want a private library, marked words from your mistakes, and imported lists. The public library stays available either way.
+You can start without an account: open [Quizzes](/quizzes/), pick a topic, and work through levels. Sign in with a **Google account** when you want a private library, marked words from your mistakes, and quizzes generated from your own lists — in **any language pair**, or even for non-language topics. The public HU–DE library stays available either way.
 
 ## What you can practise here
 
-- **Accuracy for exam papers:** [der, die, das](/quizzes/articles/), [verbs](/quizzes/verbs/), [prepositions](/quizzes/prepositions/), [adjectives](/quizzes/adjectives/).
+- **Accuracy:** [der, die, das](/quizzes/articles/), [verbs](/quizzes/verbs/), [prepositions](/quizzes/prepositions/), [adjectives](/quizzes/adjectives/).
 - **Words in context:** [vocabulary](/quizzes/vocabulary/) and [phrases](/quizzes/phrases/), with a readable [word list](/vocabulary/).
 - **Rules next to drills:** [grammar](/grammar/) for cases, tenses, articles, adjective endings, prepositions and word order.
 - **Reading and listening:** [learning materials](/learning-materials/), including [false friends](/learning-materials/reading/false-friends/) and [idioms](/learning-materials/reading/idioms/).
 
-If you are aiming at Goethe, telc or ÖSD, read the [exam prep guide](/learn/german-exam-prep/) and follow the [weekly practice plan](/learn/weekly-german-practice/). Those pages explain how the quizzes map to the four skills the exam actually scores.
+How the public and private libraries differ: [public vs private](/learn/public-and-private/). A simple loop for the week: [practice plan](/learn/weekly-german-practice/).
 
 ## How to start in ten minutes
 
@@ -821,9 +630,9 @@ If you are aiming at Goethe, telc or ÖSD, read the [exam prep guide](/learn/ger
 3. Read the matching grammar primer — [articles](/grammar/articles/) or [cases](/grammar/cases/) — then quiz again.
 
 That loop is the product: short explanation, then retrieval. It is how language sticks, and it is the opposite of a homepage that is only buttons.`,
-  de: `MicaLingo ist eine kostenlose Seite zur Vorbereitung auf Deutschprüfungen. Sie ist für Menschen gebaut, die **wiederholbares Üben** brauchen — Artikel, Verben, Präpositionen, Wortschatz und kurze Grammatiknotizen — nicht nur „10 Tipps zur Flüssigkeit“.
+  de: `MicaLingo ist eine kostenlose Seite zum **Selbstlernen**. Die öffentlichen Quizze sind für **Deutsch–Ungarisch**-Lernende gebaut, die **wiederholbares Üben** brauchen — Artikel, Verben, Präpositionen, Wortschatz und kurze Grammatiknotizen — nicht nur „10 Tipps zur Flüssigkeit“.
 
-Ohne Konto starten: [Quizze](/quizzes/) öffnen, Thema wählen, Level arbeiten. Anmelden für private Bibliothek, markierte Fehler und eigene Listen. Die öffentliche Bibliothek bleibt in beiden Fällen da.
+Ohne Konto starten: [Quizze](/quizzes/) öffnen, Thema wählen, Level arbeiten. Mit **Google-Konto** anmelden für eine private Bibliothek, markierte Fehler und Quizze aus eigenen Listen — in **beliebigen Sprachen**, oder auch für andere Themen. Die öffentliche DE–HU-Bibliothek bleibt in beiden Fällen da.
 
 ## Was du hier üben kannst
 
@@ -832,7 +641,7 @@ Ohne Konto starten: [Quizze](/quizzes/) öffnen, Thema wählen, Level arbeiten. 
 - **Regeln neben dem Drill:** [Grammatik](/grammar/).
 - **Lesen und Hören:** [Lernmaterialien](/learning-materials/).
 
-Für Goethe, telc oder ÖSD: [Prüfungsguide](/learn/german-exam-prep/) und [Wochenplan](/learn/weekly-german-practice/).
+Öffentlich vs privat: [Ratgeber](/learn/public-and-private/). Wochenplan: [Übungsplan](/learn/weekly-german-practice/).
 
 ## In zehn Minuten starten
 
@@ -841,9 +650,9 @@ Für Goethe, telc oder ÖSD: [Prüfungsguide](/learn/german-exam-prep/) und [Woc
 3. Die passende Grammatik lesen — [Artikel](/grammar/articles/) oder [Fälle](/grammar/cases/) — dann wieder quizen.
 
 Diese Schleife ist das Angebot: kurze Erklärung, dann Abrufen.`,
-  hu: `A MicaLingo ingyenes német vizsgafelkészítő oldal. Olyanoknak készült, akiknek **ismételhető gyakorlat** kell — névelők, igék, prepozíciók, szókincs és rövid nyelvtan —, nem egy újabb „10 tipp a folyékonysághoz” lista.
+  hu: `A MicaLingo ingyenes **önálló tanuló** oldal. A nyilvános kvízek **német–magyar** tanulóknak készültek, akiknek **ismételhető gyakorlat** kell — névelők, igék, prepozíciók, szókincs és rövid nyelvtan —, nem egy újabb „10 tipp a folyékonysághoz” lista.
 
-Fiók nélkül is kezdheted: [Kvízek](/quizzes/), téma, szintek. Jelentkezz be saját könyvtárhoz, megjelölt hibákhoz és importált listákhoz. A nyilvános könyvtár mindkét esetben megmarad.
+Fiók nélkül is kezdheted: [Kvízek](/quizzes/), téma, szintek. **Google-fiókkal** lépj be, ha saját könyvtárat, megjelölt hibákat és saját listából generált kvízeket akarsz — **bármilyen nyelvpáron**, vagy akár nem nyelvi témán. A nyilvános HU–DE könyvtár mindkét esetben megmarad.
 
 ## Mit gyakorolhatsz itt
 
@@ -852,7 +661,7 @@ Fiók nélkül is kezdheted: [Kvízek](/quizzes/), téma, szintek. Jelentkezz be
 - **Szabály a gyakorlat mellett:** [nyelvtan](/grammar/).
 - **Olvasás és hallás:** [tananyagok](/learning-materials/).
 
-Goethe, telc vagy ÖSD: [vizsgaútmutató](/learn/german-exam-prep/) és [heti terv](/learn/weekly-german-practice/).
+Nyilvános vs saját: [útmutató](/learn/public-and-private/). Heti kör: [gyakorlóterv](/learn/weekly-german-practice/).
 
 ## Tíz perc alatt indulás
 
@@ -864,70 +673,71 @@ Ez a kör a lényeg: rövid magyarázat, aztán előhívás.`,
 };
 
 export const GRAMMAR_INDEX_ARTICLE: Record<LearnLang, string> = {
-  en: `Use this section as a **rule book next to the quizzes**. Open a category, read the primer, then drill the same pattern. For exam candidates the usual order is [articles](/grammar/articles/) → [cases](/grammar/cases/) → [prepositions](/grammar/prepositions/) → [tenses](/grammar/tenses/) → [adjectives](/grammar/adjectives/) → [sentence structure](/grammar/sentence-structure/). Longer walkthroughs live under [Study guides](/learn/).`,
-  de: `Dieser Bereich ist das **Regelheft neben den Quizzen**. Kategorie öffnen, Primer lesen, dasselbe Muster üben. Für Prüfungen oft: [Artikel](/grammar/articles/) → [Fälle](/grammar/cases/) → [Präpositionen](/grammar/prepositions/) → [Zeitformen](/grammar/tenses/) → [Adjektive](/grammar/adjectives/) → [Satzbau](/grammar/sentence-structure/). Längere Texte unter [Lernratgeber](/learn/).`,
-  hu: `Ez a rész a **szabályfüzet a kvízek mellett**. Nyiss egy kategóriát, olvasd a bevezetőt, gyakorold ugyanazt. Vizsgához tipikus sorrend: [névelők](/grammar/articles/) → [esetek](/grammar/cases/) → [prepozíciók](/grammar/prepositions/) → [igeidők](/grammar/tenses/) → [melléknevek](/grammar/adjectives/) → [szórend](/grammar/sentence-structure/). Hosszabb anyag: [Tanulási útmutatók](/learn/).`,
+  en: `Use this section as a **rule book next to the quizzes**. Open a category, read the primer, then drill the same pattern. A useful order for self-learners is [articles](/grammar/articles/) → [cases](/grammar/cases/) → [prepositions](/grammar/prepositions/) → [tenses](/grammar/tenses/) → [adjectives](/grammar/adjectives/) → [sentence structure](/grammar/sentence-structure/). Longer walkthroughs live under [Study guides](/learn/).`,
+  de: `Dieser Bereich ist das **Regelheft neben den Quizzen**. Kategorie öffnen, Primer lesen, dasselbe Muster üben. Sinnvolle Reihenfolge zum Selbstlernen: [Artikel](/grammar/articles/) → [Fälle](/grammar/cases/) → [Präpositionen](/grammar/prepositions/) → [Zeitformen](/grammar/tenses/) → [Adjektive](/grammar/adjectives/) → [Satzbau](/grammar/sentence-structure/). Längere Texte unter [Lernratgeber](/learn/).`,
+  hu: `Ez a rész a **szabályfüzet a kvízek mellett**. Nyiss egy kategóriát, olvasd a bevezetőt, gyakorold ugyanazt. Önálló tanuláshoz jó sorrend: [névelők](/grammar/articles/) → [esetek](/grammar/cases/) → [prepozíciók](/grammar/prepositions/) → [igeidők](/grammar/tenses/) → [melléknevek](/grammar/adjectives/) → [szórend](/grammar/sentence-structure/). Hosszabb anyag: [Tanulási útmutatók](/learn/).`,
 };
 
 export const QUIZ_INDEX_ARTICLE: Record<LearnLang, string> = {
-  en: `Public quizzes are grouped by skill, not by random difficulty spikes. Start with the leak you already know — for most learners that is [articles](/quizzes/articles/) or [verbs](/quizzes/verbs/). Each topic page includes a short explanation and a sample of the words you will meet, so you can learn something even before you press Start.
+  en: `The **public** quizzes are German–Hungarian and grouped by skill. Start with the leak you already know — for most learners that is [articles](/quizzes/articles/) or [verbs](/quizzes/verbs/). Each topic page includes a short explanation and a sample of the words you will meet, so you can learn something even before you press Start.
 
-Logged-in users can switch to a private tab and build quizzes from their own lists. Guests can still complete every public level. How to fit this into a week: [practice plan](/learn/weekly-german-practice/).`,
-  de: `Öffentliche Quizze sind nach Fertigkeit gruppiert. Starte beim bekannten Leck — oft [Artikel](/quizzes/articles/) oder [Verben](/quizzes/verbs/). Jede Themenseite hat eine kurze Erklärung und Beispielwörter, bevor du auf Start drückst.
+With a Google login you can switch to a private tab and generate quizzes from your own lists in any languages. Guests can still complete every public HU–DE level. How the two libraries differ: [public vs private](/learn/public-and-private/). How to fit this into a week: [practice plan](/learn/weekly-german-practice/).`,
+  de: `Die **öffentlichen** Quizze sind Deutsch–Ungarisch und nach Fertigkeit gruppiert. Starte beim bekannten Leck — oft [Artikel](/quizzes/articles/) oder [Verben](/quizzes/verbs/). Jede Themenseite hat eine kurze Erklärung und Beispielwörter, bevor du auf Start drückst.
 
-Mit Login: privater Tab und eigene Listen. Gäste können alle öffentlichen Level spielen. Wochenplan: [Übungsplan](/learn/weekly-german-practice/).`,
-  hu: `A nyilvános kvízek készség szerint vannak csoportosítva. Kezdd a ismert lyukkal — sokaknál [névelők](/quizzes/articles/) vagy [igék](/quizzes/verbs/). Minden témaoldalon van rövid magyarázat és mintaszavak, még a Start előtt.
+Mit Google-Login: privater Tab und eigene Listen in beliebigen Sprachen. Gäste können alle öffentlichen DE–HU-Level spielen. Unterschied: [öffentlich vs privat](/learn/public-and-private/). Wochenplan: [Übungsplan](/learn/weekly-german-practice/).`,
+  hu: `A **nyilvános** kvízek német–magyarok, készség szerint csoportosítva. Kezdd a ismert lyukkal — sokaknál [névelők](/quizzes/articles/) vagy [igék](/quizzes/verbs/). Minden témaoldalon van rövid magyarázat és mintaszavak, még a Start előtt.
 
-Bejelentkezve: saját lista. Vendégként is végigjátszhatod a nyilvános szinteket. Heti beosztás: [gyakorlóterv](/learn/weekly-german-practice/).`,
+Google-belépéssel saját kvíz bármilyen nyelven. Vendégként is végigjátszhatod a nyilvános HU–DE szinteket. A két könyvtár: [nyilvános vs saját](/learn/public-and-private/). Heti beosztás: [gyakorlóterv](/learn/weekly-german-practice/).`,
 };
 
 export const EXTRA_HOME_FAQ: Record<LearnLang, { q: string; a: string }[]> = {
   en: [
     {
-      q: 'Is MicaLingo useful for Goethe, telc or ÖSD?',
-      a: 'Yes. The quizzes train the language those exams mark: articles, verbs, prepositions, vocabulary and grammar accuracy. Combine them with official sample papers from the exam organiser for task types and timing.',
+      q: 'Are the public quizzes only German–Hungarian?',
+      a: 'Yes. The open library is built for Hungarian learners of German. Sign in with a Google account to set up a private library in any languages and generate your own quizzes — including non-language topics if you want.',
     },
     {
       q: 'Do I need to create an account?',
-      a: 'No. Public quizzes, grammar primers and study guides work without login. An account is only needed to save a private library, marked words and imported files.',
+      a: 'No. Public HU–DE quizzes, grammar primers and study guides work without login. A Google account is only needed to save a private library, marked words and imported files.',
     },
     {
       q: 'In which languages is the site available?',
-      a: 'The interface is English, German and Hungarian. The language you practise is German.',
+      a: 'The interface is English, German and Hungarian. Public practice is German with Hungarian meanings. After Google login, your private lists can be any language pair you set up.',
     },
   ],
   de: [
     {
-      q: 'Hilft MicaLingo bei Goethe, telc oder ÖSD?',
-      a: 'Ja. Die Quizze trainieren die Sprache, die diese Prüfungen bewerten: Artikel, Verben, Präpositionen, Wortschatz und Grammatik. Offizielle Proben des Anbieters nutzt du für Aufgabentyp und Zeit.',
+      q: 'Sind die öffentlichen Quizze nur Deutsch–Ungarisch?',
+      a: 'Ja. Die offene Bibliothek ist für Ungarisch sprechende Deutschlernende. Mit Google-Konto baust du eine private Bibliothek in beliebigen Sprachen und erzeugst eigene Quizze — auch für andere Themen.',
     },
     {
       q: 'Brauche ich ein Konto?',
-      a: 'Nein. Öffentliche Quizze, Grammatik-Primer und Ratgeber funktionieren ohne Login. Ein Konto braucht es nur für private Bibliothek, markierte Wörter und Importe.',
+      a: 'Nein. Öffentliche DE–HU-Quizze, Grammatik-Primer und Ratgeber funktionieren ohne Login. Ein Google-Konto braucht es nur für private Bibliothek, markierte Wörter und Importe.',
     },
     {
       q: 'In welchen Sprachen gibt es die Seite?',
-      a: 'Die Oberfläche ist Englisch, Deutsch und Ungarisch. Die Übungssprache ist Deutsch.',
+      a: 'Die Oberfläche ist Englisch, Deutsch und Ungarisch. Öffentlich übst du Deutsch mit ungarischer Bedeutung. Nach dem Google-Login können deine privaten Listen jedes Sprachenpaar sein.',
     },
   ],
   hu: [
     {
-      q: 'Hasznos a MicaLingo Goethe, telc vagy ÖSD vizsgához?',
-      a: 'Igen. A kvízek azt a nyelvet edzik, amit ezek a vizsgák pontoznak: névelők, igék, prepozíciók, szókincs, nyelvtan. A hivatalos mintafeladatok a feladattípushoz és az időhöz kellenek.',
+      q: 'A nyilvános kvízek csak német–magyarok?',
+      a: 'Igen. A nyilvános könyvtár magyarul tanuló németeseknek készült. Google-fiókkal saját könyvtárat állíthatsz be bármilyen nyelven, és generálhatsz saját kvízeket — akár nem nyelvi témára is.',
     },
     {
       q: 'Kell fiókot csinálnom?',
-      a: 'Nem. A nyilvános kvízek, nyelvtan-bevezetők és útmutatók belépés nélkül mennek. Fiók csak a saját könyvtárhoz, megjelölt szavakhoz és importhoz kell.',
+      a: 'Nem. A nyilvános HU–DE kvízek, nyelvtan-bevezetők és útmutatók belépés nélkül mennek. Google-fiók csak a saját könyvtárhoz, megjelölt szavakhoz és importhoz kell.',
     },
     {
       q: 'Milyen nyelveken érhető el az oldal?',
-      a: 'A felület angol, német és magyar. A gyakorolt nyelv a német.',
+      a: 'A felület angol, német és magyar. Nyilvánosan németet gyakorolsz magyar jelentéssel. Google-belépés után a saját listád bármilyen nyelvpár lehet.',
     },
   ],
 };
 
 export function getLearnGuide(slug: string): LearnGuide | undefined {
-  return LEARN_GUIDES.find((g) => g.slug === slug);
+  const mapped = slug === 'german-exam-prep' ? 'public-and-private' : slug;
+  return LEARN_GUIDES.find((g) => g.slug === mapped);
 }
 
 export function guideTitle(guide: LearnGuide, lang: LearnLang) {

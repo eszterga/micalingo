@@ -17,23 +17,23 @@ const HOME: Localized = {
   en: {
     title: 'Learn German: Quizzes, Grammar & Vocabulary | MicaLingo',
     description:
-      'Learn German online with free quizzes for vocabulary, grammar, articles (der, die, das), verbs, adjectives, and prepositions. Exam prep for Goethe, telc, and more.',
+      'Learn German online with free German–Hungarian quizzes for vocabulary, grammar, articles (der, die, das), verbs, adjectives, and prepositions. Sign in with Google to build private quizzes in any languages.',
     keywords:
-      'learn German, German learning, German quizzes, German grammar, German vocabulary, German articles, der die das, German verbs, Deutsch lernen, német tanulás, Goethe, telc, MicaLingo',
+      'learn German, German learning, German quizzes, German grammar, German vocabulary, German articles, der die das, German verbs, Deutsch lernen, német tanulás, MicaLingo',
   },
   de: {
     title: 'Deutsch lernen: Quizze, Grammatik & Wortschatz | MicaLingo',
     description:
-      'Deutsch lernen mit kostenlosen Quizzen zu Wortschatz, Grammatik, Artikeln (der, die, das), Verben, Adjektiven und Präpositionen. Vorbereitung auf Goethe, telc und mehr.',
+      'Deutsch lernen mit kostenlosen Deutsch–Ungarisch-Quizzen zu Wortschatz, Grammatik, Artikeln (der, die, das), Verben, Adjektiven und Präpositionen. Mit Google-Login eigene Quizze in beliebigen Sprachen.',
     keywords:
-      'Deutsch lernen, Deutsch Quiz, deutsche Grammatik, Wortschatz, Artikel der die das, Verben konjugieren, Adjektive, Präpositionen, Goethe, telc, MicaLingo',
+      'Deutsch lernen, Deutsch Quiz, deutsche Grammatik, Wortschatz, Artikel der die das, Verben konjugieren, Adjektive, Präpositionen, MicaLingo',
   },
   hu: {
     title: 'Német tanulás: kvízek, nyelvtan és szókincs | MicaLingo',
     description:
-      'Tanulj németül ingyenes kvízekkel: szókincs, nyelvtan, névelők (der, die, das), igék, melléknevek és prepozíciók. Felkészülés Goethe, telc és egyéb vizsgákra.',
+      'Tanulj németül ingyenes német–magyar kvízekkel: szókincs, nyelvtan, névelők (der, die, das), igék, melléknevek és prepozíciók. Google-fiókkal saját kvízek bármilyen nyelven.',
     keywords:
-      'német tanulás, német kvíz, német nyelvtan, német szókincs, német névelők, der die das, német igék, Goethe, telc, MicaLingo',
+      'német tanulás, német kvíz, német nyelvtan, német szókincs, német névelők, der die das, német igék, MicaLingo',
   },
 };
 
@@ -63,19 +63,19 @@ const ROUTES: Record<string, Localized> = {
     en: {
       title: 'German Learning Library: Vocabulary & Materials | MicaLingo',
       description:
-        'Browse German vocabulary lists plus reading and listening materials. Organize words, articles, and audio for exam preparation.',
+        'Browse public German–Hungarian vocabulary lists plus reading and listening materials. After Google login, organise a private library in any languages.',
       keywords: 'German vocabulary library, German learning materials, German word list, learn German',
     },
     de: {
       title: 'Deutsch-Lernbibliothek: Wortschatz & Materialien | MicaLingo',
       description:
-        'Durchsuche deutsche Wortschatzlisten sowie Lese- und Hörmaterialien. Organisiere Vokabeln, Texte und Audio für die Prüfungsvorbereitung.',
+        'Durchsuche die öffentliche Deutsch–Ungarisch-Wortschatzliste sowie Lese- und Hörmaterialien. Nach dem Google-Login organisierst du eine private Bibliothek in beliebigen Sprachen.',
       keywords: 'Wortschatz Bibliothek, Deutsch Lernmaterialien, Vokabelliste, Deutsch lernen',
     },
     hu: {
       title: 'Német tanulókönyvtár: szókincs és tananyagok | MicaLingo',
       description:
-        'Böngéssz német szókincslistákat, olvasnivalót és hallásértési anyagokat. Rendszerezd a szavakat, cikkeket és hanganyagokat a vizsgafelkészüléshez.',
+        'Böngéssz nyilvános német–magyar szókincslistákat, olvasnivalót és hallásértési anyagokat. Google-belépés után a saját könyvtárad bármilyen nyelvű lehet.',
       keywords: 'német szótár, német tananyag, német szólista, német tanulás',
     },
   },
@@ -120,19 +120,19 @@ const ROUTES: Record<string, Localized> = {
     en: {
       title: 'German Vocabulary List: Words to Learn & Review | MicaLingo',
       description:
-        'Build German vocabulary with searchable word lists, example sentences, and translations. Review German words for exams and everyday use.',
+        'Build German vocabulary with searchable word lists, example sentences, and translations. Review German words for everyday use.',
       keywords: 'German vocabulary, German word list, learn German words, German dictionary, Wortschatz',
     },
     de: {
       title: 'Deutscher Wortschatz: Vokabeln lernen & wiederholen | MicaLingo',
       description:
-        'Baue deinen deutschen Wortschatz mit durchsuchbaren Wortlisten, Beispielsätzen und Übersetzungen auf. Vokabeln für Prüfung und Alltag.',
+        'Baue deinen deutschen Wortschatz mit durchsuchbaren Wortlisten, Beispielsätzen und Übersetzungen auf. Vokabeln für den Alltag.',
       keywords: 'deutscher Wortschatz, Vokabelliste, deutsche Wörter lernen, Vokabeln',
     },
     hu: {
       title: 'Német szókincs: szavak tanulása és ismétlése | MicaLingo',
       description:
-        'Építsd a német szókincsed kereshető szólistákkal, példamondatokkal és fordításokkal. Ismételd a szavakat vizsgára és hétköznapi használatra.',
+        'Építsd a német szókincsed kereshető szólistákkal, példamondatokkal és fordításokkal. Ismételd a szavakat hétköznapi használatra.',
       keywords: 'német szókincs, német szólista, német szavak, szótár',
     },
   },
@@ -210,17 +210,17 @@ const ROUTES: Record<string, Localized> = {
   '/learning-materials/reading/idioms': {
     en: {
       title: 'German Idioms & Everyday Expressions | MicaLingo',
-      description: 'Study useful German idioms and expressions to sound more natural in conversation and exams.',
+      description: 'Study useful German idioms and expressions to sound more natural in conversation.',
       keywords: 'German idioms, German expressions, Redewendungen, learn German phrases',
     },
     de: {
       title: 'Deutsche Redewendungen & Ausdrücke | MicaLingo',
-      description: 'Lerne nützliche deutsche Redewendungen und Ausdrücke für natürlichere Sprache in Gespräch und Prüfung.',
+      description: 'Lerne nützliche deutsche Redewendungen und Ausdrücke für natürlichere Sprache im Gespräch.',
       keywords: 'deutsche Redewendungen, deutsche Ausdrücke, Idiome, Deutsch lernen',
     },
     hu: {
       title: 'Német szólások és kifejezések | MicaLingo',
-      description: 'Tanulj hasznos német szólásokat és kifejezéseket, hogy természetesebben beszélj vizsgán és a mindennapokban.',
+      description: 'Tanulj hasznos német szólásokat és kifejezéseket, hogy természetesebben beszélj a mindennapokban.',
       keywords: 'német szólások, német kifejezések, német idiómák',
     },
   },
@@ -244,35 +244,35 @@ const ROUTES: Record<string, Localized> = {
   '/about': {
     en: {
       title: 'About MicaLingo — Learn German Online',
-      description: 'Who runs MicaLingo, how the German quizzes and grammar notes are made, and how to contact the independently operated exam-prep project.',
-      keywords: 'MicaLingo, learn German, German exam preparation, about',
+      description: 'Who runs MicaLingo, how the public German–Hungarian quizzes are made, and how a Google login unlocks a private library in any languages.',
+      keywords: 'MicaLingo, learn German, self-learning, about',
     },
     de: {
       title: 'Über MicaLingo — Deutsch online lernen',
-      description: 'MicaLingo ist eine kostenlose Plattform zum Deutschlernen mit Quizzen, Wortschatz, Grammatik und Prüfungsvorbereitung.',
-      keywords: 'MicaLingo, Deutsch lernen, Prüfungsvorbereitung',
+      description: 'MicaLingo ist eine kostenlose Plattform zum Selbstlernen mit öffentlichen Deutsch–Ungarisch-Quizzen und einer privaten Bibliothek nach Google-Login.',
+      keywords: 'MicaLingo, Deutsch lernen, Selbstlernen',
     },
     hu: {
       title: 'A MicaLingo-ról — német tanulás online',
-      description: 'A MicaLingo ingyenes némettanuló oldal kvízekkel, szókinccsel, nyelvtannal és vizsgafelkészüléssel.',
-      keywords: 'MicaLingo, német tanulás, vizsgafelkészülés',
+      description: 'A MicaLingo ingyenes önálló tanuló oldal nyilvános német–magyar kvízekkel, és Google-belépés után saját könyvtárral bármilyen nyelven.',
+      keywords: 'MicaLingo, német tanulás, önálló tanulás',
     },
   },
   '/learn': {
     en: {
-      title: 'German Study Guides: Exam Prep, Articles & Cases | MicaLingo',
-      description: 'Original German study guides for Goethe, telc and ÖSD prep, der/die/das, German cases, and a weekly practice plan.',
-      keywords: 'German study guides, Goethe exam prep, telc Deutsch, der die das, German cases',
+      title: 'German Study Guides: Articles, Cases & Practice | MicaLingo',
+      description: 'Original German study guides for self-learners: public vs private library, der/die/das, German cases, and a weekly practice plan.',
+      keywords: 'German study guides, der die das, German cases, self-learning German',
     },
     de: {
-      title: 'Deutsch-Lernratgeber: Prüfung, Artikel & Fälle | MicaLingo',
-      description: 'Eigene Ratgeber zur Goethe-, telc- und ÖSD-Vorbereitung, der/die/das, deutsche Fälle und ein Wochenplan.',
-      keywords: 'Deutsch Lernratgeber, Goethe Vorbereitung, telc Deutsch, der die das, Kasus',
+      title: 'Deutsch-Lernratgeber: Artikel, Fälle & Üben | MicaLingo',
+      description: 'Eigene Ratgeber zum Selbstlernen: öffentlich vs privat, der/die/das, deutsche Fälle und ein Wochenplan.',
+      keywords: 'Deutsch Lernratgeber, der die das, Kasus, Selbstlernen',
     },
     hu: {
-      title: 'Német tanulási útmutatók: vizsga, névelők, esetek | MicaLingo',
-      description: 'Saját útmutatók Goethe, telc és ÖSD felkészüléshez, der/die/das, német esetek és heti gyakorlóterv.',
-      keywords: 'német útmutató, Goethe vizsga, telc, der die das, német esetek',
+      title: 'Német tanulási útmutatók: névelők, esetek | MicaLingo',
+      description: 'Saját útmutatók önálló tanuláshoz: nyilvános vs saját könyvtár, der/die/das, német esetek és heti gyakorlóterv.',
+      keywords: 'német útmutató, der die das, német esetek, önálló tanulás',
     },
   },
   '/privacy': {
@@ -331,17 +331,17 @@ const QUIZ_TOPICS: Record<string, Localized> = {
   vocabulary: {
     en: {
       title: 'German Vocabulary Quiz | Learn German Words | MicaLingo',
-      description: 'Practice German vocabulary with interactive quizzes. Learn German words, translations, and example sentences for exams and everyday use.',
+      description: 'Practice German vocabulary with interactive quizzes. Learn German words, translations, and example sentences for everyday use.',
       keywords: 'German vocabulary quiz, learn German words, German vocab practice, Wortschatz',
     },
     de: {
       title: 'Wortschatz-Quiz: Deutsche Wörter lernen | MicaLingo',
-      description: 'Übe deutschen Wortschatz mit interaktiven Quizzen. Lerne Wörter, Übersetzungen und Beispielsätze für Prüfung und Alltag.',
+      description: 'Übe deutschen Wortschatz mit interaktiven Quizzen. Lerne Wörter, Übersetzungen und Beispielsätze für den Alltag.',
       keywords: 'Wortschatz Quiz, deutsche Wörter lernen, Vokabeln üben',
     },
     hu: {
       title: 'Német szókincs kvíz | Német szavak tanulása | MicaLingo',
-      description: 'Gyakorold a német szókincset interaktív kvízekkel. Tanulj szavakat, fordításokat és példamondatokat vizsgára és hétköznapokra.',
+      description: 'Gyakorold a német szókincset interaktív kvízekkel. Tanulj szavakat, fordításokat és példamondatokat a hétköznapokra.',
       keywords: 'német szókincs kvíz, német szavak, szókincs gyakorlás',
     },
   },
@@ -365,17 +365,17 @@ const QUIZ_TOPICS: Record<string, Localized> = {
   phrases: {
     en: {
       title: 'German Phrases & Sentences Quiz | MicaLingo',
-      description: 'Practice useful German phrases and sentences for conversation, travel, and exams with interactive quizzes.',
+      description: 'Practice useful German phrases and sentences for conversation and travel with interactive quizzes.',
       keywords: 'German phrases, German sentences, everyday German, Redewendungen',
     },
     de: {
       title: 'Redewendungen & Sätze Quiz | MicaLingo',
-      description: 'Übe nützliche deutsche Redewendungen und Sätze für Gespräch, Reise und Prüfung mit interaktiven Quizzen.',
+      description: 'Übe nützliche deutsche Redewendungen und Sätze für Gespräch und Reise mit interaktiven Quizzen.',
       keywords: 'deutsche Redewendungen, deutsche Sätze, Alltagsdeutsch',
     },
     hu: {
       title: 'Német kifejezések és mondatok kvíz | MicaLingo',
-      description: 'Gyakorold a hasznos német kifejezéseket és mondatokat beszélgetéshez, utazáshoz és vizsgához.',
+      description: 'Gyakorold a hasznos német kifejezéseket és mondatokat beszélgetéshez és utazáshoz.',
       keywords: 'német kifejezések, német mondatok, hétköznapi német',
     },
   },
@@ -625,6 +625,20 @@ export function resolveSeo(pathname: string, lang: SeoLang): ResolvedSeo {
   const learnGuide = clean.match(/^\/learn\/([^/]+)$/);
   if (learnGuide) {
     const topic = learnGuide[1];
+    if (topic === 'german-exam-prep') {
+      const guide = getLearnGuide('public-and-private');
+      if (guide) {
+        return {
+          title: `${guideTitle(guide, lang)} | MicaLingo`,
+          description: guideDescription(guide, lang),
+          keywords: 'German Hungarian library, private quizzes, learn German, MicaLingo',
+          canonicalPath: '/learn/public-and-private',
+          noindex: true,
+          pageType: 'learnGuide',
+          topic: 'public-and-private',
+        };
+      }
+    }
     const guide = getLearnGuide(topic);
     if (guide) {
       return {
@@ -834,15 +848,15 @@ function homeFaq(lang: SeoLang): { q: string; a: string }[] {
       },
       {
         q: 'In welchen Sprachen ist MicaLingo verfügbar?',
-        a: 'Die Oberfläche gibt es auf Englisch, Deutsch und Ungarisch. Die Lerninhalte sind Deutsch.',
+        a: 'Die Oberfläche gibt es auf Englisch, Deutsch und Ungarisch. Öffentlich übst du Deutsch mit ungarischer Bedeutung. Nach dem Google-Login können private Listen jedes Sprachenpaar sein.',
       },
       {
-        q: 'Hilft MicaLingo bei Goethe, telc oder ÖSD?',
-        a: 'Ja. Die Quizze trainieren Artikel, Verben, Präpositionen, Wortschatz und Grammatik. Offizielle Proben des Prüfungsanbieters nutzt du für Aufgabentyp und Zeit.',
+        q: 'Sind die öffentlichen Quizze nur Deutsch–Ungarisch?',
+        a: 'Ja. Die offene Bibliothek ist für Ungarisch sprechende Deutschlernende. Mit Google-Konto baust du eine private Bibliothek in beliebigen Sprachen und erzeugst eigene Quizze.',
       },
       {
         q: 'Brauche ich ein Konto zum Üben?',
-        a: 'Nein. Öffentliche Quizze, Grammatik-Primer und Ratgeber funktionieren ohne Login. Ein Konto braucht es nur für private Bibliothek, markierte Wörter und Importe.',
+        a: 'Nein. Öffentliche DE–HU-Quizze, Grammatik-Primer und Ratgeber funktionieren ohne Login. Ein Google-Konto braucht es nur für private Bibliothek, markierte Wörter und Importe.',
       },
     ];
   }
@@ -862,15 +876,15 @@ function homeFaq(lang: SeoLang): { q: string; a: string }[] {
       },
       {
         q: 'Milyen nyelveken érhető el a MicaLingo?',
-        a: 'A felület angolul, németül és magyarul működik. A tananyag német.',
+        a: 'A felület angolul, németül és magyarul működik. Nyilvánosan németet gyakorolsz magyar jelentéssel. Google-belépés után a saját lista bármilyen nyelvpár lehet.',
       },
       {
-        q: 'Hasznos a MicaLingo Goethe, telc vagy ÖSD vizsgához?',
-        a: 'Igen. A kvízek névelőket, igéket, prepozíciókat, szókincset és nyelvtant edzenek. A hivatalos mintafeladatok a feladattípushoz és az időhöz kellenek.',
+        q: 'A nyilvános kvízek csak német–magyarok?',
+        a: 'Igen. A nyilvános könyvtár magyarul tanuló németeseknek készült. Google-fiókkal saját könyvtárat állíthatsz be bármilyen nyelven, és generálhatsz saját kvízeket.',
       },
       {
         q: 'Kell fiók a gyakorláshoz?',
-        a: 'Nem. A nyilvános kvízek, nyelvtan-bevezetők és útmutatók belépés nélkül mennek. Fiók csak a saját könyvtárhoz kell.',
+        a: 'Nem. A nyilvános HU–DE kvízek, nyelvtan-bevezetők és útmutatók belépés nélkül mennek. Google-fiók csak a saját könyvtárhoz kell.',
       },
     ];
   }
@@ -889,15 +903,15 @@ function homeFaq(lang: SeoLang): { q: string; a: string }[] {
     },
     {
       q: 'Which languages is MicaLingo available in?',
-      a: 'The interface is available in English, German, and Hungarian. The learning content is German.',
+      a: 'The interface is available in English, German, and Hungarian. Public practice is German with Hungarian meanings. After Google login, your private lists can be any language pair.',
     },
     {
-      q: 'Is MicaLingo useful for Goethe, telc or ÖSD?',
-      a: 'Yes. The quizzes train articles, verbs, prepositions, vocabulary and grammar. Use official sample papers from the exam organiser for task types and timing.',
+      q: 'Are the public quizzes only German–Hungarian?',
+      a: 'Yes. The open library is for Hungarian learners of German. Sign in with a Google account to set up a private library in any languages and generate your own quizzes.',
     },
     {
       q: 'Do I need an account to practise?',
-      a: 'No. Public quizzes, grammar primers and study guides work without login. An account is only needed to save a private library, marked words and imported files.',
+      a: 'No. Public HU–DE quizzes, grammar primers and study guides work without login. A Google account is only needed to save a private library, marked words and imported files.',
     },
   ];
 }
@@ -947,7 +961,7 @@ export const SITEMAP_PATHS = [
   '/learning-materials/reading/idioms/',
   '/learning-materials/listening/',
   '/learn/',
-  '/learn/german-exam-prep/',
+  '/learn/public-and-private/',
   '/learn/der-die-das/',
   '/learn/german-cases/',
   '/learn/weekly-german-practice/',
