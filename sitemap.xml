@@ -782,36 +782,6 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/learn/german-cases/" />
   </url>
   <url>
-    <loc>https://micalingo.com/learn/weekly-german-practice/</loc>
-    <lastmod>2026-09-01</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.85</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/learn/weekly-german-practice/" />
-    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/learn/weekly-german-practice/?lang=de" />
-    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/learn/weekly-german-practice/?lang=hu" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/learn/weekly-german-practice/" />
-  </url>
-  <url>
-    <loc>https://micalingo.com/learn/weekly-german-practice/?lang=de</loc>
-    <lastmod>2026-09-01</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.85</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/learn/weekly-german-practice/" />
-    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/learn/weekly-german-practice/?lang=de" />
-    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/learn/weekly-german-practice/?lang=hu" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/learn/weekly-german-practice/" />
-  </url>
-  <url>
-    <loc>https://micalingo.com/learn/weekly-german-practice/?lang=hu</loc>
-    <lastmod>2026-09-01</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.85</priority>
-    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/learn/weekly-german-practice/" />
-    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/learn/weekly-german-practice/?lang=de" />
-    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/learn/weekly-german-practice/?lang=hu" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/learn/weekly-german-practice/" />
-  </url>
-  <url>
     <loc>https://micalingo.com/about/</loc>
     <lastmod>2026-09-01</lastmod>
     <changefreq>monthly</changefreq>
