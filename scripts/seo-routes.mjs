@@ -79,7 +79,6 @@ export const SITEMAP_ENTRIES = [
   { path: '/learn/public-and-private', changefreq: 'monthly', priority: '0.85' },
   { path: '/learn/der-die-das', changefreq: 'monthly', priority: '0.85' },
   { path: '/learn/german-cases', changefreq: 'monthly', priority: '0.85' },
-  { path: '/learn/weekly-german-practice', changefreq: 'monthly', priority: '0.85' },
   { path: '/about', changefreq: 'monthly', priority: '0.5' },
   { path: '/privacy', changefreq: 'yearly', priority: '0.3' },
   { path: '/terms', changefreq: 'yearly', priority: '0.3' },
@@ -235,8 +234,8 @@ export const PAGE_META = {
     description: 'Improve German listening with music, podcasts, and audiobooks selected for language learners.',
   },
   '/learn': {
-    title: 'German Study Guides: Articles, Cases & Practice | MicaLingo',
-    description: 'Original German study guides for self-learners: public vs private library, der/die/das, German cases, and a weekly practice plan.',
+    title: 'German Study Guides: Articles & Cases | MicaLingo',
+    description: 'Original German study guides for self-learners: public vs private library, der/die/das, and German cases.',
   },
   '/learn/public-and-private': {
     title: 'Public German–Hungarian library vs your own quizzes | MicaLingo',
@@ -249,10 +248,6 @@ export const PAGE_META = {
   '/learn/german-cases': {
     title: 'German cases without panic | MicaLingo',
     description: 'Nominativ, Akkusativ, Dativ and Genitiv for self-learners, plus Wechselpräpositionen for location vs direction.',
-  },
-  '/learn/weekly-german-practice': {
-    title: 'A weekly German practice plan that sticks | MicaLingo',
-    description: 'A realistic weekday schedule for self-learning German with short sessions and a review loop.',
   },
   '/about': {
     title: 'About MicaLingo — Learn German Online',

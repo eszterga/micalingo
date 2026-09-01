@@ -93,6 +93,7 @@ function AppRoutes() {
         <Route path="/about" element={<About />} />
         <Route path="/learn" element={<Learn />} />
         <Route path="/learn/german-exam-prep" element={<Navigate to="/learn/public-and-private" replace />} />
+        <Route path="/learn/weekly-german-practice" element={<Navigate to="/learn" replace />} />
         <Route path="/learn/:slug" element={<LearnGuide />} />
         <Route path="/cookies" element={<Cookies />} />
         <Route path="/impressum" element={<Impressum />} />

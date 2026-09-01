@@ -260,18 +260,18 @@ const ROUTES: Record<string, Localized> = {
   },
   '/learn': {
     en: {
-      title: 'German Study Guides: Articles, Cases & Practice | MicaLingo',
-      description: 'Original German study guides for self-learners: public vs private library, der/die/das, German cases, and a weekly practice plan.',
+      title: 'German Study Guides: Articles & Cases | MicaLingo',
+      description: 'Original German study guides for self-learners: public vs private library, der/die/das, and German cases.',
       keywords: 'German study guides, der die das, German cases, self-learning German',
     },
     de: {
-      title: 'Deutsch-Lernratgeber: Artikel, Fälle & Üben | MicaLingo',
-      description: 'Eigene Ratgeber zum Selbstlernen: öffentlich vs privat, der/die/das, deutsche Fälle und ein Wochenplan.',
+      title: 'Deutsch-Lernratgeber: Artikel & Fälle | MicaLingo',
+      description: 'Eigene Ratgeber zum Selbstlernen: öffentlich vs privat, der/die/das und deutsche Fälle.',
       keywords: 'Deutsch Lernratgeber, der die das, Kasus, Selbstlernen',
     },
     hu: {
       title: 'Német tanulási útmutatók: névelők, esetek | MicaLingo',
-      description: 'Saját útmutatók önálló tanuláshoz: nyilvános vs saját könyvtár, der/die/das, német esetek és heti gyakorlóterv.',
+      description: 'Saját útmutatók önálló tanuláshoz: nyilvános vs saját könyvtár, der/die/das és német esetek.',
       keywords: 'német útmutató, der die das, német esetek, önálló tanulás',
     },
   },
@@ -964,7 +964,6 @@ export const SITEMAP_PATHS = [
   '/learn/public-and-private/',
   '/learn/der-die-das/',
   '/learn/german-cases/',
-  '/learn/weekly-german-practice/',
   '/about/',
   '/privacy/',
   '/terms/',

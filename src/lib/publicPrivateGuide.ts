@@ -34,7 +34,7 @@ Your private library is not mixed into the public one. Other visitors still see 
 
 ## How to start, depending on who you are
 
-**If you are a Hungarian learner of German:** stay on [Quizzes](/quizzes/) and the [grammar](/grammar/) primers. Learn nouns with *der/die/das*, then verbs and prepositions. The [weekly practice plan](/learn/weekly-german-practice/) is a simple loop, not an exam calendar.
+**If you are a Hungarian learner of German:** stay on [Quizzes](/quizzes/) and the [grammar](/grammar/) primers. Learn nouns with *der/die/das*, then verbs and prepositions.
 
 **If German–Hungarian is not your pair:** log in, open Import or your personal quiz tab, and build lists that match how *you* learn. The public quizzes will still be there if you ever want German with Hungarian glosses; they are not a requirement.
 
@@ -66,7 +66,7 @@ Deine private Bibliothek landet nicht in der öffentlichen. Andere sehen weiter 
 
 ## Wie du startest
 
-**Wenn du Ungarisch sprichst und Deutsch lernst:** [Quizze](/quizzes/) und [Grammatik](/grammar/). Nomen mit *der/die/das*, dann Verben und Präpositionen. Der [Wochenplan](/learn/weekly-german-practice/) ist eine Übungsschleife, kein Prüfungskalender.
+**Wenn du Ungarisch sprichst und Deutsch lernst:** [Quizze](/quizzes/) und [Grammatik](/grammar/). Nomen mit *der/die/das*, dann Verben und Präpositionen.
 
 **Wenn Deutsch–Ungarisch nicht dein Paar ist:** einloggen, Import oder privaten Quiz-Tab, Listen bauen, die zu *dir* passen. Die öffentlichen Quizze bleiben optional.
 
@@ -98,7 +98,7 @@ A saját könyvtár nem keveredik a nyilvánosba. A többiek továbbra is a ném
 
 ## Hogyan kezdj
 
-**Ha magyarul tanulsz németet:** [Kvízek](/quizzes/) és [nyelvtan](/grammar/). Főnév *der/die/das*-szal, aztán igék és prepozíciók. A [heti terv](/learn/weekly-german-practice/) gyakorlókör, nem vizsganaptár.
+**Ha magyarul tanulsz németet:** [Kvízek](/quizzes/) és [nyelvtan](/grammar/). Főnév *der/die/das*-szal, aztán igék és prepozíciók.
 
 **Ha a német–magyar nem a te párod:** lépj be, Import vagy saját kvíz fül, építs listát, ami *neked* való. A nyilvános kvízek opcionálisak maradnak.
 

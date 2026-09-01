@@ -380,131 +380,7 @@ Nem kell az összes Genitiv melléknévvégződés az első napon. Kell viszont:
 
 Az esetek akkor nyugszanak meg, ha **mondatokhoz tapadnak, amiket tényleg kimondasz**. Azokat építsd; a maradékot a [kvízek](/quizzes/) elkapják.`,
     },
-  },
-  {
-    slug: 'weekly-german-practice',
-    published: '2026-08-31',
-    minutes: 8,
-    title: {
-      en: 'A weekly German practice plan that actually sticks',
-      de: 'Ein wöchentlicher Deutsch-Übungsplan, der hält',
-      hu: 'Heti német gyakorlóterv, ami megmarad',
-    },
-    description: {
-      en: 'A realistic weekday schedule for self-learning German: short sessions, mixed skills, and a review loop so new words do not disappear by Friday.',
-      de: 'Ein realistischer Wochenplan zum Selbstlernen: kurze Einheiten, gemischte Fertigkeiten und eine Wiederholungsschleife, damit neue Wörter nicht bis Freitag verschwinden.',
-      hu: 'Reális heti beosztás önálló német tanuláshoz: rövid körök, kevert készségek, és ismétlő hurkok, hogy az új szavak ne tűnjenek el péntekre.',
-    },
-    body: {
-      en: `Most learners fail the week, not the motivation. They study for two hours on Sunday, add 60 new words, and by Wednesday the articles have evaporated. Real progress rewards **returning** to the same material, not collecting it.
-
-This plan uses MicaLingo the way a good notebook works: a little new input, a lot of retrieval, and one longer session for reading or listening.
-
-## The weekday template (25–35 minutes)
-
-| Day | Focus | What to open |
-| --- | --- | --- |
-| Monday | Vocabulary (one theme) | [Vocabulary quiz](/quizzes/vocabulary/) then save misses |
-| Tuesday | Articles | [der, die, das quiz](/quizzes/articles/) + [article guide](/learn/der-die-das/) if you keep guessing |
-| Wednesday | Verbs | [Verbs quiz](/quizzes/verbs/) — Präsens and Perfekt of the same 15 verbs |
-| Thursday | Grammar in context | One [grammar](/grammar/) category, then [prepositions](/quizzes/prepositions/) or [adjectives](/quizzes/adjectives/) |
-| Friday | Mixed retrieval | Marked words (after login) or a weaker quiz from the week |
-| Saturday | Input | [Reading](/learning-materials/reading/) or [listening](/learning-materials/listening/), 15–25 minutes |
-| Sunday | Output | Write 8–12 sentences or a short email; speak them aloud |
-
-If you only have 15 minutes, do Friday’s job: retrieve old items. New lists without retrieval are decoration.
-
-## Rules that stop the plan from collapsing
-
-- **One theme per day.** Kitchen, then travel, then work — not all three.
-- **Cap new words at 12.** If you want more, you are collecting, not learning.
-- **Always attach grammar to a sentence.** *geben + Dativ*, not “Dativ = third column”.
-- **Reuse yesterday’s mistakes first.** That is the whole point of marked words and quiz scores.
-- **Once a week, write.** Quizzes recognise; writing reveals the holes.
-
-## Keep speaking in the mix
-
-If speaking is the scare, add a five-minute voice note after Thursday: describe a picture or your last weekend. Fluency is a muscle. Silence does not train it.
-
-## When life gets busy
-
-Skip Wednesday and Thursday before you skip Friday and Sunday. Retrieval and output protect what you already know. Adding another 40 nouns does not.
-
-If cases keep breaking your writing, read [German cases without panic](/learn/german-cases/) on a Thursday instead of starting a new quiz set. If you want your own language pair, see [public vs private library](/learn/public-and-private/).
-
-Consistency looks boring in a screenshot. It is also what actually makes the language stick.`,
-      de: `Die meisten Lernenden verlieren die Woche, nicht die Motivation. Sonntag zwei Stunden, 60 neue Wörter — Mittwoch sind die Artikel weg. Fortschritt belohnt **Zurückkommen**, nicht Sammeln.
-
-Dieser Plan nutzt MicaLingo wie ein gutes Heft: wenig Input, viel Abrufen, eine längere Einheit für Lesen oder Hören.
-
-## Wochentags-Vorlage (25–35 Minuten)
-
-| Tag | Fokus | Öffnen |
-| --- | --- | --- |
-| Montag | Wortschatz (ein Thema) | [Wortschatz-Quiz](/quizzes/vocabulary/), Fehler speichern |
-| Dienstag | Artikel | [der/die/das-Quiz](/quizzes/articles/) |
-| Mittwoch | Verben | [Verben-Quiz](/quizzes/verbs/) — dieselben 15 Verben in Präsens und Perfekt |
-| Donnerstag | Grammatik im Satz | Eine [Grammatik](/grammar/)-Kategorie, dann [Präpositionen](/quizzes/prepositions/) |
-| Freitag | Gemischtes Abrufen | Markierte Wörter oder das schwächste Quiz der Woche |
-| Samstag | Input | [Lesen](/learning-materials/reading/) oder [Hören](/learning-materials/listening/) |
-| Sonntag | Output | 8–12 Sätze oder eine kurze E-Mail, laut sprechen |
-
-Bei nur 15 Minuten: Freitagsaufgabe. Abrufen schlägt neue Listen.
-
-## Regeln, damit der Plan nicht kippt
-
-- Ein Thema pro Tag.
-- Höchstens 12 neue Wörter.
-- Grammatik immer an einen Satz hängen.
-- Gestern Fehler zuerst.
-- Einmal pro Woche schreiben.
-
-## Sprechen nicht weglassen
-
-Wenn Sprechen Angst macht: nach Donnerstag fünf Minuten Sprachnachricht. Stille trainiert keine mündliche Sprache.
-
-## Wenn wenig Zeit ist
-
-Mittwoch und Donnerstag opfern, bevor Freitag und Sonntag sterben. Abrufen und Output schützen, was du schon kannst.
-
-Bei Fällen: [Fälle ohne Panik](/learn/german-cases/). Für eigene Sprachenpaare: [öffentlich vs privat](/learn/public-and-private/).`,
-      hu: `A legtöbb tanuló a hetet veszíti el, nem a motivációt. Vasárnap két óra, 60 új szó — szerdára a névelők elpárolognak. A haladás a **visszatérést** díjazza, nem a gyűjtést.
-
-Ez a terv úgy használja a MicaLingo-t, mint egy jó füzet: kevés új input, sok előhívás, egy hosszabb olvasás vagy hallgatás.
-
-## Hétköznapi sablon (25–35 perc)
-
-| Nap | Fókusz | Mit nyiss meg |
-| --- | --- | --- |
-| Hétfő | Szókincs (egy téma) | [Szókincs kvíz](/quizzes/vocabulary/), hibák mentése |
-| Kedd | Névelők | [der, die, das kvíz](/quizzes/articles/) |
-| Szerda | Igék | [Ige kvíz](/quizzes/verbs/) — ugyanaz a 15 ige Präsensben és Perfektben |
-| Csütörtök | Nyelvtan mondatban | Egy [nyelvtan](/grammar/) kategória, aztán [prepozíciók](/quizzes/prepositions/) |
-| Péntek | Vegyes előhívás | Megjelölt szavak vagy a hét leggyengébb kvíze |
-| Szombat | Bevitel | [Olvasás](/learning-materials/reading/) vagy [hallás](/learning-materials/listening/) |
-| Vasárnap | Kimenet | 8–12 mondat vagy rövid e-mail, hangosan elmondva |
-
-Ha csak 15 perc van: pénteki feladat. Az előhívás nyer az új listákkal szemben.
-
-## Szabályok, hogy ne dőljön össze
-
-- Napi egy téma.
-- Legfeljebb 12 új szó.
-- A nyelvtant mindig mondathoz kösd.
-- Először a tegnapi hibák.
-- Hetente egyszer írj.
-
-## A beszédet se hagyd ki
-
-Ha a beszéd ijeszt: csütörtök után öt perc hangüzenet. A csend nem edzi a szóbelit.
-
-## Ha kevés az idő
-
-A szerdát és csütörtököt áldozd, mielőtt a péntek és vasárnap meghal. Az előhívás és a kimenet védi, amit már tudsz.
-
-Esetekhez: [Német esetek pánik nélkül](/learn/german-cases/). Saját nyelvpárhoz: [nyilvános vs saját könyvtár](/learn/public-and-private/).`,
-    },
-  },
+  }
 ];
 
 const GRAMMAR_PRIMERS: Record<string, Record<LearnLang, string>> = {
@@ -578,9 +454,9 @@ Klasszikus csapda: a *weil*-mondat ige nélkül. Írj tíz *weil/dass* mondatot 
 
 const QUIZ_PRIMERS: Record<string, Record<LearnLang, string>> = {
   vocabulary: {
-    en: `These levels recycle high-frequency German words with Hungarian meanings. Study them in small sets: say the German aloud, hide the translation, then check. Pair this with [articles](/quizzes/articles/) so you never store a noun without *der/die/das*. A weekly rhythm is in the [practice plan](/learn/weekly-german-practice/).`,
-    de: `Diese Level wiederholen häufige deutsche Wörter mit ungarischer Bedeutung. Kleine Mengen: Deutsch laut sagen, Übersetzung verdecken, prüfen. Mit [Artikeln](/quizzes/articles/) koppeln. Wochenplan: [Übungsplan](/learn/weekly-german-practice/).`,
-    hu: `Ezek a szintek gyakori német szavakat forgatnak magyar jelentéssel és példamondattal. Kis adagokban: mondd hangosan a németet, takard a fordítást, ellenőrizd. Kösd a [névelőkhöz](/quizzes/articles/). Heti ritmus: [gyakorlóterv](/learn/weekly-german-practice/).`,
+    en: `These levels recycle high-frequency German words with Hungarian meanings. Study them in small sets: say the German aloud, hide the translation, then check. Pair this with [articles](/quizzes/articles/) so you never store a noun without *der/die/das*.`,
+    de: `Diese Level wiederholen häufige deutsche Wörter mit ungarischer Bedeutung. Kleine Mengen: Deutsch laut sagen, Übersetzung verdecken, prüfen. Mit [Artikeln](/quizzes/articles/) koppeln.`,
+    hu: `Ezek a szintek gyakori német szavakat forgatnak magyar jelentéssel és példamondattal. Kis adagokban: mondd hangosan a németet, takard a fordítást, ellenőrizd. Kösd a [névelőkhöz](/quizzes/articles/).`,
   },
   articles: {
     en: `Each item asks for **der, die or das** (and later the form that fits the case). Guessing by “how the word feels” fails under pressure. Use ending patterns (*-ung* → *die*) and always learn the noun with its article. Full method: [How to learn der, die, das](/learn/der-die-das/).`,
@@ -621,7 +497,7 @@ You can start without an account: open [Quizzes](/quizzes/), pick a topic, and w
 - **Rules next to drills:** [grammar](/grammar/) for cases, tenses, articles, adjective endings, prepositions and word order.
 - **Reading and listening:** [learning materials](/learning-materials/), including [false friends](/learning-materials/reading/false-friends/) and [idioms](/learning-materials/reading/idioms/).
 
-How the public and private libraries differ: [public vs private](/learn/public-and-private/). A simple loop for the week: [practice plan](/learn/weekly-german-practice/).
+How the public and private libraries differ: [public vs private](/learn/public-and-private/).
 
 ## How to start in ten minutes
 
@@ -641,7 +517,7 @@ Ohne Konto starten: [Quizze](/quizzes/) öffnen, Thema wählen, Level arbeiten. 
 - **Regeln neben dem Drill:** [Grammatik](/grammar/).
 - **Lesen und Hören:** [Lernmaterialien](/learning-materials/).
 
-Öffentlich vs privat: [Ratgeber](/learn/public-and-private/). Wochenplan: [Übungsplan](/learn/weekly-german-practice/).
+Öffentlich vs privat: [Ratgeber](/learn/public-and-private/).
 
 ## In zehn Minuten starten
 
@@ -661,7 +537,7 @@ Fiók nélkül is kezdheted: [Kvízek](/quizzes/), téma, szintek. **Google-fió
 - **Szabály a gyakorlat mellett:** [nyelvtan](/grammar/).
 - **Olvasás és hallás:** [tananyagok](/learning-materials/).
 
-Nyilvános vs saját: [útmutató](/learn/public-and-private/). Heti kör: [gyakorlóterv](/learn/weekly-german-practice/).
+Nyilvános vs saját: [útmutató](/learn/public-and-private/).
 
 ## Tíz perc alatt indulás
 
@@ -681,13 +557,13 @@ export const GRAMMAR_INDEX_ARTICLE: Record<LearnLang, string> = {
 export const QUIZ_INDEX_ARTICLE: Record<LearnLang, string> = {
   en: `The **public** quizzes are German–Hungarian and grouped by skill. Start with the leak you already know — for most learners that is [articles](/quizzes/articles/) or [verbs](/quizzes/verbs/). Each topic page includes a short explanation and a sample of the words you will meet, so you can learn something even before you press Start.
 
-With a Google login you can switch to a private tab and generate quizzes from your own lists in any languages. Guests can still complete every public HU–DE level. How the two libraries differ: [public vs private](/learn/public-and-private/). How to fit this into a week: [practice plan](/learn/weekly-german-practice/).`,
+With a Google login you can switch to a private tab and generate quizzes from your own lists in any languages. Guests can still complete every public HU–DE level. How the two libraries differ: [public vs private](/learn/public-and-private/).`,
   de: `Die **öffentlichen** Quizze sind Deutsch–Ungarisch und nach Fertigkeit gruppiert. Starte beim bekannten Leck — oft [Artikel](/quizzes/articles/) oder [Verben](/quizzes/verbs/). Jede Themenseite hat eine kurze Erklärung und Beispielwörter, bevor du auf Start drückst.
 
-Mit Google-Login: privater Tab und eigene Listen in beliebigen Sprachen. Gäste können alle öffentlichen DE–HU-Level spielen. Unterschied: [öffentlich vs privat](/learn/public-and-private/). Wochenplan: [Übungsplan](/learn/weekly-german-practice/).`,
+Mit Google-Login: privater Tab und eigene Listen in beliebigen Sprachen. Gäste können alle öffentlichen DE–HU-Level spielen. Unterschied: [öffentlich vs privat](/learn/public-and-private/).`,
   hu: `A **nyilvános** kvízek német–magyarok, készség szerint csoportosítva. Kezdd a ismert lyukkal — sokaknál [névelők](/quizzes/articles/) vagy [igék](/quizzes/verbs/). Minden témaoldalon van rövid magyarázat és mintaszavak, még a Start előtt.
 
-Google-belépéssel saját kvíz bármilyen nyelven. Vendégként is végigjátszhatod a nyilvános HU–DE szinteket. A két könyvtár: [nyilvános vs saját](/learn/public-and-private/). Heti beosztás: [gyakorlóterv](/learn/weekly-german-practice/).`,
+Google-belépéssel saját kvíz bármilyen nyelven. Vendégként is végigjátszhatod a nyilvános HU–DE szinteket. A két könyvtár: [nyilvános vs saját](/learn/public-and-private/).`,
 };
 
 export const EXTRA_HOME_FAQ: Record<LearnLang, { q: string; a: string }[]> = {
