@@ -11,6 +11,7 @@ import {
   type UserCredential,
 } from 'firebase/auth';
 import { auth } from './firebase';
+import { storeNativeEmail } from './adminAccess';
 
 /** True when the user dismissed the Google popup (not a real failure). */
 export function isUserCancelledAuthError(error: unknown): boolean {
@@ -74,6 +75,7 @@ export async function signInWithGoogle(): Promise<UserCredential | null> {
   pendingSignIn = (async () => {
     if (Capacitor.isNativePlatform()) {
       const result = await FirebaseAuthentication.signInWithGoogle();
+      storeNativeEmail(result.user?.email);
       const idToken = result.credential?.idToken;
       if (!idToken) {
         throw new Error('Google Sign-In did not return an ID token');
@@ -111,6 +113,7 @@ export async function signInWithGoogle(): Promise<UserCredential | null> {
 
 /** Signs out of both native Google/Firebase Auth and the Firebase JS SDK. */
 export async function signOutFromApp(): Promise<void> {
+  storeNativeEmail(null);
   if (Capacitor.isNativePlatform()) {
     try {
       await FirebaseAuthentication.signOut();

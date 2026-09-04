@@ -140,6 +140,14 @@ export default function Quizzes() {
 
       {/* Navigation Tabs — scrollable on phone / tablet */}
         <div className="flex overflow-x-auto overscroll-x-contain whitespace-nowrap border-b border-white/60 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-thin" style={{ WebkitOverflowScrolling: 'touch' }}>
+          {isAdmin && (
+            <button
+              onClick={() => handleTabChange('telc')}
+              className={`flex-shrink-0 py-3 px-4 sm:px-6 font-bold text-sm border-b-2 transition-colors touch-manipulation ${activeTab === 'telc' ? 'border-blue-600 text-blue-700' : 'border-transparent text-blue-900/50 hover:text-blue-900/80'}`}
+            >
+              {t('telc_b2')}
+            </button>
+          )}
           <button
             onClick={() => handleTabChange('library')}
             className={`flex-shrink-0 py-3 px-4 sm:px-6 font-bold text-sm border-b-2 transition-colors touch-manipulation ${activeTab === 'library' ? 'border-blue-600 text-blue-700' : 'border-transparent text-blue-900/50 hover:text-blue-900/80'}`}
@@ -158,14 +166,6 @@ export default function Quizzes() {
           >
             {t('marked_words') || 'Marked words'}
           </button>
-          {isAdmin && (
-            <button
-              onClick={() => handleTabChange('telc')}
-              className={`flex-shrink-0 py-3 px-4 sm:px-6 font-bold text-sm border-b-2 transition-colors touch-manipulation ${activeTab === 'telc' ? 'border-blue-600 text-blue-700' : 'border-transparent text-blue-900/50 hover:text-blue-900/80'}`}
-            >
-              {t('telc_b2')}
-            </button>
-          )}
         </div>
 
       {/* Public Quizzes */}
@@ -176,6 +176,16 @@ export default function Quizzes() {
             <p className="text-lg text-blue-900/70 font-medium">{t('test_your_knowledge_subtitle')}</p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {isAdmin && (
+              <Link
+                to={`/quizzes/${PRIVATE_QUIZ_TOPIC}`}
+                className="group relative flex flex-col items-start p-6 rounded-[2rem] bg-white/90 backdrop-blur-xl border border-blue-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500"
+              >
+                <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform duration-500">🎓</div>
+                <h3 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-xl mb-1">{t('telc_b2')}</h3>
+                <p className="text-gray-600 font-medium text-sm">{t('telc_b2_subtitle')}</p>
+              </Link>
+            )}
             <Link to="/quizzes/vocabulary" className="group relative flex flex-col items-start p-6 rounded-[2rem] bg-white/90 backdrop-blur-xl border border-blue-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500">
               <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform duration-500">📖</div>
               <h3 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-xl mb-1">{t('vocabulary')}</h3>

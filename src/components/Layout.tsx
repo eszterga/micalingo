@@ -83,7 +83,7 @@ export default function Layout() {
       // Let the Quiz page handle its own quit-confirm trap
       if (location.pathname === '/quiz') return;
 
-      // Prefer SPA history so private-space tabs (?tab=custom / personal / private) are restored
+      // Prefer SPA history so private-space tabs (?tab=custom / personal / private / telc) are restored
       if (canGoBack || window.history.length > 1) {
         window.history.back();
       } else if (location.pathname !== '/') {

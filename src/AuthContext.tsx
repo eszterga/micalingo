@@ -1,7 +1,16 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { type User, onAuthStateChanged } from 'firebase/auth';
+import { Capacitor } from '@capacitor/core';
+import { FirebaseAuthentication } from '@capacitor-firebase/authentication';
 import { auth } from './lib/firebase';
 import { completeGoogleRedirectSignIn, signOutFromApp } from './lib/googleAuth';
+import {
+  emailFromFirebaseUser,
+  isAdminEmail,
+  normalizeEmail,
+  readStoredNativeEmail,
+  storeNativeEmail,
+} from './lib/adminAccess';
 
 interface AuthContextType {
   user: User | null;
@@ -24,10 +33,10 @@ const AuthContext = createContext<AuthContextType>({
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [nativeEmail, setNativeEmail] = useState(() => readStoredNativeEmail());
   const [adminMode, setAdminModeState] = useState<boolean>(() => sessionStorage.getItem("micalingo_admin_mode") === "true");
 
-  const adminEmails = ['esztergalyos.ildiko@gmail.com', 'ildiko.esztergalyos@gmail.com'];
-  const isAdmin = user?.email ? adminEmails.includes(user.email.trim().toLowerCase()) : false;
+  const isAdmin = isAdminEmail(emailFromFirebaseUser(user) || nativeEmail);
 
   useEffect(() => {
     let unsubscribe = () => {};
@@ -54,6 +63,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       unsubscribe();
     };
   }, []);
+
+  useEffect(() => {
+    if (loading) return;
+
+    if (!user) {
+      storeNativeEmail(null);
+      setNativeEmail('');
+      return;
+    }
+
+    const fromUser = emailFromFirebaseUser(user);
+    if (fromUser) {
+      storeNativeEmail(fromUser);
+      setNativeEmail(fromUser);
+      return;
+    }
+
+    if (!Capacitor.isNativePlatform()) return;
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const result = await FirebaseAuthentication.getCurrentUser();
+        const email = normalizeEmail(result.user?.email);
+        if (!cancelled && email) {
+          storeNativeEmail(email);
+          setNativeEmail(email);
+        }
+      } catch {
+        /* native plugin unavailable in some WebView sessions */
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user, loading]);
   
   const setAdminMode = (isDevMode: boolean) => {
     setAdminModeState(isDevMode);
@@ -63,6 +109,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = async () => {
     sessionStorage.removeItem("adminPromptShown");
     sessionStorage.removeItem("micalingo_admin_mode");
+    storeNativeEmail(null);
+    setNativeEmail('');
     setAdminModeState(false);
     await signOutFromApp();
   };
