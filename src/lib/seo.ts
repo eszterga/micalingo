@@ -583,6 +583,14 @@ export function resolveSeo(pathname: string, lang: SeoLang): ResolvedSeo {
   const quizTopic = clean.match(/^\/quizzes\/([^/]+)$/);
   if (quizTopic) {
     const topic = quizTopic[1];
+    if (topic === 'telc-b2') {
+      return {
+        ...pick(ROUTES['/quizzes'], lang),
+        canonicalPath: '/quizzes',
+        noindex: true,
+        pageType: 'page',
+      };
+    }
     const copy = QUIZ_TOPICS[topic];
     if (copy) {
       return { ...pick(copy, lang), canonicalPath: clean, noindex: false, pageType: 'quizTopic', topic };

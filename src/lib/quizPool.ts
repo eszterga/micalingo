@@ -114,6 +114,15 @@ export function isQuizTopic(topic: string | null | undefined): topic is QuizTopi
   return !!topic && (QUIZ_TOPICS as readonly string[]).includes(topic);
 }
 
+/** Developer-only quiz section. Never part of the public library or sitemap. */
+export const PRIVATE_QUIZ_TOPIC = 'telc-b2';
+export const PRIVATE_QUIZ_TOPICS = [PRIVATE_QUIZ_TOPIC] as const;
+export type PrivateQuizTopic = (typeof PRIVATE_QUIZ_TOPICS)[number];
+
+export function isPrivateQuizTopic(topic: string | null | undefined): topic is PrivateQuizTopic {
+  return !!topic && (PRIVATE_QUIZ_TOPICS as readonly string[]).includes(topic);
+}
+
 export type QuizWord = {
   german: string;
   hungarian: string;

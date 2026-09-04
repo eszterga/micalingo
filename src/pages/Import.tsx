@@ -8,6 +8,7 @@ import { useAuth } from "../AuthContext";
 import { publicVocabulary, publicPhrases, publicArticles, publicPrepositions, publicFalseFriends, publicAdjectives } from '../lib/public-data';
 import { useCloudVocabulary, addCloudWord, bulkAddCloudWords, bulkDeleteCloudWords, updateCloudWord, purgeVocabDuplicatesKeeping, purgeSoftDeletedVocabSiblings, isActiveVocabItem, findVocabDuplicate, vocabCategoryKey, vocabGermanKey } from "../lib/firestore";
 import { useI18n } from "../I18nContext";
+import { isPrivateQuizTopic } from "../lib/quizPool";
 
 const getEditItemKey = (item: any, idx: number) => String(item?.id ?? `idx_${idx}`);
 
@@ -109,13 +110,22 @@ export default function Import() {
   }, [isAdmin, adminMode]);
 
   useEffect(() => {
+    if (!isAdmin && isPrivateQuizTopic(destination)) {
+      setDestination('vocabulary');
+    }
+    if (!isAdmin && isPrivateQuizTopic(newCategory)) {
+      setNewCategory('vocabulary');
+    }
+    if (isPrivateQuizTopic(destination) || isPrivateQuizTopic(newCategory)) {
+      setSaveToPublic(false);
+    }
     if (!saveToPublic && (destination === 'false_friends' || destination === 'idioms')) {
       setDestination('vocabulary');
     }
     if (!saveToPublic && (newCategory === 'false_friends' || newCategory === 'idioms')) {
       setNewCategory('vocabulary');
     }
-  }, [saveToPublic, destination, newCategory]);
+  }, [isAdmin, saveToPublic, destination, newCategory]);
 
   const allItems = useMemo(() => {
     const cloudItems = existingItems.map((item: any) => ({ ...item, isCloud: true }));
@@ -866,7 +876,8 @@ export default function Import() {
       let savedCount = 0;
       let overwrittenCount = 0;
       const targetCat = vocabCategoryKey(destination);
-      const targetUserId = saveToPublic ? 'PUBLIC_LIBRARY' : user?.uid;
+      const forcePrivate = isPrivateQuizTopic(targetCat);
+      const targetUserId = (!forcePrivate && saveToPublic) ? 'PUBLIC_LIBRARY' : user?.uid;
       const librarySnapshot = [...(existingItems as any[])];
 
       // 1. Save brand new items — then hard-purge any twin docs for that german+category
@@ -999,7 +1010,7 @@ export default function Import() {
 
     try {
         const payload: any = {
-          userId: saveToPublic ? "PUBLIC_LIBRARY" : user?.uid,
+          userId: (isPrivateQuizTopic(newCategory) || !saveToPublic) ? user?.uid : "PUBLIC_LIBRARY",
           german: finalGerman,
           hungarian: newHungarian.trim(),
           example: newExample.trim(),
@@ -1321,6 +1332,9 @@ export default function Import() {
                   <option value="prepositions">{t('dropdown_prepositions') || 'Prepositions quiz'}</option>
                   <option value="adjectives">{t('dropdown_adjectives') || 'Adjectives quiz'}</option>
                   <option value="verbs">{t('dropdown_verbs') || 'Verbs quiz'}</option>
+                  {isAdmin && (
+                    <option value="telc-b2">{t('dropdown_telc_b2') || 'Telc B2 (private)'}</option>
+                  )}
                   {isAdmin && adminMode && saveToPublic && (
                     <>
                       <option value="false_friends">{t('false_friends') || 'False Friends'}</option>
@@ -1372,6 +1386,9 @@ export default function Import() {
                   <option value="prepositions">{t('dropdown_prepositions') || 'Prepositions quiz'}</option>
                   <option value="adjectives">{t('dropdown_adjectives') || 'Adjectives quiz'}</option>
                   <option value="verbs">{t('dropdown_verbs') || 'Verbs quiz'}</option>
+                  {isAdmin && (
+                    <option value="telc-b2">{t('dropdown_telc_b2') || 'Telc B2 (private)'}</option>
+                  )}
                   {isAdmin && adminMode && saveToPublic && (
                     <>
                       <option value="false_friends">{t('false_friends') || 'False Friends'}</option>

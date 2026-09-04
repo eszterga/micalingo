@@ -13,6 +13,7 @@ import {
   MARKED_WORDS_PER_QUIZ,
   unmarkWord,
 } from "./markedWordsQuizEngine";
+import { PRIVATE_QUIZ_TOPIC } from "../lib/quizPool";
 
 const BackgroundBlobs = () => (
   <>
@@ -33,16 +34,17 @@ const BackgroundBlobs = () => (
   </>
 );
 
-type QuizTab = 'library' | 'personal' | 'marked';
+type QuizTab = 'library' | 'personal' | 'marked' | 'telc';
 
 export default function Quizzes() {
   const { t, language } = useI18n();
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const userVocabulary = useCloudVocabulary(user?.uid);
   const [activeTab, setActiveTab] = useState<QuizTab>(() => {
     const tab = searchParams.get('tab');
+    if (tab === 'telc' && isAdmin) return 'telc';
     if (tab === 'personal' || tab === 'marked') return tab;
     return 'library';
   });
@@ -57,10 +59,14 @@ export default function Quizzes() {
 
   useEffect(() => {
     const tab = searchParams.get('tab');
+    if (tab === 'telc') {
+      setActiveTab(isAdmin ? 'telc' : 'library');
+      return;
+    }
     if (tab === 'personal' || tab === 'marked' || tab === 'library') {
       setActiveTab(tab);
     }
-  }, [searchParams]);
+  }, [searchParams, isAdmin]);
 
   const handleTabChange = (tab: QuizTab) => {
     setActiveTab(tab);
@@ -152,6 +158,14 @@ export default function Quizzes() {
           >
             {t('marked_words') || 'Marked words'}
           </button>
+          {isAdmin && (
+            <button
+              onClick={() => handleTabChange('telc')}
+              className={`flex-shrink-0 py-3 px-4 sm:px-6 font-bold text-sm border-b-2 transition-colors touch-manipulation ${activeTab === 'telc' ? 'border-blue-600 text-blue-700' : 'border-transparent text-blue-900/50 hover:text-blue-900/80'}`}
+            >
+              {t('telc_b2')}
+            </button>
+          )}
         </div>
 
       {/* Public Quizzes */}
@@ -191,6 +205,34 @@ export default function Quizzes() {
               <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform duration-500">🏃</div>
               <h3 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-xl mb-1">{t('verbs_quiz') || 'Verbs'}</h3>
               <p className="text-gray-600 font-medium text-sm">{t('verbs_quiz_subtitle') || 'Practice German verbs and past forms.'}</p>
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {isAdmin && activeTab === 'telc' && (
+        <div className="bg-white/60 backdrop-blur-xl p-6 md:p-8 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white space-y-6">
+          <div>
+            <h2 className="text-2xl font-extrabold text-blue-950">{t('telc_b2')}</h2>
+            <p className="text-lg text-blue-900/70 font-medium">{t('telc_b2_subtitle')}</p>
+            <p className="text-sm text-blue-900/55 font-medium mt-2 max-w-2xl">{t('telc_b2_desc')}</p>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Link
+              to={`/quizzes/${PRIVATE_QUIZ_TOPIC}`}
+              className="group relative flex flex-col items-start p-6 rounded-[2rem] bg-white/90 backdrop-blur-xl border border-blue-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500"
+            >
+              <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform duration-500">🎓</div>
+              <h3 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-xl mb-1">{t('telc_b2')}</h3>
+              <p className="text-gray-600 font-medium text-sm">{t('create_your_own_quizzes_subtitle_loggedin')}</p>
+            </Link>
+            <Link
+              to={`/import?destination=${PRIVATE_QUIZ_TOPIC}`}
+              className="group relative flex flex-col items-start p-6 rounded-[2rem] bg-white/90 backdrop-blur-xl border border-blue-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500"
+            >
+              <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform duration-500">📥</div>
+              <h3 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-xl mb-1">{t('import')}</h3>
+              <p className="text-gray-600 font-medium text-sm">{t('telc_b2_desc')}</p>
             </Link>
           </div>
         </div>

@@ -184,6 +184,7 @@ export default function Statistics() {
     else if (topic === 'prepositions') translatedTopic = t('prepositions_quiz') || 'Prepositions';
     else if (topic === 'adjectives') translatedTopic = t('adjectives_quiz') || 'Adjectives';
     else if (topic === 'verbs') translatedTopic = t('verbs_quiz') || 'Verbs';
+    else if (topic === 'telc-b2') translatedTopic = t('telc_b2') || 'Telc B2';
 
     // Make the name much shorter for the table view by removing unnecessary words
     const shortTopic = translatedTopic.replace(/( kvíz| quiz| und Sätze| and sentences| és mondatok)/gi, '').trim();

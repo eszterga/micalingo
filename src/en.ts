@@ -65,6 +65,10 @@ export const en = {
   custom_phrases_desc: "Test your knowledge of custom phrases and sentences.",
   custom_prepositions_desc: "Practice cases for prepositions you've imported.",
   custom_verbs_desc: "Your personal verbs.",
+  telc_b2: "Telc B2",
+  telc_b2_subtitle: "Private practice set — only on your developer accounts.",
+  telc_b2_desc: "Import your own lists here. Other signed-in users never see this section.",
+  dropdown_telc_b2: "Telc B2 (private)",
 
   // Navigation & Layout
   home: "Home",

@@ -65,6 +65,10 @@ export const hu = {
   custom_phrases_desc: "Teszteld a tudásod a saját kifejezéseiddel és mondataiddal.",
   custom_prepositions_desc: "Gyakorold az eseteket az importált elöljárószavakkal.",
   custom_verbs_desc: "Saját igéid.",
+  telc_b2: "Telc B2",
+  telc_b2_subtitle: "Saját gyakorlóanyag — csak a developer fiókodon látszik.",
+  telc_b2_desc: "Ide importálhatod a saját listáidat. Más belépett felhasználók nem látják ezt a részt.",
+  dropdown_telc_b2: "Telc B2 (privát)",
 
   // Navigation & Layout
   home: "Kezdőlap",

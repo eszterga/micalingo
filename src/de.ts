@@ -65,6 +65,10 @@ export const de = {
   custom_phrases_desc: "Teste dein Wissen über benutzerdefinierte Redewendungen und Sätze.",
   custom_prepositions_desc: "Übe Fälle für Präpositionen, die du importiert hast.",
   custom_verbs_desc: "Deine persönlichen Verben.",
+  telc_b2: "Telc B2",
+  telc_b2_subtitle: "Privates Übungsmaterial — nur auf deinen Entwicklerkonten sichtbar.",
+  telc_b2_desc: "Hier importierst du eigene Listen. Andere angemeldete Nutzer sehen diesen Bereich nie.",
+  dropdown_telc_b2: "Telc B2 (privat)",
 
   // Navigation & Layout
   home: "Startseite",

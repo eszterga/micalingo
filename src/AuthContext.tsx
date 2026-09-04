@@ -27,7 +27,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [adminMode, setAdminModeState] = useState<boolean>(() => sessionStorage.getItem("micalingo_admin_mode") === "true");
 
   const adminEmails = ['esztergalyos.ildiko@gmail.com', 'ildiko.esztergalyos@gmail.com'];
-  const isAdmin = user?.email ? adminEmails.includes(user.email) : false;
+  const isAdmin = user?.email ? adminEmails.includes(user.email.trim().toLowerCase()) : false;
 
   useEffect(() => {
     let unsubscribe = () => {};

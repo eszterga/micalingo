@@ -148,6 +148,7 @@ export default function Results() {
     else if (topic === 'prepositions') translatedTopic = t('prepositions_quiz') || 'Prepositions';
     else if (topic === 'adjectives') translatedTopic = t('adjectives_quiz') || 'Adjectives';
     else if (topic === 'verbs') translatedTopic = t('verbs_quiz') || 'Verbs';
+    else if (topic === 'telc-b2') translatedTopic = t('telc_b2') || 'Telc B2';
 
     if (isCustom) return t('quiz_title_custom', { topic: translatedTopic, id: quizId || '' }).trim();
     return t('quiz_title_public', { topic: translatedTopic, id: quizId || '' }).trim();

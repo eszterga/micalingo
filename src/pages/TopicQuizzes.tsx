@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Link, useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useParams, useNavigate, useSearchParams, Navigate } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 import { isUserCancelledAuthError, signInWithGoogle } from '../lib/googleAuth';
 import { useCloudVocabulary } from "../lib/firestore";
@@ -12,6 +12,7 @@ import {
   buildCustomQuizPool,
   getQuizLevelCount,
   getItemsInQuizLevel,
+  isPrivateQuizTopic,
 } from "../lib/quizPool";
 
 const BackgroundBlobs = () => (
@@ -37,7 +38,7 @@ export default function TopicQuizzes() {
   const { topic } = useParams<{ topic: string }>();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const { t, language } = useI18n();
   const publicDbWordsRaw = useCloudVocabulary("PUBLIC_LIBRARY");
   const publicDbWords = publicDbWordsRaw || [];
@@ -84,6 +85,7 @@ export default function TopicQuizzes() {
 
   const pageTitle = useMemo(() => {
     if (!topic) return "";
+    if (isPrivateQuizTopic(topic)) return isAdmin ? (t('telc_b2') || "Telc B2") : "";
     return topic === 'vocabulary' ? t('vocabulary') || "Vocabulary"
       : topic === 'phrases' ? t('phrases_sentences_quiz') || "Phrases and sentences quiz"
       : topic === 'articles' ? t('articles_quiz') || "Articles"
@@ -91,12 +93,14 @@ export default function TopicQuizzes() {
       : topic === 'adjectives' ? t('adjectives_quiz') || "Adjectives"
       : topic === 'verbs' ? t('verbs_quiz') || "Verbs"
       : "";
-  }, [topic, t]);
+  }, [topic, t, isAdmin]);
 
-  const topicIntro = topic ? t(`seo_intro_${topic}`) : '';
+  const topicIntro = topic && !isPrivateQuizTopic(topic) ? t(`seo_intro_${topic}`) : '';
   const topicIntroText = topicIntro && topicIntro !== `seo_intro_${topic}` ? topicIntro : '';
-  const primer = quizPrimer(topic, language as LearnLang);
-  const sampleWords = sourceData.slice(0, 6);
+  const primer = isPrivateQuizTopic(topic) ? null : quizPrimer(topic, language as LearnLang);
+  const sampleWords = isPrivateQuizTopic(topic) ? [] : sourceData.slice(0, 6);
+  const isPrivateTopic = isPrivateQuizTopic(topic);
+  const effectiveTab = isPrivateTopic ? 'custom' : activeTab;
 
   const totalQuizzes = getQuizLevelCount(sourceData.length);
   const quizzes = Array.from({ length: totalQuizzes }, (_, i) => i + 1);
@@ -108,6 +112,10 @@ export default function TopicQuizzes() {
   const totalCustomQuizzes = getQuizLevelCount(customSourceData.length);
   const customQuizzes = Array.from({ length: totalCustomQuizzes }, (_, i) => i + 1);
 
+  if (isPrivateTopic && !isAdmin) {
+    return <Navigate to="/quizzes" replace />;
+  }
+
   if (!topic || !pageTitle) {
     return (
       <div className="relative min-h-[85vh] w-full flex flex-col pt-4 md:pt-8 pb-12">
@@ -115,7 +123,7 @@ export default function TopicQuizzes() {
         <div className="relative z-10 w-full max-w-7xl mx-auto space-y-8 px-4 md:px-8">
             <div className="text-center bg-white/70 backdrop-blur-xl p-12 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white">
                 <h1 className="text-3xl font-extrabold text-blue-950 mb-3">{t('topic_not_found') || 'Topic not found'}</h1>
-                <button onClick={() => navigate(activeTab === 'custom' ? '/quizzes?tab=personal' : '/quizzes')} className="mt-4 text-blue-600 hover:underline font-bold">{t('return_to_quizzes') || 'Return to Quizzes'}</button>
+                <button onClick={() => navigate('/quizzes')} className="mt-4 text-blue-600 hover:underline font-bold">{t('return_to_quizzes') || 'Return to Quizzes'}</button>
             </div>
         </div>
       </div>
@@ -128,7 +136,7 @@ export default function TopicQuizzes() {
       <div className="relative z-10 w-full max-w-7xl mx-auto space-y-8 px-4 md:px-8">
         <div className="flex items-center gap-4">
           <Link
-            to={activeTab === 'custom' ? '/quizzes?tab=personal' : '/quizzes'}
+            to={isPrivateTopic ? '/quizzes?tab=telc' : activeTab === 'custom' ? '/quizzes?tab=personal' : '/quizzes'}
             className="bg-white/70 backdrop-blur-md border border-white text-gray-700 hover:bg-white font-bold px-5 py-2.5 rounded-xl shadow-sm transition-all flex items-center gap-2"
           >
             {t('back_button')}
@@ -146,6 +154,7 @@ export default function TopicQuizzes() {
           </div>
         )}
 
+      {!isPrivateTopic && (
       <div className="flex overflow-x-auto whitespace-nowrap border-b border-white/60">
         <button
           onClick={() => handleTabChange('default')}
@@ -160,8 +169,9 @@ export default function TopicQuizzes() {
           {t('personalized_space') || 'Private Space'}
         </button>
       </div>
+      )}
 
-      {activeTab === 'default' && (
+      {effectiveTab === 'default' && (
         <div className="bg-white/60 backdrop-blur-xl p-6 md:p-8 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white">
           {quizzes.length === 0 && publicDbWordsRaw === null ? (
             <div className="flex flex-col items-center justify-center py-12 space-y-4">
@@ -261,7 +271,7 @@ export default function TopicQuizzes() {
         </div>
       )}
 
-      {activeTab === 'custom' && (
+      {effectiveTab === 'custom' && (
         <div className="space-y-4">
           {!user ? (
             <div className="bg-white/70 backdrop-blur-xl p-12 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white text-center">

@@ -32,8 +32,9 @@ export function isAdExcludedLocation(pathname: string, search: string): boolean 
   if (path.startsWith('/learning-materials/private')) return true;
   if (path === '/import' || path.startsWith('/import/')) return true;
   if (path === '/create-quiz') return true;
-  if (tab === 'private' || tab === 'personal' || tab === 'custom' || tab === 'marked') return true;
-  if (topic === 'marked') return true;
+  if (path === '/quizzes/telc-b2' || path.startsWith('/quizzes/telc-b2/')) return true;
+  if (tab === 'private' || tab === 'personal' || tab === 'custom' || tab === 'marked' || tab === 'telc') return true;
+  if (topic === 'marked' || topic === 'telc-b2') return true;
   if (custom === 'true' || custom === '1') return true;
   return false;
 }

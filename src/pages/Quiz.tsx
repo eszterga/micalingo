@@ -7,6 +7,7 @@ import { publicVocabulary, publicPhrases, publicArticles, publicPrepositions, pu
 import {
   WORDS_PER_QUIZ,
   isQuizTopic,
+  isPrivateQuizTopic,
   buildPublicQuizPool,
   buildCustomQuizPool,
   getQuizLevelWords,
@@ -93,11 +94,12 @@ const BackgroundBlobs = () => (
 export default function Quiz() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const { t } = useI18n();
   const topic = searchParams.get("topic");
   const quizId = parseInt(searchParams.get("quizId") || "1", 10);
-  const isCustom = searchParams.get("custom") === 'true';
+  const isPrivate = isPrivateQuizTopic(topic);
+  const isCustom = searchParams.get("custom") === 'true' || isPrivate;
   const isMarked = topic === 'marked';
   const isRedo = searchParams.get("redo") === 'true';
   const userVocabulary = useCloudVocabulary(user?.uid);
@@ -118,6 +120,12 @@ export default function Quiz() {
   /** Prevents regenerating (and flickering) when cloud vocab arrives after questions are ready. */
   const builtQuizKeyRef = useRef<string | null>(null);
 
+  useEffect(() => {
+    if (isPrivate && !isAdmin) {
+      navigate('/quizzes', { replace: true });
+    }
+  }, [isPrivate, isAdmin, navigate]);
+
   const [showExamples] = useState(() => {
     const stored = localStorage.getItem('micalingo_show_examples');
     return stored !== null ? JSON.parse(stored) : true;
@@ -130,6 +138,7 @@ export default function Quiz() {
     : topic === 'adjectives' ? (t('adjectives_quiz') || 'Adjectives')
     : topic === 'verbs' ? (t('verbs_quiz') || 'Verbs')
     : topic === 'marked' ? (t('marked_words') || 'Marked words')
+    : topic === 'telc-b2' ? (t('telc_b2') || 'Telc B2')
     : t('personalized_space');
 
   const markedWords = useMemo(
@@ -183,6 +192,8 @@ export default function Quiz() {
   // Return to the same library the user started from (private custom / marked / public)
   const quizzesBackPath = isMarked
     ? '/quizzes?tab=marked'
+    : isPrivate
+      ? `/quizzes/${topic}`
     : topic && isQuizTopic(topic)
       ? `/quizzes/${topic}${isCustom ? '?tab=custom' : ''}`
       : isCustom
