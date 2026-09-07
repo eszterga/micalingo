@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Link } from "react-router-dom";
+import AppLink from "../components/AppLink";
 import { useI18n } from "../I18nContext";
 import { useAuth } from "../AuthContext";
 import { useCloudVocabulary, addCloudWord, updateCloudWord, deleteCloudWordPurgingSoftDeleted, purgeVocabDuplicatesKeeping } from "../lib/firestore";
@@ -109,9 +109,9 @@ export default function FalseFriends() {
       <BackgroundBlobs />
       <div className="relative z-10 w-full max-w-7xl mx-auto space-y-8 px-4 md:px-8">
         <div className="flex items-center gap-4">
-          <Link to="/learning-materials/reading" className="bg-white/70 backdrop-blur-md border border-white text-gray-700 hover:bg-white font-bold px-5 py-2.5 rounded-xl shadow-sm transition-all flex items-center gap-2">
+          <AppLink to="/learning-materials/reading" className="bg-white/70 backdrop-blur-md border border-white text-gray-700 hover:bg-white font-bold px-5 py-2.5 rounded-xl shadow-sm transition-all flex items-center gap-2">
             {t('back_button')}
-          </Link>
+          </AppLink>
           <div>
             <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600 tracking-tight pb-2">{t('false_friends')}</h1>
             <p className="text-lg text-blue-900/70 font-medium mt-1">{t('false_friends_desc')}</p>

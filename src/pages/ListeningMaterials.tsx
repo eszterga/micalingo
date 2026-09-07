@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import AppLink from '../components/AppLink';
 import { useI18n } from '../I18nContext';
 import { useAuth } from '../AuthContext';
 import CMSEditorModal, { MaterialData, CategoryOption } from '../components/CMSEditorModal';
@@ -96,9 +96,9 @@ export default function ListeningMaterials() {
       <BackgroundBlobs />
       <div className="relative z-10 w-full max-w-7xl mx-auto space-y-8 px-4 md:px-8">
         <div className="flex items-center gap-4">
-          <Link to="/learning-materials" className="bg-white/70 backdrop-blur-md border border-white text-gray-700 hover:bg-white font-bold px-5 py-2.5 rounded-xl shadow-sm transition-all flex items-center gap-2">
+          <AppLink to="/learning-materials" className="bg-white/70 backdrop-blur-md border border-white text-gray-700 hover:bg-white font-bold px-5 py-2.5 rounded-xl shadow-sm transition-all flex items-center gap-2">
             {t("back_button")}
-          </Link>
+          </AppLink>
           <div>
             <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600 tracking-tight pb-2">
               {t("listen_materials")}
@@ -138,13 +138,13 @@ export default function ListeningMaterials() {
             {openSections.music && (
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 pt-8 pb-2">
                   {musicCategories.map(cat => (
-                    <Link key={cat.id} to={`/learning-materials/listening/music/${cat.id}`} className="group relative flex flex-col items-start justify-between p-6 md:p-8 rounded-[2rem] bg-white/90 backdrop-blur-xl border border-blue-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500 overflow-hidden">
+                    <AppLink key={cat.id} to={`/learning-materials/listening/music/${cat.id}`} className="group relative flex flex-col items-start justify-between p-6 md:p-8 rounded-[2rem] bg-white/90 backdrop-blur-xl border border-blue-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500 overflow-hidden">
                       <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center text-3xl mb-10 group-hover:scale-110 transition-transform duration-500 border border-gray-100">{cat.icon}</div>
                       <div className="relative z-10 w-full">
                         <h3 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-2xl drop-shadow-sm mb-1">{cat.title}</h3>
                         <p className="text-gray-600 font-medium text-sm leading-relaxed">{cat.desc}</p>
                       </div>
-                    </Link>
+                    </AppLink>
                   ))}
                 </div>
             )}
@@ -164,13 +164,13 @@ export default function ListeningMaterials() {
             {openSections.podcasts && (
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 pt-8 pb-2">
                   {podcastsCategories.map(cat => (
-                    <Link key={cat.id} to={`/learning-materials/listening/podcasts/${cat.id}`} className="group relative flex flex-col items-start justify-between p-6 md:p-8 rounded-[2rem] bg-white/90 backdrop-blur-xl border border-blue-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500 overflow-hidden">
+                    <AppLink key={cat.id} to={`/learning-materials/listening/podcasts/${cat.id}`} className="group relative flex flex-col items-start justify-between p-6 md:p-8 rounded-[2rem] bg-white/90 backdrop-blur-xl border border-blue-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500 overflow-hidden">
                       <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center text-3xl mb-10 group-hover:scale-110 transition-transform duration-500 border border-gray-100">{cat.icon}</div>
                       <div className="relative z-10 w-full">
                         <h3 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-2xl drop-shadow-sm mb-1">{cat.title}</h3>
                         <p className="text-gray-600 font-medium text-sm leading-relaxed">{cat.desc}</p>
                       </div>
-                    </Link>
+                    </AppLink>
                   ))}
                 </div>
             )}
@@ -190,13 +190,13 @@ export default function ListeningMaterials() {
             {openSections.audiobooks && (
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 pt-8 pb-2">
                   {audiobooksCategories.map(cat => (
-                    <Link key={cat.id} to={`/learning-materials/listening/audiobooks/${cat.id}`} className="group relative flex flex-col items-start justify-between p-6 md:p-8 rounded-[2rem] bg-white/90 backdrop-blur-xl border border-blue-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500 overflow-hidden">
+                    <AppLink key={cat.id} to={`/learning-materials/listening/audiobooks/${cat.id}`} className="group relative flex flex-col items-start justify-between p-6 md:p-8 rounded-[2rem] bg-white/90 backdrop-blur-xl border border-blue-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500 overflow-hidden">
                       <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center text-3xl mb-10 group-hover:scale-110 transition-transform duration-500 border border-gray-100">{cat.icon}</div>
                       <div className="relative z-10 w-full">
                         <h3 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-2xl drop-shadow-sm mb-1">{cat.title}</h3>
                         <p className="text-gray-600 font-medium text-sm leading-relaxed">{cat.desc}</p>
                       </div>
-                    </Link>
+                    </AppLink>
                   ))}
                 </div>
             )}

@@ -1,80 +1,103 @@
 /**
- * Public, indexable routes for GitHub Pages SPA fallback + sitemap generation.
- * Keep in sync with App.tsx public routes that should appear in Google Search.
+ * Public routes for GitHub Pages SPA fallback + sitemap generation.
+ * Keep in sync with App.tsx public routes and src/lib/seo.ts SITEMAP_PATHS.
  */
 export const SITE_ORIGIN = 'https://micalingo.com';
 
-/** Routes that must return HTTP 200 on GitHub Pages (copied as dist/<path>/index.html). */
-export const PUBLIC_SPA_ROUTES = [
+const QUIZ_TOPICS = ['vocabulary', 'articles', 'phrases', 'prepositions', 'adjectives', 'verbs'];
+const GRAMMAR_CATS = ['cases', 'tenses', 'articles', 'adjectives', 'prepositions', 'sentence-structure'];
+const ARTICLE_CATS = ['history', 'animals', 'music', 'culture', 'politics', 'science', 'celebrities'];
+const BOOK_CATS = ['classics', 'short-stories'];
+const MUSIC_CATS = ['pop', 'rock', 'other-music'];
+const PODCAST_CATS = ['politics', 'travel', 'psychology', 'other-podcasts'];
+const AUDIOBOOK_CATS = ['fiction', 'non-fiction', 'other-audiobooks'];
+
+/** Old URLs that must not redirect in JS. Serve content + point canonical at the live page. */
+export const LEGACY_CANONICAL = {
+  '/practice': '/quizzes',
+  ...Object.fromEntries(QUIZ_TOPICS.map((topic) => [`/practice/${topic}`, `/quizzes/${topic}`])),
+  '/learn/german-exam-prep': '/learn/public-and-private',
+  '/learn/weekly-german-practice': '/learn',
+};
+
+/** App pages Google may crawl from the nav. HTTP 200 + noindex, never sitemap. */
+export const NOINDEX_ROUTES = ['/statistics', '/settings', '/login'];
+
+export const INDEXABLE_ROUTES = [
   '/',
   '/quizzes',
-  '/quizzes/vocabulary',
-  '/quizzes/articles',
-  '/quizzes/phrases',
-  '/quizzes/prepositions',
-  '/quizzes/adjectives',
-  '/quizzes/verbs',
+  ...QUIZ_TOPICS.map((topic) => `/quizzes/${topic}`),
   '/library',
   '/grammar',
-  '/grammar/cases',
-  '/grammar/tenses',
-  '/grammar/articles',
-  '/grammar/adjectives',
-  '/grammar/prepositions',
-  '/grammar/sentence-structure',
-  '/statistics',
+  ...GRAMMAR_CATS.map((cat) => `/grammar/${cat}`),
   '/vocabulary',
-  '/practice',
-  '/practice/vocabulary',
-  '/practice/articles',
-  '/practice/phrases',
-  '/practice/prepositions',
-  '/practice/adjectives',
-  '/practice/verbs',
   '/learning-materials',
   '/learning-materials/reading',
   '/learning-materials/reading/false-friends',
   '/learning-materials/reading/idioms',
+  ...ARTICLE_CATS.map((cat) => `/learning-materials/reading/articles/${cat}`),
+  ...BOOK_CATS.map((cat) => `/learning-materials/reading/books/${cat}`),
   '/learning-materials/listening',
+  ...MUSIC_CATS.map((cat) => `/learning-materials/listening/music/${cat}`),
+  ...PODCAST_CATS.map((cat) => `/learning-materials/listening/podcasts/${cat}`),
+  ...AUDIOBOOK_CATS.map((cat) => `/learning-materials/listening/audiobooks/${cat}`),
   '/learn',
-  '/learn/german-exam-prep',
   '/learn/public-and-private',
   '/learn/der-die-das',
   '/learn/german-cases',
-  '/learn/weekly-german-practice',
   '/about',
   '/privacy',
   '/terms',
   '/cookies',
   '/impressum',
-  '/settings',
-  '/login',
 ];
 
-/** Sitemap entries: path → SEO hints (only crawlable, unique public pages). */
+/** Routes that must return HTTP 200 on GitHub Pages (copied as dist/<path>/index.html). */
+export const PUBLIC_SPA_ROUTES = [
+  ...INDEXABLE_ROUTES,
+  ...NOINDEX_ROUTES,
+  ...Object.keys(LEGACY_CANONICAL),
+];
+
+/** Sitemap entries: one loc per page (no ?lang= duplicates). */
 export const SITEMAP_ENTRIES = [
   { path: '/', changefreq: 'daily', priority: '1.0' },
   { path: '/quizzes', changefreq: 'weekly', priority: '0.9' },
   { path: '/library', changefreq: 'daily', priority: '0.9' },
   { path: '/grammar', changefreq: 'monthly', priority: '0.8' },
   { path: '/vocabulary', changefreq: 'weekly', priority: '0.8' },
-  { path: '/quizzes/vocabulary', changefreq: 'weekly', priority: '0.8' },
-  { path: '/quizzes/articles', changefreq: 'weekly', priority: '0.8' },
-  { path: '/quizzes/phrases', changefreq: 'weekly', priority: '0.8' },
-  { path: '/quizzes/prepositions', changefreq: 'weekly', priority: '0.8' },
-  { path: '/quizzes/adjectives', changefreq: 'weekly', priority: '0.8' },
-  { path: '/quizzes/verbs', changefreq: 'weekly', priority: '0.8' },
-  { path: '/grammar/cases', changefreq: 'monthly', priority: '0.7' },
-  { path: '/grammar/tenses', changefreq: 'monthly', priority: '0.7' },
-  { path: '/grammar/articles', changefreq: 'monthly', priority: '0.7' },
-  { path: '/grammar/adjectives', changefreq: 'monthly', priority: '0.7' },
-  { path: '/grammar/prepositions', changefreq: 'monthly', priority: '0.7' },
-  { path: '/grammar/sentence-structure', changefreq: 'monthly', priority: '0.7' },
+  ...QUIZ_TOPICS.map((topic) => ({ path: `/quizzes/${topic}`, changefreq: 'weekly', priority: '0.8' })),
+  ...GRAMMAR_CATS.map((cat) => ({ path: `/grammar/${cat}`, changefreq: 'monthly', priority: '0.7' })),
   { path: '/learning-materials', changefreq: 'weekly', priority: '0.75' },
   { path: '/learning-materials/reading', changefreq: 'weekly', priority: '0.7' },
   { path: '/learning-materials/reading/false-friends', changefreq: 'monthly', priority: '0.65' },
   { path: '/learning-materials/reading/idioms', changefreq: 'monthly', priority: '0.65' },
+  ...ARTICLE_CATS.map((cat) => ({
+    path: `/learning-materials/reading/articles/${cat}`,
+    changefreq: 'weekly',
+    priority: '0.55',
+  })),
+  ...BOOK_CATS.map((cat) => ({
+    path: `/learning-materials/reading/books/${cat}`,
+    changefreq: 'weekly',
+    priority: '0.55',
+  })),
   { path: '/learning-materials/listening', changefreq: 'weekly', priority: '0.7' },
+  ...MUSIC_CATS.map((cat) => ({
+    path: `/learning-materials/listening/music/${cat}`,
+    changefreq: 'weekly',
+    priority: '0.5',
+  })),
+  ...PODCAST_CATS.map((cat) => ({
+    path: `/learning-materials/listening/podcasts/${cat}`,
+    changefreq: 'weekly',
+    priority: '0.5',
+  })),
+  ...AUDIOBOOK_CATS.map((cat) => ({
+    path: `/learning-materials/listening/audiobooks/${cat}`,
+    changefreq: 'weekly',
+    priority: '0.5',
+  })),
   { path: '/learn', changefreq: 'weekly', priority: '0.9' },
   { path: '/learn/public-and-private', changefreq: 'monthly', priority: '0.85' },
   { path: '/learn/der-die-das', changefreq: 'monthly', priority: '0.85' },
@@ -85,6 +108,14 @@ export const SITEMAP_ENTRIES = [
   { path: '/cookies', changefreq: 'yearly', priority: '0.3' },
   { path: '/impressum', changefreq: 'yearly', priority: '0.3' },
 ];
+
+export function routeCanonicalPath(route) {
+  return LEGACY_CANONICAL[route] || route;
+}
+
+export function routeNoindex(route) {
+  return NOINDEX_ROUTES.includes(route) || Boolean(LEGACY_CANONICAL[route]);
+}
 
 export function absoluteUrl(path) {
   if (!path || path === '/') return `${SITE_ORIGIN}/`;
@@ -277,5 +308,36 @@ export const PAGE_META = {
     title: 'Log in | MicaLingo',
     description: 'Sign in to MicaLingo to save your German learning progress.',
   },
+};
+
+const CATEGORY_PAGE_META = {
+  '/learning-materials/reading/articles/history': ['German History Reading Practice', 'Read German articles about history to grow vocabulary and comprehension.'],
+  '/learning-materials/reading/articles/animals': ['German Articles About Animals', 'Read German texts about animals and wildlife for vocabulary practice.'],
+  '/learning-materials/reading/articles/music': ['German Articles About Music', 'Read German texts about music, composers, and genres.'],
+  '/learning-materials/reading/articles/culture': ['German Culture Reading Practice', 'Read German articles about art, concerts, and cultural life.'],
+  '/learning-materials/reading/articles/politics': ['German Politics Reading Practice', 'Read German articles about government and society.'],
+  '/learning-materials/reading/articles/science': ['German Science Reading Practice', 'Read German articles about discoveries and research.'],
+  '/learning-materials/reading/articles/celebrities': ['German Celebrity Articles', 'Read German texts about famous people and pop culture.'],
+  '/learning-materials/reading/books/classics': ['Classic German Literature', 'Read classic literature selections for German learners.'],
+  '/learning-materials/reading/books/short-stories': ['German Short Stories', 'Short German stories for daily reading practice.'],
+  '/learning-materials/listening/music/pop': ['German Pop Music Listening', 'Practice German listening with pop music.'],
+  '/learning-materials/listening/music/rock': ['German Rock Music Listening', 'Practice German listening with rock and alternative music.'],
+  '/learning-materials/listening/music/other-music': ['German Music Listening Practice', 'Practice German listening with songs across genres.'],
+  '/learning-materials/listening/podcasts/politics': ['German Politics Podcasts', 'Listen to German podcasts about government and society.'],
+  '/learning-materials/listening/podcasts/travel': ['German Travel Podcasts', 'Listen to German travel stories and tips.'],
+  '/learning-materials/listening/podcasts/psychology': ['German Psychology Podcasts', 'Listen to German podcasts about mind and behaviour.'],
+  '/learning-materials/listening/podcasts/other-podcasts': ['German Podcasts for Learners', 'Practice German listening with podcasts on mixed topics.'],
+  '/learning-materials/listening/audiobooks/fiction': ['German Fiction Audiobooks', 'Listen to German fiction for comprehension practice.'],
+  '/learning-materials/listening/audiobooks/non-fiction': ['German Non-Fiction Audiobooks', 'Listen to German non-fiction for learners.'],
+  '/learning-materials/listening/audiobooks/other-audiobooks': ['German Audiobooks for Learners', 'Practice German listening with audiobooks.'],
+};
+
+for (const [path, [title, description]] of Object.entries(CATEGORY_PAGE_META)) {
+  PAGE_META[path] = { title: `${title} | MicaLingo`, description };
+}
+
+export const NOT_FOUND_META = {
+  title: 'Page not found | MicaLingo',
+  description: 'This page does not exist. Open MicaLingo to learn German with quizzes, grammar, and vocabulary.',
 };
 

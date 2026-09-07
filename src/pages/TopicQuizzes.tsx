@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
-import { Link, useParams, useNavigate, useSearchParams, Navigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams, Navigate } from "react-router-dom";
+import AppLink from "../components/AppLink";
 import { useAuth } from "../AuthContext";
 import { isUserCancelledAuthError, signInWithGoogle } from '../lib/googleAuth';
 import { useCloudVocabulary } from "../lib/firestore";
@@ -135,12 +136,12 @@ export default function TopicQuizzes() {
       <BackgroundBlobs />
       <div className="relative z-10 w-full max-w-7xl mx-auto space-y-8 px-4 md:px-8">
         <div className="flex items-center gap-4">
-          <Link
+          <AppLink
             to={isPrivateTopic ? '/quizzes?tab=telc' : activeTab === 'custom' ? '/quizzes?tab=personal' : '/quizzes'}
             className="bg-white/70 backdrop-blur-md border border-white text-gray-700 hover:bg-white font-bold px-5 py-2.5 rounded-xl shadow-sm transition-all flex items-center gap-2"
           >
             {t('back_button')}
-          </Link>
+          </AppLink>
           <div>
             <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600 tracking-tight pb-2">{pageTitle} {t('quizzes_title') || 'Quizzes'}</h1>
             <p className="text-lg text-blue-900/70 font-medium mt-1">{t('select_level_to_start') || 'Select a level to start practicing.'}</p>
@@ -224,21 +225,21 @@ export default function TopicQuizzes() {
                     )}
                     {hasProgress ? (
                       <>
-                        <Link
+                        <AppLink
                           to={`/quiz?topic=${topic}&quizId=${quizId}&redo=true`}
                           className="flex-1 sm:flex-none text-center bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 font-bold px-5 py-2.5 rounded-xl shadow-sm transition-colors"
                         >
                           {t('redo_button') || 'Restart'}
-                        </Link>
-                        <Link
+                        </AppLink>
+                        <AppLink
                           to={`/quiz?topic=${topic}&quizId=${quizId}`}
                           className="flex-1 sm:flex-none text-center bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2.5 rounded-xl shadow-sm transition-colors"
                         >
                           {t('continue_button') || 'Continue →'}
-                        </Link>
+                        </AppLink>
                       </>
                     ) : isPerfect ? (
-                      <Link
+                      <AppLink
                         to={`/quiz?topic=${topic}&quizId=${quizId}&redo=true`}
                         className="flex-1 sm:flex-none text-center bg-green-500 hover:bg-green-600 text-white font-bold px-5 py-2.5 rounded-xl shadow-sm transition-colors flex items-center justify-center gap-2"
                       >
@@ -246,21 +247,21 @@ export default function TopicQuizzes() {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                         </svg>
                         {t('redo_button') || 'Restart'}
-                      </Link>
+                      </AppLink>
                     ) : isFinished ? (
-                      <Link
+                      <AppLink
                         to={`/quiz?topic=${topic}&quizId=${quizId}&redo=true`}
                         className="flex-1 sm:flex-none text-center bg-blue-100 hover:bg-blue-200 text-blue-700 font-bold px-5 py-2.5 rounded-xl shadow-sm transition-colors"
                       >
                         {t('retry_quiz') || 'Retry'}
-                      </Link>
+                      </AppLink>
                     ) : (
-                      <Link
+                      <AppLink
                         to={`/quiz?topic=${topic}&quizId=${quizId}`}
                         className="flex-1 sm:flex-none text-center bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-xl shadow-sm transition-colors"
                       >
                         {t('start_button') || 'Start →'}
-                      </Link>
+                      </AppLink>
                     )}
                   </div>
                 </div>
@@ -300,7 +301,7 @@ export default function TopicQuizzes() {
               <div className="w-16 h-16 bg-orange-50 text-orange-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">⚠️</div>
               <h3 className="text-3xl font-extrabold text-blue-950 mb-3">{t('not_enough_words')}</h3>
               <p className="text-blue-900/70 text-lg font-medium mb-8">{t('not_enough_words_desc', { topic: pageTitle })}</p>
-              <Link to={`/import?destination=${topic}`} className="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-700 shadow-sm">{t('import_more_words') || 'Import Data'}</Link>
+              <AppLink to={`/import?destination=${topic}`} className="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-700 shadow-sm">{t('import_more_words') || 'Import Data'}</AppLink>
             </div>
           ) : (
             <div className="bg-white/60 backdrop-blur-xl p-6 md:p-8 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white">
@@ -351,21 +352,21 @@ export default function TopicQuizzes() {
                       )}
                       {hasProgress ? (
                         <>
-                          <Link
+                          <AppLink
                             to={`/quiz?topic=${topic}&quizId=${quizId}&custom=true&redo=true`}
                             className="flex-1 sm:flex-none text-center bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 font-bold px-5 py-2.5 rounded-xl shadow-sm transition-colors"
                           >
                             {t('redo_button') || 'Restart'}
-                          </Link>
-                          <Link
+                          </AppLink>
+                          <AppLink
                             to={`/quiz?topic=${topic}&quizId=${quizId}&custom=true`}
                             className="flex-1 sm:flex-none text-center bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2.5 rounded-xl shadow-sm transition-colors"
                           >
                             {t('continue_button') || 'Continue →'}
-                          </Link>
+                          </AppLink>
                         </>
                       ) : isPerfect ? (
-                        <Link
+                        <AppLink
                           to={`/quiz?topic=${topic}&quizId=${quizId}&custom=true&redo=true`}
                           className="flex-1 sm:flex-none text-center bg-green-500 hover:bg-green-600 text-white font-bold px-5 py-2.5 rounded-xl shadow-sm transition-colors flex items-center justify-center gap-2"
                         >
@@ -373,21 +374,21 @@ export default function TopicQuizzes() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                           </svg>
                           {t('redo_button') || 'Restart'}
-                        </Link>
+                        </AppLink>
                       ) : isFinished ? (
-                        <Link
+                        <AppLink
                           to={`/quiz?topic=${topic}&quizId=${quizId}&custom=true&redo=true`}
                           className="flex-1 sm:flex-none text-center bg-blue-100 hover:bg-blue-200 text-blue-700 font-bold px-5 py-2.5 rounded-xl shadow-sm transition-colors"
                         >
                           {t('retry_quiz') || 'Retry'}
-                        </Link>
+                        </AppLink>
                       ) : (
-                        <Link
+                        <AppLink
                           to={`/quiz?topic=${topic}&quizId=${quizId}&custom=true`}
                           className="flex-1 sm:flex-none text-center bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-xl shadow-sm transition-colors"
                         >
                           {t('start_button') || 'Start →'}
-                        </Link>
+                        </AppLink>
                       )}
                     </div>
                   </div>

@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import AppLink from "../components/AppLink";
 import { useI18n } from "../I18nContext";
 
 const BackgroundBlobs = () => (
@@ -29,9 +29,9 @@ export default function Library() {
       
       <div className="relative z-10 w-full max-w-7xl mx-auto space-y-8 px-4 md:px-8">
         <div className="flex items-center gap-4">
-          <Link to="/" className="bg-white/70 backdrop-blur-md border border-white text-gray-700 hover:bg-white font-bold px-5 py-2.5 rounded-xl shadow-sm transition-all flex items-center gap-2">
+          <AppLink to="/" className="bg-white/70 backdrop-blur-md border border-white text-gray-700 hover:bg-white font-bold px-5 py-2.5 rounded-xl shadow-sm transition-all flex items-center gap-2">
             {t("back_button")}
-          </Link>
+          </AppLink>
           <div>
             <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600 tracking-tight pb-2">
               {t("library")}
@@ -43,21 +43,21 @@ export default function Library() {
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 pt-4">
-          <Link to="/vocabulary" className="group relative flex flex-col items-start justify-between p-6 md:p-8 rounded-[2rem] bg-white/70 backdrop-blur-xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500 overflow-hidden">
+          <AppLink to="/vocabulary" className="group relative flex flex-col items-start justify-between p-6 md:p-8 rounded-[2rem] bg-white/70 backdrop-blur-xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500 overflow-hidden">
             <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center text-3xl mb-10 group-hover:scale-110 transition-transform duration-500 border border-gray-100">📖</div>
             <div className="relative z-10 w-full">
               <h3 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-2xl drop-shadow-sm mb-1">{t("vocabulary")}</h3>
               <p className="text-gray-600 font-medium text-sm leading-relaxed">{t("vocab_subtitle") || 'Manage your words.'}</p>
             </div>
-          </Link>
+          </AppLink>
           
-          <Link to="/learning-materials" className="group relative flex flex-col items-start justify-between p-6 md:p-8 rounded-[2rem] bg-white/70 backdrop-blur-xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500 overflow-hidden">
+          <AppLink to="/learning-materials" className="group relative flex flex-col items-start justify-between p-6 md:p-8 rounded-[2rem] bg-white/70 backdrop-blur-xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500 overflow-hidden">
             <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center text-3xl mb-10 group-hover:scale-110 transition-transform duration-500 border border-gray-100">🎧</div>
             <div className="relative z-10 w-full">
               <h3 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-2xl drop-shadow-sm mb-1">{t("learning_materials")}</h3>
               <p className="text-gray-600 font-medium text-sm leading-relaxed">{t("learning_materials_subtitle")}</p>
             </div>
-          </Link>
+          </AppLink>
         </div>
       </div>
     </div>

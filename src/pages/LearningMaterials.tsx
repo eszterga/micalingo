@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Link, useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import AppLink from '../components/AppLink';
 import { useAuth } from '../AuthContext';
 import { useI18n } from '../I18nContext';
 import { isUserCancelledAuthError, signInWithGoogle } from '../lib/googleAuth';
@@ -58,9 +59,9 @@ export default function LearningMaterials() {
       <BackgroundBlobs />
       <div className="relative z-10 w-full max-w-7xl mx-auto space-y-8 px-4 md:px-8">
         <div className="flex items-center gap-4">
-          <Link to="/library" className="bg-white/70 backdrop-blur-md border border-white text-gray-700 hover:bg-white font-bold px-5 py-2.5 rounded-xl shadow-sm transition-all flex items-center gap-2">
+          <AppLink to="/library" className="bg-white/70 backdrop-blur-md border border-white text-gray-700 hover:bg-white font-bold px-5 py-2.5 rounded-xl shadow-sm transition-all flex items-center gap-2">
             {t("back_button")}
-          </Link>
+          </AppLink>
           <div>
             <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600 tracking-tight pb-2">
               {t("learning_materials")}
@@ -82,7 +83,7 @@ export default function LearningMaterials() {
 
         {activeTab === "public" && (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            <Link to="/learning-materials/reading" className="group relative flex flex-col items-start justify-between p-6 md:p-8 rounded-[2rem] bg-white/70 backdrop-blur-xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500 overflow-hidden">
+            <AppLink to="/learning-materials/reading" className="group relative flex flex-col items-start justify-between p-6 md:p-8 rounded-[2rem] bg-white/70 backdrop-blur-xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500 overflow-hidden">
               <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center text-3xl mb-10 group-hover:scale-110 transition-transform duration-500 border border-gray-100">
                 👓
               </div>
@@ -90,8 +91,8 @@ export default function LearningMaterials() {
                 <h3 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-2xl drop-shadow-sm mb-1">{t("read_materials")}</h3>
                 <p className="text-gray-600 font-medium text-sm leading-relaxed">{t("read_materials_desc")}</p>
               </div>
-            </Link>
-            <Link to="/learning-materials/listening" className="group relative flex flex-col items-start justify-between p-6 md:p-8 rounded-[2rem] bg-white/70 backdrop-blur-xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500 overflow-hidden">
+            </AppLink>
+            <AppLink to="/learning-materials/listening" className="group relative flex flex-col items-start justify-between p-6 md:p-8 rounded-[2rem] bg-white/70 backdrop-blur-xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500 overflow-hidden">
               <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center text-3xl mb-10 group-hover:scale-110 transition-transform duration-500 border border-gray-100">
                 🎧
               </div>
@@ -99,7 +100,7 @@ export default function LearningMaterials() {
                 <h3 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-2xl drop-shadow-sm mb-1">{t("listen_materials")}</h3>
                 <p className="text-gray-600 font-medium text-sm leading-relaxed">{t("listen_materials_desc")}</p>
               </div>
-            </Link>
+            </AppLink>
           </div>
         )}
 
@@ -107,7 +108,7 @@ export default function LearningMaterials() {
           <div className="space-y-4">
             {user ? (
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                <Link to="/learning-materials/private/reading" className="group relative flex flex-col items-start justify-between p-6 md:p-8 rounded-[2rem] bg-white/70 backdrop-blur-xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500 overflow-hidden">
+                <AppLink to="/learning-materials/private/reading" className="group relative flex flex-col items-start justify-between p-6 md:p-8 rounded-[2rem] bg-white/70 backdrop-blur-xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500 overflow-hidden">
                   <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center text-3xl mb-10 group-hover:scale-110 transition-transform duration-500 border border-gray-100">
                     👓
                   </div>
@@ -115,8 +116,8 @@ export default function LearningMaterials() {
                     <h3 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-2xl drop-shadow-sm mb-1">{t("read_materials")}</h3>
                     <p className="text-gray-600 font-medium text-sm leading-relaxed">{t("read_materials_desc")}</p>
                   </div>
-                </Link>
-                <Link to="/learning-materials/private/listening" className="group relative flex flex-col items-start justify-between p-6 md:p-8 rounded-[2rem] bg-white/70 backdrop-blur-xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500 overflow-hidden">
+                </AppLink>
+                <AppLink to="/learning-materials/private/listening" className="group relative flex flex-col items-start justify-between p-6 md:p-8 rounded-[2rem] bg-white/70 backdrop-blur-xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500 overflow-hidden">
                   <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center text-3xl mb-10 group-hover:scale-110 transition-transform duration-500 border border-gray-100">
                     🎧
                   </div>
@@ -124,7 +125,7 @@ export default function LearningMaterials() {
                     <h3 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-2xl drop-shadow-sm mb-1">{t("listen_materials")}</h3>
                     <p className="text-gray-600 font-medium text-sm leading-relaxed">{t("listen_materials_desc")}</p>
                   </div>
-                </Link>
+                </AppLink>
               </div>
             ) : (
               <div className="bg-white/70 backdrop-blur-xl p-12 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white text-center">

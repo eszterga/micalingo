@@ -685,6 +685,66 @@ export function resolveSeo(pathname: string, lang: SeoLang): ResolvedSeo {
     };
   }
 
+  if (clean.startsWith('/learning-materials/reading/articles/')) {
+    const topic = titleize(clean.split('/').pop() || 'articles');
+    return {
+      title: `German ${topic} Reading | MicaLingo`,
+      description: `Read German articles about ${topic.toLowerCase()} to grow vocabulary and comprehension.`,
+      keywords: `German ${topic.toLowerCase()} articles, German reading, learn German`,
+      canonicalPath: clean,
+      noindex: false,
+      pageType: 'page',
+    };
+  }
+
+  if (clean.startsWith('/learning-materials/reading/books/')) {
+    const topic = titleize(clean.split('/').pop() || 'books');
+    return {
+      title: `German ${topic} | MicaLingo`,
+      description: `Read German ${topic.toLowerCase()} to grow vocabulary and reading comprehension.`,
+      keywords: `German ${topic.toLowerCase()}, German reading, learn German`,
+      canonicalPath: clean,
+      noindex: false,
+      pageType: 'page',
+    };
+  }
+
+  if (clean.startsWith('/learning-materials/listening/music/')) {
+    const topic = titleize(clean.split('/').pop() || 'music');
+    return {
+      title: `German ${topic} Listening | MicaLingo`,
+      description: `Practice German listening with ${topic.toLowerCase()} music selected for language learners.`,
+      keywords: `German ${topic.toLowerCase()} music, German listening, learn German`,
+      canonicalPath: clean,
+      noindex: false,
+      pageType: 'page',
+    };
+  }
+
+  if (clean.startsWith('/learning-materials/listening/podcasts/')) {
+    const topic = titleize(clean.split('/').pop() || 'podcasts');
+    return {
+      title: `German ${topic} Podcasts | MicaLingo`,
+      description: `Listen to German podcasts about ${topic.toLowerCase()} to improve comprehension.`,
+      keywords: `German ${topic.toLowerCase()} podcasts, German listening, learn German`,
+      canonicalPath: clean,
+      noindex: false,
+      pageType: 'page',
+    };
+  }
+
+  if (clean.startsWith('/learning-materials/listening/audiobooks/')) {
+    const topic = titleize(clean.split('/').pop() || 'audiobooks');
+    return {
+      title: `German ${topic} Audiobooks | MicaLingo`,
+      description: `Practice German listening with ${topic.toLowerCase()} audiobooks.`,
+      keywords: `German ${topic.toLowerCase()} audiobooks, German listening, learn German`,
+      canonicalPath: clean,
+      noindex: false,
+      pageType: 'page',
+    };
+  }
+
   if (clean.startsWith('/learning-materials/private')) {
     return {
       ...pick(ROUTES['/learning-materials'], lang),
@@ -704,16 +764,42 @@ export function resolveSeo(pathname: string, lang: SeoLang): ResolvedSeo {
   }
 
   return {
-    ...pick(DEFAULT_COPY, lang),
-    canonicalPath: clean,
+    title: 'Page not found | MicaLingo',
+    description: 'This page does not exist. Open MicaLingo to learn German with quizzes, grammar, and vocabulary.',
+    keywords: 'MicaLingo',
+    canonicalPath: '/',
     noindex: true,
     pageType: 'page',
   };
 }
 
-export function canonicalHref(pathname: string, lang: SeoLang = 'en') {
+/**
+ * GitHub Pages 301s /path → /path/. Public links must already use the slash
+ * so Google does not keep discovering redirect URLs.
+ */
+export function withTrailingSlash(href: string) {
+  if (!href.startsWith('/')) return href;
+  const queryIdx = href.indexOf('?');
+  const hashIdx = href.indexOf('#');
+  let split = href.length;
+  if (queryIdx !== -1) split = Math.min(split, queryIdx);
+  if (hashIdx !== -1) split = Math.min(split, hashIdx);
+  const path = href.slice(0, split);
+  const rest = href.slice(split);
+  if (path === '/') return `${path}${rest}`;
+  if (/\.[a-z0-9]+$/i.test(path)) return href;
+  const slashed = path.endsWith('/') ? path : `${path}/`;
+  return `${slashed}${rest}`;
+}
+
+export function canonicalHref(pathname: string, _lang: SeoLang = 'en') {
   const clean = pathname.replace(/\/+$/, '') || '/';
-  const base = clean === '/' ? `${SITE_ORIGIN}/` : `${SITE_ORIGIN}${clean}/`;
+  // One indexable URL per page. Language is a UI setting, not a separate document.
+  return clean === '/' ? `${SITE_ORIGIN}/` : `${SITE_ORIGIN}${clean}/`;
+}
+
+export function languageHref(pathname: string, lang: SeoLang) {
+  const base = canonicalHref(pathname);
   if (lang === 'en') return base;
   return `${base}?lang=${lang}`;
 }
@@ -721,10 +807,10 @@ export function canonicalHref(pathname: string, lang: SeoLang = 'en') {
 export function hreflangAlternates(pathname: string) {
   const clean = pathname.replace(/\/+$/, '') || '/';
   return [
-    { lang: 'en', href: canonicalHref(clean, 'en') },
-    { lang: 'de', href: canonicalHref(clean, 'de') },
-    { lang: 'hu', href: canonicalHref(clean, 'hu') },
-    { lang: 'x-default', href: canonicalHref(clean, 'en') },
+    { lang: 'en', href: languageHref(clean, 'en') },
+    { lang: 'de', href: languageHref(clean, 'de') },
+    { lang: 'hu', href: languageHref(clean, 'hu') },
+    { lang: 'x-default', href: languageHref(clean, 'en') },
   ];
 }
 
@@ -944,7 +1030,7 @@ function titleize(value: string) {
   return value.split('-').map((part) => capitalize(part)).join(' ');
 }
 
-/** Public URLs for sitemap generation (trailing-slash paths except home). */
+/** Public indexable URLs (keep in sync with scripts/seo-routes.mjs SITEMAP_ENTRIES). */
 export const SITEMAP_PATHS = [
   '/',
   '/quizzes/',
@@ -967,7 +1053,26 @@ export const SITEMAP_PATHS = [
   '/learning-materials/reading/',
   '/learning-materials/reading/false-friends/',
   '/learning-materials/reading/idioms/',
+  '/learning-materials/reading/articles/history/',
+  '/learning-materials/reading/articles/animals/',
+  '/learning-materials/reading/articles/music/',
+  '/learning-materials/reading/articles/culture/',
+  '/learning-materials/reading/articles/politics/',
+  '/learning-materials/reading/articles/science/',
+  '/learning-materials/reading/articles/celebrities/',
+  '/learning-materials/reading/books/classics/',
+  '/learning-materials/reading/books/short-stories/',
   '/learning-materials/listening/',
+  '/learning-materials/listening/music/pop/',
+  '/learning-materials/listening/music/rock/',
+  '/learning-materials/listening/music/other-music/',
+  '/learning-materials/listening/podcasts/politics/',
+  '/learning-materials/listening/podcasts/travel/',
+  '/learning-materials/listening/podcasts/psychology/',
+  '/learning-materials/listening/podcasts/other-podcasts/',
+  '/learning-materials/listening/audiobooks/fiction/',
+  '/learning-materials/listening/audiobooks/non-fiction/',
+  '/learning-materials/listening/audiobooks/other-audiobooks/',
   '/learn/',
   '/learn/public-and-private/',
   '/learn/der-die-das/',

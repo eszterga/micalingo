@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import AppLink from '../components/AppLink';
 import { useAuth } from '../AuthContext';
 import { useI18n } from '../I18nContext';
 import { Capacitor } from '@capacitor/core';
@@ -72,68 +72,68 @@ export default function Home() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-6xl mx-auto z-10 px-4">
-        <Link to="/quizzes" className="group relative flex flex-col items-start justify-between p-6 md:p-8 rounded-[2rem] bg-white/70 backdrop-blur-xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500 overflow-hidden" style={{ animation: "fade-in-up 0.8s ease-out 0.1s both" }}>
+        <AppLink to="/quizzes" className="group relative flex flex-col items-start justify-between p-6 md:p-8 rounded-[2rem] bg-white/70 backdrop-blur-xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500 overflow-hidden" style={{ animation: "fade-in-up 0.8s ease-out 0.1s both" }}>
           <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center text-3xl mb-10 group-hover:scale-110 transition-transform duration-500 border border-gray-100">🎯</div>
           <div className="relative z-10 w-full">
             <h2 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-2xl drop-shadow-sm mb-1">{t("quizzes") || "Quizzes"}</h2>
             <p className="text-gray-600 font-medium text-sm leading-relaxed">{t("quizzes_subtitle") || "Choose a topic to practice."}</p>
           </div>
-        </Link>
+        </AppLink>
 
-        <Link to="/library" className="group relative flex flex-col items-start justify-between p-6 md:p-8 rounded-[2rem] bg-white/70 backdrop-blur-xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500 overflow-hidden" style={{ animation: "fade-in-up 0.8s ease-out 0.2s both" }}>
+        <AppLink to="/library" className="group relative flex flex-col items-start justify-between p-6 md:p-8 rounded-[2rem] bg-white/70 backdrop-blur-xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500 overflow-hidden" style={{ animation: "fade-in-up 0.8s ease-out 0.2s both" }}>
           <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center text-3xl mb-10 group-hover:scale-110 transition-transform duration-500 border border-gray-100">📚</div>
           <div className="relative z-10 w-full">
             <h2 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-2xl drop-shadow-sm mb-1">{t("library") || "Library"}</h2>
             <p className="text-gray-600 font-medium text-sm leading-relaxed">{t("library_subtitle") || "Here you will find your vocabulary, audio materials, and articles."}</p>
           </div>
-        </Link>
+        </AppLink>
 
-        <Link to="/grammar" className="group relative flex flex-col items-start justify-between p-6 md:p-8 rounded-[2rem] bg-white/70 backdrop-blur-xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500 overflow-hidden" style={{ animation: "fade-in-up 0.8s ease-out 0.3s both" }}>
+        <AppLink to="/grammar" className="group relative flex flex-col items-start justify-between p-6 md:p-8 rounded-[2rem] bg-white/70 backdrop-blur-xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500 overflow-hidden" style={{ animation: "fade-in-up 0.8s ease-out 0.3s both" }}>
           <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center text-3xl mb-10 group-hover:scale-110 transition-transform duration-500 border border-gray-100">🧩</div>
           <div className="relative z-10 w-full">
             <h2 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-2xl drop-shadow-sm mb-1">{t("grammar") || "Grammar"}</h2>
             <p className="text-gray-600 font-medium text-sm leading-relaxed">{t("grammar_page_subtitle") || "Review grammar rules and explanations."}</p>
           </div>
-        </Link>
+        </AppLink>
 
-        <Link to="/statistics" className="group relative flex flex-col items-start justify-between p-6 md:p-8 rounded-[2rem] bg-white/70 backdrop-blur-xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500 overflow-hidden" style={{ animation: "fade-in-up 0.8s ease-out 0.4s both" }}>
+        <AppLink to="/statistics" className="group relative flex flex-col items-start justify-between p-6 md:p-8 rounded-[2rem] bg-white/70 backdrop-blur-xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500 overflow-hidden" style={{ animation: "fade-in-up 0.8s ease-out 0.4s both" }}>
           <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center text-3xl mb-10 group-hover:scale-110 transition-transform duration-500 border border-gray-100">📈</div>
           <div className="relative z-10 w-full">
             <h2 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-2xl drop-shadow-sm mb-1">{t("statistics") || "Statistics"}</h2>
             <p className="text-gray-600 font-medium text-sm leading-relaxed">{t("statistics_page_subtitle") || "Track your learning progress over time."}</p>
           </div>
-        </Link>
+        </AppLink>
 
-        <Link to="/import" className={`group relative flex flex-col items-start justify-between p-6 md:p-8 rounded-[2rem] bg-white/70 backdrop-blur-xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500 overflow-hidden ${!user ? "opacity-80 grayscale-[40%]" : ""}`} style={{ animation: "fade-in-up 0.8s ease-out 0.5s both" }}>
+        <AppLink to="/import" className={`group relative flex flex-col items-start justify-between p-6 md:p-8 rounded-[2rem] bg-white/70 backdrop-blur-xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500 overflow-hidden ${!user ? "opacity-80 grayscale-[40%]" : ""}`} style={{ animation: "fade-in-up 0.8s ease-out 0.5s both" }}>
           <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center text-3xl mb-10 group-hover:scale-110 transition-transform duration-500 border border-gray-100">📥</div>
           <div className="relative z-10 w-full">
             <h2 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-2xl drop-shadow-sm mb-1">{t("import_data") || "Import Data"}</h2>
             <p className="text-gray-600 font-medium text-sm leading-relaxed">{t("upload_new_materials") || "Upload new words and phrases."}</p>
             {!user && <span className="inline-flex items-center gap-1.5 mt-3 text-[10px] font-bold bg-gray-100 text-gray-500 px-3 py-1 rounded-full uppercase shadow-sm"><svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>{t("login_required") || "Login required"}</span>}
           </div>
-        </Link>
+        </AppLink>
 
-        <Link to="/settings" className="group relative flex flex-col items-start justify-between p-6 md:p-8 rounded-[2rem] bg-white/70 backdrop-blur-xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500 overflow-hidden" style={{ animation: "fade-in-up 0.8s ease-out 0.6s both" }}>
+        <AppLink to="/settings" className="group relative flex flex-col items-start justify-between p-6 md:p-8 rounded-[2rem] bg-white/70 backdrop-blur-xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500 overflow-hidden" style={{ animation: "fade-in-up 0.8s ease-out 0.6s both" }}>
           <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center text-3xl mb-10 group-hover:scale-110 transition-transform duration-500 border border-gray-100">⚙️</div>
           <div className="relative z-10 w-full">
             <h2 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-2xl drop-shadow-sm mb-1">{t("settings") || "Settings"}</h2>
             <p className="text-gray-600 font-medium text-sm leading-relaxed">{t("settings_subtitle") || "Manage your account and application settings."}</p>
           </div>
-        </Link>
+        </AppLink>
       </div>
 
       <section className="relative z-10 w-full max-w-4xl mx-auto px-4 mt-14 md:mt-16 space-y-8" style={{ animation: "fade-in-up 0.8s ease-out 0.65s both" }}>
         <div>
           <h2 className="text-xl font-extrabold text-blue-950 mb-3">{t("seo_practice_heading") || "Practice German"}</h2>
           <nav className="flex flex-wrap gap-2" aria-label={t("seo_practice_heading") || "Practice German"}>
-            <Link to="/quizzes/vocabulary" className="px-3 py-1.5 rounded-full bg-white/80 border border-blue-100 text-sm font-bold text-blue-800 hover:border-blue-300 hover:bg-white transition-colors">{t("vocabulary")}</Link>
-            <Link to="/quizzes/articles" className="px-3 py-1.5 rounded-full bg-white/80 border border-blue-100 text-sm font-bold text-blue-800 hover:border-blue-300 hover:bg-white transition-colors">{t("articles_quiz")}</Link>
-            <Link to="/quizzes/verbs" className="px-3 py-1.5 rounded-full bg-white/80 border border-blue-100 text-sm font-bold text-blue-800 hover:border-blue-300 hover:bg-white transition-colors">{t("verbs_quiz")}</Link>
-            <Link to="/quizzes/adjectives" className="px-3 py-1.5 rounded-full bg-white/80 border border-blue-100 text-sm font-bold text-blue-800 hover:border-blue-300 hover:bg-white transition-colors">{t("adjectives_quiz")}</Link>
-            <Link to="/quizzes/phrases" className="px-3 py-1.5 rounded-full bg-white/80 border border-blue-100 text-sm font-bold text-blue-800 hover:border-blue-300 hover:bg-white transition-colors">{t("phrases_quiz")}</Link>
-            <Link to="/quizzes/prepositions" className="px-3 py-1.5 rounded-full bg-white/80 border border-blue-100 text-sm font-bold text-blue-800 hover:border-blue-300 hover:bg-white transition-colors">{t("prepositions_quiz")}</Link>
-            <Link to="/grammar" className="px-3 py-1.5 rounded-full bg-white/80 border border-blue-100 text-sm font-bold text-blue-800 hover:border-blue-300 hover:bg-white transition-colors">{t("grammar")}</Link>
-            <Link to="/learn" className="px-3 py-1.5 rounded-full bg-white/80 border border-blue-100 text-sm font-bold text-blue-800 hover:border-blue-300 hover:bg-white transition-colors">{t("learn_hub_title")}</Link>
+            <AppLink to="/quizzes/vocabulary" className="px-3 py-1.5 rounded-full bg-white/80 border border-blue-100 text-sm font-bold text-blue-800 hover:border-blue-300 hover:bg-white transition-colors">{t("vocabulary")}</AppLink>
+            <AppLink to="/quizzes/articles" className="px-3 py-1.5 rounded-full bg-white/80 border border-blue-100 text-sm font-bold text-blue-800 hover:border-blue-300 hover:bg-white transition-colors">{t("articles_quiz")}</AppLink>
+            <AppLink to="/quizzes/verbs" className="px-3 py-1.5 rounded-full bg-white/80 border border-blue-100 text-sm font-bold text-blue-800 hover:border-blue-300 hover:bg-white transition-colors">{t("verbs_quiz")}</AppLink>
+            <AppLink to="/quizzes/adjectives" className="px-3 py-1.5 rounded-full bg-white/80 border border-blue-100 text-sm font-bold text-blue-800 hover:border-blue-300 hover:bg-white transition-colors">{t("adjectives_quiz")}</AppLink>
+            <AppLink to="/quizzes/phrases" className="px-3 py-1.5 rounded-full bg-white/80 border border-blue-100 text-sm font-bold text-blue-800 hover:border-blue-300 hover:bg-white transition-colors">{t("phrases_quiz")}</AppLink>
+            <AppLink to="/quizzes/prepositions" className="px-3 py-1.5 rounded-full bg-white/80 border border-blue-100 text-sm font-bold text-blue-800 hover:border-blue-300 hover:bg-white transition-colors">{t("prepositions_quiz")}</AppLink>
+            <AppLink to="/grammar" className="px-3 py-1.5 rounded-full bg-white/80 border border-blue-100 text-sm font-bold text-blue-800 hover:border-blue-300 hover:bg-white transition-colors">{t("grammar")}</AppLink>
+            <AppLink to="/learn" className="px-3 py-1.5 rounded-full bg-white/80 border border-blue-100 text-sm font-bold text-blue-800 hover:border-blue-300 hover:bg-white transition-colors">{t("learn_hub_title")}</AppLink>
           </nav>
         </div>
         <article className="text-left bg-white/75 backdrop-blur-xl border border-white rounded-[1.75rem] p-5 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">

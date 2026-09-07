@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
-import { Link, useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import AppLink from '../components/AppLink';
 import { useI18n } from "../I18nContext";
 import { useAuth } from '../AuthContext';
 import { collection, query, where, getDocs, doc, getDoc, setDoc, deleteDoc } from 'firebase/firestore';
@@ -579,21 +580,21 @@ export default function Grammar() {
         
         {/* Header */}
         <div className="flex items-center gap-4">
-          <Link to="/" className="bg-white/70 backdrop-blur-md border border-white text-gray-700 hover:bg-white font-bold px-5 py-2.5 rounded-xl shadow-sm transition-all flex items-center gap-2">
+          <AppLink to="/" className="bg-white/70 backdrop-blur-md border border-white text-gray-700 hover:bg-white font-bold px-5 py-2.5 rounded-xl shadow-sm transition-all flex items-center gap-2">
             {t('back_button')}
-          </Link>
+          </AppLink>
           <div>
             <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600 tracking-tight pb-2">{t('grammar_page_title')}</h1>
             <p className="text-lg text-blue-900/70 font-medium mt-1">{t('grammar_page_subtitle')}</p>
             <nav className="flex flex-wrap gap-2 mt-3" aria-label={t('grammar_page_title')}>
               {publicCategories.map((cat) => (
-                <Link key={cat.id} to={`/grammar/${cat.id}`} className="px-3 py-1 rounded-full bg-white/80 border border-blue-100 text-xs sm:text-sm font-bold text-blue-800 hover:border-blue-300 hover:bg-white transition-colors">
+                <AppLink key={cat.id} to={`/grammar/${cat.id}`} className="px-3 py-1 rounded-full bg-white/80 border border-blue-100 text-xs sm:text-sm font-bold text-blue-800 hover:border-blue-300 hover:bg-white transition-colors">
                   {cat.title}
-                </Link>
+                </AppLink>
               ))}
-              <Link to="/learn" className="px-3 py-1 rounded-full bg-white/80 border border-blue-100 text-xs sm:text-sm font-bold text-blue-800 hover:border-blue-300 hover:bg-white transition-colors">
+              <AppLink to="/learn" className="px-3 py-1 rounded-full bg-white/80 border border-blue-100 text-xs sm:text-sm font-bold text-blue-800 hover:border-blue-300 hover:bg-white transition-colors">
                 {t('learn_hub_title')}
-              </Link>
+              </AppLink>
             </nav>
           </div>
         </div>

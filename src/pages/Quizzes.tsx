@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
-import { Link, useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import AppLink from "../components/AppLink";
 import { useI18n } from "../I18nContext";
 import { useAuth } from "../AuthContext";
 import ArticleBody from "../components/ArticleBody";
@@ -124,9 +125,9 @@ export default function Quizzes() {
       <BackgroundBlobs />
       <div className="relative z-10 w-full max-w-7xl mx-auto space-y-6 sm:space-y-8 px-4 md:px-8">
         <div className="flex items-start sm:items-center gap-3 sm:gap-4">
-          <Link to="/" className="flex-shrink-0 bg-white/70 backdrop-blur-md border border-white text-gray-700 hover:bg-white font-bold px-4 sm:px-5 py-2.5 rounded-xl shadow-sm transition-all flex items-center gap-2 active:scale-[0.98] touch-manipulation">
+          <AppLink to="/" className="flex-shrink-0 bg-white/70 backdrop-blur-md border border-white text-gray-700 hover:bg-white font-bold px-4 sm:px-5 py-2.5 rounded-xl shadow-sm transition-all flex items-center gap-2 active:scale-[0.98] touch-manipulation">
             {t('back_button')}
-          </Link>
+          </AppLink>
           <div className="min-w-0">
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600 tracking-tight pb-1 sm:pb-2">{t('quizzes_title')}</h1>
             <p className="text-base sm:text-lg text-blue-900/70 font-medium mt-0.5 sm:mt-1">{t('quizzes_subtitle')}</p>
@@ -177,45 +178,45 @@ export default function Quizzes() {
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {isAdmin && (
-              <Link
+              <AppLink
                 to={`/quizzes/${PRIVATE_QUIZ_TOPIC}`}
                 className="group relative flex flex-col items-start p-6 rounded-[2rem] bg-white/90 backdrop-blur-xl border border-blue-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500"
               >
                 <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform duration-500">🎓</div>
                 <h3 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-xl mb-1">{t('telc_b2')}</h3>
                 <p className="text-gray-600 font-medium text-sm">{t('telc_b2_subtitle')}</p>
-              </Link>
+              </AppLink>
             )}
-            <Link to="/quizzes/vocabulary" className="group relative flex flex-col items-start p-6 rounded-[2rem] bg-white/90 backdrop-blur-xl border border-blue-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500">
+            <AppLink to="/quizzes/vocabulary" className="group relative flex flex-col items-start p-6 rounded-[2rem] bg-white/90 backdrop-blur-xl border border-blue-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500">
               <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform duration-500">📖</div>
               <h3 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-xl mb-1">{t('vocabulary')}</h3>
               <p className="text-gray-600 font-medium text-sm">{t('vocabulary_quiz_subtitle')}</p>
-            </Link>
-            <Link to="/quizzes/articles" className="group relative flex flex-col items-start p-6 rounded-[2rem] bg-white/90 backdrop-blur-xl border border-blue-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500">
+            </AppLink>
+            <AppLink to="/quizzes/articles" className="group relative flex flex-col items-start p-6 rounded-[2rem] bg-white/90 backdrop-blur-xl border border-blue-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500">
               <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform duration-500">🔤</div>
               <h3 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-xl mb-1">{t('articles_quiz')}</h3>
               <p className="text-gray-600 font-medium text-sm">{t('articles_quiz_subtitle')}</p>
-            </Link>
-            <Link to="/quizzes/phrases" className="group relative flex flex-col items-start p-6 rounded-[2rem] bg-white/90 backdrop-blur-xl border border-blue-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500">
+            </AppLink>
+            <AppLink to="/quizzes/phrases" className="group relative flex flex-col items-start p-6 rounded-[2rem] bg-white/90 backdrop-blur-xl border border-blue-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500">
               <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform duration-500">💬</div>
               <h3 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-xl mb-1">{t('phrases_quiz')}</h3>
               <p className="text-gray-600 font-medium text-sm">{t('phrases_quiz_subtitle')}</p>
-            </Link>
-            <Link to="/quizzes/prepositions" className="group relative flex flex-col items-start p-6 rounded-[2rem] bg-white/90 backdrop-blur-xl border border-blue-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500">
+            </AppLink>
+            <AppLink to="/quizzes/prepositions" className="group relative flex flex-col items-start p-6 rounded-[2rem] bg-white/90 backdrop-blur-xl border border-blue-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500">
               <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform duration-500">📍</div>
               <h3 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-xl mb-1">{t('prepositions_quiz')}</h3>
               <p className="text-gray-600 font-medium text-sm">{t('prepositions_quiz_subtitle')}</p>
-            </Link>
-            <Link to="/quizzes/adjectives" className="group relative flex flex-col items-start p-6 rounded-[2rem] bg-white/90 backdrop-blur-xl border border-blue-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500">
+            </AppLink>
+            <AppLink to="/quizzes/adjectives" className="group relative flex flex-col items-start p-6 rounded-[2rem] bg-white/90 backdrop-blur-xl border border-blue-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500">
               <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform duration-500">✨</div>
               <h3 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-xl mb-1">{t('adjectives_quiz') || 'Adjectives'}</h3>
               <p className="text-gray-600 font-medium text-sm">{t('adjectives_quiz_subtitle') || 'Practice German adjectives.'}</p>
-            </Link>
-            <Link to="/quizzes/verbs" className="group relative flex flex-col items-start p-6 rounded-[2rem] bg-white/90 backdrop-blur-xl border border-blue-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500">
+            </AppLink>
+            <AppLink to="/quizzes/verbs" className="group relative flex flex-col items-start p-6 rounded-[2rem] bg-white/90 backdrop-blur-xl border border-blue-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500">
               <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform duration-500">🏃</div>
               <h3 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-xl mb-1">{t('verbs_quiz') || 'Verbs'}</h3>
               <p className="text-gray-600 font-medium text-sm">{t('verbs_quiz_subtitle') || 'Practice German verbs and past forms.'}</p>
-            </Link>
+            </AppLink>
           </div>
         </div>
       )}
@@ -228,22 +229,22 @@ export default function Quizzes() {
             <p className="text-sm text-blue-900/55 font-medium mt-2 max-w-2xl">{t('telc_b2_desc')}</p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Link
+            <AppLink
               to={`/quizzes/${PRIVATE_QUIZ_TOPIC}`}
               className="group relative flex flex-col items-start p-6 rounded-[2rem] bg-white/90 backdrop-blur-xl border border-blue-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500"
             >
               <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform duration-500">🎓</div>
               <h3 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-xl mb-1">{t('telc_b2')}</h3>
               <p className="text-gray-600 font-medium text-sm">{t('create_your_own_quizzes_subtitle_loggedin')}</p>
-            </Link>
-            <Link
+            </AppLink>
+            <AppLink
               to={`/import?destination=${PRIVATE_QUIZ_TOPIC}`}
               className="group relative flex flex-col items-start p-6 rounded-[2rem] bg-white/90 backdrop-blur-xl border border-blue-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500"
             >
               <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform duration-500">📥</div>
               <h3 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-xl mb-1">{t('import')}</h3>
               <p className="text-gray-600 font-medium text-sm">{t('telc_b2_desc')}</p>
-            </Link>
+            </AppLink>
           </div>
         </div>
       )}
@@ -260,36 +261,36 @@ export default function Quizzes() {
                 <p className="text-lg text-blue-900/70 font-medium">{t('create_your_own_quizzes_subtitle_loggedin')}</p>
               </div>
               <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <Link to="/quizzes/vocabulary?tab=custom" className="group relative flex flex-col items-start p-6 rounded-[2rem] bg-white/90 backdrop-blur-xl border border-blue-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500">
+                <AppLink to="/quizzes/vocabulary?tab=custom" className="group relative flex flex-col items-start p-6 rounded-[2rem] bg-white/90 backdrop-blur-xl border border-blue-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500">
                   <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform duration-500">📖</div>
                   <h3 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-xl mb-1">{t('vocabulary_quiz')}</h3>
                   <p className="text-gray-600 font-medium text-sm">{t('custom_vocab_desc')}</p>
-                </Link>
-                <Link to="/quizzes/articles?tab=custom" className="group relative flex flex-col items-start p-6 rounded-[2rem] bg-white/90 backdrop-blur-xl border border-blue-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500">
+                </AppLink>
+                <AppLink to="/quizzes/articles?tab=custom" className="group relative flex flex-col items-start p-6 rounded-[2rem] bg-white/90 backdrop-blur-xl border border-blue-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500">
                   <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform duration-500">🔤</div>
                   <h3 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-xl mb-1">{t('articles_quiz')}</h3>
                   <p className="text-gray-600 font-medium text-sm">{t('custom_articles_desc')}</p>
-                </Link>
-                <Link to="/quizzes/phrases?tab=custom" className="group relative flex flex-col items-start p-6 rounded-[2rem] bg-white/90 backdrop-blur-xl border border-blue-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500">
+                </AppLink>
+                <AppLink to="/quizzes/phrases?tab=custom" className="group relative flex flex-col items-start p-6 rounded-[2rem] bg-white/90 backdrop-blur-xl border border-blue-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500">
                   <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform duration-500">💬</div>
                   <h3 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-xl mb-1">{t('phrases_quiz')}</h3>
                   <p className="text-gray-600 font-medium text-sm">{t('custom_phrases_desc')}</p>
-                </Link>
-                <Link to="/quizzes/prepositions?tab=custom" className="group relative flex flex-col items-start p-6 rounded-[2rem] bg-white/90 backdrop-blur-xl border border-blue-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500">
+                </AppLink>
+                <AppLink to="/quizzes/prepositions?tab=custom" className="group relative flex flex-col items-start p-6 rounded-[2rem] bg-white/90 backdrop-blur-xl border border-blue-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500">
                   <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform duration-500">📍</div>
                   <h3 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-xl mb-1">{t('prepositions_quiz')}</h3>
                   <p className="text-gray-600 font-medium text-sm">{t('custom_prepositions_desc')}</p>
-                </Link>
-                <Link to="/quizzes/adjectives?tab=custom" className="group relative flex flex-col items-start p-6 rounded-[2rem] bg-white/90 backdrop-blur-xl border border-blue-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500">
+                </AppLink>
+                <AppLink to="/quizzes/adjectives?tab=custom" className="group relative flex flex-col items-start p-6 rounded-[2rem] bg-white/90 backdrop-blur-xl border border-blue-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500">
                   <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform duration-500">✨</div>
                   <h3 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-xl mb-1">{t('adjectives_quiz') || 'Adjectives'}</h3>
                   <p className="text-gray-600 font-medium text-sm">{t('custom_adjectives_desc') || 'Your personal adjectives.'}</p>
-                </Link>
-                <Link to="/quizzes/verbs?tab=custom" className="group relative flex flex-col items-start p-6 rounded-[2rem] bg-white/90 backdrop-blur-xl border border-blue-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500">
+                </AppLink>
+                <AppLink to="/quizzes/verbs?tab=custom" className="group relative flex flex-col items-start p-6 rounded-[2rem] bg-white/90 backdrop-blur-xl border border-blue-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500">
                   <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform duration-500">🏃</div>
                   <h3 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-xl mb-1">{t('verbs_quiz') || 'Verbs'}</h3>
                   <p className="text-gray-600 font-medium text-sm">{t('custom_verbs_desc') || 'Your personal verbs.'}</p>
-                </Link>
+                </AppLink>
               </div>
             </div>
           )}
@@ -341,7 +342,7 @@ export default function Quizzes() {
                           ? markedWords.length % MARKED_WORDS_PER_QUIZ
                           : MARKED_WORDS_PER_QUIZ;
                       return (
-                        <Link
+                        <AppLink
                           key={quizId}
                           to={`/quiz?topic=marked&quizId=${quizId}`}
                           className="group flex items-center justify-between gap-3 min-h-[4.25rem] p-4 sm:p-5 rounded-2xl bg-white/90 border border-blue-50 hover:border-blue-200 hover:shadow-md active:scale-[0.99] transition-all touch-manipulation"
@@ -356,7 +357,7 @@ export default function Quizzes() {
                             </div>
                           </div>
                           <span className="text-blue-600 font-bold text-lg flex-shrink-0 group-hover:translate-x-1 transition-transform" aria-hidden>→</span>
-                        </Link>
+                        </AppLink>
                       );
                     })}
                     </div>

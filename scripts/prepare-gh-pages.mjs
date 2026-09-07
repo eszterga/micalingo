@@ -5,10 +5,11 @@ import {
   PUBLIC_SPA_ROUTES,
   SITEMAP_ENTRIES,
   absoluteUrl,
-  languageUrl,
   HREFLANG_TAGS,
-  SEO_LANGS,
   PAGE_META,
+  NOT_FOUND_META,
+  routeCanonicalPath,
+  routeNoindex,
 } from './seo-routes.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -22,12 +23,17 @@ if (!fs.existsSync(indexHtmlPath)) {
 
 const indexHtml = fs.readFileSync(indexHtmlPath, 'utf8');
 
-function applyPageMeta(html, route) {
-  const canonical = absoluteUrl(route);
-  const meta = PAGE_META[route] || PAGE_META['/'];
-  const hreflang = HREFLANG_TAGS(route)
-    .map((alt) => `<link rel="alternate" hreflang="${alt.lang}" href="${alt.href}" />`)
-    .join('\n    ');
+function applyPageMeta(html, route, options = {}) {
+  const canonicalPath = options.canonicalPath || routeCanonicalPath(route);
+  const canonical = absoluteUrl(canonicalPath);
+  const noindex = options.noindex === true || routeNoindex(route);
+  const meta = options.meta || PAGE_META[canonicalPath] || PAGE_META[route] || PAGE_META['/'];
+  const robots = noindex ? 'noindex, follow' : 'index, follow';
+  const hreflang = noindex
+    ? ''
+    : HREFLANG_TAGS(canonicalPath)
+        .map((alt) => `<link rel="alternate" hreflang="${alt.lang}" href="${alt.href}" />`)
+        .join('\n    ');
 
   let next = html
     .replace(/<title>[^<]*<\/title>/i, `<title>${escapeHtml(meta.title)}</title>`)
@@ -38,7 +44,17 @@ function applyPageMeta(html, route) {
     .replace(/<link rel="alternate" hreflang="[^"]+" href="[^"]+"\s*\/?>\s*/gi, '')
     .replace(
       /<link rel="canonical" href="[^"]*"\s*\/?>/i,
-      `<link rel="canonical" href="${canonical}" />\n    ${hreflang}`
+      hreflang
+        ? `<link rel="canonical" href="${canonical}" />\n    ${hreflang}`
+        : `<link rel="canonical" href="${canonical}" />`
+    )
+    .replace(
+      /<meta name="robots" content="[^"]*"\s*\/?>/i,
+      `<meta name="robots" content="${robots}" />`
+    )
+    .replace(
+      /<meta name="googlebot" content="[^"]*"\s*\/?>/i,
+      `<meta name="googlebot" content="${robots}" />`
     )
     .replace(
       /<meta property="og:url" content="[^"]*"\s*\/?>/i,
@@ -76,19 +92,17 @@ function buildSitemap() {
   const today = new Date().toISOString().slice(0, 10);
   const urls = [];
   for (const { path: route, changefreq, priority } of SITEMAP_ENTRIES) {
-    for (const lang of SEO_LANGS) {
-      const loc = languageUrl(route, lang);
-      const alts = HREFLANG_TAGS(route)
-        .map((alt) => `    <xhtml:link rel="alternate" hreflang="${alt.lang}" href="${alt.href}" />`)
-        .join('\n');
-      urls.push(`  <url>
+    const loc = absoluteUrl(route);
+    const alts = HREFLANG_TAGS(route)
+      .map((alt) => `    <xhtml:link rel="alternate" hreflang="${alt.lang}" href="${alt.href}" />`)
+      .join('\n');
+    urls.push(`  <url>
     <loc>${loc}</loc>
     <lastmod>${today}</lastmod>
     <changefreq>${changefreq}</changefreq>
     <priority>${priority}</priority>
 ${alts}
   </url>`);
-    }
   }
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
@@ -102,7 +116,15 @@ ${urls.join('\n')}
 fs.writeFileSync(path.join(distDir, '.nojekyll'), '');
 
 // GitHub Pages SPA fallback for unknown deep links (still HTTP 404 status).
-fs.writeFileSync(path.join(distDir, '404.html'), applyPageMeta(indexHtml, '/'), 'utf8');
+fs.writeFileSync(
+  path.join(distDir, '404.html'),
+  applyPageMeta(indexHtml, '/', {
+    noindex: true,
+    canonicalPath: '/',
+    meta: NOT_FOUND_META,
+  }),
+  'utf8'
+);
 
 // Materialize public routes as real files so Google gets HTTP 200 + correct path.
 for (const route of PUBLIC_SPA_ROUTES) {
@@ -122,5 +144,5 @@ fs.writeFileSync(path.join(distDir, 'sitemap.xml'), sitemap, 'utf8');
 fs.writeFileSync(path.resolve(__dirname, '..', 'public', 'sitemap.xml'), sitemap, 'utf8');
 
 console.log(
-  `Prepared GitHub Pages SEO: 404.html + ${PUBLIC_SPA_ROUTES.length} route shells + sitemap (${SITEMAP_ENTRIES.length * SEO_LANGS.length} URLs).`
+  `Prepared GitHub Pages SEO: 404.html + ${PUBLIC_SPA_ROUTES.length} route shells + sitemap (${SITEMAP_ENTRIES.length} URLs).`
 );

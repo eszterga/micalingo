@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import AppLink from '../components/AppLink';
 import { useI18n } from '../I18nContext';
 import { LEARN_GUIDES, guideTitle, guideDescription } from '../lib/learnContent';
 import type { LearnLang } from '../lib/learnContent';
@@ -9,9 +9,9 @@ export default function Learn() {
 
   return (
     <div className="max-w-3xl mx-auto pb-16">
-      <Link to="/" className="inline-flex items-center gap-2 text-sm font-bold text-blue-700 hover:text-blue-900 mb-6">
+      <AppLink to="/" className="inline-flex items-center gap-2 text-sm font-bold text-blue-700 hover:text-blue-900 mb-6">
         ← {t('home') || 'Home'}
-      </Link>
+      </AppLink>
       <article className="bg-white/80 backdrop-blur-xl border border-white rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-6 md:p-10 space-y-8">
         <div>
           <h1 className="text-3xl md:text-4xl font-extrabold text-blue-950 mb-3">{t('learn_hub_title')}</h1>
@@ -20,7 +20,7 @@ export default function Learn() {
         <ul className="space-y-4">
           {LEARN_GUIDES.map((guide) => (
             <li key={guide.slug}>
-              <Link
+              <AppLink
                 to={`/learn/${guide.slug}`}
                 className="block p-5 rounded-2xl bg-blue-50/80 border border-blue-100 hover:border-blue-300 hover:bg-white transition-colors"
               >
@@ -29,14 +29,14 @@ export default function Learn() {
                 <p className="text-xs font-bold uppercase tracking-wider text-blue-700/70">
                   {t('learn_read_time', { minutes: guide.minutes })}
                 </p>
-              </Link>
+              </AppLink>
             </li>
           ))}
         </ul>
         <nav className="flex flex-wrap gap-3 pt-2 border-t border-blue-100 text-sm font-bold">
-          <Link to="/quizzes" className="text-blue-700 hover:text-blue-900">{t('quizzes')}</Link>
-          <Link to="/grammar" className="text-blue-700 hover:text-blue-900">{t('grammar')}</Link>
-          <Link to="/about" className="text-blue-700 hover:text-blue-900">{t('footer_about')}</Link>
+          <AppLink to="/quizzes" className="text-blue-700 hover:text-blue-900">{t('quizzes')}</AppLink>
+          <AppLink to="/grammar" className="text-blue-700 hover:text-blue-900">{t('grammar')}</AppLink>
+          <AppLink to="/about" className="text-blue-700 hover:text-blue-900">{t('footer_about')}</AppLink>
         </nav>
       </article>
     </div>

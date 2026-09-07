@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import AppLink from './AppLink';
 import { useAuth } from '../AuthContext';
 import { useI18n } from '../I18nContext';
 import { Capacitor } from '@capacitor/core';
@@ -42,6 +43,7 @@ export default function Layout() {
     { code: 'hu', label: 'Magyar', flag: 'HU' }
   ];
 
+  const currentPath = location.pathname.replace(/\/+$/, '') || '/';
   const navLinks = [
     { path: '/', label: t('home') || 'Home' },
     { path: '/quizzes', label: t('quizzes') || 'Quizzes' },
@@ -81,12 +83,12 @@ export default function Layout() {
 
     const listener: any = CapacitorApp.addListener('backButton', ({ canGoBack }: { canGoBack: boolean }) => {
       // Let the Quiz page handle its own quit-confirm trap
-      if (location.pathname === '/quiz') return;
+      if (currentPath === '/quiz') return;
 
       // Prefer SPA history so private-space tabs (?tab=custom / personal / private / telc) are restored
       if (canGoBack || window.history.length > 1) {
         window.history.back();
-      } else if (location.pathname !== '/') {
+      } else if (currentPath !== '/') {
         // Deep link / cold start on a subpage with empty history → go home instead of exiting
         navigate('/', { replace: true });
       } else {
@@ -103,7 +105,7 @@ export default function Layout() {
         listener.remove();
       }
     };
-  }, [t, location.pathname, navigate]);
+  }, [t, currentPath, navigate]);
 
   const isNativeApp = Capacitor.isNativePlatform();
   // Clear phone status bar (clock / wifi / notch) on mobile browser + Capacitor
@@ -138,17 +140,17 @@ export default function Layout() {
         style={{ paddingTop: mobileTopInset }}
       >
         <div className="flex items-center gap-3">
-          {location.pathname !== '/' && (
+          {currentPath !== '/' && (
             <button onClick={() => setIsMobileMenuOpen(true)} className="p-1 -ml-1 text-gray-300 hover:text-white" title="Menu">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
           )}
-          <Link to="/" className="flex items-center gap-2">
+          <AppLink to="/" className="flex items-center gap-2">
             <img src="/logo.png" alt="MicaLingo — learn German" className="w-10 h-10 object-contain mt-1" width="40" height="40" />
             <span className="text-2xl font-extrabold tracking-wider">MicaLingo</span>
-          </Link>
+          </AppLink>
         </div>
         <div className="flex items-center gap-3">
           <div className="relative">
@@ -190,9 +192,9 @@ export default function Layout() {
               )}
             </button>
           ) : (
-            <Link to="/login" className="text-xs text-gray-400 hover:text-white border border-gray-600 px-2 py-1.5 rounded">
+            <AppLink to="/login" className="text-xs text-gray-400 hover:text-white border border-gray-600 px-2 py-1.5 rounded">
               {t('login') || 'Log in'}
-            </Link>
+            </AppLink>
           )}
         </div>
       </div>
@@ -218,14 +220,14 @@ export default function Layout() {
             </div>
             <nav className="flex flex-col gap-1 px-4 flex-1 overflow-y-auto pb-6">
               {navLinks.map(link => (
-                <Link
+                <AppLink
                   key={link.path}
                   to={link.path}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className={`px-4 py-3 rounded transition-colors ${location.pathname === link.path ? 'bg-blue-800 text-white font-medium' : 'hover:bg-blue-800 hover:text-white'}`}
+                  className={`px-4 py-3 rounded transition-colors ${currentPath === link.path ? 'bg-blue-800 text-white font-medium' : 'hover:bg-blue-800 hover:text-white'}`}
                 >
                   {link.label}
-                </Link>
+                </AppLink>
               ))}
 
               {!Capacitor.isNativePlatform() && (
@@ -255,24 +257,24 @@ export default function Layout() {
                 >
                   💖 {t('support_micalingo') || 'Support MicaLingo'}
                 </button>
-                <Link to="/privacy" onClick={() => setIsMobileMenuOpen(false)} className="px-4 py-2.5 rounded text-sm text-blue-200 hover:bg-blue-800 hover:text-white transition-colors">
+                <AppLink to="/privacy" onClick={() => setIsMobileMenuOpen(false)} className="px-4 py-2.5 rounded text-sm text-blue-200 hover:bg-blue-800 hover:text-white transition-colors">
                   {t('footer_privacy') || 'Privacy Policy'}
-                </Link>
-                <Link to="/terms" onClick={() => setIsMobileMenuOpen(false)} className="px-4 py-2.5 rounded text-sm text-blue-200 hover:bg-blue-800 hover:text-white transition-colors">
+                </AppLink>
+                <AppLink to="/terms" onClick={() => setIsMobileMenuOpen(false)} className="px-4 py-2.5 rounded text-sm text-blue-200 hover:bg-blue-800 hover:text-white transition-colors">
                   {t('footer_terms') || 'Terms of Service'}
-                </Link>
-                <Link to="/cookies" onClick={() => setIsMobileMenuOpen(false)} className="px-4 py-2.5 rounded text-sm text-blue-200 hover:bg-blue-800 hover:text-white transition-colors">
+                </AppLink>
+                <AppLink to="/cookies" onClick={() => setIsMobileMenuOpen(false)} className="px-4 py-2.5 rounded text-sm text-blue-200 hover:bg-blue-800 hover:text-white transition-colors">
                   {t('footer_cookies') || 'Cookie Policy'}
-                </Link>
-                <Link to="/impressum" onClick={() => setIsMobileMenuOpen(false)} className="px-4 py-2.5 rounded text-sm text-blue-200 hover:bg-blue-800 hover:text-white transition-colors">
+                </AppLink>
+                <AppLink to="/impressum" onClick={() => setIsMobileMenuOpen(false)} className="px-4 py-2.5 rounded text-sm text-blue-200 hover:bg-blue-800 hover:text-white transition-colors">
                   {t('footer_impressum') || 'Impressum'}
-                </Link>
-                <Link to="/about" onClick={() => setIsMobileMenuOpen(false)} className="px-4 py-2.5 rounded text-sm text-blue-200 hover:bg-blue-800 hover:text-white transition-colors">
+                </AppLink>
+                <AppLink to="/about" onClick={() => setIsMobileMenuOpen(false)} className="px-4 py-2.5 rounded text-sm text-blue-200 hover:bg-blue-800 hover:text-white transition-colors">
                   {t('footer_about') || 'About & Contact'}
-                </Link>
-                <Link to="/learn" onClick={() => setIsMobileMenuOpen(false)} className="px-4 py-2.5 rounded text-sm text-blue-200 hover:bg-blue-800 hover:text-white transition-colors">
+                </AppLink>
+                <AppLink to="/learn" onClick={() => setIsMobileMenuOpen(false)} className="px-4 py-2.5 rounded text-sm text-blue-200 hover:bg-blue-800 hover:text-white transition-colors">
                   {t('learn_card_title') || 'Study guides'}
-                </Link>
+                </AppLink>
                 <button
                   type="button"
                   onClick={() => {
@@ -292,15 +294,15 @@ export default function Layout() {
       <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
         {/* Desktop Header */}
         <header className="hidden md:flex justify-between items-center px-8 py-4 bg-white/30 backdrop-blur-lg border-b border-white/40 shadow-sm z-50 relative">
-          <Link to="/" className="flex items-center gap-3 hover:scale-105 transition-transform">
+          <AppLink to="/" className="flex items-center gap-3 hover:scale-105 transition-transform">
             <img src="/logo.png" alt="MicaLingo — learn German" className="w-12 h-12 object-contain drop-shadow-sm mt-1.5" width="48" height="48" />
             <span className="text-3xl font-extrabold text-blue-900 tracking-wider">MicaLingo</span>
-          </Link>
+          </AppLink>
           <nav className="hidden lg:flex items-center gap-5 text-sm font-extrabold text-blue-900">
-            <Link to="/quizzes" className="hover:text-blue-700 transition-colors">{t('quizzes')}</Link>
-            <Link to="/grammar" className="hover:text-blue-700 transition-colors">{t('grammar')}</Link>
-            <Link to="/learn" className="hover:text-blue-700 transition-colors">{t('learn_card_title')}</Link>
-            <Link to="/about" className="hover:text-blue-700 transition-colors">{t('footer_about')}</Link>
+            <AppLink to="/quizzes" className="hover:text-blue-700 transition-colors">{t('quizzes')}</AppLink>
+            <AppLink to="/grammar" className="hover:text-blue-700 transition-colors">{t('grammar')}</AppLink>
+            <AppLink to="/learn" className="hover:text-blue-700 transition-colors">{t('learn_card_title')}</AppLink>
+            <AppLink to="/about" className="hover:text-blue-700 transition-colors">{t('footer_about')}</AppLink>
           </nav>
           <div className="flex items-center gap-6">
             <div className="relative">
@@ -349,9 +351,9 @@ export default function Layout() {
                 </button>
               </div>
             ) : (
-              <Link to="/login" className="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors">
+              <AppLink to="/login" className="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors">
                 {t('login') || 'Log in'}
-              </Link>
+              </AppLink>
             )}
           </div>
         </header>
@@ -363,12 +365,12 @@ export default function Layout() {
             </div>
             <footer className="mt-10 pt-6 pb-20 md:pb-8 border-t border-blue-200/40 text-center relative z-10" style={{ paddingBottom: 'max(5rem, calc(2rem + var(--admob-banner-height, 0px)))' }}>
               <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm font-bold text-blue-800/80 mb-3">
-                <Link to="/privacy" className="hover:text-blue-950 transition-colors">{t('footer_privacy') || 'Privacy Policy'}</Link>
-                <Link to="/terms" className="hover:text-blue-950 transition-colors">{t('footer_terms') || 'Terms of Service'}</Link>
-                <Link to="/cookies" className="hover:text-blue-950 transition-colors">{t('footer_cookies') || 'Cookie Policy'}</Link>
-                <Link to="/impressum" className="hover:text-blue-950 transition-colors">{t('footer_impressum') || 'Impressum'}</Link>
-                <Link to="/about" className="hover:text-blue-950 transition-colors">{t('footer_about') || 'About & Contact'}</Link>
-                <Link to="/learn" className="hover:text-blue-950 transition-colors">{t('learn_card_title') || 'Study guides'}</Link>
+                <AppLink to="/privacy" className="hover:text-blue-950 transition-colors">{t('footer_privacy') || 'Privacy Policy'}</AppLink>
+                <AppLink to="/terms" className="hover:text-blue-950 transition-colors">{t('footer_terms') || 'Terms of Service'}</AppLink>
+                <AppLink to="/cookies" className="hover:text-blue-950 transition-colors">{t('footer_cookies') || 'Cookie Policy'}</AppLink>
+                <AppLink to="/impressum" className="hover:text-blue-950 transition-colors">{t('footer_impressum') || 'Impressum'}</AppLink>
+                <AppLink to="/about" className="hover:text-blue-950 transition-colors">{t('footer_about') || 'About & Contact'}</AppLink>
+                <AppLink to="/learn" className="hover:text-blue-950 transition-colors">{t('learn_card_title') || 'Study guides'}</AppLink>
                 <button
                   type="button"
                   onClick={openCookieSettings}

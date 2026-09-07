@@ -1,13 +1,15 @@
-import { Link, Navigate, useParams } from 'react-router-dom';
+import { Navigate, useParams } from 'react-router-dom';
+import AppLink from '../components/AppLink';
 import { useI18n } from '../I18nContext';
 import ArticleBody from '../components/ArticleBody';
 import { getLearnGuide, guideBody, guideTitle, guideDescription, LEARN_GUIDES } from '../lib/learnContent';
 import type { LearnLang } from '../lib/learnContent';
 
-export default function LearnGuide() {
-  const { slug } = useParams<{ slug: string }>();
+export default function LearnGuide({ forcedSlug }: { forcedSlug?: string }) {
+  const { slug: slugParam } = useParams<{ slug: string }>();
   const { t, language } = useI18n();
   const lang = language as LearnLang;
+  const slug = forcedSlug || slugParam;
   const guide = slug ? getLearnGuide(slug) : undefined;
 
   if (!guide) {
@@ -18,9 +20,9 @@ export default function LearnGuide() {
 
   return (
     <div className="max-w-3xl mx-auto pb-16">
-      <Link to="/learn" className="inline-flex items-center gap-2 text-sm font-bold text-blue-700 hover:text-blue-900 mb-6">
+      <AppLink to="/learn" className="inline-flex items-center gap-2 text-sm font-bold text-blue-700 hover:text-blue-900 mb-6">
         ← {t('learn_hub_title')}
-      </Link>
+      </AppLink>
       <article className="bg-white/80 backdrop-blur-xl border border-white rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-6 md:p-10">
         <p className="text-xs font-bold uppercase tracking-wider text-blue-700/70 mb-3">
           {t('learn_byline', { minutes: guide.minutes })}
@@ -34,9 +36,9 @@ export default function LearnGuide() {
             <ul className="space-y-2">
               {others.map((g) => (
                 <li key={g.slug}>
-                  <Link to={`/learn/${g.slug}`} className="font-bold text-blue-700 hover:text-blue-900">
+                  <AppLink to={`/learn/${g.slug}`} className="font-bold text-blue-700 hover:text-blue-900">
                     {guideTitle(g, lang)}
-                  </Link>
+                  </AppLink>
                 </li>
               ))}
             </ul>

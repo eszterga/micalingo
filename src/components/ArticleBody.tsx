@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import AppLink from './AppLink';
 
 type InlinePart =
   | { type: 'text'; text: string }
@@ -46,9 +46,9 @@ function renderInline(parts: InlinePart[], keyPrefix: string) {
     if (part.type === 'link') {
       if (part.href.startsWith('/')) {
         return (
-          <Link key={key} to={part.href} className="text-blue-700 font-bold underline underline-offset-2 hover:text-blue-900">
+          <AppLink key={key} to={part.href} className="text-blue-700 font-bold underline underline-offset-2 hover:text-blue-900">
             {part.text}
-          </Link>
+          </AppLink>
         );
       }
       return (

@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, useLocation, Navigate, useParams } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import React, { Suspense } from "react";
 import Layout from "./components/Layout";
 import AdminPrompt from "./components/AdminPrompt";
@@ -44,10 +44,10 @@ const Learn = React.lazy(() => import("./pages/Learn"));
 const LearnGuide = React.lazy(() => import("./pages/LearnGuide"));
 const Cookies = React.lazy(() => import("./pages/Cookies"));
 const Impressum = React.lazy(() => import("./pages/Impressum"));
+const NotFound = React.lazy(() => import("./pages/NotFound"));
 
-function PracticeTopicRedirect() {
-  const { topic } = useParams();
-  return <Navigate to={topic ? `/quizzes/${topic}` : '/quizzes'} replace />;
+function LegacyLearnGuide() {
+  return <LearnGuide forcedSlug="public-and-private" />;
 }
 
 function AppRoutes() {
@@ -65,8 +65,8 @@ function AppRoutes() {
       <Route element={<Layout />}>
         {/* Publicly shared sections */}
         <Route path="/" element={<Home />} />
-        <Route path="/practice" element={<Navigate to="/quizzes" replace />} />
-        <Route path="/practice/:topic" element={<PracticeTopicRedirect />} />
+        <Route path="/practice" element={<Quizzes />} />
+        <Route path="/practice/:topic" element={<TopicQuizzes />} />
         <Route path="/quiz" element={<Quiz />} />
         <Route path="/results" element={<Results />} />
         <Route path="/grammar" element={<Grammar />} />
@@ -92,8 +92,8 @@ function AppRoutes() {
         <Route path="/terms" element={<Terms />} />
         <Route path="/about" element={<About />} />
         <Route path="/learn" element={<Learn />} />
-        <Route path="/learn/german-exam-prep" element={<Navigate to="/learn/public-and-private" replace />} />
-        <Route path="/learn/weekly-german-practice" element={<Navigate to="/learn" replace />} />
+        <Route path="/learn/german-exam-prep" element={<LegacyLearnGuide />} />
+        <Route path="/learn/weekly-german-practice" element={<Learn />} />
         <Route path="/learn/:slug" element={<LearnGuide />} />
         <Route path="/cookies" element={<Cookies />} />
         <Route path="/impressum" element={<Impressum />} />
@@ -105,6 +105,7 @@ function AppRoutes() {
           <Route path="/learning-materials/private/reading" element={<PrivateMaterials type="reading" />} />
           <Route path="/learning-materials/private/listening" element={<PrivateMaterials type="listening" />} />
         </Route>
+        <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
   );

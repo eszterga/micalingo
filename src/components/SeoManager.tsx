@@ -33,7 +33,7 @@ function upsertJsonLd(data: object) {
 }
 
 function upsertHreflang(alternates: { lang: string; href: string }[]) {
-  document.head.querySelectorAll('link[data-seo-hreflang]').forEach((node) => node.remove());
+  document.head.querySelectorAll('link[rel="alternate"][hreflang]').forEach((node) => node.remove());
   for (const alt of alternates) {
     const link = document.createElement('link');
     link.setAttribute('rel', 'alternate');
@@ -68,7 +68,7 @@ export default function SeoManager() {
 
   useEffect(() => {
     const seo = resolveSeo(pathname, lang);
-    const canonical = canonicalHref(seo.canonicalPath, lang);
+    const canonical = canonicalHref(seo.canonicalPath);
     const robots = seo.noindex ? 'noindex, follow' : 'index, follow';
 
     document.title = seo.title;
@@ -107,7 +107,11 @@ export default function SeoManager() {
     }
     link.setAttribute('href', canonical);
 
-    upsertHreflang(hreflangAlternates(seo.canonicalPath));
+    if (seo.noindex) {
+      document.head.querySelectorAll('link[rel="alternate"][hreflang]').forEach((node) => node.remove());
+    } else {
+      upsertHreflang(hreflangAlternates(seo.canonicalPath));
+    }
     upsertJsonLd(buildJsonLd(seo, lang, canonical));
   }, [pathname, lang]);
 

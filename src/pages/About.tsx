@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import AppLink from '../components/AppLink';
 import { useI18n } from '../I18nContext';
 
 function AboutBody({ text, supportLabel }: { text: string; supportLabel: string }) {
@@ -32,9 +32,9 @@ export default function About() {
 
   return (
     <div className="max-w-3xl mx-auto pb-16">
-      <Link to="/" className="inline-flex items-center gap-2 text-sm font-bold text-blue-700 hover:text-blue-900 mb-6">
+      <AppLink to="/" className="inline-flex items-center gap-2 text-sm font-bold text-blue-700 hover:text-blue-900 mb-6">
         ← {t('home') || 'Home'}
-      </Link>
+      </AppLink>
       <article className="bg-white/80 backdrop-blur-xl border border-white rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-6 md:p-10 space-y-10">
         <div>
           <h1 className="text-3xl md:text-4xl font-extrabold text-blue-950 mb-2">{t('about_title')}</h1>
@@ -86,11 +86,11 @@ export default function About() {
         </section>
 
         <nav className="flex flex-wrap gap-4 pt-2 border-t border-blue-100 text-sm font-bold">
-          <Link to="/learn" className="text-blue-700 hover:text-blue-900">{t('learn_hub_title')}</Link>
-          <Link to="/privacy" className="text-blue-700 hover:text-blue-900">{t('footer_privacy')}</Link>
-          <Link to="/terms" className="text-blue-700 hover:text-blue-900">{t('footer_terms')}</Link>
-          <Link to="/cookies" className="text-blue-700 hover:text-blue-900">{t('footer_cookies')}</Link>
-          <Link to="/impressum" className="text-blue-700 hover:text-blue-900">{t('footer_impressum')}</Link>
+          <AppLink to="/learn" className="text-blue-700 hover:text-blue-900">{t('learn_hub_title')}</AppLink>
+          <AppLink to="/privacy" className="text-blue-700 hover:text-blue-900">{t('footer_privacy')}</AppLink>
+          <AppLink to="/terms" className="text-blue-700 hover:text-blue-900">{t('footer_terms')}</AppLink>
+          <AppLink to="/cookies" className="text-blue-700 hover:text-blue-900">{t('footer_cookies')}</AppLink>
+          <AppLink to="/impressum" className="text-blue-700 hover:text-blue-900">{t('footer_impressum')}</AppLink>
         </nav>
       </article>
     </div>

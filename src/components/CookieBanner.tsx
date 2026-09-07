@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import AppLink from './AppLink';
 import { useI18n } from '../I18nContext';
 import {
   OPEN_COOKIE_SETTINGS_EVENT,
@@ -63,13 +63,13 @@ export default function CookieBanner() {
         </h2>
         <p className="text-sm text-gray-700 leading-relaxed mb-4">
           {t('cookie_banner_body')}{' '}
-          <Link to="/privacy" className="font-bold text-blue-700 underline underline-offset-2">
+          <AppLink to="/privacy" className="font-bold text-blue-700 underline underline-offset-2">
             {t('footer_privacy')}
-          </Link>
+          </AppLink>
           {' · '}
-          <Link to="/cookies" className="font-bold text-blue-700 underline underline-offset-2">
+          <AppLink to="/cookies" className="font-bold text-blue-700 underline underline-offset-2">
             {t('footer_cookies')}
-          </Link>
+          </AppLink>
         </p>
 
         {customize && (
