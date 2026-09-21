@@ -539,13 +539,10 @@ const GRAMMAR_CATS: Record<string, Localized> = {
 
 const DEFAULT_COPY = HOME;
 const NOINDEX_PATHS = new Set([
-  '/login',
-  '/settings',
   '/import',
   '/create-quiz',
   '/quiz',
   '/results',
-  '/statistics',
 ]);
 
 export type ResolvedSeo = SeoCopy & {
@@ -566,7 +563,7 @@ export function resolveSeo(pathname: string, lang: SeoLang): ResolvedSeo {
     return {
       ...pick(ROUTES['/quizzes'], lang),
       canonicalPath: '/quizzes',
-      noindex: true,
+      noindex: false,
       pageType: 'page',
     };
   }
@@ -614,7 +611,7 @@ export function resolveSeo(pathname: string, lang: SeoLang): ResolvedSeo {
       return {
         ...pick(copy, lang),
         canonicalPath: `/quizzes/${topic}`,
-        noindex: true,
+        noindex: false,
         pageType: 'quizTopic',
         topic,
       };
@@ -624,7 +621,7 @@ export function resolveSeo(pathname: string, lang: SeoLang): ResolvedSeo {
       description: `Practice German ${topic} with MicaLingo quizzes.`,
       keywords: `German ${topic} quiz, learn German`,
       canonicalPath: '/quizzes',
-      noindex: true,
+      noindex: false,
       pageType: 'quizTopic',
       topic,
     };
@@ -641,11 +638,19 @@ export function resolveSeo(pathname: string, lang: SeoLang): ResolvedSeo {
           description: guideDescription(guide, lang),
           keywords: 'German Hungarian library, private quizzes, learn German, MicaLingo',
           canonicalPath: '/learn/public-and-private',
-          noindex: true,
+          noindex: false,
           pageType: 'learnGuide',
           topic: 'public-and-private',
         };
       }
+    }
+    if (topic === 'weekly-german-practice') {
+      return {
+        ...pick(ROUTES['/learn'], lang),
+        canonicalPath: '/learn',
+        noindex: false,
+        pageType: 'page',
+      };
     }
     const guide = getLearnGuide(topic);
     if (guide) {
@@ -1037,6 +1042,7 @@ export const SITEMAP_PATHS = [
   '/library/',
   '/grammar/',
   '/vocabulary/',
+  '/statistics/',
   '/quizzes/vocabulary/',
   '/quizzes/articles/',
   '/quizzes/phrases/',

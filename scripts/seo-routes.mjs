@@ -20,9 +20,6 @@ export const LEGACY_CANONICAL = {
   '/learn/weekly-german-practice': '/learn',
 };
 
-/** App pages Google may crawl from the nav. HTTP 200 + noindex, never sitemap. */
-export const NOINDEX_ROUTES = ['/statistics', '/settings', '/login'];
-
 export const INDEXABLE_ROUTES = [
   '/',
   '/quizzes',
@@ -31,6 +28,7 @@ export const INDEXABLE_ROUTES = [
   '/grammar',
   ...GRAMMAR_CATS.map((cat) => `/grammar/${cat}`),
   '/vocabulary',
+  '/statistics',
   '/learning-materials',
   '/learning-materials/reading',
   '/learning-materials/reading/false-friends',
@@ -55,7 +53,8 @@ export const INDEXABLE_ROUTES = [
 /** Routes that must return HTTP 200 on GitHub Pages (copied as dist/<path>/index.html). */
 export const PUBLIC_SPA_ROUTES = [
   ...INDEXABLE_ROUTES,
-  ...NOINDEX_ROUTES,
+  '/settings',
+  '/login',
   ...Object.keys(LEGACY_CANONICAL),
 ];
 
@@ -66,6 +65,7 @@ export const SITEMAP_ENTRIES = [
   { path: '/library', changefreq: 'daily', priority: '0.9' },
   { path: '/grammar', changefreq: 'monthly', priority: '0.8' },
   { path: '/vocabulary', changefreq: 'weekly', priority: '0.8' },
+  { path: '/statistics', changefreq: 'weekly', priority: '0.5' },
   ...QUIZ_TOPICS.map((topic) => ({ path: `/quizzes/${topic}`, changefreq: 'weekly', priority: '0.8' })),
   ...GRAMMAR_CATS.map((cat) => ({ path: `/grammar/${cat}`, changefreq: 'monthly', priority: '0.7' })),
   { path: '/learning-materials', changefreq: 'weekly', priority: '0.75' },
@@ -113,8 +113,8 @@ export function routeCanonicalPath(route) {
   return LEGACY_CANONICAL[route] || route;
 }
 
-export function routeNoindex(route) {
-  return NOINDEX_ROUTES.includes(route) || Boolean(LEGACY_CANONICAL[route]);
+export function routeNoindex(_route) {
+  return false;
 }
 
 export function absoluteUrl(path) {
