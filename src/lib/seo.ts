@@ -779,10 +779,10 @@ export function resolveSeo(pathname: string, lang: SeoLang): ResolvedSeo {
 }
 
 /**
- * GitHub Pages 301s /path → /path/. Public links must already use the slash
- * so Google does not keep discovering redirect URLs.
+ * Public hrefs stay slashless so they match the HTTP 200 URL GitHub Pages
+ * serves from path.html (path/index.html still covers /path/).
  */
-export function withTrailingSlash(href: string) {
+export function withoutTrailingSlash(href: string) {
   if (!href.startsWith('/')) return href;
   const queryIdx = href.indexOf('?');
   const hashIdx = href.indexOf('#');
@@ -793,14 +793,14 @@ export function withTrailingSlash(href: string) {
   const rest = href.slice(split);
   if (path === '/') return `${path}${rest}`;
   if (/\.[a-z0-9]+$/i.test(path)) return href;
-  const slashed = path.endsWith('/') ? path : `${path}/`;
-  return `${slashed}${rest}`;
+  const trimmed = path.replace(/\/+$/, '') || '/';
+  return `${trimmed}${rest}`;
 }
 
 export function canonicalHref(pathname: string, _lang: SeoLang = 'en') {
   const clean = pathname.replace(/\/+$/, '') || '/';
   // One indexable URL per page. Language is a UI setting, not a separate document.
-  return clean === '/' ? `${SITE_ORIGIN}/` : `${SITE_ORIGIN}${clean}/`;
+  return clean === '/' ? `${SITE_ORIGIN}/` : `${SITE_ORIGIN}${clean}`;
 }
 
 export function languageHref(pathname: string, lang: SeoLang) {
@@ -1038,54 +1038,54 @@ function titleize(value: string) {
 /** Public indexable URLs (keep in sync with scripts/seo-routes.mjs SITEMAP_ENTRIES). */
 export const SITEMAP_PATHS = [
   '/',
-  '/quizzes/',
-  '/library/',
-  '/grammar/',
-  '/vocabulary/',
-  '/statistics/',
-  '/quizzes/vocabulary/',
-  '/quizzes/articles/',
-  '/quizzes/phrases/',
-  '/quizzes/prepositions/',
-  '/quizzes/adjectives/',
-  '/quizzes/verbs/',
-  '/grammar/cases/',
-  '/grammar/tenses/',
-  '/grammar/articles/',
-  '/grammar/adjectives/',
-  '/grammar/prepositions/',
-  '/grammar/sentence-structure/',
-  '/learning-materials/',
-  '/learning-materials/reading/',
-  '/learning-materials/reading/false-friends/',
-  '/learning-materials/reading/idioms/',
-  '/learning-materials/reading/articles/history/',
-  '/learning-materials/reading/articles/animals/',
-  '/learning-materials/reading/articles/music/',
-  '/learning-materials/reading/articles/culture/',
-  '/learning-materials/reading/articles/politics/',
-  '/learning-materials/reading/articles/science/',
-  '/learning-materials/reading/articles/celebrities/',
-  '/learning-materials/reading/books/classics/',
-  '/learning-materials/reading/books/short-stories/',
-  '/learning-materials/listening/',
-  '/learning-materials/listening/music/pop/',
-  '/learning-materials/listening/music/rock/',
-  '/learning-materials/listening/music/other-music/',
-  '/learning-materials/listening/podcasts/politics/',
-  '/learning-materials/listening/podcasts/travel/',
-  '/learning-materials/listening/podcasts/psychology/',
-  '/learning-materials/listening/podcasts/other-podcasts/',
-  '/learning-materials/listening/audiobooks/fiction/',
-  '/learning-materials/listening/audiobooks/non-fiction/',
-  '/learning-materials/listening/audiobooks/other-audiobooks/',
-  '/learn/',
-  '/learn/public-and-private/',
-  '/learn/der-die-das/',
-  '/learn/german-cases/',
-  '/about/',
-  '/privacy/',
-  '/terms/',
-  '/cookies/',
-  '/impressum/',
+  '/quizzes',
+  '/library',
+  '/grammar',
+  '/vocabulary',
+  '/statistics',
+  '/quizzes/vocabulary',
+  '/quizzes/articles',
+  '/quizzes/phrases',
+  '/quizzes/prepositions',
+  '/quizzes/adjectives',
+  '/quizzes/verbs',
+  '/grammar/cases',
+  '/grammar/tenses',
+  '/grammar/articles',
+  '/grammar/adjectives',
+  '/grammar/prepositions',
+  '/grammar/sentence-structure',
+  '/learning-materials',
+  '/learning-materials/reading',
+  '/learning-materials/reading/false-friends',
+  '/learning-materials/reading/idioms',
+  '/learning-materials/reading/articles/history',
+  '/learning-materials/reading/articles/animals',
+  '/learning-materials/reading/articles/music',
+  '/learning-materials/reading/articles/culture',
+  '/learning-materials/reading/articles/politics',
+  '/learning-materials/reading/articles/science',
+  '/learning-materials/reading/articles/celebrities',
+  '/learning-materials/reading/books/classics',
+  '/learning-materials/reading/books/short-stories',
+  '/learning-materials/listening',
+  '/learning-materials/listening/music/pop',
+  '/learning-materials/listening/music/rock',
+  '/learning-materials/listening/music/other-music',
+  '/learning-materials/listening/podcasts/politics',
+  '/learning-materials/listening/podcasts/travel',
+  '/learning-materials/listening/podcasts/psychology',
+  '/learning-materials/listening/podcasts/other-podcasts',
+  '/learning-materials/listening/audiobooks/fiction',
+  '/learning-materials/listening/audiobooks/non-fiction',
+  '/learning-materials/listening/audiobooks/other-audiobooks',
+  '/learn',
+  '/learn/public-and-private',
+  '/learn/der-die-das',
+  '/learn/german-cases',
+  '/about',
+  '/privacy',
+  '/terms',
+  '/cookies',
+  '/impressum',
 ];

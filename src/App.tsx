@@ -52,8 +52,9 @@ function LegacyLearnGuide() {
 
 function AppRoutes() {
   const location = useLocation();
-  // GitHub Pages serves /quizzes/ (200) and 301s /quizzes. Match both
-  // without a client redirect, which Google would also treat as a redirect.
+  // GitHub Pages serves both /quizzes (from quizzes.html) and /quizzes/.
+  // Strip a trailing slash for routing only — do not navigate, or Google
+  // would treat the slashed URL as a client-side redirect.
   const normalizedLocation = {
     ...location,
     pathname: location.pathname.replace(/\/+$/, '') || '/',

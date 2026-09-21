@@ -121,8 +121,8 @@ export function absoluteUrl(path) {
   if (!path || path === '/') return `${SITE_ORIGIN}/`;
   const withSlash = path.startsWith('/') ? path : `/${path}`;
   const trimmed = withSlash.replace(/\/+$/, '');
-  // GitHub Pages 301s /quizzes → /quizzes/, so canonicals must use the slash.
-  return `${SITE_ORIGIN}${trimmed}/`;
+  // Slashless canonical: dist/quizzes.html makes /quizzes HTTP 200 on GitHub Pages.
+  return `${SITE_ORIGIN}${trimmed}`;
 }
 
 export const SEO_LANGS = ['en', 'de', 'hu'];

@@ -127,6 +127,8 @@ fs.writeFileSync(
 );
 
 // Materialize public routes as real files so Google gets HTTP 200 + correct path.
+// GitHub Pages 301s /quizzes → /quizzes/ when only quizzes/index.html exists.
+// quizzes.html makes /quizzes return 200; quizzes/index.html keeps /quizzes/ as 200.
 for (const route of PUBLIC_SPA_ROUTES) {
   const html = applyPageMeta(indexHtml, route);
   if (route === '/') {
@@ -134,6 +136,10 @@ for (const route of PUBLIC_SPA_ROUTES) {
     continue;
   }
   const segments = route.replace(/^\//, '').split('/');
+  const leaf = segments[segments.length - 1];
+  const parentDir = path.join(distDir, ...segments.slice(0, -1));
+  fs.mkdirSync(parentDir, { recursive: true });
+  fs.writeFileSync(path.join(parentDir, `${leaf}.html`), html, 'utf8');
   const dir = path.join(distDir, ...segments);
   fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(path.join(dir, 'index.html'), html, 'utf8');
