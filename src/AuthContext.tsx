@@ -43,8 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let cancelled = false;
 
     (async () => {
-      // Finish redirect-based Google sign-in (used on Firefox / popup fallback)
-      // before subscribing so AuthContext sees the user on return.
+      // Finish a redirect sign-in if the popup was blocked and we fell back.
       try {
         await completeGoogleRedirectSignIn();
       } catch (error) {

@@ -27,13 +27,6 @@ function isAuthErrorCode(error: unknown, code: string): boolean {
   );
 }
 
-function prefersRedirectSignIn(): boolean {
-  // Firefox Enhanced Tracking / Fingerprinting Protection often breaks the
-  // cross-origin Firebase auth popup (authDomain is *.firebaseapp.com while
-  // the app runs on micalingo.com). Full-page redirect is reliable there.
-  return /firefox/i.test(navigator.userAgent);
-}
-
 function shouldFallbackToRedirect(error: unknown): boolean {
   return (
     isAuthErrorCode(error, 'auth/popup-blocked') ||
@@ -56,11 +49,11 @@ let pendingSignIn: Promise<UserCredential | null> | null = null;
 /**
  * Signs the user in with their Google account.
  *
- * Web (Chrome/Safari/Edge): Firebase Auth popup, with redirect fallback
- * when the popup is blocked or cancelled by the browser.
- *
- * Web (Firefox): redirect flow — popups are unreliable with Firefox
- * tracking / fingerprinting protections against the Firebase auth domain.
+ * Web: Firebase Auth popup. Firefox partitions storage for the cross-site
+ * helper iframe on micalingo.firebaseapp.com, which drops the session from
+ * signInWithRedirect ("Partitioned cookie or storage access…"). Popup
+ * returns the credential via window.opener and does not need that storage.
+ * Redirect is only a fallback when the browser blocks the popup.
  *
  * Native app: Google blocks OAuth inside the WebView ("disallowed_useragent").
  * We use the device's native Google Sign-In UI, then pass the ID token into
@@ -86,11 +79,6 @@ export async function signInWithGoogle(): Promise<UserCredential | null> {
 
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
-
-    if (prefersRedirectSignIn()) {
-      await signInWithRedirect(auth, provider);
-      return null;
-    }
 
     try {
       return await signInWithPopup(auth, provider);
