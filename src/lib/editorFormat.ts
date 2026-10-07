@@ -1,0 +1,450 @@
+/**
+ * Read and rewrite formatting inside a contentEditable CMS editor.
+ * Pasted Word/Docs HTML keeps its own font, size, and weight on nested spans,
+ * which execCommand fontSize/fontName does not surface or override.
+ */
+
+export type FormatPatch = {
+  fontWeight?: "400" | "700";
+  fontStyle?: "italic" | "normal";
+  underline?: boolean;
+  strike?: boolean;
+  fontFamily?: string;
+  fontSize?: string;
+};
+
+export type FormatState = {
+  bold: boolean;
+  boldMixed: boolean;
+  italic: boolean;
+  italicMixed: boolean;
+  underline: boolean;
+  underlineMixed: boolean;
+  strike: boolean;
+  strikeMixed: boolean;
+  fontFamily: string;
+  fontMixed: boolean;
+  fontSizePx: number | null;
+  sizeMixed: boolean;
+  block: string;
+  align: string;
+  color: string;
+  highlight: string;
+  highlightOn: boolean;
+};
+
+export const EMPTY_FORMAT: FormatState = {
+  bold: false,
+  boldMixed: false,
+  italic: false,
+  italicMixed: false,
+  underline: false,
+  underlineMixed: false,
+  strike: false,
+  strikeMixed: false,
+  fontFamily: "",
+  fontMixed: false,
+  fontSizePx: null,
+  sizeMixed: false,
+  block: "",
+  align: "",
+  color: "#111827",
+  highlight: "#fef08a",
+  highlightOn: false,
+};
+
+export const FONT_PRESETS = [
+  "Arial",
+  "Calibri",
+  "Georgia",
+  "Times New Roman",
+  "Verdana",
+  "Tahoma",
+  "Trebuchet MS",
+  "Segoe UI",
+  "Courier New",
+];
+
+export const SIZE_PRESETS = [
+  { px: 13, label: "Small (13px)" },
+  { px: 16, label: "Normal (16px)" },
+  { px: 24, label: "Large (24px)" },
+  { px: 48, label: "Huge (48px)" },
+];
+
+const BLOCK_TAGS = new Set(["H1", "H2", "H3", "H4", "H5", "H6", "P", "LI", "PRE", "BLOCKQUOTE", "DIV"]);
+
+type StripFlags = {
+  fontFamily: boolean;
+  fontSize: boolean;
+  fontWeight: boolean;
+  fontStyle: boolean;
+  underline: boolean;
+  strike: boolean;
+};
+
+function elementOf(node: Node | null): HTMLElement | null {
+  if (!node) return null;
+  return node instanceof HTMLElement ? node : node.parentElement;
+}
+
+export function normalizeFontFamily(family: string): string {
+  const first = family.split(",")[0]?.trim() ?? "";
+  return first.replace(/^['"]+|['"]+$/g, "").trim();
+}
+
+function rgbToHex(color: string): string {
+  if (!color) return "#111827";
+  if (color.startsWith("#")) {
+    if (color.length === 4) {
+      return `#${color[1]}${color[1]}${color[2]}${color[2]}${color[3]}${color[3]}`;
+    }
+    return color.slice(0, 7);
+  }
+  const match = color.match(/rgba?\(\s*(\d+)[,\s]+(\d+)[,\s]+(\d+)/i);
+  if (!match) return "#111827";
+  return `#${[match[1], match[2], match[3]].map((n) => Number(n).toString(16).padStart(2, "0")).join("")}`;
+}
+
+function isTransparent(color: string): boolean {
+  if (!color) return true;
+  if (color === "transparent") return true;
+  const match = color.match(/rgba\(\s*\d+[,\s]+\d+[,\s]+\d+[,\s/]+([\d.]+)\s*\)/i);
+  if (match && Number(match[1]) === 0) return true;
+  return false;
+}
+
+function decorationOn(el: HTMLElement, editor: HTMLElement, kind: "underline" | "line-through"): boolean {
+  let cur: HTMLElement | null = el;
+  while (cur) {
+    if (kind === "underline" && cur.tagName === "U") return true;
+    if (kind === "line-through" && (cur.tagName === "S" || cur.tagName === "STRIKE" || cur.tagName === "DEL")) return true;
+    const own = `${cur.style.textDecoration} ${cur.style.textDecorationLine}`.toLowerCase();
+    if (own.includes(kind)) return true;
+    const computed = (getComputedStyle(cur).textDecorationLine || "").toLowerCase();
+    if (computed.includes(kind)) return true;
+    if (cur === editor) break;
+    cur = cur.parentElement;
+  }
+  return false;
+}
+
+function blockOf(el: HTMLElement, editor: HTMLElement): string {
+  let cur: HTMLElement | null = el;
+  while (cur && cur !== editor) {
+    if (BLOCK_TAGS.has(cur.tagName) && cur.tagName !== "DIV") return cur.tagName;
+    if (cur.tagName === "DIV") return "DIV";
+    cur = cur.parentElement;
+  }
+  return "";
+}
+
+function alignOf(el: HTMLElement, editor: HTMLElement): string {
+  let cur: HTMLElement | null = el;
+  while (cur && cur !== editor) {
+    const inline = cur.style.textAlign;
+    if (inline) return inline;
+    cur = cur.parentElement;
+  }
+  const computed = getComputedStyle(el).textAlign || "";
+  if (computed === "start") return "left";
+  if (computed === "end") return "right";
+  return computed;
+}
+
+function sampleElements(editor: HTMLElement): HTMLElement[] {
+  const sel = window.getSelection();
+  if (!sel || sel.rangeCount === 0) return [];
+  const range = sel.getRangeAt(0);
+  if (!editor.contains(range.commonAncestorContainer)) return [];
+
+  if (range.collapsed) {
+    const el = elementOf(range.startContainer);
+    return el && editor.contains(el) ? [el] : [];
+  }
+
+  const found: HTMLElement[] = [];
+  const walker = document.createTreeWalker(editor, NodeFilter.SHOW_TEXT);
+  let node = walker.nextNode();
+  while (node) {
+    if (node.textContent && node.textContent.trim()) {
+      let hit = false;
+      try {
+        hit = range.intersectsNode(node);
+      } catch {
+        hit = false;
+      }
+      if (hit) {
+        const el = elementOf(node);
+        if (el) found.push(el);
+      }
+    }
+    node = walker.nextNode();
+  }
+  if (found.length > 0) return found;
+  const fallback = elementOf(range.startContainer);
+  return fallback ? [fallback] : [];
+}
+
+function uniqueFlags(values: boolean[]): { on: boolean; mixed: boolean } {
+  if (values.length === 0) return { on: false, mixed: false };
+  const on = values.every(Boolean);
+  const any = values.some(Boolean);
+  return { on, mixed: any && !on };
+}
+
+export function readFormatState(editor: HTMLElement): FormatState {
+  const samples = sampleElements(editor);
+  if (samples.length === 0) return EMPTY_FORMAT;
+
+  const bold = uniqueFlags(samples.map((el) => {
+    const weight = getComputedStyle(el).fontWeight;
+    const numeric = Number.parseInt(weight, 10);
+    return weight === "bold" || (Number.isFinite(numeric) && numeric >= 600);
+  }));
+  const italic = uniqueFlags(samples.map((el) => {
+    const style = getComputedStyle(el).fontStyle;
+    return style === "italic" || style === "oblique";
+  }));
+  const underline = uniqueFlags(samples.map((el) => decorationOn(el, editor, "underline")));
+  const strike = uniqueFlags(samples.map((el) => decorationOn(el, editor, "line-through")));
+
+  const families = samples.map((el) => normalizeFontFamily(getComputedStyle(el).fontFamily));
+  const familyKey = (value: string) => value.toLowerCase();
+  const uniqueFamilies = Array.from(new Set(families.map(familyKey).filter(Boolean)));
+  const sizes = samples.map((el) => Math.round(Number.parseFloat(getComputedStyle(el).fontSize) || 0)).filter((n) => n > 0);
+  const uniqueSizes = Array.from(new Set(sizes));
+
+  const first = samples[0];
+  const color = rgbToHex(getComputedStyle(first).color);
+  const background = getComputedStyle(first).backgroundColor;
+  const highlightOn = !isTransparent(background) && rgbToHex(background) !== "#ffffff";
+
+  return {
+    bold: bold.on,
+    boldMixed: bold.mixed,
+    italic: italic.on,
+    italicMixed: italic.mixed,
+    underline: underline.on,
+    underlineMixed: underline.mixed,
+    strike: strike.on,
+    strikeMixed: strike.mixed,
+    fontFamily: families[0] || "",
+    fontMixed: uniqueFamilies.length > 1,
+    fontSizePx: uniqueSizes.length === 1 ? uniqueSizes[0] : sizes[0] ?? null,
+    sizeMixed: uniqueSizes.length > 1,
+    block: blockOf(first, editor),
+    align: alignOf(first, editor),
+    color,
+    highlight: highlightOn ? rgbToHex(background) : "#fef08a",
+    highlightOn,
+  };
+}
+
+function isBlock(el: HTMLElement): boolean {
+  return /^(P|DIV|H[1-6]|LI|PRE|BLOCKQUOTE|TD|TH|TABLE|UL|OL|TR)$/.test(el.tagName);
+}
+
+function flagsFor(patch: FormatPatch): StripFlags {
+  return {
+    fontFamily: patch.fontFamily !== undefined,
+    fontSize: patch.fontSize !== undefined,
+    fontWeight: patch.fontWeight !== undefined,
+    fontStyle: patch.fontStyle !== undefined,
+    underline: patch.underline !== undefined,
+    strike: patch.strike !== undefined,
+  };
+}
+
+function cleanElement(el: HTMLElement, strip: StripFlags) {
+  if (strip.fontFamily) {
+    el.style.fontFamily = "";
+    el.removeAttribute("face");
+  }
+  if (strip.fontSize) {
+    el.style.fontSize = "";
+    el.removeAttribute("size");
+  }
+  if (strip.fontWeight) el.style.fontWeight = "";
+  if (strip.fontStyle) el.style.fontStyle = "";
+  if (strip.underline || strip.strike) {
+    const current = `${el.style.textDecorationLine || ""} ${el.style.textDecoration || ""}`.toLowerCase();
+    let next = current;
+    if (strip.underline) next = next.replace(/underline/g, "");
+    if (strip.strike) next = next.replace(/line-through/g, "");
+    next = next.replace(/\s+/g, " ").trim();
+    el.style.textDecoration = "";
+    el.style.textDecorationLine = next;
+  }
+  if (!el.getAttribute("style")?.trim()) el.removeAttribute("style");
+}
+
+function unwrap(el: HTMLElement) {
+  const parent = el.parentNode;
+  if (!parent) return;
+  while (el.firstChild) parent.insertBefore(el.firstChild, el);
+  parent.removeChild(el);
+}
+
+function unwrapSemantics(root: ParentNode, strip: StripFlags) {
+  const tags: string[] = [];
+  if (strip.fontWeight) tags.push("b", "strong");
+  if (strip.fontStyle) tags.push("i", "em");
+  if (strip.underline) tags.push("u");
+  if (strip.strike) tags.push("s", "strike", "del");
+  if (strip.fontFamily || strip.fontSize) tags.push("font");
+
+  for (const tag of tags) {
+    const list = Array.from(root.querySelectorAll(tag));
+    for (const node of list) {
+      const el = node as HTMLElement;
+      if (tag === "font" && (el.getAttribute("color") || el.style.color)) continue;
+      unwrap(el);
+    }
+  }
+}
+
+function styleFromPatch(patch: FormatPatch): Record<string, string> {
+  const style: Record<string, string> = {};
+  if (patch.fontWeight) style.fontWeight = patch.fontWeight;
+  if (patch.fontStyle) style.fontStyle = patch.fontStyle;
+  if (patch.fontFamily) style.fontFamily = patch.fontFamily;
+  if (patch.fontSize) style.fontSize = patch.fontSize;
+  const deco: string[] = [];
+  if (patch.underline) deco.push("underline");
+  if (patch.strike) deco.push("line-through");
+  if (deco.length > 0) style.textDecorationLine = deco.join(" ");
+  return style;
+}
+
+function assignStyle(el: HTMLElement, style: Record<string, string>) {
+  for (const [key, value] of Object.entries(style)) {
+    el.style.setProperty(key.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`), value);
+  }
+}
+
+function cleanRoot(root: ParentNode, strip: StripFlags) {
+  const elements = Array.from(root.querySelectorAll("*"));
+  for (const node of elements) cleanElement(node as HTMLElement, strip);
+  unwrapSemantics(root, strip);
+}
+
+function applyToFragment(frag: DocumentFragment, patch: FormatPatch) {
+  const strip = flagsFor(patch);
+  cleanRoot(frag, strip);
+  const style = styleFromPatch(patch);
+  if (Object.keys(style).length === 0) return;
+
+  const kids = Array.from(frag.childNodes);
+  const hasBlock = kids.some((node) => node instanceof HTMLElement && isBlock(node));
+  if (!hasBlock) {
+    const span = document.createElement("span");
+    assignStyle(span, style);
+    for (const kid of kids) span.appendChild(kid);
+    frag.appendChild(span);
+    return;
+  }
+  for (const node of kids) {
+    if (node instanceof HTMLElement && isBlock(node)) {
+      assignStyle(node, style);
+    } else if (node.nodeType === Node.TEXT_NODE && node.textContent) {
+      const span = document.createElement("span");
+      assignStyle(span, style);
+      node.parentNode?.insertBefore(span, node);
+      span.appendChild(node);
+    }
+  }
+}
+
+function blockElement(el: HTMLElement | null, editor: HTMLElement): HTMLElement | null {
+  let cur = el;
+  while (cur && cur !== editor) {
+    if (/^(P|DIV|LI|H[1-6]|BLOCKQUOTE|TD|TH)$/.test(cur.tagName)) return cur;
+    cur = cur.parentElement;
+  }
+  return null;
+}
+
+function applyAtCaret(editor: HTMLElement, patch: FormatPatch) {
+  const sel = window.getSelection();
+  const anchor = sel?.anchorNode ?? null;
+  const el = elementOf(anchor);
+
+  // A click with no drag still has a caret. Font and size should restyle that
+  // paragraph so pasted, mixed runs become one type and one size.
+  if (patch.fontFamily || patch.fontSize) {
+    const block = blockElement(el, editor);
+    if (block) {
+      const range = document.createRange();
+      range.selectNodeContents(block);
+      applyToLiveRange(range, patch);
+      return;
+    }
+  }
+
+  const carrier = el?.closest("span,font,b,strong,i,em,u,s,strike");
+  if (carrier instanceof HTMLElement && carrier !== editor && editor.contains(carrier)) {
+    const range = document.createRange();
+    // Replace the whole inline run so a parent <b>/<u>/<span> cannot keep the old style.
+    range.selectNode(carrier);
+    applyToLiveRange(range, patch);
+    return;
+  }
+
+  editor.focus();
+  try {
+    document.execCommand("styleWithCSS", false, "true");
+  } catch {
+    /* ignore */
+  }
+  if (patch.fontWeight === "700" && !document.queryCommandState("bold")) document.execCommand("bold");
+  if (patch.fontWeight === "400" && document.queryCommandState("bold")) document.execCommand("bold");
+  if (patch.fontStyle === "italic" && !document.queryCommandState("italic")) document.execCommand("italic");
+  if (patch.fontStyle === "normal" && document.queryCommandState("italic")) document.execCommand("italic");
+  if (patch.underline === true && !document.queryCommandState("underline")) document.execCommand("underline");
+  if (patch.underline === false && document.queryCommandState("underline")) document.execCommand("underline");
+  if (patch.strike === true && !document.queryCommandState("strikeThrough")) document.execCommand("strikeThrough");
+  if (patch.strike === false && document.queryCommandState("strikeThrough")) document.execCommand("strikeThrough");
+  if (patch.fontFamily) document.execCommand("fontName", false, patch.fontFamily);
+  if (patch.fontSize) {
+    document.execCommand("fontSize", false, "7");
+    const fonts = editor.querySelectorAll('font[size="7"]');
+    const last = fonts[fonts.length - 1] as HTMLElement | undefined;
+    if (last) {
+      last.removeAttribute("size");
+      last.style.fontSize = patch.fontSize;
+    }
+  }
+}
+
+function applyToLiveRange(range: Range, patch: FormatPatch) {
+  const frag = range.extractContents();
+  applyToFragment(frag, patch);
+  const first = frag.firstChild;
+  const last = frag.lastChild;
+  range.insertNode(frag);
+  if (!first || !last) return;
+  const sel = window.getSelection();
+  const next = document.createRange();
+  next.setStartBefore(first);
+  next.setEndAfter(last);
+  sel?.removeAllRanges();
+  sel?.addRange(next);
+}
+
+export function applyInlineFormat(editor: HTMLElement, patch: FormatPatch) {
+  const sel = window.getSelection();
+  if (!sel || sel.rangeCount === 0 || !editor.contains(sel.anchorNode)) return;
+  const range = sel.getRangeAt(0);
+  if (!editor.contains(range.commonAncestorContainer)) return;
+  if (range.collapsed) {
+    applyAtCaret(editor, patch);
+    return;
+  }
+  applyToLiveRange(range, patch);
+}
+
+export function editorCommand(editor: HTMLElement, command: string, value?: string) {
+  editor.focus();
+  document.execCommand(command, false, value);
+}

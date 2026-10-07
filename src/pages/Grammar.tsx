@@ -9,13 +9,12 @@ import { signInWithGoogle } from '../lib/googleAuth';
 import { addCloudWord, useCloudVocabulary, findVocabDuplicate, vocabCategoryKey } from '../lib/firestore';
 import { ImageLightbox, useImageLightbox } from '../components/ImageLightbox';
 import ArticleContent from '../components/ArticleContent';
+import EditorFormatControls from '../components/EditorFormatControls';
 import ArticleBody from '../components/ArticleBody';
 import { grammarIndexArticle } from '../lib/learnContent';
 import type { LearnLang } from '../lib/learnContent';
 import {
-  applyEditorColor,
   getSelectionBookmark,
-  restoreSelectionBookmark,
   type SelectionBookmark,
 } from '../lib/richTextSelection';
 
@@ -119,6 +118,11 @@ export default function Grammar() {
   const [editingContext, setEditingContext] = useState<{ isPublic: boolean; catId: string; itemId: string | null } | null>(null);
   const [editData, setEditData] = useState({ title: "", url: "", source: "", content: "" });
   const contentRef = useRef<HTMLDivElement>(null);
+  const syncEditorHtml = () => {
+    const html = contentRef.current?.innerHTML;
+    if (html === undefined) return;
+    setEditData(prev => (prev.content === html ? prev : { ...prev, content: html }));
+  };
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedImage, setSelectedImage] = useState<HTMLImageElement | null>(null);
   const [selectedTable, setSelectedTable] = useState<HTMLTableElement | null>(null);
@@ -128,22 +132,6 @@ export default function Grammar() {
   const saveSelection = () => {
     const bookmark = getSelectionBookmark(contentRef.current);
     if (bookmark) savedSelection.current = bookmark;
-  };
-  const restoreSelection = () => {
-    restoreSelectionBookmark(contentRef.current, savedSelection.current);
-  };
-  const applyColor = (command: 'foreColor' | 'hiliteColor', color: string) => {
-    // Capture again in case the picker opened before mouseUp saved the range
-    saveSelection();
-    savedSelection.current = applyEditorColor(
-      contentRef.current,
-      command,
-      color,
-      savedSelection.current
-    );
-    if (contentRef.current) {
-      setEditData(prev => ({ ...prev, content: contentRef.current!.innerHTML }));
-    }
   };
 
   const applyTableStyle = (action: string, value?: string) => {
@@ -848,47 +836,14 @@ export default function Grammar() {
                 <label className="block text-sm font-bold text-gray-700 mb-2">{t("grammar_rule_content") || "Grammar Explanation"}</label>
                 <div className="w-full rounded-xl border-gray-200 border focus-within:ring-2 focus-within:ring-blue-500 transition-all overflow-hidden flex flex-col bg-white">
                   <div className="bg-gray-50 border-b border-gray-200 p-2 flex gap-2 flex-wrap">
-                    <button type="button" onClick={e => { e.preventDefault(); document.execCommand("bold", false); }} className="px-3 py-1 bg-white border border-gray-300 rounded font-bold hover:bg-gray-200 text-sm shadow-sm">B</button>
-                    <button type="button" onClick={e => { e.preventDefault(); document.execCommand("italic", false); }} className="px-3 py-1 bg-white border border-gray-300 rounded italic hover:bg-gray-200 text-sm shadow-sm">I</button>
-                    <div className="w-px h-6 bg-gray-300 self-center mx-1"></div>
-                    <button type="button" onClick={e => { e.preventDefault(); document.execCommand("justifyLeft", false); }} className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-sm shadow-sm" title="Align Left">⬅️</button>
-                    <button type="button" onClick={e => { e.preventDefault(); document.execCommand("justifyCenter", false); }} className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-sm shadow-sm" title="Align Center">↔️</button>
-                    <button type="button" onClick={e => { e.preventDefault(); document.execCommand("justifyRight", false); }} className="px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-sm shadow-sm" title="Align Right">➡️</button>
-                    <div className="w-px h-6 bg-gray-300 self-center mx-1"></div>
-                    <button type="button" onClick={e => { e.preventDefault(); document.execCommand("formatBlock", false, "H2"); }} className="px-3 py-1 bg-white border border-gray-300 rounded font-bold hover:bg-gray-200 text-sm shadow-sm">H2</button>
-                    <button type="button" onClick={e => { e.preventDefault(); document.execCommand("formatBlock", false, "H3"); }} className="px-3 py-1 bg-white border border-gray-300 rounded font-bold hover:bg-gray-200 text-sm shadow-sm">H3</button>
-                    <button type="button" onClick={e => { e.preventDefault(); document.execCommand("formatBlock", false, "P"); }} className="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-sm shadow-sm">P</button>
-                    <div className="w-px h-6 bg-gray-300 self-center mx-1"></div>
-                    <button type="button" onClick={e => { e.preventDefault(); document.execCommand("insertUnorderedList", false); }} className="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-sm font-medium shadow-sm">{t("bullet_list") || "• Bullet List"}</button>
-                    <button type="button" onClick={e => { e.preventDefault(); document.execCommand("undo", false); }} className="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-sm font-medium shadow-sm">{t("undo_button") || "↩ Undo"}</button>
+                    <EditorFormatControls editorRef={contentRef} onContentChange={syncEditorHtml}>
+                    <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => { document.execCommand("insertUnorderedList", false); syncEditorHtml(); }} className="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-sm font-medium shadow-sm">{t("bullet_list") || "• Bullet List"}</button>
+                    <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => { document.execCommand("undo", false); syncEditorHtml(); }} className="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-sm font-medium shadow-sm">{t("undo_button") || "↩ Undo"}</button>
                     <div className="w-px h-6 bg-gray-300 self-center mx-1"></div>
                     <button type="button" onClick={() => fileInputRef.current?.click()} className="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-sm text-gray-700 transition-colors shadow-sm font-medium flex items-center gap-1">
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg> {t('add_image') || 'Add Image'}
                     </button>
-                    <div className="w-px h-6 bg-gray-300 self-center mx-1"></div>
-                    <select onChange={(e) => { restoreSelection(); document.execCommand("fontSize", false, e.target.value); setEditData(prev => ({ ...prev, content: contentRef.current!.innerHTML })); e.target.value = ""; }} className="px-2 py-1 bg-white border border-gray-300 rounded text-sm shadow-sm outline-none cursor-pointer">
-                      <option value="">Size</option><option value="1">Small</option><option value="3">Normal</option><option value="5">Large</option><option value="7">Huge</option>
-                    </select>
-                    <div className="flex items-center border border-gray-300 rounded bg-white shadow-sm px-1" title="Text Color">
-                      <span className="text-xs text-gray-500 px-1 font-serif">A</span>
-                      <input
-                        type="color"
-                        onMouseDown={saveSelection}
-                        onInput={(e) => applyColor('foreColor', (e.target as HTMLInputElement).value)}
-                        onChange={(e) => applyColor('foreColor', e.target.value)}
-                        className="w-5 h-5 p-0 border-0 bg-transparent cursor-pointer"
-                      />
-                    </div>
-                    <div className="flex items-center border border-gray-300 rounded bg-white shadow-sm px-1" title="Highlight Color">
-                      <span className="text-xs text-gray-500 px-1 font-serif bg-yellow-200">A</span>
-                      <input
-                        type="color"
-                        onMouseDown={saveSelection}
-                        onInput={(e) => applyColor('hiliteColor', (e.target as HTMLInputElement).value)}
-                        onChange={(e) => applyColor('hiliteColor', e.target.value)}
-                        className="w-5 h-5 p-0 border-0 bg-transparent cursor-pointer"
-                      />
-                    </div>
+                    </EditorFormatControls>
                     <button type="button" onClick={handleInsertTable} className="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-sm text-gray-700 transition-colors shadow-sm font-medium flex items-center gap-1">📊 Table</button>
                     <input type="file" accept="image/*" ref={fileInputRef} onChange={handleImageUpload} className="hidden" />
                   </div>
