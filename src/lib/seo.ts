@@ -750,6 +750,24 @@ export function resolveSeo(pathname: string, lang: SeoLang): ResolvedSeo {
     };
   }
 
+  const collectionCanonical = {
+    '/learning-materials/reading/articles': '/learning-materials/reading',
+    '/learning-materials/reading/books': '/learning-materials/reading',
+    '/learning-materials/reading/interesting': '/learning-materials/reading',
+    '/learning-materials/listening/music': '/learning-materials/listening',
+    '/learning-materials/listening/podcasts': '/learning-materials/listening',
+    '/learning-materials/listening/audiobooks': '/learning-materials/listening',
+  } as const;
+  if (clean in collectionCanonical) {
+    const canonicalPath = collectionCanonical[clean as keyof typeof collectionCanonical];
+    return {
+      ...pick(ROUTES[canonicalPath], lang),
+      canonicalPath,
+      noindex: false,
+      pageType: 'page',
+    };
+  }
+
   if (clean.startsWith('/learning-materials/private')) {
     return {
       ...pick(ROUTES['/learning-materials'], lang),

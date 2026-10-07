@@ -20,6 +20,20 @@ export const LEGACY_CANONICAL = {
   '/learn/weekly-german-practice': '/learn',
 };
 
+/**
+ * Folder URLs GitHub Pages creates for nested pages (articles/history.html).
+ * Without a sibling articles.html, /articles 301s to /articles/ and that URL 404s.
+ * Serve the parent hub at HTTP 200 and canonicalise to it. Keep these out of the sitemap.
+ */
+export const DIRECTORY_CANONICAL = {
+  '/learning-materials/reading/articles': '/learning-materials/reading',
+  '/learning-materials/reading/books': '/learning-materials/reading',
+  '/learning-materials/reading/interesting': '/learning-materials/reading',
+  '/learning-materials/listening/music': '/learning-materials/listening',
+  '/learning-materials/listening/podcasts': '/learning-materials/listening',
+  '/learning-materials/listening/audiobooks': '/learning-materials/listening',
+};
+
 export const INDEXABLE_ROUTES = [
   '/',
   '/quizzes',
@@ -56,6 +70,7 @@ export const PUBLIC_SPA_ROUTES = [
   '/settings',
   '/login',
   ...Object.keys(LEGACY_CANONICAL),
+  ...Object.keys(DIRECTORY_CANONICAL),
 ];
 
 /** Sitemap entries: one loc per page (no ?lang= duplicates). */
@@ -110,7 +125,7 @@ export const SITEMAP_ENTRIES = [
 ];
 
 export function routeCanonicalPath(route) {
-  return LEGACY_CANONICAL[route] || route;
+  return LEGACY_CANONICAL[route] || DIRECTORY_CANONICAL[route] || route;
 }
 
 export function routeNoindex(_route) {

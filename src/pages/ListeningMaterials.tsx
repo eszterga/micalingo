@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import AppLink from '../components/AppLink';
 import { useI18n } from '../I18nContext';
 import { useAuth } from '../AuthContext';
@@ -28,12 +29,21 @@ const BackgroundBlobs = () => (
 export default function ListeningMaterials() {
   const { t } = useI18n();
   const { user, isAdmin, adminMode } = useAuth();
+  const { pathname } = useLocation();
+  const sectionFromPath = pathname.match(/\/listening\/(music|podcasts|audiobooks)$/)?.[1] as
+    | 'music'
+    | 'podcasts'
+    | 'audiobooks'
+    | undefined;
   const [openSections, setOpenSections] = useState<{ music: boolean; podcasts: boolean; audiobooks: boolean }>(() => {
+    const opened = sectionFromPath ? { [sectionFromPath]: true } : {};
     try {
       const saved = sessionStorage.getItem('micalingo_listening_sections_v2');
-      return saved ? JSON.parse(saved) : { music: false, podcasts: false, audiobooks: false };
+      return saved
+        ? { ...JSON.parse(saved), ...opened }
+        : { music: false, podcasts: false, audiobooks: false, ...opened };
     } catch (e) {
-      return { music: false, podcasts: false, audiobooks: false };
+      return { music: false, podcasts: false, audiobooks: false, ...opened };
     }
   });
   const [isEditorOpen, setIsEditorOpen] = useState(false);

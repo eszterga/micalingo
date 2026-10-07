@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import AppLink from '../components/AppLink';
 import { useI18n } from '../I18nContext';
 import { useAuth } from '../AuthContext';
@@ -28,12 +29,21 @@ const BackgroundBlobs = () => (
 export default function ReadingMaterials() {
   const { t } = useI18n();
   const { user, isAdmin, adminMode } = useAuth();
+  const { pathname } = useLocation();
+  const sectionFromPath = pathname.match(/\/reading\/(interesting|articles|books)$/)?.[1] as
+    | 'interesting'
+    | 'articles'
+    | 'books'
+    | undefined;
   const [openSections, setOpenSections] = useState<{ interesting: boolean; articles: boolean; books: boolean }>(() => {
+    const opened = sectionFromPath ? { [sectionFromPath]: true } : {};
     try {
       const saved = sessionStorage.getItem('micalingo_reading_sections_v2');
-      return saved ? JSON.parse(saved) : { interesting: false, articles: false, books: false };
+      return saved
+        ? { ...JSON.parse(saved), ...opened }
+        : { interesting: false, articles: false, books: false, ...opened };
     } catch (e) {
-      return { interesting: false, articles: false, books: false };
+      return { interesting: false, articles: false, books: false, ...opened };
     }
   });
   const [isEditorOpen, setIsEditorOpen] = useState(false);
