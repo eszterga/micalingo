@@ -93,7 +93,7 @@ export const hu = {
 
   // Home
   welcome_back: "Üdvözlünk, jó, hogy itt vagy!",
-  ready_to_learn: "Tanulj németül online ingyenes német–magyar kvízekkel: szókincs, nyelvtan, névelők (der, die, das) és igék. Google-fiókkal saját könyvtárat építhetsz bármilyen nyelven, és generálhatsz saját kvízeket.",
+  ready_to_learn: "Tanulj németül online ingyenes német-magyar kvízekkel. Gyakorolhatod vegyesen mellékneveket, főneveket, névelőket és igéket. Google-fiókoddal saját könyvtárat hozhatsz létre, és akár más nyelveket (vagy akár matematikai, történelmi feladványokat is) gyakorolhatsz, tanulhatsz. Eredményeidet a statisztika menüpontnál visszanézheted és letöltheted, könyvtáradat ízlésed szerint bővítheted.",
   import_data: "Adatok importálása és kezelése",
   upload_new_materials: "Tölts fel új szavakat és kifejezéseket.",
   login_required: "Bejelentkezés szükséges",
