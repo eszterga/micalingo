@@ -2,7 +2,7 @@ import AppLink from '../components/AppLink';
 import { useAuth } from '../AuthContext';
 import { useI18n } from '../I18nContext';
 import { Capacitor } from '@capacitor/core';
-import { extraHomeFaq, homeArticle } from '../lib/learnContent';
+import { homeArticle } from '../lib/learnContent';
 import type { LearnLang } from '../lib/learnContent';
 import ArticleBody from '../components/ArticleBody';
 
@@ -10,7 +10,6 @@ export default function Home() {
   const { user } = useAuth();
   const { t, language } = useI18n();
   const lang = language as LearnLang;
-  const extraFaq = extraHomeFaq(lang);
 
   const flyingWords = [
     { text: "der Hund", left: "10%", delay: "0s", duration: "12s" },
@@ -139,29 +138,6 @@ export default function Home() {
         <article className="text-left bg-white/75 backdrop-blur-xl border border-white rounded-[1.75rem] p-5 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
           <ArticleBody markdown={homeArticle(lang)} />
         </article>
-        <section className="text-left bg-white/75 backdrop-blur-xl border border-white rounded-[1.75rem] p-5 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-          <h2 className="text-xl font-extrabold text-blue-950 mb-4">{t("seo_faq_heading")}</h2>
-          <dl className="space-y-4 text-sm">
-            <div>
-              <dt className="font-extrabold text-blue-900">{t("seo_faq_q1")}</dt>
-              <dd className="text-blue-900/70 font-medium mt-1 leading-relaxed">{t("seo_faq_a1")}</dd>
-            </div>
-            <div>
-              <dt className="font-extrabold text-blue-900">{t("seo_faq_q2")}</dt>
-              <dd className="text-blue-900/70 font-medium mt-1 leading-relaxed">{t("seo_faq_a2")}</dd>
-            </div>
-            <div>
-              <dt className="font-extrabold text-blue-900">{t("seo_faq_q3")}</dt>
-              <dd className="text-blue-900/70 font-medium mt-1 leading-relaxed">{t("seo_faq_a3")}</dd>
-            </div>
-            {extraFaq.map((item) => (
-              <div key={item.q}>
-                <dt className="font-extrabold text-blue-900">{item.q}</dt>
-                <dd className="text-blue-900/70 font-medium mt-1 leading-relaxed">{item.a}</dd>
-              </div>
-            ))}
-          </dl>
-        </section>
       </section>
 
       {/* Android Download App Button (Centered below grid) */}

@@ -889,17 +889,6 @@ export function buildJsonLd(seo: ResolvedSeo, lang: SeoLang, canonical: string) 
     },
   ];
 
-  if (seo.pageType === 'home') {
-    graph.push({
-      '@type': 'FAQPage',
-      mainEntity: homeFaq(lang).map((item) => ({
-        '@type': 'Question',
-        name: item.q,
-        acceptedAnswer: { '@type': 'Answer', text: item.a },
-      })),
-    });
-  }
-
   if (seo.pageType === 'quizTopic' && seo.topic) {
     graph.push({
       '@type': 'LearningResource',
@@ -946,91 +935,6 @@ export function buildJsonLd(seo: ResolvedSeo, lang: SeoLang, canonical: string) 
   }
 
   return { '@context': 'https://schema.org', '@graph': graph };
-}
-
-function homeFaq(lang: SeoLang): { q: string; a: string }[] {
-  if (lang === 'de') {
-    return [
-      {
-        q: 'Wie kann ich bei MicaLingo kostenlos Deutsch lernen?',
-        a: 'MicaLingo bietet kostenlose Deutsch-Quizze zu Wortschatz, Grammatik, Artikeln (der, die, das), Verben, Adjektiven und Präpositionen sowie Lese- und Hörmaterialien.',
-      },
-      {
-        q: 'Gibt es ein Quiz für deutsche Artikel der, die, das?',
-        a: 'Ja. Unter Quizze findest du ein Artikel-Quiz, mit dem du der, die, das und das Genus deutscher Nomen übst.',
-      },
-      {
-        q: 'Kann ich deutsche Verben und Grammatik üben?',
-        a: 'Ja. Es gibt Verben-Quizze (Konjugation, Vergangenheit) und Grammatikseiten zu Fällen, Zeitformen, Adjektiven, Präpositionen und Satzbau.',
-      },
-      {
-        q: 'In welchen Sprachen ist MicaLingo verfügbar?',
-        a: 'Die Oberfläche gibt es auf Englisch, Deutsch und Ungarisch. Öffentlich übst du Deutsch mit ungarischer Bedeutung. Nach dem Google-Login können private Listen jedes Sprachenpaar sein.',
-      },
-      {
-        q: 'Sind die öffentlichen Quizze nur Deutsch–Ungarisch?',
-        a: 'Ja. Die offene Bibliothek ist für Ungarisch sprechende Deutschlernende. Mit Google-Konto baust du eine private Bibliothek in beliebigen Sprachen und erzeugst eigene Quizze.',
-      },
-      {
-        q: 'Brauche ich ein Konto zum Üben?',
-        a: 'Nein. Öffentliche DE–HU-Quizze, Grammatik-Primer und Ratgeber funktionieren ohne Login. Ein Google-Konto braucht es nur für private Bibliothek, markierte Wörter und Importe.',
-      },
-    ];
-  }
-  if (lang === 'hu') {
-    return [
-      {
-        q: 'Hogyan tanulhatok ingyen németet a MicaLingo-n?',
-        a: 'A MicaLingo ingyenes német kvízeket kínál szókinccsel, nyelvtannal, névelőkkel (der, die, das), igékkel, melléknevekkel és prepozíciókkal, plusz olvasási és hallásértési anyagokat.',
-      },
-      {
-        q: 'Van kvíz a der, die, das névelőkhöz?',
-        a: 'Igen. A Kvízek menüben megtalálod a névelők kvízt, amellyel a der, die, das és a főnevek nemét gyakorolhatod.',
-      },
-      {
-        q: 'Gyakorolhatom a német igéket és a nyelvtant?',
-        a: 'Igen. Van ige kvíz (ragozás, múlt idő) és nyelvtan oldalak esetekhez, igeidőkhöz, melléknevekhez, prepozíciókhoz és szórendhez.',
-      },
-      {
-        q: 'Milyen nyelveken érhető el a MicaLingo?',
-        a: 'A felület angolul, németül és magyarul működik. Nyilvánosan németet gyakorolsz magyar jelentéssel. Google-belépés után a saját lista bármilyen nyelvpár lehet.',
-      },
-      {
-        q: 'A nyilvános kvízek csak német–magyarok?',
-        a: 'Igen. A nyilvános könyvtár magyarul tanuló németeseknek készült. Google-fiókkal saját könyvtárat állíthatsz be bármilyen nyelven, és generálhatsz saját kvízeket.',
-      },
-      {
-        q: 'Kell fiók a gyakorláshoz?',
-        a: 'Nem. A nyilvános HU–DE kvízek, nyelvtan-bevezetők és útmutatók belépés nélkül mennek. Google-fiók csak a saját könyvtárhoz kell.',
-      },
-    ];
-  }
-  return [
-    {
-      q: 'How can I learn German for free on MicaLingo?',
-      a: 'MicaLingo offers free German quizzes for vocabulary, grammar, articles (der, die, das), verbs, adjectives, and prepositions, plus reading and listening materials.',
-    },
-    {
-      q: 'Is there a quiz for German articles der, die, das?',
-      a: 'Yes. Open Quizzes and choose the Articles quiz to practice der, die, das and German noun genders.',
-    },
-    {
-      q: 'Can I practice German verbs and grammar?',
-      a: 'Yes. There are verb quizzes (conjugation and past tense) and grammar pages for cases, tenses, adjectives, prepositions, and sentence structure.',
-    },
-    {
-      q: 'Which languages is MicaLingo available in?',
-      a: 'The interface is available in English, German, and Hungarian. Public practice is German with Hungarian meanings. After Google login, your private lists can be any language pair.',
-    },
-    {
-      q: 'Are the public quizzes only German–Hungarian?',
-      a: 'Yes. The open library is for Hungarian learners of German. Sign in with a Google account to set up a private library in any languages and generate your own quizzes.',
-    },
-    {
-      q: 'Do I need an account to practise?',
-      a: 'No. Public HU–DE quizzes, grammar primers and study guides work without login. A Google account is only needed to save a private library, marked words and imported files.',
-    },
-  ];
 }
 
 function topicTeaches(topic: string, lang: SeoLang) {

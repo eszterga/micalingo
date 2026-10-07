@@ -488,64 +488,13 @@ const QUIZ_PRIMERS: Record<string, Record<LearnLang, string>> = {
 export const HOME_ARTICLE: Record<LearnLang, string> = {
   en: `MicaLingo is a free **self-learning** site. The public quizzes are built for **German–Hungarian** learners who need repeatable practice — articles, verbs, prepositions, vocabulary and short grammar notes — not another page that only lists “10 tips to get fluent”.
 
-You can start without an account: open [Quizzes](/quizzes/), pick a topic, and work through levels. Sign in with a **Google account** when you want a private library, marked words from your mistakes, and quizzes generated from your own lists — in **any language pair**, or even for non-language topics. The public HU–DE library stays available either way.
-
-## What you can practise here
-
-- **Accuracy:** [der, die, das](/quizzes/articles/), [verbs](/quizzes/verbs/), [prepositions](/quizzes/prepositions/), [adjectives](/quizzes/adjectives/).
-- **Words in context:** [vocabulary](/quizzes/vocabulary/) and [phrases](/quizzes/phrases/), with a readable [word list](/vocabulary/).
-- **Rules next to drills:** [grammar](/grammar/) for cases, tenses, articles, adjective endings, prepositions and word order.
-- **Reading and listening:** [learning materials](/learning-materials/), including [false friends](/learning-materials/reading/false-friends/) and [idioms](/learning-materials/reading/idioms/).
-
-How the public and private libraries differ: [public vs private](/learn/public-and-private/).
-
-## How to start in ten minutes
-
-1. Take the [articles quiz](/quizzes/articles/) until you know whether gender is your leak.
-2. Do one [vocabulary](/quizzes/vocabulary/) level on a single theme (home, travel, work).
-3. Read the matching grammar primer — [articles](/grammar/articles/) or [cases](/grammar/cases/) — then quiz again.
-
-That loop is the product: short explanation, then retrieval. It is how language sticks, and it is the opposite of a homepage that is only buttons.`,
+You can start without an account: open [Quizzes](/quizzes/), pick a topic, and work through levels. Sign in with a **Google account** when you want a private library, marked words from your mistakes, and quizzes generated from your own lists — in **any language pair**, or even for non-language topics. The public HU–DE library stays available either way.`,
   de: `MicaLingo ist eine kostenlose Seite zum **Selbstlernen**. Die öffentlichen Quizze sind für **Deutsch–Ungarisch**-Lernende gebaut, die **wiederholbares Üben** brauchen — Artikel, Verben, Präpositionen, Wortschatz und kurze Grammatiknotizen — nicht nur „10 Tipps zur Flüssigkeit“.
 
-Ohne Konto starten: [Quizze](/quizzes/) öffnen, Thema wählen, Level arbeiten. Mit **Google-Konto** anmelden für eine private Bibliothek, markierte Fehler und Quizze aus eigenen Listen — in **beliebigen Sprachen**, oder auch für andere Themen. Die öffentliche DE–HU-Bibliothek bleibt in beiden Fällen da.
-
-## Was du hier üben kannst
-
-- **Genauigkeit:** [der, die, das](/quizzes/articles/), [Verben](/quizzes/verbs/), [Präpositionen](/quizzes/prepositions/), [Adjektive](/quizzes/adjectives/).
-- **Wortschatz im Kontext:** [Wortschatz](/quizzes/vocabulary/) und [Redemittel](/quizzes/phrases/), plus [Wortliste](/vocabulary/).
-- **Regeln neben dem Drill:** [Grammatik](/grammar/).
-- **Lesen und Hören:** [Lernmaterialien](/learning-materials/).
-
-Öffentlich vs privat: [Ratgeber](/learn/public-and-private/).
-
-## In zehn Minuten starten
-
-1. [Artikel-Quiz](/quizzes/articles/), bis klar ist, ob das Genus das Leck ist.
-2. Ein [Wortschatz](/quizzes/vocabulary/)-Level zu einem Thema.
-3. Die passende Grammatik lesen — [Artikel](/grammar/articles/) oder [Fälle](/grammar/cases/) — dann wieder quizen.
-
-Diese Schleife ist das Angebot: kurze Erklärung, dann Abrufen.`,
+Ohne Konto starten: [Quizze](/quizzes/) öffnen, Thema wählen, Level arbeiten. Mit **Google-Konto** anmelden für eine private Bibliothek, markierte Fehler und Quizze aus eigenen Listen — in **beliebigen Sprachen**, oder auch für andere Themen. Die öffentliche DE–HU-Bibliothek bleibt in beiden Fällen da.`,
   hu: `A MicaLingo ingyenes **önálló tanuló** oldal. A nyilvános kvízek **német–magyar** tanulóknak készültek, akiknek **ismételhető gyakorlat** kell — névelők, igék, prepozíciók, szókincs és rövid nyelvtan —, nem egy újabb „10 tipp a folyékonysághoz” lista.
 
-Fiók nélkül is kezdheted: [Kvízek](/quizzes/), téma, szintek. **Google-fiókkal** lépj be, ha saját könyvtárat, megjelölt hibákat és saját listából generált kvízeket akarsz — **bármilyen nyelvpáron**, vagy akár nem nyelvi témán. A nyilvános HU–DE könyvtár mindkét esetben megmarad.
-
-## Mit gyakorolhatsz itt
-
-- **Pontosság:** [der, die, das](/quizzes/articles/), [igék](/quizzes/verbs/), [prepozíciók](/quizzes/prepositions/), [melléknevek](/quizzes/adjectives/).
-- **Szavak kontextusban:** [szókincs](/quizzes/vocabulary/) és [kifejezések](/quizzes/phrases/), plusz [szólista](/vocabulary/).
-- **Szabály a gyakorlat mellett:** [nyelvtan](/grammar/).
-- **Olvasás és hallás:** [tananyagok](/learning-materials/).
-
-Nyilvános vs saját: [útmutató](/learn/public-and-private/).
-
-## Tíz perc alatt indulás
-
-1. [Névelők kvíz](/quizzes/articles/), amíg kiderül, a nem-e a lyuk.
-2. Egy [szókincs](/quizzes/vocabulary/) szint egy témán.
-3. A hozzá tartozó nyelvtan — [névelők](/grammar/articles/) vagy [esetek](/grammar/cases/) — majd újra kvíz.
-
-Ez a kör a lényeg: rövid magyarázat, aztán előhívás.`,
+Fiók nélkül is kezdheted: [Kvízek](/quizzes/), téma, szintek. **Google-fiókkal** lépj be, ha saját könyvtárat, megjelölt hibákat és saját listából generált kvízeket akarsz — **bármilyen nyelvpáron**, vagy akár nem nyelvi témán. A nyilvános HU–DE könyvtár mindkét esetben megmarad.`,
 };
 
 export const GRAMMAR_INDEX_ARTICLE: Record<LearnLang, string> = {
@@ -564,51 +513,6 @@ Mit Google-Login: privater Tab und eigene Listen in beliebigen Sprachen. Gäste 
   hu: `A **nyilvános** kvízek német–magyarok, készség szerint csoportosítva. Kezdd a ismert lyukkal — sokaknál [névelők](/quizzes/articles/) vagy [igék](/quizzes/verbs/). Minden témaoldalon van rövid magyarázat és mintaszavak, még a Start előtt.
 
 Google-belépéssel saját kvíz bármilyen nyelven. Vendégként is végigjátszhatod a nyilvános HU–DE szinteket. A két könyvtár: [nyilvános vs saját](/learn/public-and-private/).`,
-};
-
-export const EXTRA_HOME_FAQ: Record<LearnLang, { q: string; a: string }[]> = {
-  en: [
-    {
-      q: 'Are the public quizzes only German–Hungarian?',
-      a: 'Yes. The open library is built for Hungarian learners of German. Sign in with a Google account to set up a private library in any languages and generate your own quizzes — including non-language topics if you want.',
-    },
-    {
-      q: 'Do I need to create an account?',
-      a: 'No. Public HU–DE quizzes, grammar primers and study guides work without login. A Google account is only needed to save a private library, marked words and imported files.',
-    },
-    {
-      q: 'In which languages is the site available?',
-      a: 'The interface is English, German and Hungarian. Public practice is German with Hungarian meanings. After Google login, your private lists can be any language pair you set up.',
-    },
-  ],
-  de: [
-    {
-      q: 'Sind die öffentlichen Quizze nur Deutsch–Ungarisch?',
-      a: 'Ja. Die offene Bibliothek ist für Ungarisch sprechende Deutschlernende. Mit Google-Konto baust du eine private Bibliothek in beliebigen Sprachen und erzeugst eigene Quizze — auch für andere Themen.',
-    },
-    {
-      q: 'Brauche ich ein Konto?',
-      a: 'Nein. Öffentliche DE–HU-Quizze, Grammatik-Primer und Ratgeber funktionieren ohne Login. Ein Google-Konto braucht es nur für private Bibliothek, markierte Wörter und Importe.',
-    },
-    {
-      q: 'In welchen Sprachen gibt es die Seite?',
-      a: 'Die Oberfläche ist Englisch, Deutsch und Ungarisch. Öffentlich übst du Deutsch mit ungarischer Bedeutung. Nach dem Google-Login können deine privaten Listen jedes Sprachenpaar sein.',
-    },
-  ],
-  hu: [
-    {
-      q: 'A nyilvános kvízek csak német–magyarok?',
-      a: 'Igen. A nyilvános könyvtár magyarul tanuló németeseknek készült. Google-fiókkal saját könyvtárat állíthatsz be bármilyen nyelven, és generálhatsz saját kvízeket — akár nem nyelvi témára is.',
-    },
-    {
-      q: 'Kell fiókot csinálnom?',
-      a: 'Nem. A nyilvános HU–DE kvízek, nyelvtan-bevezetők és útmutatók belépés nélkül mennek. Google-fiók csak a saját könyvtárhoz, megjelölt szavakhoz és importhoz kell.',
-    },
-    {
-      q: 'Milyen nyelveken érhető el az oldal?',
-      a: 'A felület angol, német és magyar. Nyilvánosan németet gyakorolsz magyar jelentéssel. Google-belépés után a saját listád bármilyen nyelvpár lehet.',
-    },
-  ],
 };
 
 export function getLearnGuide(slug: string): LearnGuide | undefined {
@@ -648,8 +552,4 @@ export function grammarIndexArticle(lang: LearnLang) {
 
 export function quizIndexArticle(lang: LearnLang) {
   return pick(QUIZ_INDEX_ARTICLE, lang);
-}
-
-export function extraHomeFaq(lang: LearnLang) {
-  return pick(EXTRA_HOME_FAQ, lang);
 }
