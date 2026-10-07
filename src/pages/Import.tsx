@@ -32,12 +32,30 @@ const EDIT_FIELD_CLASS =
 
 interface ImportedFilePreview {
   fileName: string;
+  /** Hungarian meaning, shown under one-by-one CMS entries so the row is identifiable. */
+  subtitle?: string;
   fileType: string;
   destination: string;
   itemCount: number;
   wordIds: string[];
   uniqueKey: string;
+  /** True for a single manually added word, so edit/delete do not touch the whole CMS batch. */
+  singleEntry?: boolean;
 }
+
+const MANUAL_CMS_SOURCE = "Manual CMS Entry";
+
+const isManualCmsItem = (item: any) =>
+  item?.sourceType === "cms" || item?.sourceFile === MANUAL_CMS_SOURCE;
+
+/** One-by-one CMS saves share a generic source name. Show the word itself instead. */
+const manualCmsLabel = (item: any) => {
+  const german = String(item?.german || "").trim();
+  const hungarian = String(item?.hungarian || "").trim();
+  const fileName = german || hungarian || MANUAL_CMS_SOURCE;
+  const subtitle = hungarian && hungarian !== fileName ? hungarian : "";
+  return { fileName, subtitle };
+};
 
 const BackgroundBlobs = () => (
   <>
@@ -290,18 +308,25 @@ export default function Import() {
 
   const importedFiles = useMemo(() => {
     const fileMap = new Map<string, ImportedFilePreview>();
-    allItems.forEach((item: any) => {
+    allItems.forEach((item: any, index: number) => {
+      const manual = isManualCmsItem(item);
       const source = item.sourceFile || "Legacy Import (No File Name)";
       const category = item.category || 'mixed';
-      const key = `${source}_${category}`;
+      const label = manual ? manualCmsLabel(item) : null;
+      // Each manually added word is its own row. File uploads stay grouped by filename.
+      const key = manual
+        ? `cms_${item.id ?? index}_${category}`
+        : `${source}_${category}`;
       if (!fileMap.has(key)) {
         fileMap.set(key, {
-          fileName: source,
-          fileType: item.sourceType || (item.sourceFile ? item.sourceFile.split('.').pop() || 'unknown' : 'unknown'),
+          fileName: label?.fileName || source,
+          subtitle: label?.subtitle || "",
+          fileType: manual ? "cms" : (item.sourceType || (item.sourceFile ? item.sourceFile.split('.').pop() || 'unknown' : 'unknown')),
           destination: category,
           itemCount: 0,
           wordIds: [],
-          uniqueKey: key
+          uniqueKey: key,
+          singleEntry: manual
         });
       }
       const fileData = fileMap.get(key)!;
@@ -315,11 +340,10 @@ export default function Import() {
     if (!fileSearchTerm.trim()) return importedFiles;
     const searchTerms = fileSearchTerm.toLowerCase().trim().split(/\s+/).filter(Boolean);
     return importedFiles.filter((f: ImportedFilePreview) => {
-      if (searchTerms.every(t => f.fileName.toLowerCase().includes(t))) return true;
-      const itemsInFile = allItems.filter((item: any) => 
-        (item.sourceFile || "Legacy Import (No File Name)") === f.fileName &&
-        (item.category || 'mixed') === f.destination
-      );
+      const nameHaystack = `${f.fileName} ${f.subtitle || ""}`.toLowerCase();
+      if (searchTerms.every(t => nameHaystack.includes(t))) return true;
+      const idSet = new Set(f.wordIds);
+      const itemsInFile = allItems.filter((item: any) => item.id && idSet.has(item.id));
       return itemsInFile.some((item: any) =>
         searchTerms.every(t =>
           (item.german || '').toLowerCase().includes(t) ||
@@ -371,15 +395,23 @@ export default function Import() {
     setPinnedEditMatchKeys(keys);
   };
 
-  const handleEditFile = (file: ImportedFilePreview) => {
-    const items = allItems.filter((item: any) => 
+  const itemsForImportedFile = (file: ImportedFilePreview) => {
+    if (file.singleEntry) {
+      const idSet = new Set(file.wordIds);
+      return allItems.filter((item: any) => item.id && idSet.has(item.id));
+    }
+    return allItems.filter((item: any) =>
       (item.sourceFile || "Legacy Import (No File Name)") === file.fileName &&
-      (item.category || 'mixed') === file.destination
+      (item.category || "mixed") === file.destination
     );
+  };
+
+  const handleEditFile = (file: ImportedFilePreview) => {
+    const items = itemsForImportedFile(file);
     const cloned = JSON.parse(JSON.stringify(items));
     setEditFileItems(cloned);
     setEditingFileCategory(file.destination);
-    setEditingFile(file.fileName);
+    setEditingFile(file.subtitle ? `${file.fileName} — ${file.subtitle}` : file.fileName);
     setDeletedEditItemIds([]);
     setModalSearchTerm(fileSearchTerm);
     pinEditMatches(cloned, fileSearchTerm);
@@ -470,11 +502,9 @@ export default function Import() {
       }
 
       const newCloudItems: any[] = [];
-      const originalItems = allItems.filter((item: any) => 
-        (item.sourceFile || 'Legacy Import (No File Name)') === editingFile &&
-        (item.category || 'mixed') === editingFileCategory
+      const originalMap = new Map<string, any>(
+        allItems.filter((i: any) => i?.id).map((i: any) => [i.id, i])
       );
-      const originalMap = new Map<string, any>(originalItems.map((i: any) => [i.id, i]));
 
       for (const item of editFileItems) {
         if (!item.id) continue;
@@ -502,6 +532,9 @@ export default function Import() {
             if (item.hint !== undefined) updatePayload.hint = item.hint.trim();
             if (item.article !== undefined) updatePayload.article = item.article.trim();
             if (item.noun !== undefined) updatePayload.noun = item.noun.trim();
+            if (isManualCmsItem(orig)) {
+              updatePayload.sourceFile = String(item.german || "").trim() || String(item.hungarian || "").trim() || MANUAL_CMS_SOURCE;
+            }
 
             await updateCloudWord(
               item.id,
@@ -568,11 +601,7 @@ export default function Import() {
 
     setSaving(true);
     try {
-      // Re-determine the items to delete at the moment of action to avoid stale state.
-      const itemsInFile = allItems.filter((item: any) => 
-        (item.sourceFile || "Legacy Import (No File Name)") === fileInfo.fileName &&
-        (item.category || 'mixed') === fileInfo.destination
-      );
+      const itemsInFile = itemsForImportedFile(fileInfo);
       const wordIdsToDelete = itemsInFile.map((item: any) => item.id).filter(Boolean);
 
       const cloudDeletes = wordIdsToDelete.filter((id: string) => !id.startsWith('static_'));
@@ -621,11 +650,7 @@ export default function Import() {
       let allIdsToDelete: string[] = [];
       importedFiles.forEach((f: ImportedFilePreview) => {
         if (selectedFiles.has(f.uniqueKey)) {
-          // Re-calculate IDs to ensure freshness
-          const itemsInFile = allItems.filter((item: any) => 
-            (item.sourceFile || "Legacy Import (No File Name)") === f.fileName &&
-            (item.category || 'mixed') === f.destination
-          );
+          const itemsInFile = itemsForImportedFile(f);
           const wordIds = itemsInFile.map((item: any) => item.id).filter(Boolean);
           allIdsToDelete.push(...wordIds);
         }
@@ -665,10 +690,8 @@ export default function Import() {
 
   const handleDownloadFiles = (uniqueKeys: string[]) => {
     const keysSet = new Set(uniqueKeys);
-    const itemsToExport = allItems.filter((item: any) => {
-      const key = `${item.sourceFile || 'Legacy Import (No File Name)'}_${item.category || 'mixed'}`;
-      return keysSet.has(key);
-    });
+    const selected = importedFiles.filter((f) => keysSet.has(f.uniqueKey));
+    const itemsToExport = selected.flatMap((f) => itemsForImportedFile(f));
 
     if (itemsToExport.length === 0) {
       alert(t('no_items_export'));
@@ -692,7 +715,7 @@ export default function Import() {
     const firstItem = importedFiles.find(f => f.uniqueKey === uniqueKeys[0]);
     const outName =
       uniqueKeys.length === 1 && firstItem
-        ? `MicaLingo_Export_${firstItem.fileName.replace(/\.[^/.]+$/, '')}_${firstItem.destination}.xlsx`
+        ? `MicaLingo_Export_${firstItem.fileName.replace(/[<>:"/\\|?*\u0000-\u001F]/g, "_").replace(/\.[^/.]+$/, "").trim() || "export"}_${firstItem.destination}.xlsx`
         : `MicaLingo_Bulk_Export_${uniqueKeys.length}_files.xlsx`;
 
     XLSX.writeFile(workbook, outName);
@@ -1017,7 +1040,7 @@ export default function Import() {
           note: newCategory === 'false_friends' || newCategory === 'idioms' ? newNote.trim() : "",
           dateAdded: Date.now(),
           category: vocabCategoryKey(newCategory),
-          sourceFile: "Manual CMS Entry",
+          sourceFile: finalGerman,
           sourceType: "cms"
         };
 
@@ -1624,7 +1647,12 @@ export default function Import() {
                         className="w-5 h-5 text-blue-600 rounded border-blue-200 cursor-pointer"
                       />
                     </td>
-                    <td className="p-3 sm:p-5 font-bold text-blue-950 break-all">{file.fileName}</td>
+                    <td className="p-3 sm:p-5">
+                      <div className="font-bold text-blue-950 break-all">{file.fileName}</div>
+                      {file.subtitle ? (
+                        <div className="text-sm font-medium text-gray-500 break-all mt-0.5">{file.subtitle}</div>
+                      ) : null}
+                    </td>
                     <td className="p-3 sm:p-5 text-gray-600 uppercase text-sm font-bold">{file.fileType}</td>
                     <td className="p-3 sm:p-5">
                       <span className="px-2.5 py-1 text-xs font-bold rounded-full bg-blue-100 text-blue-800 uppercase tracking-wider">{file.destination}</span>
