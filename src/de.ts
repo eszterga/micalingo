@@ -93,7 +93,7 @@ export const de = {
 
   // Home
   welcome_back: "Willkommen, schön dich hier zu sehen!",
-  ready_to_learn: "Lerne Deutsch online mit kostenlosen Deutsch-Ungarisch-Quizzen. Übe gemischt Adjektive, Substantive, Artikel und Verben. Mit deinem Google-Konto kannst du eine eigene Bibliothek anlegen und auch andere Sprachen üben und lernen, oder sogar mathematische und geschichtliche Aufgaben. Deine Ergebnisse kannst du im Menüpunkt Statistik ansehen und herunterladen und deine Bibliothek nach deinem Geschmack erweitern.",
+  ready_to_learn: "Lerne Deutsch mit kostenlosen, vorgefertigten Deutsch-Ungarisch-Quizzen, oder erstelle neue aus deinem eigenen Wörterbuch und Wortschatz! Übe gemischt Adjektive, Substantive, Artikel und Verben. Mit deinem Google-Konto kannst du eine eigene Bibliothek anlegen und auch andere Sprachen üben und lernen, oder sogar mathematische und geschichtliche Aufgaben. Deine Ergebnisse kannst du im Menüpunkt Statistik ansehen und herunterladen und deine Bibliothek nach deinem Geschmack erweitern.",
   import_data: "Daten importieren und verwalten",
   upload_new_materials: "Neue Wörter und Sätze hochladen.",
   login_required: "Anmeldung erforderlich",

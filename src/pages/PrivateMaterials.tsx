@@ -12,6 +12,7 @@ import {
   getSelectionBookmark,
   type SelectionBookmark,
 } from '../lib/richTextSelection';
+import { applyBulletList, restoreEditorSelection } from '../lib/editorFormat';
 
 const BackgroundBlobs = () => (
   <>
@@ -644,23 +645,8 @@ export default function PrivateMaterials({ type }: { type: 'reading' | 'listenin
 
   const handleInsertList = (e: React.MouseEvent) => {
     e.preventDefault();
-    const selection = window.getSelection();
-    if (!selection?.rangeCount) {
-      document.execCommand("insertUnorderedList", false);
-      return;
-    }
-
-    const selectedText = selection.toString();
-    if (selectedText.trim() === '') {
-      document.execCommand("insertUnorderedList", false);
-      return;
-    }
-
-    const lines = selectedText.split('\n').filter(line => line.trim() !== '');
-    if (lines.length > 0) {
-      const listHtml = '<ul>' + lines.map(line => `<li>${line}</li>`).join('') + '</ul>';
-      document.execCommand('insertHTML', false, listHtml);
-    }
+    applyBulletList(contentRef.current);
+    syncEditorHtml();
   };
 
   return (
@@ -838,7 +824,7 @@ export default function PrivateMaterials({ type }: { type: 'reading' | 'listenin
                   <div className="bg-gray-50 border-b border-gray-200 p-2 flex gap-2 flex-wrap">
                     <EditorFormatControls editorRef={contentRef} onContentChange={syncEditorHtml}>
                     <button type="button" onClick={handleInsertList} className="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-sm text-gray-700 transition-colors shadow-sm font-medium">• Bullet List</button>
-                    <button type="button" onClick={e => { e.preventDefault(); document.execCommand("undo", false); syncEditorHtml(); }} className="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-sm text-gray-700 transition-colors shadow-sm font-medium">↩ Undo</button>
+                    <button type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => { if (contentRef.current) restoreEditorSelection(contentRef.current); document.execCommand("undo", false); syncEditorHtml(); }} className="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-sm text-gray-700 transition-colors shadow-sm font-medium">↩ Undo</button>
                     <div className="w-px h-6 bg-gray-300 self-center mx-1"></div>
                     <button type="button" onClick={() => fileInputRef.current?.click()} className="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-200 text-sm text-gray-700 transition-colors shadow-sm font-medium flex items-center gap-1">
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg> {t('add_image') || 'Add Image'}

@@ -93,6 +93,51 @@ export function normalizeFontFamily(family: string): string {
   return first.replace(/^['"]+|['"]+$/g, "").trim();
 }
 
+const GENERIC_FONTS = new Set([
+  "system-ui",
+  "ui-sans-serif",
+  "ui-serif",
+  "ui-monospace",
+  "ui-rounded",
+  "sans-serif",
+  "serif",
+  "monospace",
+  "cursive",
+  "fantasy",
+  "emoji",
+  "math",
+  "fangsong",
+  "inherit",
+  "initial",
+  "unset",
+  "revert",
+  "revert-layer",
+  "-apple-system",
+  "blinkmacsystemfont",
+  "avenir",
+  "helvetica",
+  "helvetica neue",
+]);
+
+/** Families that come from the page default, not from an author-chosen font. */
+export function isGenericFontFamily(family: string): boolean {
+  const name = normalizeFontFamily(family).toLowerCase();
+  return !name || GENERIC_FONTS.has(name);
+}
+
+/** Font set on this element or an ancestor inside the editor. Inherited page defaults count as none. */
+export function explicitFontFamily(el: HTMLElement, editor: HTMLElement): string {
+  let cur: HTMLElement | null = el;
+  while (cur && cur !== editor.parentElement) {
+    const raw = cur.style.fontFamily || cur.getAttribute("face") || "";
+    const name = normalizeFontFamily(raw);
+    if (name && !isGenericFontFamily(name)) return name;
+    if (cur === editor) break;
+    cur = cur.parentElement;
+  }
+  return "";
+}
+
 function rgbToHex(color: string): string {
   if (!color) return "#111827";
   if (color.startsWith("#")) {
@@ -209,9 +254,10 @@ export function readFormatState(editor: HTMLElement): FormatState {
   const underline = uniqueFlags(samples.map((el) => decorationOn(el, editor, "underline")));
   const strike = uniqueFlags(samples.map((el) => decorationOn(el, editor, "line-through")));
 
-  const families = samples.map((el) => normalizeFontFamily(getComputedStyle(el).fontFamily));
+  const families = samples.map((el) => explicitFontFamily(el, editor));
   const familyKey = (value: string) => value.toLowerCase();
-  const uniqueFamilies = Array.from(new Set(families.map(familyKey).filter(Boolean)));
+  const namedFamilies = families.filter((name) => name && !isGenericFontFamily(name));
+  const uniqueFamilies = Array.from(new Set(namedFamilies.map(familyKey)));
   const sizes = samples.map((el) => Math.round(Number.parseFloat(getComputedStyle(el).fontSize) || 0)).filter((n) => n > 0);
   const uniqueSizes = Array.from(new Set(sizes));
 
@@ -229,8 +275,8 @@ export function readFormatState(editor: HTMLElement): FormatState {
     underlineMixed: underline.mixed,
     strike: strike.on,
     strikeMixed: strike.mixed,
-    fontFamily: families[0] || "",
-    fontMixed: uniqueFamilies.length > 1,
+    fontFamily: uniqueFamilies.length === 1 ? namedFamilies[0] : "",
+    fontMixed: uniqueFamilies.length > 1 || (namedFamilies.length > 0 && namedFamilies.length < families.length),
     fontSizePx: uniqueSizes.length === 1 ? uniqueSizes[0] : sizes[0] ?? null,
     sizeMixed: uniqueSizes.length > 1,
     block: blockOf(first, editor),
@@ -444,7 +490,215 @@ export function applyInlineFormat(editor: HTMLElement, patch: FormatPatch) {
   applyToLiveRange(range, patch);
 }
 
+const LISTABLE = /^(P|DIV|H[1-6]|LI|BLOCKQUOTE|PRE)$/;
+
+let savedRange: Range | null = null;
+let savedEditor: HTMLElement | null = null;
+
+function selectionInEditor(editor: HTMLElement): Range | null {
+  const sel = window.getSelection();
+  if (!sel || sel.rangeCount === 0) return null;
+  const range = sel.getRangeAt(0);
+  const node = range.commonAncestorContainer;
+  if (node !== editor && !editor.contains(node)) return null;
+  return range;
+}
+
+/**
+ * Keep the editor selection across toolbar clicks.
+ * "live" ignores a collapsed caret so a blur cannot wipe a real highlight.
+ * "freeze" stores whatever is in the editor right now, including a caret.
+ */
+export function rememberEditorSelection(editor: HTMLElement | null, mode: "live" | "freeze" = "live") {
+  if (!editor) return;
+  const range = selectionInEditor(editor);
+  if (!range) return;
+  if (mode === "live" && range.collapsed && savedRange && !savedRange.collapsed && savedEditor === editor) return;
+  savedEditor = editor;
+  savedRange = range.cloneRange();
+}
+
+export function restoreEditorSelection(editor: HTMLElement): boolean {
+  try {
+    editor.focus({ preventScroll: true });
+  } catch {
+    editor.focus();
+  }
+  if (savedEditor !== editor || !savedRange) return false;
+  try {
+    const node = savedRange.commonAncestorContainer;
+    if (node !== editor && !editor.contains(node)) return false;
+    const sel = window.getSelection();
+    sel?.removeAllRanges();
+    sel?.addRange(savedRange.cloneRange());
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function finishEdit(editor: HTMLElement) {
+  const range = selectionInEditor(editor);
+  if (!range) {
+    if (savedEditor === editor) savedRange = null;
+    return;
+  }
+  savedEditor = editor;
+  savedRange = range.cloneRange();
+}
+
+function blocksTouchingSelection(editor: HTMLElement): HTMLElement[] {
+  const range = selectionInEditor(editor);
+  if (!range) return [];
+  const found: HTMLElement[] = [];
+  const walker = document.createTreeWalker(editor, NodeFilter.SHOW_ELEMENT);
+  let current = walker.nextNode();
+  while (current) {
+    const el = current as HTMLElement;
+    if (LISTABLE.test(el.tagName)) {
+      try {
+        if (range.intersectsNode(el)) found.push(el);
+      } catch {
+        /* ignore detached nodes */
+      }
+    }
+    current = walker.nextNode();
+  }
+  return found.filter((el) => !found.some((other) => other !== el && el.contains(other)));
+}
+
+function renameElement(el: HTMLElement, tag: string) {
+  if (el.tagName === tag) return;
+  const next = document.createElement(tag);
+  for (const attr of Array.from(el.attributes)) next.setAttribute(attr.name, attr.value);
+  while (el.firstChild) next.appendChild(el.firstChild);
+  el.replaceWith(next);
+}
+
+function linesOf(block: HTMLElement): HTMLElement[] {
+  const hasBr = Array.from(block.childNodes).some((node) => node.nodeName === "BR");
+  if (!hasBr) return [block];
+  const lines: HTMLElement[] = [];
+  let bucket = document.createElement("div");
+  for (const node of Array.from(block.childNodes)) {
+    if (node.nodeName === "BR") {
+      lines.push(bucket);
+      bucket = document.createElement("div");
+      continue;
+    }
+    bucket.appendChild(node);
+  }
+  lines.push(bucket);
+  return lines.filter((line) => (line.textContent || "").replace(/\u00a0/g, "").trim() || line.querySelector("img,table"));
+}
+
+function placeList(blocks: HTMLElement[]) {
+  const ul = document.createElement("ul");
+  blocks[0].before(ul);
+  for (const block of blocks) {
+    if (block.tagName === "LI") {
+      ul.appendChild(block);
+      continue;
+    }
+    for (const line of linesOf(block)) {
+      const li = document.createElement("li");
+      while (line.firstChild) li.appendChild(line.firstChild);
+      if (!(li.textContent || "").replace(/\u00a0/g, "").trim() && !li.querySelector("img,table")) continue;
+      ul.appendChild(li);
+    }
+    if (block.isConnected) block.remove();
+  }
+  if (!ul.childElementCount) ul.remove();
+}
+
+function unwrapListItems(items: HTMLElement[]) {
+  for (const li of items) {
+    const parent = li.parentElement;
+    const p = document.createElement("p");
+    while (li.firstChild) p.appendChild(li.firstChild);
+    li.replaceWith(p);
+    if (parent && (parent.tagName === "UL" || parent.tagName === "OL") && parent.childElementCount === 0) {
+      parent.remove();
+    }
+  }
+}
+
+function selectionToList(editor: HTMLElement) {
+  const range = selectionInEditor(editor);
+  if (!range || range.collapsed) {
+    document.execCommand("insertUnorderedList");
+    return;
+  }
+  const lines = range.toString().split(/\n/).map((line) => line.trim()).filter(Boolean);
+  if (lines.length === 0) {
+    document.execCommand("insertUnorderedList");
+    return;
+  }
+  const ul = document.createElement("ul");
+  for (const line of lines) {
+    const li = document.createElement("li");
+    li.textContent = line;
+    ul.appendChild(li);
+  }
+  range.deleteContents();
+  range.insertNode(ul);
+}
+
+/** Turn the current selection into a bullet list, or back into paragraphs. */
+export function applyBulletList(editor: HTMLElement | null) {
+  if (!editor) return;
+  restoreEditorSelection(editor);
+  const blocks = blocksTouchingSelection(editor);
+  if (blocks.length > 0 && blocks.every((block) => block.tagName === "LI")) {
+    unwrapListItems(blocks);
+    finishEdit(editor);
+    return;
+  }
+  if (blocks.length === 0) {
+    const before = editor.innerHTML;
+    let changed = false;
+    try {
+      changed = document.execCommand("insertUnorderedList");
+    } catch {
+      changed = false;
+    }
+    if (!changed || editor.innerHTML === before) selectionToList(editor);
+    finishEdit(editor);
+    return;
+  }
+  placeList(blocks);
+  finishEdit(editor);
+}
+
+/** Apply H2 / H3 / P to every block in the selection, even when execCommand ignores it. */
+export function applyBlockFormat(editor: HTMLElement, tag: string) {
+  restoreEditorSelection(editor);
+  const normalized = tag.replace(/[<>]/g, "").toUpperCase();
+  const before = editor.innerHTML;
+  let changed = false;
+  try {
+    changed = document.execCommand("formatBlock", false, `<${normalized.toLowerCase()}>`)
+      || document.execCommand("formatBlock", false, normalized);
+  } catch {
+    changed = false;
+  }
+  if (!changed || editor.innerHTML === before) {
+    const blocks = blocksTouchingSelection(editor).filter((block) => block.tagName !== "LI");
+    for (const block of blocks) renameElement(block, normalized);
+  }
+  finishEdit(editor);
+}
+
 export function editorCommand(editor: HTMLElement, command: string, value?: string) {
-  editor.focus();
+  restoreEditorSelection(editor);
+  if (command === "formatBlock" && value) {
+    applyBlockFormat(editor, value);
+    return;
+  }
+  if (command === "insertUnorderedList") {
+    applyBulletList(editor);
+    return;
+  }
   document.execCommand(command, false, value);
+  finishEdit(editor);
 }

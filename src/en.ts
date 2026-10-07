@@ -93,7 +93,7 @@ export const en = {
 
   // Home
   welcome_back: "Welcome, nice to see you here!",
-  ready_to_learn: "Learn German online with free German-Hungarian quizzes. Practice adjectives, nouns, articles, and verbs mixed together. With your Google account you can create your own library and practice or study other languages too, or even math and history challenges. Review and download your results in the Statistics menu, and expand your library however you like.",
+  ready_to_learn: "Learn German with free, ready-made German-Hungarian quizzes, or create new ones from your own dictionary and vocabulary! Practice adjectives, nouns, articles, and verbs mixed together. With your Google account you can create your own library and practice or study other languages too, or even math and history challenges. Review and download your results in the Statistics menu, and expand your library however you like.",
   import_data: "Import and manage data",
   upload_new_materials: "Upload new words and phrases.",
   login_required: "Login required",

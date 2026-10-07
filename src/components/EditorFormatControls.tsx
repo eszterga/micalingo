@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type CSSProperties, type MouseEvent, type ReactNode, type RefObject } from "react";
+import { useEffect, useState, type CSSProperties, type MouseEvent, type ReactNode, type RefObject } from "react";
 import {
   applyEditorColor,
   getSelectionBookmark,
@@ -10,8 +10,11 @@ import {
   SIZE_PRESETS,
   applyInlineFormat,
   editorCommand,
+  isGenericFontFamily,
   normalizeFontFamily,
   readFormatState,
+  rememberEditorSelection,
+  restoreEditorSelection,
   type FormatState,
 } from "../lib/editorFormat";
 
@@ -34,18 +37,15 @@ function buttonClass(active: boolean, mixed: boolean, extra = "") {
 
 export default function EditorFormatControls({ editorRef, onContentChange, children }: Props) {
   const [format, setFormat] = useState<FormatState>(EMPTY_FORMAT);
-  const capturedRange = useRef<Range | null>(null);
 
   const captureRange = () => {
-    const editor = editorRef.current;
-    const sel = window.getSelection();
-    if (!editor || !sel || sel.rangeCount === 0 || !sel.anchorNode || !editor.contains(sel.anchorNode)) return;
-    capturedRange.current = sel.getRangeAt(0).cloneRange();
+    rememberEditorSelection(editorRef.current, "freeze");
   };
 
   const refresh = () => {
     const editor = editorRef.current;
     if (!editor) return;
+    rememberEditorSelection(editor, "live");
     const sel = window.getSelection();
     if (!sel?.anchorNode || !editor.contains(sel.anchorNode)) return;
     setFormat(readFormatState(editor));
@@ -53,17 +53,26 @@ export default function EditorFormatControls({ editorRef, onContentChange, child
 
   useEffect(() => {
     const editor = editorRef.current;
-    if (!editor) return;
     const onSelection = () => refresh();
+    const onPointerDown = (event: Event) => {
+      const current = editorRef.current;
+      if (!current) return;
+      const target = event.target;
+      if (target instanceof Node && current.contains(target)) return;
+      rememberEditorSelection(current, "freeze");
+    };
+    const onUserCaret = () => rememberEditorSelection(editorRef.current, "freeze");
     document.addEventListener("selectionchange", onSelection);
-    editor.addEventListener("keyup", onSelection);
-    editor.addEventListener("mouseup", onSelection);
-    editor.addEventListener("input", onSelection);
+    document.addEventListener("pointerdown", onPointerDown, true);
+    editor?.addEventListener("keyup", onUserCaret);
+    editor?.addEventListener("mouseup", onUserCaret);
+    editor?.addEventListener("input", onSelection);
     return () => {
       document.removeEventListener("selectionchange", onSelection);
-      editor.removeEventListener("keyup", onSelection);
-      editor.removeEventListener("mouseup", onSelection);
-      editor.removeEventListener("input", onSelection);
+      document.removeEventListener("pointerdown", onPointerDown, true);
+      editor?.removeEventListener("keyup", onUserCaret);
+      editor?.removeEventListener("mouseup", onUserCaret);
+      editor?.removeEventListener("input", onSelection);
     };
     // editorRef is stable; rebind when the modal mounts the editor node
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -74,25 +83,17 @@ export default function EditorFormatControls({ editorRef, onContentChange, child
     refresh();
   };
 
-  const withEditor = (fn: (editor: HTMLDivElement) => void, restoreCaptured = false) => {
+  const withEditor = (fn: (editor: HTMLDivElement) => void) => {
     const editor = editorRef.current;
     if (!editor) return;
-    if (restoreCaptured && capturedRange.current) {
-      try {
-        editor.focus();
-        const sel = window.getSelection();
-        sel?.removeAllRanges();
-        sel?.addRange(capturedRange.current);
-      } catch {
-        /* the saved range can expire if the DOM was replaced */
-      }
-    }
-    capturedRange.current = null;
+    restoreEditorSelection(editor);
     fn(editor);
+    rememberEditorSelection(editor, "freeze");
     afterEdit();
   };
 
   const keepSelection = (event: MouseEvent) => {
+    rememberEditorSelection(editorRef.current, "freeze");
     event.preventDefault();
   };
 
@@ -109,13 +110,14 @@ export default function EditorFormatControls({ editorRef, onContentChange, child
     applyInlineFormat(editor, { strike: !(format.strike && !format.strikeMixed) });
   });
 
+  const explicitFont = format.fontFamily && !isGenericFontFamily(format.fontFamily) ? format.fontFamily : "";
   const fonts = [...FONT_PRESETS];
-  const knownFont = fonts.find((name) => name.toLowerCase() === format.fontFamily.toLowerCase());
-  if (format.fontFamily && !knownFont) fonts.unshift(format.fontFamily);
+  const knownFont = fonts.find((name) => name.toLowerCase() === explicitFont.toLowerCase());
+  if (explicitFont && !knownFont) fonts.unshift(explicitFont);
 
   const sizeValue = format.sizeMixed ? "__mixed" : format.fontSizePx ? String(format.fontSizePx) : "";
   const knownSize = SIZE_PRESETS.some((preset) => preset.px === format.fontSizePx);
-  const fontValue = format.fontMixed ? "__mixed" : (knownFont || format.fontFamily || "");
+  const fontValue = format.fontMixed ? "__mixed" : (knownFont || explicitFont || "");
 
   const paragraphOn = format.block === "P" || format.block === "DIV";
   const oddBlock = format.block && !["P", "DIV", "H2", "H3"].includes(format.block);
@@ -154,11 +156,11 @@ export default function EditorFormatControls({ editorRef, onContentChange, child
         onChange={(event) => {
           const value = event.target.value;
           if (!value || value === "__mixed") return;
-          withEditor((editor) => applyInlineFormat(editor, { fontFamily: normalizeFontFamily(value) || value }), true);
+          withEditor((editor) => applyInlineFormat(editor, { fontFamily: normalizeFontFamily(value) || value }));
         }}
         className={`px-2 py-1 border rounded text-sm shadow-sm outline-none cursor-pointer max-w-[10rem] ${format.fontMixed ? "bg-amber-50 border-amber-400" : "bg-white border-gray-300"}`}
       >
-        {!fontValue ? <option value="">Font</option> : null}
+        <option value="">Font</option>
         {format.fontMixed ? <option value="__mixed">Mixed</option> : null}
         {fonts.map((name) => (
           <option key={name} value={name}>{name}</option>
@@ -172,7 +174,7 @@ export default function EditorFormatControls({ editorRef, onContentChange, child
         onChange={(event) => {
           const value = event.target.value;
           if (!value || value === "__mixed") return;
-          withEditor((editor) => applyInlineFormat(editor, { fontSize: `${value}px` }), true);
+          withEditor((editor) => applyInlineFormat(editor, { fontSize: `${value}px` }));
         }}
         className={`px-2 py-1 border rounded text-sm shadow-sm outline-none cursor-pointer ${format.sizeMixed ? "bg-amber-50 border-amber-400" : "bg-white border-gray-300"}`}
       >

@@ -16,6 +16,39 @@ html {
   cursor: zoom-in;
 }
 
+.prose h2 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1.25;
+  margin: 0.9rem 0 0.4rem;
+}
+
+.prose h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.3;
+  margin: 0.75rem 0 0.35rem;
+}
+
+.prose ul,
+.prose ol {
+  margin: 0.5rem 0;
+  padding-left: 1.5rem;
+}
+
+.prose ul {
+  list-style: disc outside;
+}
+
+.prose ol {
+  list-style: decimal outside;
+}
+
+.prose li {
+  display: list-item;
+  margin: 0.2rem 0;
+}
+
 /* Responsive tables: pasted Word/Excel/Docs tables often carry fixed pixel
    widths inline, which would otherwise overflow and get clipped on narrow
    mobile/app viewports. Wrapping them lets the table scroll horizontally
