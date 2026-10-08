@@ -119,7 +119,7 @@ export default function Home() {
           <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center text-3xl mb-10 group-hover:scale-110 transition-transform duration-500 border border-gray-100">📚</div>
           <div className="relative z-10 w-full">
             <h2 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-2xl drop-shadow-sm mb-1">{t("library") || "Library"}</h2>
-            <p className="text-gray-600 font-medium text-sm leading-relaxed">{t("library_subtitle") || "Here you will find your vocabulary, audio materials, and articles."}</p>
+            <p className="text-gray-600 font-medium text-sm leading-relaxed">{t("library_subtitle") || "Browse the vocabulary collection, or create your own reading and listening collection."}</p>
           </div>
         </AppLink>
 
@@ -127,7 +127,7 @@ export default function Home() {
           <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center text-3xl mb-10 group-hover:scale-110 transition-transform duration-500 border border-gray-100">🧩</div>
           <div className="relative z-10 w-full">
             <h2 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-2xl drop-shadow-sm mb-1">{t("grammar") || "Grammar"}</h2>
-            <p className="text-gray-600 font-medium text-sm leading-relaxed">{t("grammar_page_subtitle") || "Review grammar rules and explanations."}</p>
+            <p className="text-gray-600 font-medium text-sm leading-relaxed">{t("grammar_page_subtitle") || "Read through the German cases, tenses, articles, adjective endings, and prepositions."}</p>
           </div>
         </AppLink>
 
@@ -152,7 +152,7 @@ export default function Home() {
           <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center text-3xl mb-10 group-hover:scale-110 transition-transform duration-500 border border-gray-100">⚙️</div>
           <div className="relative z-10 w-full">
             <h2 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-2xl drop-shadow-sm mb-1">{t("settings") || "Settings"}</h2>
-            <p className="text-gray-600 font-medium text-sm leading-relaxed">{t("settings_subtitle") || "Manage your account and application settings."}</p>
+            <p className="text-gray-600 font-medium text-sm leading-relaxed">{t("settings_subtitle") || "Here you can manage your account and the app settings"}</p>
           </div>
         </AppLink>
       </div>

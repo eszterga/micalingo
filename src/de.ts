@@ -4,7 +4,7 @@ export const de = {
 
   // Settings
   settings_title: "Einstellungen",
-  settings_subtitle: "Verwalte dein Konto und die Anwendungseinstellungen.",
+  settings_subtitle: "Hier kannst du dein Konto und die App-Einstellungen verwalten",
   language_preferences: "Spracheinstellungen",
   language_preferences_subtitle: "Wähle die Anwendungssprache aus.",
   app_language: "App-Sprache",
@@ -13,8 +13,8 @@ export const de = {
   hungarian: "Ungarisch",
   practice_settings: "Übungseinstellungen",
   practice_settings_subtitle: "Passe dein Quiz-Erlebnis an.",
-  show_example_sentences: "Beispielsätze anzeigen",
-  show_example_sentences_subtitle: "Zeige Beispielsätze nach der Beantwortung einer Frage an.",
+  show_example_sentences: "Hinweise/Beispiele anzeigen",
+  show_example_sentences_subtitle: "Zeige Hinweise und Beispiele nach der Beantwortung einer Frage an.",
   save_preferences: "Einstellungen speichern",
   saving_preferences: "Speichern...",
   save_button: "Speichern",
@@ -343,7 +343,7 @@ export const de = {
 
   // Grammar & Statistics
   grammar_page_title: "Deutsche Grammatik",
-  grammar_page_subtitle: "Lerne deutsche Fälle, Zeitformen, Artikel (der, die, das), Adjektivendungen, Präpositionen und Satzbau.",
+  grammar_page_subtitle: "Lies die deutschen Fälle, Zeitformen, Artikel, Adjektivendungen und Präpositionen durch.",
   grammar_page_title_private: "Grammatik",
   grammar_page_subtitle_private: "Stelle deine eigenen Grammatiknotizen zusammen, in jeder Sprache.",
   grammar_cases: "Fälle (Kasus)",
@@ -413,7 +413,7 @@ export const de = {
 
   // Library & Learning Materials
   library: "Bibliothek",
-  library_subtitle: "Öffentliche Deutsch–Ungarisch-Wortschatzlisten sowie Lese- und Hörmaterialien. Nach dem Google-Login kann deine private Bibliothek beliebige Sprachen nutzen.",
+  library_subtitle: "Stöbere in der Wortschatzsammlung, oder lege deine eigene Lese- und Hörsammlung an.",
   library_card_public_note: "(öffentliche Bibliothek). Klicke und erstelle deine eigene Bibliothek!",
   learning_materials: "Deutsch Lernmaterialien",
   learning_materials_subtitle: "Deutsch lesen und hören: Artikel, Redewendungen, Bücher, Musik und Podcasts.",
@@ -717,7 +717,7 @@ export const de = {
   cookie_banner_ads_desc: "Ermöglicht Google AdSense, Cookies zu verwenden, um Anzeigen — einschließlich personalisierter Anzeigen — zu zeigen.",
   cookie_banner_always_on: "Immer aktiv",
   cookie_settings_title: "Cookie-Einstellungen",
-  cookie_settings_desc: "Legen Sie fest, ob Google auf der Website und in der App Werbe-Cookies verwenden darf.",
+  cookie_settings_desc: "Hier kannst du festlegen, ob Google auf der Website und in der App Werbe-Cookies verwenden darf.",
   cookie_settings_manage: "Cookie-Einstellungen ändern",
   cookie_settings_status_accepted: "Werbe-Cookies: erlaubt",
   cookie_settings_status_rejected: "Werbe-Cookies: blockiert",

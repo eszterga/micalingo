@@ -4,7 +4,7 @@ export const en = {
 
   // Settings
   settings_title: "Settings",
-  settings_subtitle: "Manage your account and application settings.",
+  settings_subtitle: "Here you can manage your account and the app settings",
   language_preferences: "Language Preferences",
   language_preferences_subtitle: "Select the application language.",
   app_language: "App Language",
@@ -13,8 +13,8 @@ export const en = {
   hungarian: "Hungarian",
   practice_settings: "Practice Settings",
   practice_settings_subtitle: "Customize your quiz experience.",
-  show_example_sentences: "Show Example Sentences",
-  show_example_sentences_subtitle: "Display example sentences after answering a question.",
+  show_example_sentences: "Show hints/examples",
+  show_example_sentences_subtitle: "Display hints and examples after answering a question.",
   save_preferences: "Save Preferences",
   saving_preferences: "Saving...",
   save_button: "Save",
@@ -344,7 +344,7 @@ export const en = {
 
   // Grammar & Statistics
   grammar_page_title: "German Grammar",
-  grammar_page_subtitle: "Learn German cases, tenses, articles (der, die, das), adjective endings, prepositions, and sentence structure.",
+  grammar_page_subtitle: "Read through the German cases, tenses, articles, adjective endings, and prepositions.",
   grammar_page_title_private: "Grammar",
   grammar_page_subtitle_private: "Customize your own grammar notes, in any language.",
   grammar_cases: "Cases (Fälle)",
@@ -414,7 +414,7 @@ export const en = {
 
   // Library & Learning Materials
   library: "Library",
-  library_subtitle: "Public German–Hungarian vocabulary lists plus reading and listening. After Google login, your private library can use any languages.",
+  library_subtitle: "Browse the vocabulary collection, or create your own reading and listening collection.",
   library_card_public_note: "(public library). Click and create your own library!",
   learning_materials: "German Learning Materials",
   learning_materials_subtitle: "German reading and listening: articles, idioms, books, music, and podcasts.",
@@ -718,7 +718,7 @@ export const en = {
   cookie_banner_ads_desc: "Allows Google AdSense to use cookies to display ads, including personalized ads.",
   cookie_banner_always_on: "Always on",
   cookie_settings_title: "Cookie preferences",
-  cookie_settings_desc: "Manage whether Google may use advertising cookies on the website and in the app.",
+  cookie_settings_desc: "Here you can set whether Google may use advertising cookies on the website and in the app.",
   cookie_settings_manage: "Change cookie settings",
   cookie_settings_status_accepted: "Advertising cookies: allowed",
   cookie_settings_status_rejected: "Advertising cookies: blocked",

@@ -4,7 +4,7 @@ export const hu = {
 
   // Settings
   settings_title: "Beállítások",
-  settings_subtitle: "Kezeld a fiókod és az alkalmazás beállításait.",
+  settings_subtitle: "Itt kezelheted a fiókod és az alkalmazás beállításait",
   language_preferences: "Nyelvi beállítások",
   language_preferences_subtitle: "Válaszd ki az alkalmazás nyelvét.",
   app_language: "Alkalmazás nyelve",
@@ -13,8 +13,8 @@ export const hu = {
   hungarian: "Magyar",
   practice_settings: "Gyakorlás beállításai",
   practice_settings_subtitle: "Szabd testre a kvíz élményét.",
-  show_example_sentences: "Példamondatok mutatása",
-  show_example_sentences_subtitle: "Példamondatok megjelenítése a kérdések megválaszolása után.",
+  show_example_sentences: "Súgó/Példák mutatása",
+  show_example_sentences_subtitle: "Súgók és példák megjelenítése a kérdések megválaszolása után.",
   save_preferences: "Beállítások mentése",
   saving_preferences: "Mentés...",
   save_button: "Mentés",
@@ -111,7 +111,7 @@ export const hu = {
 
   // Home
   welcome_back: "Üdvözlünk, jó, hogy itt vagy!",
-  ready_to_learn: "Tanulj németül ingyenes, előre elkészített német-magyar kvízekkel, vagy hozz létre újakat a saját szótáradból és szókincsedből! Google-fiókoddal saját könyvtárat hozhatsz létre, és más nyelveket is tanulhatsz, vagy akár matematikai és történelmi feladványokat.",
+  ready_to_learn: "Tanulj németül ingyenes, előre elkészített német-magyar kvízekkel, vagy hozz létre újakat a saját szótáradból és szókincsedből! Google-fiókoddal saját könyvtárat hozhatsz létre, és más nyelveket, vagy akár matematikai és történelmi feladványokat is gyakorolhatsz!",
   home_about: "A MicaLingo egy ingyenes oldal – és applikáció –, ahol előre elkészített kvízekkel tesztelheted nyelvtudásod (német-magyar nyelven). Fiók (bejelentkezés) nélkül is gyakorolhatsz, de bejelentkezés után elmentheted és letöltheted eddig elért eredményeidet, feltöltheted saját szógyűjteményedet és újabb kvízeket generálhatsz. Az alkalmazás jelenleg ingyenesen elérhető, de ha úgy érzed, az oldal hasznos számodra, a {support_link} gombbal tetszőleges összeget utalhatsz.",
   home_disclaimer: "Az oldal és az applikáció folyamatos fejlesztés alatt áll, így az esetleges hibákért elnézésedet kérjük. Véleményed és észrevételeidet várjuk a {email} e-mail címre.",
   import_data: "Adatok importálása és kezelése",
@@ -344,7 +344,7 @@ _items_save: "Nincsenek érvényes szavak a mentéshez, vagy nem vagy bejelentke
 
   // Grammar & Statistics
   grammar_page_title: "Német nyelvtan",
-  grammar_page_subtitle: "Tanuld a német eseteket, igeidőket, névelőket (der, die, das), melléknévvégződéseket, prepozíciókat és a szórendet.",
+  grammar_page_subtitle: "Olvasd át a német eseteket, igeidőket, névelőket, melléknévvégződéseket, prepozíciókat.",
   grammar_page_title_private: "Nyelvtan",
   grammar_page_subtitle_private: "Állítsd össze a saját nyelvtani jegyzeteidet, bármilyen nyelven.",
   grammar_cases: "Esetek",
@@ -412,7 +412,7 @@ _items_save: "Nincsenek érvényes szavak a mentéshez, vagy nem vagy bejelentke
 
   // Library & Learning Materials
   library: "Könyvtár",
-  library_subtitle: "Nyilvános német–magyar szókincslisták, olvasnivaló és hallásértés. Google-belépés után a saját könyvtárad bármilyen nyelvű lehet.",
+  library_subtitle: "Böngéssz a szókincsgyűjteményben, vagy hozd létre saját olvasni- és hallgatnivaló gyűjteményed.",
   library_card_public_note: "(nyilvános könyvtár). Kattints és hozd létre saját könyvtárad!",
   learning_materials: "Német tananyagok",
   learning_materials_subtitle: "Német olvasás és hallásértés: cikkek, szólások, könyvek, zene és podcastok.",
@@ -716,7 +716,7 @@ _items_save: "Nincsenek érvényes szavak a mentéshez, vagy nem vagy bejelentke
   cookie_banner_ads_desc: "Lehetővé teszi a Google AdSense számára, hogy sütiket használjon hirdetések — ideértve a személyre szabott hirdetéseket — megjelenítéséhez.",
   cookie_banner_always_on: "Mindig be",
   cookie_settings_title: "Süti beállítások",
-  cookie_settings_desc: "Itt állíthatja be, hogy a Google használhat-e hirdetési sütiket a webhelyen és az alkalmazásban.",
+  cookie_settings_desc: "Itt állíthatod be, hogy a Google használhat-e hirdetési sütiket a webhelyen és az alkalmazásban.",
   cookie_settings_manage: "Süti beállítások módosítása",
   cookie_settings_status_accepted: "Hirdetési sütik: engedélyezve",
   cookie_settings_status_rejected: "Hirdetési sütik: tiltva",

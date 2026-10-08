@@ -525,7 +525,7 @@ export default function Settings() {
           </Link>
           <div>
             <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600 tracking-tight pb-2">{t('settings_title') || 'Settings'}</h1>
-            <p className="text-lg text-blue-900/70 font-medium mt-1">{t('settings_subtitle') || 'Manage your account and application settings.'}</p>
+            <p className="text-lg text-blue-900/70 font-medium mt-1">{t('settings_subtitle') || 'Here you can manage your account and the app settings'}</p>
           </div>
         </div>
         
@@ -577,13 +577,12 @@ export default function Settings() {
 
         {/* Practice Settings */}
         <div>
-          <h2 className="text-2xl font-extrabold text-blue-950 mb-2">{t('practice_settings') || 'Practice Settings'}</h2>
-          <p className="text-blue-900/70 text-sm mb-4 font-medium">{t('practice_settings_subtitle') || 'Customize your quiz experience.'}</p>
+          <h2 className="text-2xl font-extrabold text-blue-950 mb-4">{t('practice_settings') || 'Practice Settings'}</h2>
           
           <div className="flex items-center justify-between max-w-md bg-white/50 p-5 rounded-2xl border border-blue-50 shadow-sm">
             <div>
-              <h3 className="font-bold text-blue-950">{t('show_example_sentences') || 'Show Example Sentences'}</h3>
-              <p className="text-xs text-blue-900/60 mt-1 font-medium">{t('show_example_sentences_subtitle') || 'Display example sentences after answering a question.'}</p>
+              <h3 className="font-bold text-blue-950">{t('show_example_sentences') || 'Show hints/examples'}</h3>
+              <p className="text-xs text-blue-900/60 mt-1 font-medium">{t('show_example_sentences_subtitle') || 'Display hints and examples after answering a question.'}</p>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
               <input 
