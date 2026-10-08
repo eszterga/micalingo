@@ -559,6 +559,17 @@ function pick(map: Localized, lang: SeoLang): SeoCopy {
 export function resolveSeo(pathname: string, lang: SeoLang): ResolvedSeo {
   const clean = pathname.replace(/\/+$/, '') || '/';
 
+  if (clean === '/excel-save') {
+    return {
+      title: 'Save Excel | MicaLingo',
+      description: 'Download an Excel file from MicaLingo.',
+      keywords: 'MicaLingo',
+      canonicalPath: '/excel-save',
+      noindex: true,
+      pageType: 'page',
+    };
+  }
+
   if (clean === '/practice') {
     return {
       ...pick(ROUTES['/quizzes'], lang),

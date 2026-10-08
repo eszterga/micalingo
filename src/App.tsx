@@ -46,6 +46,7 @@ const Learn = React.lazy(() => import("./pages/Learn"));
 const LearnGuide = React.lazy(() => import("./pages/LearnGuide"));
 const Cookies = React.lazy(() => import("./pages/Cookies"));
 const Impressum = React.lazy(() => import("./pages/Impressum"));
+const ExcelSave = React.lazy(() => import("./pages/ExcelSave"));
 const NotFound = React.lazy(() => import("./pages/NotFound"));
 
 function LegacyLearnGuide() {
@@ -106,6 +107,7 @@ function AppRoutes() {
         <Route path="/learn/:slug" element={<LearnGuide />} />
         <Route path="/cookies" element={<Cookies />} />
         <Route path="/impressum" element={<Impressum />} />
+        <Route path="/excel-save" element={<ExcelSave />} />
 
         {/* Personalized sections requiring login */}
         <Route element={<ProtectedRoute />}>

@@ -3,7 +3,6 @@ import { Directory, Filesystem } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
 import * as XLSX from 'xlsx';
 
-const XLSX_MIME = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 const OCTET_STREAM = 'application/octet-stream';
 
 type PluginHeader = { name?: string };
@@ -69,27 +68,6 @@ function triggerAnchorDownload(bytes: Uint8Array, filename: string): void {
   window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
 }
 
-function excelFile(bytes: Uint8Array, filename: string, type: string): File {
-  return new File([bytesToArrayBuffer(bytes)], filename, { type });
-}
-
-/**
- * Must be called in the same turn as the tap. Android's WebView ignores a
- * normal download link, and canShare() often says no even when the share
- * sheet can still open. Asking here is what shows Save / Drive / Files.
- */
-function shareFileFromTap(bytes: Uint8Array, filename: string): Promise<void> {
-  if (typeof navigator.share !== 'function') {
-    return Promise.reject(new Error('share unavailable'));
-  }
-  const payload: ShareData = { files: [excelFile(bytes, filename, XLSX_MIME)], title: filename };
-  return navigator.share(payload).catch((error: unknown) => {
-    if (isShareCancel(error)) throw error;
-    const fallback: ShareData = { files: [excelFile(bytes, filename, OCTET_STREAM)], title: filename };
-    return navigator.share(fallback);
-  });
-}
-
 async function shareWithNativePlugins(bytes: Uint8Array, filename: string): Promise<void> {
   const base64 = bytesToBase64(bytes);
   const written = await Filesystem.writeFile({
@@ -110,39 +88,45 @@ async function shareWithNativePlugins(bytes: Uint8Array, filename: string): Prom
   });
 }
 
-async function saveInApp(bytes: Uint8Array, filename: string, failMessage?: string): Promise<void> {
-  try {
-    await shareFileFromTap(bytes, filename);
-    return;
-  } catch (error) {
-    if (isShareCancel(error)) return;
-    console.error('Excel share failed', error);
-  }
+/**
+ * The installed app's WebView drops a normal download and cannot open a file
+ * share sheet. A link the app does not own is handed to the phone's browser,
+ * and that browser can save the Excel file.
+ */
+function openInPhoneBrowser(bytes: Uint8Array, filename: string): void {
+  const url = new URL('https://micalingo.com/excel-save');
+  url.searchParams.set('name', filename);
+  url.searchParams.set('file', bytesToBase64(bytes));
+  const hierarchical = url.toString().replace(/^https:\/\//, '');
+  window.location.href = `intent://${hierarchical}#Intent;scheme=https;action=android.intent.action.VIEW;end`;
+}
 
-  if (nativePluginInstalled('Filesystem') && nativePluginInstalled('Share')) {
-    try {
-      await shareWithNativePlugins(bytes, filename);
-      return;
-    } catch (error) {
-      if (isShareCancel(error)) return;
-      console.error('Excel native share failed', error);
-    }
-  }
-
-  if (failMessage) window.alert(failMessage);
+export function downloadBase64Excel(base64: string, filename: string): void {
+  const clean = base64.replace(/\s/g, '');
+  const binary = atob(clean);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
+  triggerAnchorDownload(bytes, safeFileName(filename));
 }
 
 /**
- * Browsers save the file directly. The Android app shows the system share
- * sheet (Save to Files, Drive, Downloads) because its WebView drops a normal
- * download and gives the user no sign that the tap worked.
+ * Browsers save the file directly. The Android app opens the phone browser,
+ * where the download is allowed.
  */
 export function downloadWorkbook(workbook: XLSX.WorkBook, filename: string, failMessage?: string): Promise<void> {
   try {
     const bytes = toUint8Array(XLSX.write(workbook, { bookType: 'xlsx', type: 'array' }));
     const safeName = safeFileName(filename);
     if (Capacitor.isNativePlatform()) {
-      return saveInApp(bytes, safeName, failMessage);
+      if (nativePluginInstalled('Filesystem') && nativePluginInstalled('Share')) {
+        return shareWithNativePlugins(bytes, safeName).catch((error: unknown) => {
+          if (isShareCancel(error)) return;
+          console.error('Excel native share failed', error);
+          openInPhoneBrowser(bytes, safeName);
+        });
+      }
+      openInPhoneBrowser(bytes, safeName);
+      return Promise.resolve();
     }
     triggerAnchorDownload(bytes, safeName);
     return Promise.resolve();

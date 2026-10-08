@@ -69,6 +69,7 @@ export const PUBLIC_SPA_ROUTES = [
   ...INDEXABLE_ROUTES,
   '/settings',
   '/login',
+  '/excel-save',
   ...Object.keys(LEGACY_CANONICAL),
   ...Object.keys(DIRECTORY_CANONICAL),
 ];
@@ -128,8 +129,8 @@ export function routeCanonicalPath(route) {
   return LEGACY_CANONICAL[route] || DIRECTORY_CANONICAL[route] || route;
 }
 
-export function routeNoindex(_route) {
-  return false;
+export function routeNoindex(route) {
+  return route === '/excel-save';
 }
 
 export function absoluteUrl(path) {
