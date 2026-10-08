@@ -692,7 +692,7 @@ _items_save: "Nincsenek érvényes szavak a mentéshez, vagy nem vagy bejelentke
   impressum_title: "Impresszum",
   impressum_intro: "Ez az impresszum azonosítja, ki üzemelteti a MicaLingo webhelyet és mobilalkalmazást.",
   impressum_s1_title: "1. Üzemeltető",
-  impressum_s1_body: "Szolgáltatás neve: MicaLingo\nWebhely: https://micalingo.com\nMobilalkalmazás: MicaLingo (ugyanazon Szolgáltatás Android / iOS WebView-ja)\nÜzemeltető: MicaLingo, önállóan működtetett oktatási projekt.",
+  impressum_s1_body: "Szolgáltatás neve: MicaLingo\nWebhely: https://micalingo.com\nMobilalkalmazás: MicaLingo (ugyanazon Szolgáltatás Android WebView-ja)\nÜzemeltető: MicaLingo, önállóan működtetett oktatási projekt.",
   impressum_s2_title: "2. Kapcsolat",
   impressum_s2_body: "E-mail: support.micalingo@gmail.com\nWebhely: https://micalingo.com\nEz az elérhetőség a felhasználói, adatvédelmi és jogi megkeresésekhez.",
   impressum_s3_title: "3. A Szolgáltatás jellege",

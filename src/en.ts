@@ -694,7 +694,7 @@ export const en = {
   impressum_title: "Impressum / Legal Notice",
   impressum_intro: "This legal notice identifies who operates the MicaLingo website and mobile application.",
   impressum_s1_title: "1. Operator",
-  impressum_s1_body: "Service name: MicaLingo\nWebsite: https://micalingo.com\nMobile app: MicaLingo (Android / iOS WebView of the same Service)\nOperator: MicaLingo, an independently operated educational project.",
+  impressum_s1_body: "Service name: MicaLingo\nWebsite: https://micalingo.com\nMobile app: MicaLingo (Android WebView of the same Service)\nOperator: MicaLingo, an independently operated educational project.",
   impressum_s2_title: "2. Contact",
   impressum_s2_body: "Email: support.micalingo@gmail.com\nWebsite: https://micalingo.com\nThis is the contact address for users, privacy requests, and legal notices.",
   impressum_s3_title: "3. Nature of the Service",

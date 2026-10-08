@@ -693,7 +693,7 @@ export const de = {
   impressum_title: "Impressum",
   impressum_intro: "Dieses Impressum nennt, wer die MicaLingo-Website und die mobile Anwendung betreibt.",
   impressum_s1_title: "1. Betreiber",
-  impressum_s1_body: "Dienstname: MicaLingo\nWebsite: https://micalingo.com\nMobile App: MicaLingo (Android-/iOS-WebView desselben Dienstes)\nBetreiber: MicaLingo, ein unabhängig betriebenes Bildungsprojekt.",
+  impressum_s1_body: "Dienstname: MicaLingo\nWebsite: https://micalingo.com\nMobile App: MicaLingo (Android-WebView desselben Dienstes)\nBetreiber: MicaLingo, ein unabhängig betriebenes Bildungsprojekt.",
   impressum_s2_title: "2. Kontakt",
   impressum_s2_body: "E-Mail: support.micalingo@gmail.com\nWebsite: https://micalingo.com\nDies ist die Kontaktadresse für Nutzer, Datenschutzanfragen und rechtliche Mitteilungen.",
   impressum_s3_title: "3. Art des Dienstes",
