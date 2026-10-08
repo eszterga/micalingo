@@ -130,6 +130,8 @@ export const de = {
   // Import
   import_title: "Dateien importieren",
   accepted_format_guide: "Akzeptierte Formate",
+  format_guide_hint: "Dies ist nur eine Anleitung. Die Beispiele oben sind für Sprachen gedacht, du kannst sie aber für jedes Thema anpassen.",
+  excel_save_failed: "Die Excel-Datei konnte auf diesem Gerät nicht gespeichert werden.",
   vocab_phrases: "Wortschatz (Lesen oder Quiz) / Redewendungen-Quiz:",
   format_vocab_phrases: "Spalte A = Deutsch (Phrase/Satz), Spalte B = Ungarisch (Bedeutung), Spalte C = Beispiel (Optional).",
   verbs_quiz_format_title: "Verben-Quiz:",
@@ -764,6 +766,4 @@ export const de = {
   about_how_body: "Öffentliche Quizze basieren auf kuratierten deutsch–ungarischen Wort- und Phrasenlisten zu Alltagsthemen wie Wohnen, Reisen, Arbeit und Essen. Grammatikseiten beginnen mit eigenen Primern, die ohne Klick sichtbar bleiben, plus längeren Notizen in der öffentlichen Bibliothek. Mit Google-Konto importierst du eigene Listen in beliebigen Sprachen und erzeugst eigene Quizze. Die Erklärungen auf dieser Seite sind für MicaLingo geschrieben und nicht aus anderen Lehrbüchern kopiert.",
   about_for_heading: "Für wen die Seite ist",
   about_for_body: "Die Oberfläche ist Englisch, Deutsch und Ungarisch, weil viele Besucher Ungarisch sprechende Deutschlernende sind (oder Englisch als Brücke nutzen). Öffentlich übst du dieses DE–HU-Paar. Nach dem Google-Login können Lehrkräfte und Selbstlernende eine private Bibliothek einrichten, wie sie wollen. Private Listen bleiben beim angemeldeten Konto.",
-
-  footer_tagline: "Deutsch lernen mit Quizzen, Grammatik, Wortschatz, Artikeln (der, die, das) und Verben. Learn German. Német tanulás.",
 };

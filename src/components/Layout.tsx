@@ -412,9 +412,6 @@ export default function Layout() {
               <p className="text-xs text-blue-900/50 font-medium">
                 © {new Date().getFullYear()} MicaLingo · {t('footer_rights') || 'All rights reserved.'}
               </p>
-              <p className="mt-2 text-xs text-blue-900/50 font-medium max-w-xl mx-auto leading-relaxed">
-                {t('footer_tagline')}
-              </p>
             </footer>
           </div>
         </main>

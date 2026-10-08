@@ -130,6 +130,8 @@ export const en = {
   // Import
   import_title: "Import Files",
   accepted_format_guide: "Accepted Format Guide",
+  format_guide_hint: "This is only a guide. The examples above are for language setups, but you can customize them to any topic.",
+  excel_save_failed: "The Excel file could not be saved on this device.",
   vocab_phrases: "Vocabulary (Read or Quiz) / Phrases Quiz:",
   format_vocab_phrases: "Column A = German (Phrase/Sentence), Column B = Hungarian (Meaning), Column C = Example (Optional).",
   verbs_quiz_format_title: "Verbs Quiz:",
@@ -765,6 +767,4 @@ export const en = {
   about_how_body: "Public quizzes are built from curated German–Hungarian word and phrase lists grouped by everyday topics such as home, travel, work and food. Grammar pages start with original primers that stay visible without a click, plus longer notes in the public library. Sign in with Google to import your own lists in any languages and generate your own quizzes. Explanations on this site are written for MicaLingo; they are not copied from other textbooks.",
   about_for_heading: "Who it is for",
   about_for_body: "The interface is English, German and Hungarian because many visitors are Hungarian learners of German (or use English as a bridge). Public practice is that HU–DE pair. After a Google login, teachers and self-learners can set up a private library however they want. Private lists stay private to the signed-in account.",
-
-  footer_tagline: "Learn German with quizzes, grammar, vocabulary, articles (der, die, das), and verbs. Deutsch lernen. Német tanulás.",
 };

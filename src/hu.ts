@@ -130,6 +130,8 @@ export const hu = {
   // Import
   import_title: "Fájlok importálása",
   accepted_format_guide: "Elfogadott formátumok",
+  format_guide_hint: "Ez csak egy útmutató. A fenti példák nyelvi beállításokra vonatkoznak, de bármilyen témára testre szabhatók.",
+  excel_save_failed: "Az Excel-fájlt nem sikerült menteni ezen az eszközön.",
 vocab_phrases: "Szókincs (Olvasnivaló vagy Kvíz) / Kifejezések Kvíz:",
   format_vocab_phrases: "A oszlop = Német (Kifejezés/Mondat), B oszlop = Magyar (Jelentés), C oszlop = Példa (Opcionális).",
   verbs_quiz_format_title: "Ige Kvíz:",
@@ -743,12 +745,12 @@ _items_save: "Nincsenek érvényes szavak a mentéshez, vagy nem vagy bejelentke
   seo_faq_q6: "Milyen nyelveken érhető el a MicaLingo?",
   seo_faq_a6: "A felület angol, német és magyar. Nyilvánosan németet gyakorolsz magyar jelentéssel. Google-belépés után a saját listád bármilyen nyelvpár lehet.",
 
-  learn_hub_title: "Német tanulási útmutatók",
-  learn_hub_intro: "Saját útmutatók önálló tanuláshoz: nyilvános német–magyar könyvtár vs. saját kvízek, der/die/das és német esetek. Először olvasd el, aztán használd a kvízeket.",
+  learn_hub_title: "Útmutató",
+  learn_hub_intro: "Gyakorolj az előre elkészített német-magyar kvízekkel, vagy belépés és egy excel táblányi tudásanyag (lehet matematikai, vagy akár történelmi feladvány!) feltöltése után generálj személyreszabott kvízeket.",
   learn_read_time: "{minutes} perc olvasás",
   learn_byline: "MicaLingo útmutató · kb. {minutes} perc",
   learn_more_guides: "További útmutatók",
-  learn_card_title: "Tanulási útmutatók",
+  learn_card_title: "Útmutató",
   learn_card_subtitle: "Nyilvános vs saját könyvtár, névelők és esetek.",
   home_how_heading: "Hogyan tanulj németet a MicaLingo-n",
   home_quiet_blurb: "Tanulási útmutatók, ha a kvízek mögötti módszer is kell:",
@@ -763,6 +765,4 @@ _items_save: "Nincsenek érvényes szavak a mentéshez, vagy nem vagy bejelentke
   about_how_body: "A nyilvános kvízek gondozott német–magyar szó- és kifejezéslistákból épülnek, hétköznapi témák szerint: otthon, utazás, munka, étel. A nyelvtan oldalak eredeti, kattintás nélkül látható bevezetővel indulnak, plusz hosszabb jegyzetekkel a nyilvános könyvtárban. Google-fiókkal saját listát importálhatsz bármilyen nyelven, és generálhatsz saját kvízeket. Az oldal magyarázatai a MicaLingo-hoz íródtak, nem más tankönyvekből másolva.",
   about_for_heading: "Kinek szól",
   about_for_body: "A felület angol, német és magyar, mert sok látogató magyarul tanul németet (vagy angolt használ hídnak). Nyilvánosan ez a HU–DE pár. Google-belépés után tanárok és önálló tanulók úgy állíthatják be a saját könyvtárat, ahogy akarják. A saját lista a bejelentkezett fióknál marad.",
-
-  footer_tagline: "Tanulj németül kvízekkel, nyelvtannal, szókinccsel, névelőkkel (der, die, das) és igékkel. Deutsch lernen. Learn German.",
 };
