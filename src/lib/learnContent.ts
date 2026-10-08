@@ -486,15 +486,15 @@ const QUIZ_PRIMERS: Record<string, Record<LearnLang, string>> = {
 };
 
 export const HOME_ARTICLE: Record<LearnLang, string> = {
-  en: `MicaLingo is a free **self-learning** site. The public quizzes are built for **German–Hungarian** learners who need repeatable practice — articles, verbs, prepositions, vocabulary and short grammar notes — not another page that only lists “10 tips to get fluent”.
+  en: `MicaLingo is a free website — and app — where you can test your language skills with ready-made quizzes (German–Hungarian). You can practice without an account, but after you sign in you can save and download the results you have reached so far, upload your own word collection, and generate more quizzes. The app is currently free, and if you find the site useful, you can send any amount with the Support MicaLingo button.
 
-You can start without an account: open [Quizzes](/quizzes/), pick a topic, and work through levels. Sign in with a **Google account** when you want a private library, marked words from your mistakes, and quizzes generated from your own lists — in **any language pair**, or even for non-language topics. The public HU–DE library stays available either way.`,
-  de: `MicaLingo ist eine kostenlose Seite zum **Selbstlernen**. Die öffentlichen Quizze sind für **Deutsch–Ungarisch**-Lernende gebaut, die **wiederholbares Üben** brauchen — Artikel, Verben, Präpositionen, Wortschatz und kurze Grammatiknotizen — nicht nur „10 Tipps zur Flüssigkeit“.
+The site and the app are still being developed, so please excuse any errors. We welcome your feedback and comments at support.micalingo@gmail.com.`,
+  de: `MicaLingo ist eine kostenlose Website – und App –, auf der du deine Sprachkenntnisse mit fertigen Quizzen testen kannst (Deutsch–Ungarisch). Du kannst auch ohne Konto üben, aber nach der Anmeldung kannst du deine bisherigen Ergebnisse speichern und herunterladen, deine eigene Wortsammlung hochladen und weitere Quizze erzeugen. Die App ist derzeit kostenlos. Wenn dir die Seite nützlich ist, kannst du über den Button MicaLingo unterstützen einen beliebigen Betrag überweisen.
 
-Ohne Konto starten: [Quizze](/quizzes/) öffnen, Thema wählen, Level arbeiten. Mit **Google-Konto** anmelden für eine private Bibliothek, markierte Fehler und Quizze aus eigenen Listen — in **beliebigen Sprachen**, oder auch für andere Themen. Die öffentliche DE–HU-Bibliothek bleibt in beiden Fällen da.`,
-  hu: `A MicaLingo ingyenes **önálló tanuló** oldal. A nyilvános kvízek **német–magyar** tanulóknak készültek, akiknek **ismételhető gyakorlat** kell — névelők, igék, prepozíciók, szókincs és rövid nyelvtan —, nem egy újabb „10 tipp a folyékonysághoz” lista.
+Die Seite und die App werden laufend weiterentwickelt, bitte entschuldige daher mögliche Fehler. Feedback und Hinweise nehmen wir gern unter support.micalingo@gmail.com entgegen.`,
+  hu: `A MicaLingo egy ingyenes oldal – és applikáció –, ahol előre elkészített kvízekkel tesztelheted nyelvtudásod (német-magyar nyelven). Fiók (bejelentkezés) nélkül is gyakorolhatsz, de bejelentkezés után elmentheted és letöltheted eddig elért eredményeidet, feltöltheted saját szógyűjteményedet és újabb kvízeket generálhatsz. Az alkalmazás jelenleg ingyenesen elérhető, de ha úgy érzed, az oldal hasznos számodra, a Támogasd a MicaLingot gombbal tetszőleges összeget utalhatsz.
 
-Fiók nélkül is kezdheted: [Kvízek](/quizzes/), téma, szintek. **Google-fiókkal** lépj be, ha saját könyvtárat, megjelölt hibákat és saját listából generált kvízeket akarsz — **bármilyen nyelvpáron**, vagy akár nem nyelvi témán. A nyilvános HU–DE könyvtár mindkét esetben megmarad.`,
+Az oldal és az applikáció folyamatos fejlesztés alatt áll, így az esetleges hibákért elnézésedet kérjük. Véleményed és észrevételeidet várjuk a support.micalingo@gmail.com e-mail címre.`,
 };
 
 export const GRAMMAR_INDEX_ARTICLE: Record<LearnLang, string> = {

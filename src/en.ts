@@ -94,6 +94,8 @@ export const en = {
   // Home
   welcome_back: "Welcome, nice to see you here!",
   ready_to_learn: "Learn German with free, ready-made German-Hungarian quizzes, or create new ones from your own dictionary and vocabulary! With your Google account you can create your own library and study other languages too, or even math and history challenges.",
+  home_about: "MicaLingo is a free website — and app — where you can test your language skills with ready-made quizzes (German–Hungarian). You can practice without an account, but after you sign in you can save and download the results you have reached so far, upload your own word collection, and generate more quizzes. The app is currently free, and if you find the site useful, you can send any amount with the {support_link} button.",
+  home_disclaimer: "The site and the app are still being developed, so please excuse any errors. We welcome your feedback and comments at {email}.",
   import_data: "Import and manage data",
   upload_new_materials: "Upload new words and phrases.",
   login_required: "Login required",

@@ -58,7 +58,7 @@ Als Gast kannst du alle öffentlichen Level spielen. Du brauchst kein Prüfungsz
 Mit Google-Konto bekommst du einen **privaten Bereich**. Der gehört dir. Du kannst:
 
 - Listen in **beliebigen Sprachenpaaren** importieren oder eintippen (Deutsch–Englisch, Spanisch–Ungarisch, Französisch–Deutsch …).
-- Dieselbe Quiz-Engine für **andere Themen** nutzen: Jahreszahlen, Hauptstädte, Formeln — zwei Spalten, die du hochlädst.
+- Denselben Quiz-Generator für **andere Themen** nutzen: Jahreszahlen, Hauptstädte, Formeln — zwei Spalten, die du hochlädst.
 - Quizze aus eigenen Dateien erzeugen, nicht aus den öffentlichen DE–HU-Listen.
 - Markierte Wörter und Punkte am Konto behalten.
 
@@ -90,7 +90,7 @@ Vendégként végigjátszhatod a nyilvános szinteket. Nem kell vizsgacél. A l�
 Google-fiókkal **saját teret** kapsz. Az a tiéd. Tudsz:
 
 - **Bármilyen nyelvpáros** listát importálni vagy beírni (német–angol, spanyol–magyar, francia–német …).
-- Ugyanazzal a kvízmotornál **nem nyelvi témát** is gyakorolni: évszámok, fővárosok, képletek — két oszlop, amit feltöltesz.
+- Ugyanazzal a kvízgenerátorral **nem nyelvi témát** is gyakorolni: évszámok, fővárosok, képletek — két oszlop, amit feltöltesz.
 - Saját fájlból kvízt generálni, nem a nyilvános HU–DE listából.
 - Megjelölt szavakat és pontokat a fióknál tartani.
 

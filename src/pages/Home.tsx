@@ -2,14 +2,50 @@ import AppLink from '../components/AppLink';
 import { useAuth } from '../AuthContext';
 import { useI18n } from '../I18nContext';
 import { Capacitor } from '@capacitor/core';
-import { homeArticle } from '../lib/learnContent';
-import type { LearnLang } from '../lib/learnContent';
-import ArticleBody from '../components/ArticleBody';
+
+const SUPPORT_EMAIL = 'support.micalingo@gmail.com';
+
+function HomeAbout({ text, supportLabel }: { text: string; supportLabel: string }) {
+  const parts = text.split('{support_link}');
+  const openSupport = () => {
+    window.dispatchEvent(new CustomEvent('openSupportModal'));
+  };
+
+  if (parts.length < 2) {
+    return <p className="font-medium text-gray-700 leading-relaxed">{text}</p>;
+  }
+
+  return (
+    <p className="font-medium text-gray-700 leading-relaxed">
+      {parts[0]}
+      <button
+        type="button"
+        onClick={openSupport}
+        className="font-bold text-pink-600 hover:text-pink-700 underline underline-offset-2 transition-colors"
+      >
+        {supportLabel}
+      </button>
+      {parts[1]}
+    </p>
+  );
+}
+
+function HomeDisclaimer({ text }: { text: string }) {
+  const parts = text.split('{email}');
+  return (
+    <p className="mt-3 text-xs md:text-sm font-medium text-gray-500 leading-relaxed">
+      {parts[0]}
+      <a href={`mailto:${SUPPORT_EMAIL}`} className="underline underline-offset-2 hover:text-gray-700">
+        {SUPPORT_EMAIL}
+      </a>
+      {parts[1] || ''}
+    </p>
+  );
+}
 
 export default function Home() {
   const { user } = useAuth();
-  const { t, language } = useI18n();
-  const lang = language as LearnLang;
+  const { t } = useI18n();
 
   const flyingWords = [
     { text: "der Hund", left: "10%", delay: "0s", duration: "12s" },
@@ -123,7 +159,8 @@ export default function Home() {
 
       <section className="relative z-10 w-full max-w-4xl mx-auto px-4 mt-14 md:mt-16" style={{ animation: "fade-in-up 0.8s ease-out 0.65s both" }}>
         <article className="text-left bg-white/75 backdrop-blur-xl border border-white rounded-[1.75rem] p-5 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-          <ArticleBody markdown={homeArticle(lang)} />
+          <HomeAbout text={t('home_about')} supportLabel={t('support_micalingo')} />
+          <HomeDisclaimer text={t('home_disclaimer')} />
         </article>
       </section>
 
