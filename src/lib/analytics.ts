@@ -74,3 +74,18 @@ export function trackEvent(name: string, params: EventParams = {}) {
     app_platform: platform(),
   });
 }
+
+const APP_FIRST_OPEN_KEY = 'micalingo_app_first_open_sent';
+
+/** One event per device, the first time the installed Android app is opened with analytics allowed. */
+export function trackInstalledApp() {
+  if (!Capacitor.isNativePlatform()) return;
+  if (!allowed() || typeof window.gtag !== 'function') return;
+  try {
+    if (localStorage.getItem(APP_FIRST_OPEN_KEY) === '1') return;
+    localStorage.setItem(APP_FIRST_OPEN_KEY, '1');
+  } catch {
+    return;
+  }
+  trackEvent('app_first_open');
+}

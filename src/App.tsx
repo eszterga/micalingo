@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import React, { Suspense, useEffect } from "react";
-import { installAnalytics, trackPageView } from "./lib/analytics";
+import { installAnalytics, trackInstalledApp, trackPageView } from "./lib/analytics";
 import { CONSENT_CHANGED_EVENT } from "./lib/consent";
 import Layout from "./components/Layout";
 import AdminPrompt from "./components/AdminPrompt";
@@ -126,7 +126,10 @@ function AnalyticsTracker() {
   useEffect(() => installAnalytics(), []);
 
   useEffect(() => {
-    const send = () => trackPageView(`${location.pathname}${location.search}`);
+    const send = () => {
+      trackPageView(`${location.pathname}${location.search}`);
+      trackInstalledApp();
+    };
     send();
     window.addEventListener(CONSENT_CHANGED_EVENT, send);
     return () => window.removeEventListener(CONSENT_CHANGED_EVENT, send);
