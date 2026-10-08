@@ -44,15 +44,17 @@ export default function Layout() {
   ];
 
   const currentPath = location.pathname.replace(/\/+$/, '') || '/';
-  const navLinks = [
-    { path: '/', label: t('home') || 'Home' },
+  const quickLinks = [
     { path: '/quizzes', label: t('quizzes') || 'Quizzes' },
     { path: '/library', label: t('library') || 'Library' },
     { path: '/grammar', label: t('grammar') || 'Grammar' },
-    { path: '/learn', label: t('learn_card_title') || 'Study guides' },
     { path: '/statistics', label: t('statistics') || 'Statistics' },
-    ...(user ? [{ path: '/import', label: t('import') || 'Import' }] : []),
+    { path: '/import', label: t('import') || 'Import' },
     { path: '/settings', label: t('settings') || 'Settings' }
+  ];
+  const navLinks = [
+    { path: '/', label: t('home') || 'Home' },
+    ...quickLinks
   ];
 
   const currentLanguageFlag = languages.find(l => l.code === language)?.flag || 'EN';
@@ -272,9 +274,6 @@ export default function Layout() {
                 <AppLink to="/about" onClick={() => setIsMobileMenuOpen(false)} className="px-4 py-2.5 rounded text-sm text-blue-200 hover:bg-blue-800 hover:text-white transition-colors">
                   {t('footer_about') || 'About & Contact'}
                 </AppLink>
-                <AppLink to="/learn" onClick={() => setIsMobileMenuOpen(false)} className="px-4 py-2.5 rounded text-sm text-blue-200 hover:bg-blue-800 hover:text-white transition-colors">
-                  {t('learn_card_title') || 'Study guides'}
-                </AppLink>
                 <button
                   type="button"
                   onClick={() => {
@@ -298,11 +297,16 @@ export default function Layout() {
             <img src="/logo.png" alt="MicaLingo — learn German" className="w-12 h-12 object-contain drop-shadow-sm mt-1.5" width="48" height="48" />
             <span className="text-3xl font-extrabold text-blue-900 tracking-wider">MicaLingo</span>
           </AppLink>
-          <nav className="hidden lg:flex items-center gap-5 text-sm font-extrabold text-blue-900">
-            <AppLink to="/quizzes" className="hover:text-blue-700 transition-colors">{t('quizzes')}</AppLink>
-            <AppLink to="/grammar" className="hover:text-blue-700 transition-colors">{t('grammar')}</AppLink>
-            <AppLink to="/learn" className="hover:text-blue-700 transition-colors">{t('learn_card_title')}</AppLink>
-            <AppLink to="/about" className="hover:text-blue-700 transition-colors">{t('footer_about')}</AppLink>
+          <nav className="hidden lg:flex items-center gap-4 text-sm font-extrabold text-blue-900">
+            {quickLinks.map(link => (
+              <AppLink
+                key={link.path}
+                to={link.path}
+                className={`hover:text-blue-700 transition-colors whitespace-nowrap ${currentPath === link.path ? 'text-blue-700' : ''}`}
+              >
+                {link.label}
+              </AppLink>
+            ))}
           </nav>
           <div className="flex items-center gap-6">
             <div className="relative">

@@ -1,6 +1,6 @@
 export const en = {
-  title: "Learn German — self-study quizzes",
-  home_h1: "Learn German: Quizzes, Grammar & Vocabulary",
+  title: "Create your own quizzes",
+  home_h1: "Quiz engine to support your self-study journey.",
 
   // Settings
   settings_title: "Settings",
@@ -93,7 +93,7 @@ export const en = {
 
   // Home
   welcome_back: "Welcome, nice to see you here!",
-  ready_to_learn: "Learn German with free, ready-made German-Hungarian quizzes, or create new ones from your own dictionary and vocabulary! Practice adjectives, nouns, articles, and verbs mixed together. With your Google account you can create your own library and practice or study other languages too, or even math and history challenges. Review and download your results in the Statistics menu, and expand your library however you like.",
+  ready_to_learn: "Learn German with free, ready-made German-Hungarian quizzes, or create new ones from your own dictionary and vocabulary! With your Google account you can create your own library and study other languages too, or even math and history challenges.",
   import_data: "Import and manage data",
   upload_new_materials: "Upload new words and phrases.",
   login_required: "Login required",
@@ -697,6 +697,9 @@ export const en = {
   cookie_settings_status_unset: "You have not made a cookie choice yet.",
 
   seo_practice_heading: "Practice German",
+  home_link_quiz_engine: "Quiz engine",
+  home_link_self_made: "Self-made quizzes",
+  home_link_self_study: "Self-study",
   seo_intro_quizzes: "Choose a quiz: vocabulary, articles (der, die, das), verbs, adjectives, phrases, or prepositions.",
   seo_intro_vocabulary: "Vocabulary quizzes with translations and example sentences. Learn words by level.",
   seo_intro_articles: "Articles quiz for der, die, das. Practice noun genders and definite articles.",

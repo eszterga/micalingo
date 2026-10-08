@@ -1,6 +1,6 @@
 export const de = {
-  title: "Deutsch lernen — Selbstlern-Quizze",
-  home_h1: "Deutsch lernen: Quizze, Grammatik & Wortschatz",
+  title: "Erstelle deine eigenen Quizze",
+  home_h1: "Quiz-Engine für deinen Selbstlernweg.",
 
   // Settings
   settings_title: "Einstellungen",
@@ -93,7 +93,7 @@ export const de = {
 
   // Home
   welcome_back: "Willkommen, schön dich hier zu sehen!",
-  ready_to_learn: "Lerne Deutsch mit kostenlosen, vorgefertigten Deutsch-Ungarisch-Quizzen, oder erstelle neue aus deinem eigenen Wörterbuch und Wortschatz! Übe gemischt Adjektive, Substantive, Artikel und Verben. Mit deinem Google-Konto kannst du eine eigene Bibliothek anlegen und auch andere Sprachen üben und lernen, oder sogar mathematische und geschichtliche Aufgaben. Deine Ergebnisse kannst du im Menüpunkt Statistik ansehen und herunterladen und deine Bibliothek nach deinem Geschmack erweitern.",
+  ready_to_learn: "Lerne Deutsch mit kostenlosen, vorgefertigten Deutsch-Ungarisch-Quizzen, oder erstelle neue aus deinem eigenen Wörterbuch und Wortschatz! Mit deinem Google-Konto kannst du eine eigene Bibliothek anlegen und auch andere Sprachen lernen, oder sogar Mathematik- und Geschichtsaufgaben.",
   import_data: "Daten importieren und verwalten",
   upload_new_materials: "Neue Wörter und Sätze hochladen.",
   login_required: "Anmeldung erforderlich",
@@ -697,6 +697,9 @@ export const de = {
   cookie_settings_status_unset: "Sie haben noch keine Cookie-Auswahl getroffen.",
 
   seo_practice_heading: "Deutsch üben",
+  home_link_quiz_engine: "Quiz-Engine",
+  home_link_self_made: "Eigene Quizze",
+  home_link_self_study: "Selbstlernen",
   seo_intro_quizzes: "Wähle ein Quiz: Wortschatz, Artikel (der, die, das), Verben, Adjektive, Redewendungen oder Präpositionen.",
   seo_intro_vocabulary: "Wortschatz-Quizze mit Übersetzungen und Beispielsätzen. Lerne Wörter nach Level.",
   seo_intro_articles: "Artikel-Quiz für der, die, das. Übe das Genus der Nomen und bestimmte Artikel.",

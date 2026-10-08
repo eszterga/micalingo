@@ -1,6 +1,6 @@
 export const hu = {
-  title: "Német tanulás — önálló kvízek",
-  home_h1: "Német tanulás: kvízek, nyelvtan és szókincs",
+  title: "Hozd létre a saját kvízeidet",
+  home_h1: "Kvízmotor az önálló tanulásodhoz.",
 
   // Settings
   settings_title: "Beállítások",
@@ -93,7 +93,7 @@ export const hu = {
 
   // Home
   welcome_back: "Üdvözlünk, jó, hogy itt vagy!",
-  ready_to_learn: "Tanulj németül ingyenes, előre elkészített német-magyar kvízekkel, vagy hozz létre újakat saját szótáradból, szókincsedből! Gyakorolhatod vegyesen mellékneveket, főneveket, névelőket és igéket. Google-fiókoddal saját könyvtárat hozhatsz létre, és akár más nyelveket (vagy akár matematikai, történelmi feladványokat is) gyakorolhatsz, tanulhatsz. Eredményeidet a statisztika menüpontnál visszanézheted és letöltheted, könyvtáradat ízlésed szerint bővítheted.",
+  ready_to_learn: "Tanulj németül ingyenes, előre elkészített német-magyar kvízekkel, vagy hozz létre újakat a saját szótáradból és szókincsedből! Google-fiókoddal saját könyvtárat hozhatsz létre, és más nyelveket is tanulhatsz, vagy akár matematikai és történelmi feladványokat.",
   import_data: "Adatok importálása és kezelése",
   upload_new_materials: "Tölts fel új szavakat és kifejezéseket.",
   login_required: "Bejelentkezés szükséges",
@@ -695,6 +695,9 @@ _items_save: "Nincsenek érvényes szavak a mentéshez, vagy nem vagy bejelentke
   cookie_settings_status_unset: "Még nem választott süti beállítást.",
 
   seo_practice_heading: "Német gyakorlás",
+  home_link_quiz_engine: "Kvízmotor",
+  home_link_self_made: "Saját kvízek",
+  home_link_self_study: "Önálló tanulás",
   seo_intro_quizzes: "Válassz kvízt: szókincs, névelők (der, die, das), igék, melléknevek, kifejezések vagy prepozíciók.",
   seo_intro_vocabulary: "Szókincs kvízek fordításokkal és példamondatokkal. Tanulj szavakat szintenként.",
   seo_intro_articles: "Névelők kvíz: der, die, das. Gyakorold a főnevek nemét és a határozott névelőket.",

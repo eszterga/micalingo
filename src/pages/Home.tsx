@@ -60,13 +60,13 @@ export default function Home() {
 
       <div className="text-center z-10 mb-16 relative w-full max-w-4xl mx-auto px-4" style={{ animation: "0.8s ease-out 0s 1 normal both running fade-in-up" }}>
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/70 border border-white shadow-sm backdrop-blur-md mb-6 text-blue-800 font-bold text-sm tracking-wider uppercase">
-          <span className="text-lg leading-none">🚀</span> {t("title") || "Learn German — self-study quizzes"}
+          <span className="text-lg leading-none">🚀</span> {t("title") || "Create your own quizzes"}
         </div>
         <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600 pb-3 leading-tight tracking-tight">
-          {t("home_h1") || "Learn German: Quizzes, Grammar & Vocabulary"}
+          {t("home_h1") || "Quiz engine to support your self-study journey."}
         </h1>
         <p className="text-lg md:text-2xl text-blue-900/70 mt-4 font-medium max-w-2xl mx-auto leading-relaxed">
-          {t("ready_to_learn") || "Ready to improve your German? Create your own library, quizzes and learning materials, test your knowledge now!"}
+          {t("ready_to_learn") || "Learn German with free, ready-made German-Hungarian quizzes, or create new ones from your own dictionary and vocabulary! With your Google account you can create your own library and study other languages too, or even math and history challenges."}
         </p>
       </div>
 
@@ -121,20 +121,7 @@ export default function Home() {
         </AppLink>
       </div>
 
-      <section className="relative z-10 w-full max-w-4xl mx-auto px-4 mt-14 md:mt-16 space-y-8" style={{ animation: "fade-in-up 0.8s ease-out 0.65s both" }}>
-        <div>
-          <h2 className="text-xl font-extrabold text-blue-950 mb-3">{t("seo_practice_heading") || "Practice German"}</h2>
-          <nav className="flex flex-wrap gap-2" aria-label={t("seo_practice_heading") || "Practice German"}>
-            <AppLink to="/quizzes/vocabulary" className="px-3 py-1.5 rounded-full bg-white/80 border border-blue-100 text-sm font-bold text-blue-800 hover:border-blue-300 hover:bg-white transition-colors">{t("vocabulary")}</AppLink>
-            <AppLink to="/quizzes/articles" className="px-3 py-1.5 rounded-full bg-white/80 border border-blue-100 text-sm font-bold text-blue-800 hover:border-blue-300 hover:bg-white transition-colors">{t("articles_quiz")}</AppLink>
-            <AppLink to="/quizzes/verbs" className="px-3 py-1.5 rounded-full bg-white/80 border border-blue-100 text-sm font-bold text-blue-800 hover:border-blue-300 hover:bg-white transition-colors">{t("verbs_quiz")}</AppLink>
-            <AppLink to="/quizzes/adjectives" className="px-3 py-1.5 rounded-full bg-white/80 border border-blue-100 text-sm font-bold text-blue-800 hover:border-blue-300 hover:bg-white transition-colors">{t("adjectives_quiz")}</AppLink>
-            <AppLink to="/quizzes/phrases" className="px-3 py-1.5 rounded-full bg-white/80 border border-blue-100 text-sm font-bold text-blue-800 hover:border-blue-300 hover:bg-white transition-colors">{t("phrases_quiz")}</AppLink>
-            <AppLink to="/quizzes/prepositions" className="px-3 py-1.5 rounded-full bg-white/80 border border-blue-100 text-sm font-bold text-blue-800 hover:border-blue-300 hover:bg-white transition-colors">{t("prepositions_quiz")}</AppLink>
-            <AppLink to="/grammar" className="px-3 py-1.5 rounded-full bg-white/80 border border-blue-100 text-sm font-bold text-blue-800 hover:border-blue-300 hover:bg-white transition-colors">{t("grammar")}</AppLink>
-            <AppLink to="/learn" className="px-3 py-1.5 rounded-full bg-white/80 border border-blue-100 text-sm font-bold text-blue-800 hover:border-blue-300 hover:bg-white transition-colors">{t("learn_hub_title")}</AppLink>
-          </nav>
-        </div>
+      <section className="relative z-10 w-full max-w-4xl mx-auto px-4 mt-14 md:mt-16" style={{ animation: "fade-in-up 0.8s ease-out 0.65s both" }}>
         <article className="text-left bg-white/75 backdrop-blur-xl border border-white rounded-[1.75rem] p-5 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
           <ArticleBody markdown={homeArticle(lang)} />
         </article>
@@ -156,6 +143,15 @@ export default function Home() {
           </p>
         </div>
       )}
+
+      <nav className="relative z-10 w-full max-w-4xl mx-auto px-4 mt-8 md:mt-10 flex flex-wrap justify-center gap-2" aria-label={`${t("quizzes")}, ${t("library")}, ${t("grammar")}`}>
+        <AppLink to="/quizzes" className="px-3 py-1.5 rounded-full bg-white/80 border border-blue-100 text-sm font-bold text-blue-800 hover:border-blue-300 hover:bg-white transition-colors">{t("home_link_quiz_engine")}</AppLink>
+        <AppLink to="/quizzes?tab=personal" className="px-3 py-1.5 rounded-full bg-white/80 border border-blue-100 text-sm font-bold text-blue-800 hover:border-blue-300 hover:bg-white transition-colors">{t("home_link_self_made")}</AppLink>
+        <AppLink to="/learn" className="px-3 py-1.5 rounded-full bg-white/80 border border-blue-100 text-sm font-bold text-blue-800 hover:border-blue-300 hover:bg-white transition-colors">{t("home_link_self_study")}</AppLink>
+        <AppLink to="/grammar" className="px-3 py-1.5 rounded-full bg-white/80 border border-blue-100 text-sm font-bold text-blue-800 hover:border-blue-300 hover:bg-white transition-colors">{t("grammar")}</AppLink>
+        <AppLink to="/library" className="px-3 py-1.5 rounded-full bg-white/80 border border-blue-100 text-sm font-bold text-blue-800 hover:border-blue-300 hover:bg-white transition-colors">{t("library")}</AppLink>
+        <AppLink to="/vocabulary" className="px-3 py-1.5 rounded-full bg-white/80 border border-blue-100 text-sm font-bold text-blue-800 hover:border-blue-300 hover:bg-white transition-colors">{t("vocabulary")}</AppLink>
+      </nav>
     </div>
   );
 }
