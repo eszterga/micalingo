@@ -118,9 +118,9 @@ export default function Layout() {
     : 'max(2rem, calc(env(safe-area-inset-top, 0px) + 0.5rem))';
 
   const supportTiers = [
-    { href: 'https://donate.stripe.com/5kQ6oAcYegUV77K5GQ4Ja00', label: t('support_tier_1') || 'Coffee Tier', amount: '€2', featured: false },
+    { href: 'https://buy.stripe.com/7sY9AM8HY345eAcb1a4Ja05', label: t('support_tier_1') || 'Coffee Tier', amount: '€3', featured: false },
     { href: 'https://donate.stripe.com/28EcMYcYecEFcs4d9i4Ja01', label: t('support_tier_2') || 'Snack Tier', amount: '€5', featured: false },
-    { href: 'https://donate.stripe.com/9B6bIU8HYeMN1Nq0mw4Ja02', label: t('support_tier_3') || 'Lunch Tier', amount: '€8', featured: false },
+    { href: 'https://donate.stripe.com/9B6bIU8HYeMN1Nq0mw4Ja02', label: t('support_tier_3') || 'Drink Tier', amount: '€8', featured: false },
     { href: 'https://donate.stripe.com/9B67sE5vMawxfEgb1a4Ja03', label: t('support_tier_4') || 'Hero Tier 🚀', amount: '€10', featured: true },
   ];
   const customSupportUrl = 'https://buy.stripe.com/aFaeV64rI8opajWedm4Ja04';
