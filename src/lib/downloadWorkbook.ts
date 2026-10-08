@@ -69,31 +69,24 @@ function triggerAnchorDownload(bytes: Uint8Array, filename: string): void {
   window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
 }
 
-function shareableFile(bytes: Uint8Array, filename: string): File | null {
-  const nav = navigator as Navigator & { canShare?: (data: ShareData) => boolean };
-  if (typeof nav.share !== 'function') return null;
-  try {
-    const buffer = bytesToArrayBuffer(bytes);
-    const candidates = [
-      new File([buffer], filename, { type: XLSX_MIME }),
-      new File([buffer], filename, { type: OCTET_STREAM }),
-    ];
-    for (const file of candidates) {
-      const payload: ShareData = { files: [file], title: filename };
-      if (typeof nav.canShare !== 'function' || nav.canShare(payload)) return file;
-    }
-  } catch (error) {
-    console.error('Excel share check failed', error);
-  }
-  return null;
+function excelFile(bytes: Uint8Array, filename: string, type: string): File {
+  return new File([bytesToArrayBuffer(bytes)], filename, { type });
 }
 
-function startWebShare(file: File, filename: string, onFail: () => void): void {
-  const payload: ShareData = { files: [file], title: filename };
-  void navigator.share(payload).catch((error: unknown) => {
-    if (isShareCancel(error)) return;
-    console.error('Excel web share failed', error);
-    onFail();
+/**
+ * Must be called in the same turn as the tap. Android's WebView ignores a
+ * normal download link, and canShare() often says no even when the share
+ * sheet can still open. Asking here is what shows Save / Drive / Files.
+ */
+function shareFileFromTap(bytes: Uint8Array, filename: string): Promise<void> {
+  if (typeof navigator.share !== 'function') {
+    return Promise.reject(new Error('share unavailable'));
+  }
+  const payload: ShareData = { files: [excelFile(bytes, filename, XLSX_MIME)], title: filename };
+  return navigator.share(payload).catch((error: unknown) => {
+    if (isShareCancel(error)) throw error;
+    const fallback: ShareData = { files: [excelFile(bytes, filename, OCTET_STREAM)], title: filename };
+    return navigator.share(fallback);
   });
 }
 
@@ -104,8 +97,9 @@ async function shareWithNativePlugins(bytes: Uint8Array, filename: string): Prom
     data: base64,
     directory: Directory.Cache,
   });
-  const uri = written?.uri
+  const rawUri = written?.uri
     || (await Filesystem.getUri({ directory: Directory.Cache, path: filename })).uri;
+  const uri = rawUri?.startsWith('/') ? `file://${rawUri}` : rawUri;
   if (!uri || !uri.startsWith('file:')) {
     throw new Error('Excel file URI is not shareable');
   }
@@ -116,79 +110,45 @@ async function shareWithNativePlugins(bytes: Uint8Array, filename: string): Prom
   });
 }
 
-async function saveOnDevice(
-  bytes: Uint8Array,
-  filename: string,
-  failMessage: string | undefined,
-  fallback: () => void,
-): Promise<void> {
+async function saveInApp(bytes: Uint8Array, filename: string, failMessage?: string): Promise<void> {
   try {
-    await shareWithNativePlugins(bytes, filename);
+    await shareFileFromTap(bytes, filename);
     return;
   } catch (error) {
     if (isShareCancel(error)) return;
     console.error('Excel share failed', error);
   }
 
-  const file = shareableFile(bytes, filename);
-  if (file) {
-    startWebShare(file, filename, () => {
-      try {
-        fallback();
-      } catch (error) {
-        console.error(error);
-        if (failMessage) window.alert(failMessage);
-      }
-    });
-    return;
+  if (nativePluginInstalled('Filesystem') && nativePluginInstalled('Share')) {
+    try {
+      await shareWithNativePlugins(bytes, filename);
+      return;
+    } catch (error) {
+      if (isShareCancel(error)) return;
+      console.error('Excel native share failed', error);
+    }
   }
 
-  try {
-    fallback();
-  } catch (error) {
-    console.error(error);
-    if (failMessage) window.alert(failMessage);
-  }
+  if (failMessage) window.alert(failMessage);
 }
 
 /**
- * Browsers save the file directly. The Capacitor app loads the site inside a
- * WebView. When that app build includes Filesystem and Share, the system
- * share sheet opens. Older installs keep the direct download that already
- * worked on the phone.
+ * Browsers save the file directly. The Android app shows the system share
+ * sheet (Save to Files, Drive, Downloads) because its WebView drops a normal
+ * download and gives the user no sign that the tap worked.
  */
-export function downloadWorkbook(workbook: XLSX.WorkBook, filename: string, failMessage?: string): void {
+export function downloadWorkbook(workbook: XLSX.WorkBook, filename: string, failMessage?: string): Promise<void> {
   try {
     const bytes = toUint8Array(XLSX.write(workbook, { bookType: 'xlsx', type: 'array' }));
     const safeName = safeFileName(filename);
-    const fallback = () => triggerAnchorDownload(bytes, safeName);
-    const nativeShareReady = Capacitor.isNativePlatform()
-      && nativePluginInstalled('Filesystem')
-      && nativePluginInstalled('Share');
-
-    if (nativeShareReady) {
-      void saveOnDevice(bytes, safeName, failMessage, fallback);
-      return;
-    }
-
     if (Capacitor.isNativePlatform()) {
-      const file = shareableFile(bytes, safeName);
-      if (file) {
-        startWebShare(file, safeName, () => {
-          try {
-            fallback();
-          } catch (error) {
-            console.error(error);
-            if (failMessage) window.alert(failMessage);
-          }
-        });
-        return;
-      }
+      return saveInApp(bytes, safeName, failMessage);
     }
-
-    fallback();
+    triggerAnchorDownload(bytes, safeName);
+    return Promise.resolve();
   } catch (error) {
     console.error(error);
     if (failMessage) window.alert(failMessage);
+    return Promise.resolve();
   }
 }

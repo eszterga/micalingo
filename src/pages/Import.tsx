@@ -90,6 +90,7 @@ export default function Import() {
   
   const [data, setData] = useState<ParsedImport | null>(null);
   const [saving, setSaving] = useState(false);
+  const [activeTemplate, setActiveTemplate] = useState<string | null>(null);
   const [searchParams] = useSearchParams();
   const initialDestination = searchParams.get('destination') || 'vocabulary';
   const [destination, setDestination] = useState(initialDestination);
@@ -725,7 +726,23 @@ export default function Import() {
     downloadWorkbook(workbook, outName, t('excel_save_failed'));
   };
 
-  const handleDownloadTemplate = (type: 'standard' | 'articles' | 'adjectives' | 'verbs' | 'false_friends' | 'idioms' | 'prepositions') => {
+  const templateButtonClass = (type: string) =>
+    `w-full px-4 py-2.5 font-bold rounded-xl border flex items-center justify-center gap-2 shadow-sm text-sm touch-manipulation select-none transition-colors active:bg-blue-700 active:text-white disabled:opacity-100 ${
+      activeTemplate === type
+        ? 'bg-blue-600 text-white border-blue-600'
+        : 'bg-white text-blue-600 border-blue-200'
+    }`;
+
+  const handleDownloadTemplate = async (type: 'standard' | 'articles' | 'adjectives' | 'verbs' | 'false_friends' | 'idioms' | 'prepositions') => {
+    setActiveTemplate(type);
+    try {
+    await runDownloadTemplate(type);
+    } finally {
+      setActiveTemplate(null);
+    }
+  };
+
+  const runDownloadTemplate = async (type: 'standard' | 'articles' | 'adjectives' | 'verbs' | 'false_friends' | 'idioms' | 'prepositions') => {
     let templateData: object[];
 
     if (type === 'articles') {
@@ -828,7 +845,7 @@ export default function Import() {
       `${sheetName}_Template`
     );
 
-    downloadWorkbook(
+    await downloadWorkbook(
       workbook,
       `MicaLingo_${sheetName}_Template.xlsx`,
       t('excel_save_failed')
@@ -1128,7 +1145,7 @@ export default function Import() {
             <button
               type="button"
               onClick={() => handleDownloadTemplate('standard')}
-              className="w-full px-4 py-2.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 shadow-sm text-sm"
+              className={templateButtonClass('standard')}
             >
               <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M8 12l4 4m0 0l4-4m-4 4V4" />
@@ -1138,7 +1155,7 @@ export default function Import() {
             <button
               type="button"
               onClick={() => handleDownloadTemplate('articles')}
-              className="w-full px-4 py-2.5 bg-white text-blue-600 border border-blue-200 font-bold rounded-xl hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 shadow-sm text-sm"
+              className={templateButtonClass('articles')}
             >
               <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M8 12l4 4m0 0l4-4m-4 4V4" />
@@ -1148,7 +1165,7 @@ export default function Import() {
             <button
               type="button"
               onClick={() => handleDownloadTemplate('adjectives')}
-              className="w-full px-4 py-2.5 bg-white text-blue-600 border border-blue-200 font-bold rounded-xl hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 shadow-sm text-sm"
+              className={templateButtonClass('adjectives')}
             >
               <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M8 12l4 4m0 0l4-4m-4 4V4" />
@@ -1158,7 +1175,7 @@ export default function Import() {
             <button
               type="button"
               onClick={() => handleDownloadTemplate('verbs')}
-              className="w-full px-4 py-2.5 bg-white text-blue-600 border border-blue-200 font-bold rounded-xl hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 shadow-sm text-sm"
+              className={templateButtonClass('verbs')}
             >
               <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M8 12l4 4m0 0l4-4m-4 4V4" />
@@ -1168,7 +1185,7 @@ export default function Import() {
             <button
               type="button"
               onClick={() => handleDownloadTemplate('prepositions')}
-              className="w-full px-4 py-2.5 bg-white text-blue-600 border border-blue-200 font-bold rounded-xl hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 shadow-sm text-sm"
+              className={templateButtonClass('prepositions')}
             >
               <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M8 12l4 4m0 0l4-4m-4 4V4" />
@@ -1180,7 +1197,7 @@ export default function Import() {
                 <button
                   type="button"
                   onClick={() => handleDownloadTemplate('false_friends')}
-                  className="w-full px-4 py-2.5 bg-white text-blue-600 border border-blue-200 font-bold rounded-xl hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 shadow-sm text-sm"
+                  className={templateButtonClass('false_friends')}
                 >
                   <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M8 12l4 4m0 0l4-4m-4 4V4" />
@@ -1190,7 +1207,7 @@ export default function Import() {
                 <button
                   type="button"
                   onClick={() => handleDownloadTemplate('idioms')}
-                  className="w-full px-4 py-2.5 bg-white text-blue-600 border border-blue-200 font-bold rounded-xl hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 shadow-sm text-sm"
+                  className={templateButtonClass('idioms')}
                 >
                   <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M8 12l4 4m0 0l4-4m-4 4V4" />
