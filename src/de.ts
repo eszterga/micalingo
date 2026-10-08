@@ -1,6 +1,6 @@
 export const de = {
   title: "Erstelle deine eigenen Quizze",
-  home_h1: "Quiz-Generator für deinen Selbstlernweg.",
+  home_h1: "Quiz-Generator für deinen Selbstlernweg",
 
   // Settings
   settings_title: "Einstellungen",

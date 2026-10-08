@@ -1,6 +1,6 @@
 export const en = {
   title: "Create your own quizzes",
-  home_h1: "Quiz engine to support your self-study journey.",
+  home_h1: "Quiz engine to support your self-study journey",
 
   // Settings
   settings_title: "Settings",

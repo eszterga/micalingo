@@ -99,7 +99,7 @@ export default function Home() {
           <span className="text-lg leading-none">🚀</span> {t("title") || "Create your own quizzes"}
         </div>
         <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600 pb-3 leading-tight tracking-tight">
-          {t("home_h1") || "Quiz engine to support your self-study journey."}
+          {t("home_h1") || "Quiz engine to support your self-study journey"}
         </h1>
         <p className="text-lg md:text-2xl text-blue-900/70 mt-4 font-medium max-w-2xl mx-auto leading-relaxed">
           {t("ready_to_learn") || "Learn German with free, ready-made German-Hungarian quizzes, or create new ones from your own dictionary and vocabulary! With your Google account you can create your own library and study other languages too, or even math and history challenges."}

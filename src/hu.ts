@@ -1,6 +1,6 @@
 export const hu = {
   title: "Hozd létre saját kvízeidet!",
-  home_h1: "Kvízgenerátor az önálló tanulásodhoz.",
+  home_h1: "Kvízgenerátor az önálló tanulásodhoz",
 
   // Settings
   settings_title: "Beállítások",
