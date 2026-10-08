@@ -9,8 +9,9 @@ import { publicVocabulary, publicPhrases, publicArticles, publicPrepositions, pu
 import { useCloudVocabulary, addCloudWord, bulkAddCloudWords, bulkDeleteCloudWords, updateCloudWord, purgeVocabDuplicatesKeeping, purgeSoftDeletedVocabSiblings, isActiveVocabItem, findVocabDuplicate, vocabCategoryKey, vocabGermanKey } from "../lib/firestore";
 import { useI18n } from "../I18nContext";
 import { isPrivateQuizTopic } from "../lib/quizPool";
-import { isMatchQuizTopic, matchColumnLabel, useQuizLabels } from "../lib/quizLabels";
+import { isMatchQuizTopic, matchColumnLabel, privateCardTitle, quizDisplayTitle, useQuizLabels } from "../lib/quizLabels";
 import { QuizCategoryOptions } from "../components/QuizCategoryOptions";
+import { downloadWorkbook } from "../lib/downloadWorkbook";
 
 const getEditItemKey = (item: any, idx: number) => String(item?.id ?? `idx_${idx}`);
 
@@ -721,7 +722,7 @@ export default function Import() {
         ? `MicaLingo_Export_${firstItem.fileName.replace(/[<>:"/\\|?*\u0000-\u001F]/g, "_").replace(/\.[^/.]+$/, "").trim() || "export"}_${firstItem.destination}.xlsx`
         : `MicaLingo_Bulk_Export_${uniqueKeys.length}_files.xlsx`;
 
-    XLSX.writeFile(workbook, outName);
+    downloadWorkbook(workbook, outName, t('excel_save_failed'));
   };
 
   const handleDownloadTemplate = (type: 'standard' | 'articles' | 'adjectives' | 'verbs' | 'false_friends' | 'idioms' | 'prepositions') => {
@@ -827,9 +828,10 @@ export default function Import() {
       `${sheetName}_Template`
     );
 
-    XLSX.writeFile(
+    downloadWorkbook(
       workbook,
-      `MicaLingo_${sheetName}_Template.xlsx`
+      `MicaLingo_${sheetName}_Template.xlsx`,
+      t('excel_save_failed')
     );
   };
 
@@ -1114,6 +1116,7 @@ export default function Import() {
           <li><strong>{t('adjectives_quiz_label') || 'Adjectives Quiz:'}</strong> {t('format_adjectives') || 'Column A: German, Column B: Hungarian, Column C: Levels (e.g., besser, am besten).'}</li>
           <li><strong>{t('prepositions_quiz_format_title') || 'Prepositions Quiz:'}</strong> {t('prepositions_quiz_format_desc') || 'Column A = German verb + Hungarian meaning, Column B = Preposition + case, Column C = Example sentence.'}</li>
         </ul>
+        <p className="text-xs text-blue-700/80 mt-3 leading-relaxed">{t('format_guide_hint')}</p>
 
         {/* Downloadable Template */}
         <div className="mt-4 pt-4 border-t border-blue-200/60 flex flex-col gap-4">
@@ -1123,6 +1126,7 @@ export default function Import() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 w-full">
             <button
+              type="button"
               onClick={() => handleDownloadTemplate('standard')}
               className="w-full px-4 py-2.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 shadow-sm text-sm"
             >
@@ -1132,6 +1136,7 @@ export default function Import() {
               <span>{t('vocab_template')}</span>
             </button>
             <button
+              type="button"
               onClick={() => handleDownloadTemplate('articles')}
               className="w-full px-4 py-2.5 bg-white text-blue-600 border border-blue-200 font-bold rounded-xl hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 shadow-sm text-sm"
             >
@@ -1141,6 +1146,7 @@ export default function Import() {
               <span>{t('articles_template')}</span>
             </button>
             <button
+              type="button"
               onClick={() => handleDownloadTemplate('adjectives')}
               className="w-full px-4 py-2.5 bg-white text-blue-600 border border-blue-200 font-bold rounded-xl hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 shadow-sm text-sm"
             >
@@ -1150,6 +1156,7 @@ export default function Import() {
               <span>{t('adjectives_template')}</span>
             </button>
             <button
+              type="button"
               onClick={() => handleDownloadTemplate('verbs')}
               className="w-full px-4 py-2.5 bg-white text-blue-600 border border-blue-200 font-bold rounded-xl hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 shadow-sm text-sm"
             >
@@ -1159,6 +1166,7 @@ export default function Import() {
               <span>{t('verbs_template') || 'Verbs Template'}</span>
             </button>
             <button
+              type="button"
               onClick={() => handleDownloadTemplate('prepositions')}
               className="w-full px-4 py-2.5 bg-white text-blue-600 border border-blue-200 font-bold rounded-xl hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 shadow-sm text-sm"
             >
@@ -1170,6 +1178,7 @@ export default function Import() {
             {isAdmin && adminMode && (
               <>
                 <button
+                  type="button"
                   onClick={() => handleDownloadTemplate('false_friends')}
                   className="w-full px-4 py-2.5 bg-white text-blue-600 border border-blue-200 font-bold rounded-xl hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 shadow-sm text-sm"
                 >
@@ -1179,6 +1188,7 @@ export default function Import() {
                   <span>{t('false_friends') || 'False Friends Template'}</span>
                 </button>
                 <button
+                  type="button"
                   onClick={() => handleDownloadTemplate('idioms')}
                   className="w-full px-4 py-2.5 bg-white text-blue-600 border border-blue-200 font-bold rounded-xl hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 shadow-sm text-sm"
                 >
@@ -1358,6 +1368,7 @@ export default function Import() {
                     includeReading
                     includeTelc={isAdmin}
                     includePublicExtras={isAdmin && adminMode && saveToPublic}
+                    blankUntilTitled={!saveToPublic}
                   />
                 </select>
                 </div>
@@ -1418,6 +1429,7 @@ export default function Import() {
                     includeReading
                     includeTelc={isAdmin}
                     includePublicExtras={isAdmin && adminMode && saveToPublic}
+                    blankUntilTitled={!saveToPublic}
                   />
                 </select>
               </div>
@@ -1680,7 +1692,7 @@ export default function Import() {
                     </td>
                     <td className="p-3 sm:p-5 text-gray-600 uppercase text-sm font-bold">{file.fileType}</td>
                     <td className="p-3 sm:p-5">
-                      <span className="px-2.5 py-1 text-xs font-bold rounded-full bg-blue-100 text-blue-800 uppercase tracking-wider">{file.destination}</span>
+                      <span className="px-2.5 py-1 text-xs font-bold rounded-full bg-blue-100 text-blue-800 tracking-wider">{saveToPublic ? quizDisplayTitle(quizLabels, file.destination, file.destination) : privateCardTitle(quizLabels, file.destination, file.destination, t('quiz_slot_title_placeholder'))}</span>
                     </td>
                     <td className="p-3 sm:p-5 text-gray-700 font-medium">{file.itemCount}</td>
                     <td className="p-3 sm:p-5 text-right">

@@ -10,8 +10,9 @@ import {
 } from "../lib/firestore";
 import { publicVocabulary, publicPhrases, publicArticles, publicPrepositions, publicFalseFriends, publicAdjectives } from '../lib/public-data';
 import * as XLSX from 'xlsx';
+import { downloadWorkbook } from '../lib/downloadWorkbook';
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import { quizDisplayTitle, useQuizLabels } from "../lib/quizLabels";
+import { privateCardTitle, quizDisplayTitle, useQuizLabels } from "../lib/quizLabels";
 import { dbCloud } from "../lib/firebase";
 import { CONSENT_CHANGED_EVENT, openCookieSettings, readConsent } from "../lib/consent";
 
@@ -511,7 +512,7 @@ export default function Settings() {
     const outName = uniqueKeys.length === 1 && firstItem 
       ? `MicaLingo_Export_${firstItem.fileName.replace(/\.[^/.]+$/, '')}_${firstItem.destination}.xlsx` 
       : `MicaLingo_Bulk_Export_${uniqueKeys.length}_files.xlsx`;
-    XLSX.writeFile(workbook, outName);
+    downloadWorkbook(workbook, outName, t('excel_save_failed'));
   };
 
   return (
@@ -757,7 +758,7 @@ export default function Settings() {
                           </td>
                           <td className="p-3 sm:p-5 font-bold text-blue-950 break-all">{file.fileName}</td>
                           <td className="p-3 sm:p-5 text-gray-600 uppercase text-sm font-bold">{file.fileType}</td>
-                          <td className="p-3 sm:p-5"><span className="px-2.5 py-1 text-xs font-bold rounded-full bg-blue-100 text-blue-800 tracking-wider">{quizDisplayTitle(quizLabels, file.destination, file.destination)}</span></td>
+                          <td className="p-3 sm:p-5"><span className="px-2.5 py-1 text-xs font-bold rounded-full bg-blue-100 text-blue-800 tracking-wider">{saveToPublic ? quizDisplayTitle(quizLabels, file.destination, file.destination) : privateCardTitle(quizLabels, file.destination, file.destination, t('quiz_slot_title_placeholder'))}</span></td>
                           <td className="p-3 sm:p-5 text-gray-700 font-medium">{file.itemCount}</td>
                           <td className="p-3 sm:p-5 text-right">
                             <div className="flex flex-nowrap items-center justify-end gap-1.5 opacity-100 transition-opacity">

@@ -63,6 +63,8 @@ export const en = {
   custom_vocab_desc: "Practice word translations from your personal library.",
   custom_articles_desc: "Practice 'der, die, das' with your own nouns.",
   custom_phrases_desc: "Test your knowledge of custom phrases and sentences.",
+  quiz_slot_title_placeholder: "Title (fill in)",
+  quiz_slot_desc_placeholder: "On your uploaded Excel sheets, mark which quiz category or topic to add them to.",
   custom_prepositions_desc: "Practice cases for prepositions you've imported.",
   custom_verbs_desc: "Your personal verbs.",
   rename_quiz_card: "Rename",

@@ -1,4 +1,4 @@
-import { quizDisplayTitle, type QuizLabelMap } from '../lib/quizLabels';
+import { privateCardIsBlank, privateQuizCard, quizDisplayTitle, type QuizLabelMap } from '../lib/quizLabels';
 
 type Translate = (key: string) => string;
 
@@ -9,15 +9,24 @@ export function QuizCategoryOptions({
   includeReading = false,
   includeTelc = false,
   includePublicExtras = false,
+  blankUntilTitled = false,
 }: {
   labels: QuizLabelMap;
   t: Translate;
   includeReading?: boolean;
   includeTelc?: boolean;
   includePublicExtras?: boolean;
+  /** Personal library: unnamed article/phrase slots show the fill-in label. */
+  blankUntilTitled?: boolean;
 }) {
-  const title = (topic: 'vocabulary' | 'articles' | 'phrases' | 'prepositions' | 'adjectives' | 'verbs', key: string) =>
-    quizDisplayTitle(labels, topic, t(key));
+  const title = (topic: 'vocabulary' | 'articles' | 'phrases' | 'prepositions' | 'adjectives' | 'verbs', key: string) => {
+    if (blankUntilTitled && privateCardIsBlank(labels, topic)) {
+      const icon = privateQuizCard(topic)?.icon;
+      const label = t('quiz_slot_title_placeholder');
+      return icon ? `${icon} ${label}` : label;
+    }
+    return quizDisplayTitle(labels, topic, t(key));
+  };
 
   return (
     <>

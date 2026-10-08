@@ -73,9 +73,32 @@ export function sanitizeQuizLabels(raw: unknown): QuizLabelMap {
   return labels;
 }
 
+/** Articles and phrases stay unnamed on a private account until the user sets a title. */
+export function isBlankUntilTitled(topic?: string | null): topic is 'articles' | 'phrases' {
+  return topic === 'articles' || topic === 'phrases';
+}
+
 export function quizDisplayTitle(labels: QuizLabelMap, topic: string | null | undefined, fallback: string) {
   if (!isPrivateQuizCard(topic)) return fallback;
   return labels[topic]?.title || fallback;
+}
+
+/** Private card title. Open slots use a fill-in label until the user names them. */
+export function privateCardTitle(
+  labels: QuizLabelMap,
+  topic: string | null | undefined,
+  namedFallback: string,
+  blankLabel: string,
+) {
+  if (!isPrivateQuizCard(topic)) return namedFallback;
+  const custom = labels[topic]?.title;
+  if (custom) return custom;
+  if (isBlankUntilTitled(topic)) return blankLabel;
+  return namedFallback;
+}
+
+export function privateCardIsBlank(labels: QuizLabelMap, topic?: string | null) {
+  return isBlankUntilTitled(topic) && !labels[topic]?.title;
 }
 
 /** Custom column header for match quizzes. Other formats keep their own headers. */

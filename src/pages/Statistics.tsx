@@ -5,6 +5,8 @@ import { Link } from "react-router-dom";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { dbCloud } from "../lib/firebase";
 import * as XLSX from 'xlsx';
+import { downloadWorkbook } from '../lib/downloadWorkbook';
+import { privateCardTitle, useQuizLabels } from "../lib/quizLabels";
 
 const BackgroundBlobs = () => (
   <>
@@ -27,6 +29,7 @@ const BackgroundBlobs = () => (
 
 export default function Statistics() {
   const { user } = useAuth();
+  const { labels: quizLabels } = useQuizLabels(user?.uid);
   const { t } = useI18n();
   const [history, setHistory] = useState<Record<string, any>>({});
   const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
@@ -186,6 +189,10 @@ export default function Statistics() {
     else if (topic === 'verbs') translatedTopic = t('verbs_quiz') || 'Verbs';
     else if (topic === 'telc-b2') translatedTopic = t('telc_b2') || 'Telc B2';
 
+    if (isCustom) {
+      translatedTopic = privateCardTitle(quizLabels, topic, translatedTopic, t('quiz_slot_title_placeholder'));
+    }
+
     // Make the name much shorter for the table view by removing unnecessary words
     const shortTopic = translatedTopic.replace(/( kvíz| quiz| und Sätze| and sentences| és mondatok)/gi, '').trim();
 
@@ -211,7 +218,7 @@ export default function Statistics() {
     worksheet['!cols'] = [{ wch: 50 }, { wch: 30 }, { wch: 30 }, { wch: 15 }];
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Results');
-    XLSX.writeFile(workbook, `${key}_results.xlsx`);
+    downloadWorkbook(workbook, `${key}_results.xlsx`, t('excel_save_failed'));
   };
 
   const getQuizUrl = (key: string) => {

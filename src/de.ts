@@ -63,6 +63,8 @@ export const de = {
   custom_vocab_desc: "Übe Wortübersetzungen aus deiner persönlichen Bibliothek.",
   custom_articles_desc: "Übe 'der, die, das' mit deinen eigenen Substantiven.",
   custom_phrases_desc: "Teste dein Wissen über benutzerdefinierte Redewendungen und Sätze.",
+  quiz_slot_title_placeholder: "Titel (ausfüllen)",
+  quiz_slot_desc_placeholder: "In deinen hochgeladenen Excel-Tabellen kannst du markieren, zu welcher Quizkategorie oder welchem Thema sie gehören.",
   custom_prepositions_desc: "Übe Fälle für Präpositionen, die du importiert hast.",
   custom_verbs_desc: "Deine persönlichen Verben.",
   rename_quiz_card: "Umbenennen",

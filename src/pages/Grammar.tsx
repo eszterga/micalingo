@@ -15,6 +15,8 @@ import {
   type SelectionBookmark,
 } from '../lib/richTextSelection';
 import { applyBulletList, restoreEditorSelection } from '../lib/editorFormat';
+import { QuizCategoryOptions } from '../components/QuizCategoryOptions';
+import { useQuizLabels } from '../lib/quizLabels';
 
 const BackgroundBlobs = () => (
   <>
@@ -38,6 +40,7 @@ const BackgroundBlobs = () => (
 export default function Grammar() {
   const { t } = useI18n();
   const { user, isAdmin, adminMode } = useAuth();
+  const { labels: quizLabels } = useQuizLabels(user?.uid);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'public' | 'private'>(searchParams.get("tab") === "private" ? "private" : "public");
@@ -921,13 +924,7 @@ export default function Grammar() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">{t('modal_category_label') || 'Category'}</label>
                 <select value={newCategory} onChange={(e) => setNewCategory(e.target.value)} className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50">
-                  <option value="vocabulary">{t('dropdown_vocabulary') || 'Vocabulary quiz'}</option>
-                  <option value="reading">{t('dropdown_reading') || 'Vocabulary (to read)'}</option>
-                  <option value="articles">{t('dropdown_articles') || 'Articles quiz'}</option>
-                  <option value="phrases">{t('dropdown_phrases') || 'Phrases and sentences quiz'}</option>
-                  <option value="prepositions">{t('dropdown_prepositions') || 'Prepositions quiz'}</option>
-                  <option value="adjectives">{t('dropdown_adjectives') || 'Adjectives quiz'}</option>
-                  <option value="verbs">{t('dropdown_verbs') || 'Verbs quiz'}</option>
+                  <QuizCategoryOptions labels={quizLabels} t={t} includeReading blankUntilTitled={!saveToPublic} />
                 </select>
               </div>
               {newCategory === 'articles' ? (

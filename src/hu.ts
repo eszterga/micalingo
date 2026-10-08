@@ -63,6 +63,8 @@ export const hu = {
   custom_vocab_desc: "Gyakorolj szófordításokat a saját szótáradból.",
   custom_articles_desc: "Gyakorold a 'der, die, das' névelőket a saját főneveiddel.",
   custom_phrases_desc: "Teszteld a tudásod a saját kifejezéseiddel és mondataiddal.",
+  quiz_slot_title_placeholder: "Cím (töltsd ki)",
+  quiz_slot_desc_placeholder: "A feltöltött Excel-tábláidon megjelölheted, melyik kvízkategóriához vagy témához kerüljenek.",
   custom_prepositions_desc: "Gyakorold az eseteket az importált elöljárószavakkal.",
   custom_verbs_desc: "Saját igéid.",
   rename_quiz_card: "Átnevezés",

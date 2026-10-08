@@ -3,7 +3,7 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 import { useI18n } from "../I18nContext";
 import { useCloudVocabulary, vocabCategoryKey, isReadingVocabCategory, isMarkedVocabCategory } from "../lib/firestore";
-import { isPrivateQuizCard, quizDisplayTitle, useQuizLabels } from "../lib/quizLabels";
+import { isPrivateQuizCard, privateCardTitle, useQuizLabels } from "../lib/quizLabels";
 import { publicVocabulary, publicPhrases, publicArticles, publicPrepositions, publicAdjectives } from "../lib/public-data";
 import {
   WORDS_PER_QUIZ,
@@ -20,6 +20,7 @@ import {
 import { doc, setDoc } from 'firebase/firestore';
 import { dbCloud } from '../lib/firebase';
 import * as XLSX from 'xlsx';
+import { downloadWorkbook } from '../lib/downloadWorkbook';
 import { Capacitor } from '@capacitor/core';
 import { App as CapacitorApp } from '@capacitor/app';
 import {
@@ -143,7 +144,7 @@ export default function Quiz() {
     : topic === 'telc-b2' ? (t('telc_b2') || 'Telc B2')
     : t('personalized_space');
   const displayTopic = isCustom && isPrivateQuizCard(topic)
-    ? quizDisplayTitle(quizLabels, topic, translatedTopic)
+    ? privateCardTitle(quizLabels, topic, translatedTopic, t('quiz_slot_title_placeholder'))
     : translatedTopic;
 
   const markedWords = useMemo(
@@ -887,7 +888,7 @@ export default function Quiz() {
                   worksheet['!cols'] = [{ wch: 50 }, { wch: 30 }, { wch: 30 }, { wch: 15 }];
                   const workbook = XLSX.utils.book_new();
                   XLSX.utils.book_append_sheet(workbook, worksheet, 'Results');
-                  XLSX.writeFile(workbook, `${quizKey}_results.xlsx`);
+                  downloadWorkbook(workbook, `${quizKey}_results.xlsx`, t('excel_save_failed'));
                 }}
                 className="w-full min-h-[3rem] bg-green-100 text-green-700 font-bold py-3 px-4 rounded-xl hover:bg-green-200 transition-colors shadow-sm text-sm sm:text-base touch-manipulation active:scale-[0.98]"
               >

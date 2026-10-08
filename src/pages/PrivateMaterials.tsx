@@ -919,7 +919,7 @@ export default function PrivateMaterials({ type }: { type: 'reading' | 'listenin
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">{t('modal_category_label') || 'Category'}</label>
                 <select value={newCategory} onChange={(e) => setNewCategory(e.target.value)} className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50">
-                  <QuizCategoryOptions labels={quizLabels} t={t} includeReading />
+                  <QuizCategoryOptions labels={quizLabels} t={t} includeReading blankUntilTitled={!saveToPublic} />
                 </select>
               </div>
 

@@ -10,8 +10,9 @@ import { isUserCancelledAuthError, signInWithGoogle } from '../lib/googleAuth';
 import { useCloudVocabulary } from "../lib/firestore";
 import {
   PRIVATE_QUIZ_CARDS,
+  privateCardIsBlank,
+  privateCardTitle,
   privateQuizCard,
-  quizDisplayTitle,
   useQuizLabels,
   type PrivateQuizTopic,
   type QuizLabelOverride,
@@ -310,12 +311,15 @@ export default function Quizzes() {
                 <p className="text-lg text-blue-900/70 font-medium">{t('create_your_own_quizzes_subtitle_loggedin')}</p>
               </div>
               <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {PRIVATE_QUIZ_CARDS.map((card) => (
+                {PRIVATE_QUIZ_CARDS.map((card) => {
+                  const blank = privateCardIsBlank(labels, card.topic);
+                  const title = privateCardTitle(labels, card.topic, t(card.titleKey), t('quiz_slot_title_placeholder'));
+                  return (
                   <div key={card.topic} className="group relative flex flex-col items-start p-6 rounded-[2rem] bg-white/90 backdrop-blur-xl border border-blue-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500">
                     <AppLink to={`/quizzes/${card.topic}?tab=custom`} className="flex flex-col items-start w-full">
                       <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform duration-500">{card.icon}</div>
-                      <h3 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-xl mb-1">{quizDisplayTitle(labels, card.topic, t(card.titleKey))}</h3>
-                      <p className="text-gray-600 font-medium text-sm">{t(card.descKey)}</p>
+                      <h3 className={`font-extrabold transition-colors text-xl mb-1 ${blank ? 'text-gray-400 italic group-hover:text-blue-500' : 'text-gray-900 group-hover:text-blue-700'}`}>{title}</h3>
+                      <p className="text-gray-600 font-medium text-sm">{card.topic === 'articles' || card.topic === 'phrases' ? t('quiz_slot_desc_placeholder') : t(card.descKey)}</p>
                     </AppLink>
                     <button
                       type="button"
@@ -326,7 +330,8 @@ export default function Quizzes() {
                       {t('rename_quiz_card')}
                     </button>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
@@ -352,7 +357,7 @@ export default function Quizzes() {
                   type="text"
                   value={labelDraft.title || ''}
                   onChange={(e) => setLabelDraft((prev) => ({ ...prev, title: e.target.value }))}
-                  placeholder={t(privateQuizCard(editingTopic)?.titleKey || 'vocabulary_quiz')}
+                  placeholder={privateCardIsBlank(labels, editingTopic) ? t('quiz_slot_title_placeholder') : t(privateQuizCard(editingTopic)?.titleKey || 'vocabulary_quiz')}
                   maxLength={48}
                   className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
                   autoFocus

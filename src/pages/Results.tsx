@@ -9,7 +9,9 @@ import {
   getQuizLevelCount,
 } from "../lib/quizPool";
 import * as XLSX from 'xlsx';
+import { downloadWorkbook } from '../lib/downloadWorkbook';
 import { filterMarkedWords, getMarkedQuizLevels } from "./markedWordsQuizEngine";
+import { privateCardTitle, useQuizLabels } from "../lib/quizLabels";
 
 const BackgroundBlobs = () => (
   <>
@@ -33,6 +35,7 @@ const BackgroundBlobs = () => (
 export default function Results() {
   const { t } = useI18n();
   const { user } = useAuth();
+  const { labels: quizLabels } = useQuizLabels(user?.uid);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [history, setHistory] = useState<Record<string, any>>({});
@@ -68,7 +71,7 @@ export default function Results() {
     worksheet['!cols'] = [{ wch: 50 }, { wch: 30 }, { wch: 30 }, { wch: 15 }];
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Results');
-    XLSX.writeFile(workbook, `${key}_results.xlsx`);
+    downloadWorkbook(workbook, `${key}_results.xlsx`, t('excel_save_failed'));
   };
 
   const getTopicQuizzesUrl = (key: string) => {
@@ -150,7 +153,10 @@ export default function Results() {
     else if (topic === 'verbs') translatedTopic = t('verbs_quiz') || 'Verbs';
     else if (topic === 'telc-b2') translatedTopic = t('telc_b2') || 'Telc B2';
 
-    if (isCustom) return t('quiz_title_custom', { topic: translatedTopic, id: quizId || '' }).trim();
+    if (isCustom) {
+      translatedTopic = privateCardTitle(quizLabels, topic, translatedTopic, t('quiz_slot_title_placeholder'));
+      return t('quiz_title_custom', { topic: translatedTopic, id: quizId || '' }).trim();
+    }
     return t('quiz_title_public', { topic: translatedTopic, id: quizId || '' }).trim();
   };
 
