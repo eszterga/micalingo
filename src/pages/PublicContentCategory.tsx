@@ -9,6 +9,7 @@ import { addCloudWord, useCloudVocabulary, findVocabDuplicate, vocabCategoryKey 
 import { useQuizLabels } from '../lib/quizLabels';
 import { QuizCategoryOptions } from '../components/QuizCategoryOptions';
 import { fetchVisibleLibraryItems } from '../lib/libraryContent';
+import { categoryTitleKey } from '../lib/categoryTitle';
 import { ImageLightbox, useImageLightbox } from '../components/ImageLightbox';
 import ArticleContent from '../components/ArticleContent';
 import EditorFormatControls from '../components/EditorFormatControls';
@@ -45,7 +46,7 @@ export default function PublicContentCategory({ type }: { type: 'articles' | 'bo
   const userVocabulary = useCloudVocabulary(user?.uid) || [];
   const publicVocabulary = useCloudVocabulary("PUBLIC_LIBRARY") || [];
   
-  const categoryName = t((categoryId || '') as any) || categoryId;
+  const categoryName = t(categoryTitleKey(categoryId)) || categoryId;
   const collectionName = type === 'articles' ? 'articles' : type === 'books' ? 'books' : 'interesting';
   
   const [items, setItems] = useState<any[]>([]);
@@ -556,7 +557,7 @@ export default function PublicContentCategory({ type }: { type: 'articles' | 'bo
             {t("back_button")}
           </AppLink>
           <div>
-            <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600 tracking-tight pb-2 capitalize">
+            <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600 tracking-tight pb-2">
               {categoryName}
             </h1>
             <p className="text-lg text-blue-900/70 font-medium mt-1">

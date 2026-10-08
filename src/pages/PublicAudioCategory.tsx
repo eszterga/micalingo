@@ -9,6 +9,7 @@ import { addCloudWord, useCloudVocabulary, findVocabDuplicate, vocabCategoryKey 
 import { useQuizLabels } from '../lib/quizLabels';
 import { QuizCategoryOptions } from '../components/QuizCategoryOptions';
 import { fetchVisibleLibraryItems } from '../lib/libraryContent';
+import { categoryTitleKey } from '../lib/categoryTitle';
 import { ImageLightbox, useImageLightbox } from '../components/ImageLightbox';
 import ArticleContent from '../components/ArticleContent';
 import EditorFormatControls from '../components/EditorFormatControls';
@@ -196,7 +197,7 @@ export default function PublicAudioCategory({ type }: { type: 'music' | 'podcast
     setSaveToPublic(isAdmin ? adminMode : false);
   }, [isAdmin, adminMode]);
 
-  const categoryName = t((categoryId || '') as any) || categoryId;
+  const categoryName = t(categoryTitleKey(categoryId)) || categoryId;
   const sectionName = type === 'music' ? t("music_section" as any) : type === 'podcasts' ? t("podcasts_section" as any) : t("audiobooks_section" as any);
 
   useEffect(() => {
@@ -571,7 +572,7 @@ export default function PublicAudioCategory({ type }: { type: 'music' | 'podcast
             {t("back_button")}
           </AppLink>
           <div>
-            <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600 tracking-tight pb-2 capitalize">
+            <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600 tracking-tight pb-2">
               {categoryName}
             </h1>
             <p className="text-lg text-blue-900/70 font-medium mt-1">
