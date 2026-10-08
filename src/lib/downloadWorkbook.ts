@@ -4,6 +4,7 @@ import { Share } from '@capacitor/share';
 import * as XLSX from 'xlsx';
 
 const XLSX_MIME = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+const OCTET_STREAM = 'application/octet-stream';
 
 type PluginHeader = { name?: string };
 
@@ -50,29 +51,64 @@ function isShareCancel(error: unknown): boolean {
   return name === 'AbortError' || /cancel|dismiss/i.test(message);
 }
 
-function triggerAnchorDownload(blob: Blob, filename: string): void {
+/**
+ * Same save SheetJS used when phone downloads worked: an octet-stream blob.
+ * Android's download manager rejects the spreadsheet MIME type and reports
+ * that the file could not be downloaded. Keep the blob alive long enough
+ * for a slow phone to finish reading it.
+ */
+function triggerAnchorDownload(bytes: Uint8Array, filename: string): void {
+  const blob = new Blob([bytesToArrayBuffer(bytes)], { type: OCTET_STREAM });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
   link.download = filename;
-  link.rel = 'noopener';
   document.body.appendChild(link);
   link.click();
   link.remove();
-  window.setTimeout(() => URL.revokeObjectURL(url), 2000);
+  window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
+}
+
+function shareableFile(bytes: Uint8Array, filename: string): File | null {
+  const nav = navigator as Navigator & { canShare?: (data: ShareData) => boolean };
+  if (typeof nav.share !== 'function') return null;
+  try {
+    const buffer = bytesToArrayBuffer(bytes);
+    const candidates = [
+      new File([buffer], filename, { type: XLSX_MIME }),
+      new File([buffer], filename, { type: OCTET_STREAM }),
+    ];
+    for (const file of candidates) {
+      const payload: ShareData = { files: [file], title: filename };
+      if (typeof nav.canShare !== 'function' || nav.canShare(payload)) return file;
+    }
+  } catch (error) {
+    console.error('Excel share check failed', error);
+  }
+  return null;
+}
+
+function startWebShare(file: File, filename: string, onFail: () => void): void {
+  const payload: ShareData = { files: [file], title: filename };
+  void navigator.share(payload).catch((error: unknown) => {
+    if (isShareCancel(error)) return;
+    console.error('Excel web share failed', error);
+    onFail();
+  });
 }
 
 async function shareWithNativePlugins(bytes: Uint8Array, filename: string): Promise<void> {
   const base64 = bytesToBase64(bytes);
-  await Filesystem.writeFile({
+  const written = await Filesystem.writeFile({
     path: filename,
     data: base64,
     directory: Directory.Cache,
   });
-  const { uri } = await Filesystem.getUri({
-    directory: Directory.Cache,
-    path: filename,
-  });
+  const uri = written?.uri
+    || (await Filesystem.getUri({ directory: Directory.Cache, path: filename })).uri;
+  if (!uri || !uri.startsWith('file:')) {
+    throw new Error('Excel file URI is not shareable');
+  }
   await Share.share({
     title: filename,
     files: [uri],
@@ -80,52 +116,77 @@ async function shareWithNativePlugins(bytes: Uint8Array, filename: string): Prom
   });
 }
 
-async function shareWithWebApi(file: File, filename: string): Promise<boolean> {
-  const nav = navigator as Navigator & { canShare?: (data: ShareData) => boolean };
-  if (typeof nav.share !== 'function') return false;
-  const payload: ShareData = { files: [file], title: filename };
-  if (typeof nav.canShare === 'function' && !nav.canShare(payload)) return false;
-  await nav.share(payload);
-  return true;
-}
-
-async function saveOnDevice(bytes: Uint8Array, blob: Blob, filename: string, failMessage?: string): Promise<void> {
-  const file = new File([blob], filename, { type: XLSX_MIME });
+async function saveOnDevice(
+  bytes: Uint8Array,
+  filename: string,
+  failMessage: string | undefined,
+  fallback: () => void,
+): Promise<void> {
   try {
-    if (nativePluginInstalled('Filesystem') && nativePluginInstalled('Share')) {
-      await shareWithNativePlugins(bytes, filename);
-      return;
-    }
-    if (await shareWithWebApi(file, filename)) return;
+    await shareWithNativePlugins(bytes, filename);
+    return;
   } catch (error) {
     if (isShareCancel(error)) return;
     console.error('Excel share failed', error);
-    try {
-      if (await shareWithWebApi(file, filename)) return;
-    } catch (fallbackError) {
-      if (isShareCancel(fallbackError)) return;
-      console.error('Excel web share failed', fallbackError);
-    }
   }
 
-  if (failMessage) window.alert(failMessage);
+  const file = shareableFile(bytes, filename);
+  if (file) {
+    startWebShare(file, filename, () => {
+      try {
+        fallback();
+      } catch (error) {
+        console.error(error);
+        if (failMessage) window.alert(failMessage);
+      }
+    });
+    return;
+  }
+
+  try {
+    fallback();
+  } catch (error) {
+    console.error(error);
+    if (failMessage) window.alert(failMessage);
+  }
 }
 
 /**
  * Browsers save the file directly. The Capacitor app loads the site inside a
- * WebView, which ignores the download attribute, so the app opens the system
- * share sheet instead (Save to Files, Drive, Downloads, and so on).
+ * WebView. When that app build includes Filesystem and Share, the system
+ * share sheet opens. Older installs keep the direct download that already
+ * worked on the phone.
  */
 export function downloadWorkbook(workbook: XLSX.WorkBook, filename: string, failMessage?: string): void {
   try {
     const bytes = toUint8Array(XLSX.write(workbook, { bookType: 'xlsx', type: 'array' }));
-    const blob = new Blob([bytesToArrayBuffer(bytes)], { type: XLSX_MIME });
     const safeName = safeFileName(filename);
-    if (!Capacitor.isNativePlatform()) {
-      triggerAnchorDownload(blob, safeName);
+    const fallback = () => triggerAnchorDownload(bytes, safeName);
+    const nativeShareReady = Capacitor.isNativePlatform()
+      && nativePluginInstalled('Filesystem')
+      && nativePluginInstalled('Share');
+
+    if (nativeShareReady) {
+      void saveOnDevice(bytes, safeName, failMessage, fallback);
       return;
     }
-    void saveOnDevice(bytes, blob, safeName, failMessage);
+
+    if (Capacitor.isNativePlatform()) {
+      const file = shareableFile(bytes, safeName);
+      if (file) {
+        startWebShare(file, safeName, () => {
+          try {
+            fallback();
+          } catch (error) {
+            console.error(error);
+            if (failMessage) window.alert(failMessage);
+          }
+        });
+        return;
+      }
+    }
+
+    fallback();
   } catch (error) {
     console.error(error);
     if (failMessage) window.alert(failMessage);
