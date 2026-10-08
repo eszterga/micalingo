@@ -1,0 +1,14 @@
+---
+description: Ship accepted work on main only. Never create branches.
+alwaysApply: true
+---
+
+# Git workflow
+
+Work only on `main`. Never create a branch, local or remote.
+
+When the user accepts a change, commit it on `main` and push to `origin/main`. That push is the production release: GitHub Actions builds the site and publishes it to the `gh-pages` branch, which serves micalingo.com.
+
+Do not push, reset, or delete `gh-pages`. It is the published site, not a working branch. Its behind/ahead counts versus `main` are normal, because it stores built files, not source history.
+
+Delete leftover feature branches only when their commits are already in `main`.
