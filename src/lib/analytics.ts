@@ -6,7 +6,7 @@ import { CONSENT_CHANGED_EVENT, readConsent } from './consent';
  * (Admin → Data streams → Web → Measurement ID, looks like G-XXXXXXXX).
  * Tracking stays off until this is set.
  */
-export const GA_MEASUREMENT_ID = '';
+export const GA_MEASUREMENT_ID = 'G-95P6ZPTCB3';
 
 type EventParams = Record<string, string | number | boolean>;
 
