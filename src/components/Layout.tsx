@@ -36,6 +36,8 @@ export default function Layout() {
   const [isMobileLangMenuOpen, setIsMobileLangMenuOpen] = useState(false);
   const [isSupportModalOpen, setIsSupportModalOpen] = useState(false);
   const [showConsiderSupport, setShowConsiderSupport] = useState(false);
+  const [customAmount, setCustomAmount] = useState('');
+  const [customAmountError, setCustomAmountError] = useState(false);
 
   const languages = [
     { code: 'en', label: 'English', flag: 'EN' },
@@ -121,16 +123,40 @@ export default function Layout() {
     { href: 'https://donate.stripe.com/9B6bIU8HYeMN1Nq0mw4Ja02', label: t('support_tier_3') || 'Lunch Tier', amount: '€8', featured: false },
     { href: 'https://donate.stripe.com/9B67sE5vMawxfEgb1a4Ja03', label: t('support_tier_4') || 'Hero Tier 🚀', amount: '€10', featured: true },
   ];
+  const customSupportUrl = 'https://buy.stripe.com/aFaeV64rI8opajWedm4Ja04';
+
+  const closeSupportModal = () => {
+    setIsSupportModalOpen(false);
+    setCustomAmount('');
+    setCustomAmountError(false);
+  };
 
   // On Capacitor, target=_blank often no-ops. Top-level navigation to a non-allowlisted
   // host is handed off to the system browser, matching desktop "open Stripe" behavior.
   const openDonateUrl = (url: string) => {
-    setIsSupportModalOpen(false);
+    closeSupportModal();
     if (Capacitor.isNativePlatform()) {
       window.location.href = url;
       return;
     }
     window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
+  const openCustomSupport = (event: React.FormEvent) => {
+    event.preventDefault();
+    const normalized = customAmount.trim().replace(',', '.');
+    if (!/^\d+(\.\d{1,2})?$/.test(normalized)) {
+      setCustomAmountError(true);
+      return;
+    }
+    const [whole, frac = ''] = normalized.split('.');
+    const cents = Number(whole) * 100 + Number(frac.padEnd(2, '0'));
+    // Stripe ignores amounts outside the pay-what-you-want link's limits.
+    if (cents < 100 || cents > 1_000_000) {
+      setCustomAmountError(true);
+      return;
+    }
+    openDonateUrl(`${customSupportUrl}?prefilled_amount=${cents}`);
   };
 
   return (
@@ -419,7 +445,7 @@ export default function Layout() {
             paddingLeft: 'max(1rem, env(safe-area-inset-left, 0px))',
             paddingRight: 'max(1rem, env(safe-area-inset-right, 0px))',
           }}
-          onClick={() => setIsSupportModalOpen(false)}
+          onClick={closeSupportModal}
         >
           <div
             role="dialog"
@@ -435,7 +461,7 @@ export default function Layout() {
               </h2>
               <button
                 type="button"
-                onClick={() => setIsSupportModalOpen(false)}
+                onClick={closeSupportModal}
                 className="shrink-0 text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-full hover:bg-gray-200"
                 aria-label={t('close') || 'Close'}
               >
@@ -466,6 +492,43 @@ export default function Layout() {
                   <span className="shrink-0">{tier.amount}</span>
                 </a>
               ))}
+              <form onSubmit={openCustomSupport} className="flex flex-col gap-2">
+                <div className={`w-full flex flex-col gap-2 px-5 sm:px-6 py-3.5 bg-blue-50 text-blue-800 font-bold rounded-xl border ${customAmountError ? 'border-red-300' : 'border-blue-200'}`}>
+                  <label htmlFor="support-custom-amount" className="text-left leading-snug">
+                    {t('support_tier_other') || 'Other amount'}
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <div className="flex flex-1 items-center min-w-0 bg-white rounded-lg border border-blue-200 px-3">
+                      <span className="text-blue-800" aria-hidden="true">€</span>
+                      <input
+                        id="support-custom-amount"
+                        type="text"
+                        inputMode="decimal"
+                        autoComplete="off"
+                        value={customAmount}
+                        placeholder="15"
+                        aria-invalid={customAmountError}
+                        onChange={(e) => {
+                          setCustomAmount(e.target.value);
+                          if (customAmountError) setCustomAmountError(false);
+                        }}
+                        className="w-full min-w-0 bg-transparent py-2 px-2 text-blue-950 font-bold outline-none"
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      className="shrink-0 px-4 py-2 rounded-lg bg-blue-800 hover:bg-blue-900 text-white font-bold transition-colors"
+                    >
+                      {t('support_other_continue') || 'Continue'}
+                    </button>
+                  </div>
+                </div>
+                {customAmountError && (
+                  <p className="text-sm text-red-600 font-medium text-center" role="alert">
+                    {t('support_other_invalid') || 'Enter an amount from €1 to €10,000.'}
+                  </p>
+                )}
+              </form>
             </div>
           </div>
         </div>
