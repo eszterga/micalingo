@@ -3,7 +3,7 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 import { useI18n } from "../I18nContext";
 import { useCloudVocabulary, vocabCategoryKey, isReadingVocabCategory, isMarkedVocabCategory } from "../lib/firestore";
-import { isPrivateQuizCard, privateCardTitle, useQuizLabels } from "../lib/quizLabels";
+import { isPrivateQuizCard, privateCardTitle, privateSlotNumber, useQuizLabels } from "../lib/quizLabels";
 import { publicVocabulary, publicPhrases, publicArticles, publicPrepositions, publicAdjectives } from "../lib/public-data";
 import {
   WORDS_PER_QUIZ,
@@ -145,7 +145,7 @@ export default function Quiz() {
     : topic === 'telc-b2' ? (t('telc_b2') || 'Telc B2')
     : t('personalized_space');
   const displayTopic = isCustom && isPrivateQuizCard(topic)
-    ? privateCardTitle(quizLabels, topic, translatedTopic, t('quiz_slot_title_placeholder'))
+    ? privateCardTitle(quizLabels, topic, translatedTopic, t('quiz_slot_title_placeholder', { n: privateSlotNumber(topic) }))
     : translatedTopic;
 
   const markedWords = useMemo(
@@ -228,7 +228,7 @@ export default function Quiz() {
     const selectedWords = [...words];
     const allGermanTerms = germanTermsLookup;
     const built = selectedWords.map(word => {
-      if (topic === 'articles') {
+      if (!isCustom && topic === 'articles') {
         const baseArticle = getArticleFromQuizWord(word);
         const baseNoun = getNounFromArticleQuizWord(word);
         const hint = getArticleQuizHint(word);
@@ -249,7 +249,7 @@ export default function Quiz() {
           german: word.german,
           hungarian: translation && !isArticleLabel(translation) ? translation : undefined,
         };
-      } else if (topic === 'prepositions') {
+      } else if (!isCustom && topic === 'prepositions') {
         const correctAnswer = word.hungarian || '';
         const normalize = (s: string) => (s || '').toLowerCase().replace(/\s+/g, '');
         const normalizedCorrect = normalize(correctAnswer);

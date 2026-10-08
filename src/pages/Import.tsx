@@ -9,7 +9,7 @@ import { publicVocabulary, publicPhrases, publicArticles, publicPrepositions, pu
 import { useCloudVocabulary, addCloudWord, bulkAddCloudWords, bulkDeleteCloudWords, updateCloudWord, purgeVocabDuplicatesKeeping, purgeSoftDeletedVocabSiblings, isActiveVocabItem, findVocabDuplicate, vocabCategoryKey, vocabGermanKey } from "../lib/firestore";
 import { useI18n } from "../I18nContext";
 import { isPrivateQuizTopic } from "../lib/quizPool";
-import { isMatchQuizTopic, matchColumnLabel, privateCardTitle, quizDisplayTitle, useQuizLabels } from "../lib/quizLabels";
+import { isMatchQuizTopic, matchColumnLabel, privateCardTitle, privateSlotNumber, quizDisplayTitle, useQuizLabels } from "../lib/quizLabels";
 import { QuizCategoryOptions } from "../components/QuizCategoryOptions";
 import { downloadWorkbook } from "../lib/downloadWorkbook";
 
@@ -1692,7 +1692,7 @@ export default function Import() {
                     </td>
                     <td className="p-3 sm:p-5 text-gray-600 uppercase text-sm font-bold">{file.fileType}</td>
                     <td className="p-3 sm:p-5">
-                      <span className="px-2.5 py-1 text-xs font-bold rounded-full bg-blue-100 text-blue-800 tracking-wider">{saveToPublic ? quizDisplayTitle(quizLabels, file.destination, file.destination) : privateCardTitle(quizLabels, file.destination, file.destination, t('quiz_slot_title_placeholder'))}</span>
+                      <span className="px-2.5 py-1 text-xs font-bold rounded-full bg-blue-100 text-blue-800 tracking-wider">{saveToPublic ? quizDisplayTitle(quizLabels, file.destination, file.destination) : privateCardTitle(quizLabels, file.destination, file.destination, t('quiz_slot_title_placeholder', { n: privateSlotNumber(file.destination) }))}</span>
                     </td>
                     <td className="p-3 sm:p-5 text-gray-700 font-medium">{file.itemCount}</td>
                     <td className="p-3 sm:p-5 text-right">

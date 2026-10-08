@@ -11,7 +11,7 @@ import {
 import * as XLSX from 'xlsx';
 import { downloadWorkbook } from '../lib/downloadWorkbook';
 import { filterMarkedWords, getMarkedQuizLevels } from "./markedWordsQuizEngine";
-import { privateCardTitle, useQuizLabels } from "../lib/quizLabels";
+import { privateCardTitle, privateSlotNumber, useQuizLabels } from "../lib/quizLabels";
 
 const BackgroundBlobs = () => (
   <>
@@ -154,7 +154,7 @@ export default function Results() {
     else if (topic === 'telc-b2') translatedTopic = t('telc_b2') || 'Telc B2';
 
     if (isCustom) {
-      translatedTopic = privateCardTitle(quizLabels, topic, translatedTopic, t('quiz_slot_title_placeholder'));
+      translatedTopic = privateCardTitle(quizLabels, topic, translatedTopic, t('quiz_slot_title_placeholder', { n: privateSlotNumber(topic) }));
       return t('quiz_title_custom', { topic: translatedTopic, id: quizId || '' }).trim();
     }
     return t('quiz_title_public', { topic: translatedTopic, id: quizId || '' }).trim();

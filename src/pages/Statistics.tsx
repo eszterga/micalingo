@@ -6,7 +6,7 @@ import { doc, getDoc, setDoc } from "firebase/firestore";
 import { dbCloud } from "../lib/firebase";
 import * as XLSX from 'xlsx';
 import { downloadWorkbook } from '../lib/downloadWorkbook';
-import { privateCardTitle, useQuizLabels } from "../lib/quizLabels";
+import { privateCardTitle, privateSlotNumber, useQuizLabels } from "../lib/quizLabels";
 
 const BackgroundBlobs = () => (
   <>
@@ -190,7 +190,7 @@ export default function Statistics() {
     else if (topic === 'telc-b2') translatedTopic = t('telc_b2') || 'Telc B2';
 
     if (isCustom) {
-      translatedTopic = privateCardTitle(quizLabels, topic, translatedTopic, t('quiz_slot_title_placeholder'));
+      translatedTopic = privateCardTitle(quizLabels, topic, translatedTopic, t('quiz_slot_title_placeholder', { n: privateSlotNumber(topic) }));
     }
 
     // Make the name much shorter for the table view by removing unnecessary words

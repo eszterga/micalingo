@@ -5,9 +5,9 @@ import { dbCloud } from './firebase';
 /** Private quiz buckets. The stored category key stays fixed so existing imports keep working. */
 export const PRIVATE_QUIZ_CARDS = [
   { topic: 'vocabulary', icon: '📖', titleKey: 'vocabulary_quiz', descKey: 'custom_vocab_desc', dropdownKey: 'dropdown_vocabulary', kind: 'match' },
-  { topic: 'articles', icon: '🔤', titleKey: 'articles_quiz', descKey: 'custom_articles_desc', dropdownKey: 'dropdown_articles', kind: 'articles' },
+  { topic: 'articles', icon: '🔤', titleKey: 'articles_quiz', descKey: 'custom_articles_desc', dropdownKey: 'dropdown_articles', kind: 'match' },
   { topic: 'phrases', icon: '💬', titleKey: 'phrases_quiz', descKey: 'custom_phrases_desc', dropdownKey: 'dropdown_phrases', kind: 'match' },
-  { topic: 'prepositions', icon: '📍', titleKey: 'prepositions_quiz', descKey: 'custom_prepositions_desc', dropdownKey: 'dropdown_prepositions', kind: 'prepositions' },
+  { topic: 'prepositions', icon: '📍', titleKey: 'prepositions_quiz', descKey: 'custom_prepositions_desc', dropdownKey: 'dropdown_prepositions', kind: 'match' },
   { topic: 'adjectives', icon: '✨', titleKey: 'adjectives_quiz', descKey: 'custom_adjectives_desc', dropdownKey: 'dropdown_adjectives', kind: 'match' },
   { topic: 'verbs', icon: '🏃', titleKey: 'verbs_quiz', descKey: 'custom_verbs_desc', dropdownKey: 'dropdown_verbs', kind: 'match' },
 ] as const;
@@ -29,6 +29,12 @@ const LIMITS = { title: 48, description: 140, columnA: 40, columnB: 40, columnC:
 
 export function isPrivateQuizCard(topic?: string | null): topic is PrivateQuizTopic {
   return PRIVATE_QUIZ_CARDS.some((card) => card.topic === topic);
+}
+
+/** Stable 1-based slot number so empty cards read Téma1, Téma2, and so on. */
+export function privateSlotNumber(topic?: string | null): number {
+  const index = PRIVATE_QUIZ_CARDS.findIndex((card) => card.topic === topic);
+  return index >= 0 ? index + 1 : 1;
 }
 
 export function privateQuizCard(topic?: string | null) {
@@ -73,9 +79,9 @@ export function sanitizeQuizLabels(raw: unknown): QuizLabelMap {
   return labels;
 }
 
-/** Articles and phrases stay unnamed on a private account until the user sets a title. */
-export function isBlankUntilTitled(topic?: string | null): topic is 'articles' | 'phrases' {
-  return topic === 'articles' || topic === 'phrases';
+/** Every private quiz slot stays unnamed until the user sets a title. */
+export function isBlankUntilTitled(topic?: string | null): topic is PrivateQuizTopic {
+  return isPrivateQuizCard(topic);
 }
 
 export function quizDisplayTitle(labels: QuizLabelMap, topic: string | null | undefined, fallback: string) {

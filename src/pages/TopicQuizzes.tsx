@@ -15,7 +15,7 @@ import {
   getItemsInQuizLevel,
   isPrivateQuizTopic,
 } from "../lib/quizPool";
-import { isPrivateQuizCard, privateCardTitle, useQuizLabels } from "../lib/quizLabels";
+import { isPrivateQuizCard, privateCardTitle, privateSlotNumber, useQuizLabels } from "../lib/quizLabels";
 
 const BackgroundBlobs = () => (
   <>
@@ -97,7 +97,7 @@ export default function TopicQuizzes() {
       : topic === 'verbs' ? t('verbs_quiz') || "Verbs"
       : "";
     if (activeTab === 'custom' && isPrivateQuizCard(topic)) {
-      return privateCardTitle(quizLabels, topic, base, t('quiz_slot_title_placeholder'));
+      return privateCardTitle(quizLabels, topic, base, t('quiz_slot_title_placeholder', { n: privateSlotNumber(topic) }));
     }
     return base;
   }, [topic, t, isAdmin, activeTab, quizLabels]);

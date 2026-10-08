@@ -9,7 +9,7 @@ import {
   PRIVATE_QUIZ_CARDS,
   privateCardIsBlank,
   privateCardTitle,
-  privateQuizCard,
+  privateSlotNumber,
   useQuizLabels,
   type PrivateQuizTopic,
   type QuizLabelOverride,
@@ -40,6 +40,19 @@ const BackgroundBlobs = () => (
     <div className="fixed bottom-[-10%] left-[20%] w-[45vw] h-[45vw] max-w-[550px] max-h-[550px] bg-pink-200 rounded-full mix-blend-multiply filter blur-[80px] md:blur-[120px] opacity-40 animate-blob animation-delay-4000 pointer-events-none z-0"></div>
   </>
 );
+
+function PrivateQuizIntro({ t }: { t: (key: string) => string }) {
+  const parts = t('private_quizzes_intro').split('{import_link}');
+  return (
+    <p className="text-base sm:text-lg text-blue-900/70 font-medium mt-0.5 sm:mt-1 max-w-2xl">
+      {parts[0]}
+      <AppLink to="/import" className="font-bold text-blue-700 underline underline-offset-2 hover:text-blue-900">
+        {t('private_quizzes_import_link')}
+      </AppLink>
+      {parts[1] ?? ''}
+    </p>
+  );
+}
 
 type QuizTab = 'library' | 'personal' | 'marked' | 'telc';
 
@@ -120,19 +133,6 @@ export default function Quizzes() {
     }
   };
 
-  const handleResetLabel = async () => {
-    if (!editingTopic) return;
-    setSavingLabel(true);
-    try {
-      await saveTopic(editingTopic, null);
-      setEditingTopic(null);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setSavingLabel(false);
-    }
-  };
-
   const handleRemoveMarked = async (id: string | undefined, german: string) => {
     if (!id) return;
     if (!window.confirm(t('alert_confirm_delete_word') || `Remove "${german}"?`)) return;
@@ -177,8 +177,14 @@ export default function Quizzes() {
           </AppLink>
           <div className="min-w-0">
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600 tracking-tight pb-1 sm:pb-2">{t('quizzes_title')}</h1>
-            <p className="text-base sm:text-lg text-blue-900/70 font-medium mt-0.5 sm:mt-1">{t('quizzes_subtitle')}</p>
-            <p className="text-sm text-blue-900/55 font-medium mt-2 max-w-2xl">{t('seo_intro_quizzes')}</p>
+            {activeTab === 'personal' ? (
+              <PrivateQuizIntro t={t} />
+            ) : (
+              <>
+                <p className="text-base sm:text-lg text-blue-900/70 font-medium mt-0.5 sm:mt-1">{t('quizzes_subtitle')}</p>
+                <p className="text-sm text-blue-900/55 font-medium mt-2 max-w-2xl">{t('seo_intro_quizzes')}</p>
+              </>
+            )}
           </div>
         </div>
 
@@ -306,13 +312,13 @@ export default function Quizzes() {
               <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {PRIVATE_QUIZ_CARDS.map((card) => {
                   const blank = privateCardIsBlank(labels, card.topic);
-                  const title = privateCardTitle(labels, card.topic, t(card.titleKey), t('quiz_slot_title_placeholder'));
+                  const placeholder = t('quiz_slot_title_placeholder', { n: privateSlotNumber(card.topic) });
+                  const title = privateCardTitle(labels, card.topic, t(card.titleKey), placeholder);
                   return (
                   <div key={card.topic} className="group relative flex flex-col items-start p-6 rounded-[2rem] bg-white/90 backdrop-blur-xl border border-blue-50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500">
                     <AppLink to={`/quizzes/${card.topic}?tab=custom`} className="flex flex-col items-start w-full">
                       <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform duration-500">{card.icon}</div>
-                      <h3 className={`font-extrabold transition-colors text-xl mb-1 ${blank ? 'text-gray-400 italic group-hover:text-blue-500' : 'text-gray-900 group-hover:text-blue-700'}`}>{title}</h3>
-                      <p className="text-gray-600 font-medium text-sm">{card.topic === 'articles' || card.topic === 'phrases' ? t('quiz_slot_desc_placeholder') : t(card.descKey)}</p>
+                      <h3 className={`font-extrabold transition-colors text-xl ${blank ? 'text-gray-400 italic group-hover:text-blue-500' : 'text-gray-900 group-hover:text-blue-700'}`}>{title}</h3>
                     </AppLink>
                     <button
                       type="button"
@@ -341,65 +347,55 @@ export default function Quizzes() {
               </button>
             </div>
             <div className="p-6 md:p-8 overflow-y-auto space-y-4">
-              {privateQuizCard(editingTopic)?.kind === 'match' && (
-                <p className="text-sm text-gray-600">{t('rename_quiz_hint_match')}</p>
-              )}
+              <p className="text-sm text-gray-600">{t('rename_quiz_hint_match')}</p>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">{t('rename_quiz_title_label')}</label>
                 <input
                   type="text"
                   value={labelDraft.title || ''}
                   onChange={(e) => setLabelDraft((prev) => ({ ...prev, title: e.target.value }))}
-                  placeholder={privateCardIsBlank(labels, editingTopic) ? t('quiz_slot_title_placeholder') : t(privateQuizCard(editingTopic)?.titleKey || 'vocabulary_quiz')}
+                  placeholder={t('rename_quiz_title_example')}
                   maxLength={48}
-                  className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-gray-400"
                   autoFocus
                 />
               </div>
-              {privateQuizCard(editingTopic)?.kind === 'match' && (
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('rename_quiz_column_a')}</label>
-                    <input
-                      type="text"
-                      value={labelDraft.columnA || ''}
-                      onChange={(e) => setLabelDraft((prev) => ({ ...prev, columnA: e.target.value }))}
-                      placeholder={t('rename_quiz_placeholder_a')}
-                      maxLength={40}
-                      className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('rename_quiz_column_b')}</label>
-                    <input
-                      type="text"
-                      value={labelDraft.columnB || ''}
-                      onChange={(e) => setLabelDraft((prev) => ({ ...prev, columnB: e.target.value }))}
-                      placeholder={t('rename_quiz_placeholder_b')}
-                      maxLength={40}
-                      className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('rename_quiz_column_c')}</label>
-                    <input
-                      type="text"
-                      value={labelDraft.columnC || ''}
-                      onChange={(e) => setLabelDraft((prev) => ({ ...prev, columnC: e.target.value }))}
-                      placeholder={t('rename_quiz_placeholder_c')}
-                      maxLength={40}
-                      className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('rename_quiz_column_a')}</label>
+                  <input
+                    type="text"
+                    value={labelDraft.columnA || ''}
+                    onChange={(e) => setLabelDraft((prev) => ({ ...prev, columnA: e.target.value }))}
+                    maxLength={40}
+                    className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
                 </div>
-              )}
-            </div>
-            <div className="p-6 md:p-8 border-t border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row justify-between gap-3">
-              <button type="button" onClick={handleResetLabel} disabled={savingLabel} className="px-4 py-3 font-bold text-gray-600 hover:bg-gray-200 rounded-xl transition-colors disabled:opacity-50">{t('rename_quiz_reset')}</button>
-              <div className="flex gap-3">
-                <button type="button" onClick={() => setEditingTopic(null)} disabled={savingLabel} className="px-4 py-3 font-bold text-gray-600 hover:bg-gray-200 rounded-xl transition-colors disabled:opacity-50">{t('cancel')}</button>
-                <button type="button" onClick={handleSaveLabel} disabled={savingLabel} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl shadow-sm transition-colors disabled:opacity-50">{t('rename_quiz_save')}</button>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('rename_quiz_column_b')}</label>
+                  <input
+                    type="text"
+                    value={labelDraft.columnB || ''}
+                    onChange={(e) => setLabelDraft((prev) => ({ ...prev, columnB: e.target.value }))}
+                    maxLength={40}
+                    className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('rename_quiz_column_c')}</label>
+                  <input
+                    type="text"
+                    value={labelDraft.columnC || ''}
+                    onChange={(e) => setLabelDraft((prev) => ({ ...prev, columnC: e.target.value }))}
+                    maxLength={40}
+                    className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
               </div>
+            </div>
+            <div className="p-6 md:p-8 border-t border-gray-100 bg-gray-50/50 flex justify-end gap-3">
+              <button type="button" onClick={() => setEditingTopic(null)} disabled={savingLabel} className="px-4 py-3 font-bold text-gray-600 hover:bg-gray-200 rounded-xl transition-colors disabled:opacity-50">{t('cancel')}</button>
+              <button type="button" onClick={handleSaveLabel} disabled={savingLabel} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl shadow-sm transition-colors disabled:opacity-50">{t('rename_quiz_save')}</button>
             </div>
           </div>
         </div>

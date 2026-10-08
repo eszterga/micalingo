@@ -1,6 +1,6 @@
-import { privateCardIsBlank, privateQuizCard, quizDisplayTitle, type QuizLabelMap } from '../lib/quizLabels';
+import { privateCardIsBlank, privateQuizCard, privateSlotNumber, quizDisplayTitle, type QuizLabelMap } from '../lib/quizLabels';
 
-type Translate = (key: string) => string;
+type Translate = (key: string, replacements?: Record<string, string | number>) => string;
 
 /** Save-to list. Custom private titles replace the default quiz names. */
 export function QuizCategoryOptions({
@@ -16,13 +16,13 @@ export function QuizCategoryOptions({
   includeReading?: boolean;
   includeTelc?: boolean;
   includePublicExtras?: boolean;
-  /** Personal library: unnamed article/phrase slots show the fill-in label. */
+  /** Personal library: unnamed private slots show the fill-in label. */
   blankUntilTitled?: boolean;
 }) {
   const title = (topic: 'vocabulary' | 'articles' | 'phrases' | 'prepositions' | 'adjectives' | 'verbs', key: string) => {
     if (blankUntilTitled && privateCardIsBlank(labels, topic)) {
       const icon = privateQuizCard(topic)?.icon;
-      const label = t('quiz_slot_title_placeholder');
+      const label = t('quiz_slot_title_placeholder', { n: privateSlotNumber(topic) });
       return icon ? `${icon} ${label}` : label;
     }
     return quizDisplayTitle(labels, topic, t(key));
