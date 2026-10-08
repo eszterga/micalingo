@@ -21,6 +21,7 @@ import { doc, setDoc } from 'firebase/firestore';
 import { dbCloud } from '../lib/firebase';
 import * as XLSX from 'xlsx';
 import { downloadWorkbook } from '../lib/downloadWorkbook';
+import { trackEvent } from '../lib/analytics';
 import { Capacitor } from '@capacitor/core';
 import { App as CapacitorApp } from '@capacitor/app';
 import {
@@ -572,7 +573,24 @@ export default function Quiz() {
     };
   }, [quizState, quizzesBackPath, navigate]);
 
+  useEffect(() => {
+    if (quizState !== 'ongoing' || questions.length === 0) return;
+    trackEvent('quiz_start', {
+      topic: (topic || 'general').slice(0, 100),
+      quiz_id: quizId,
+      quiz_kind: isCustom ? 'custom' : 'public',
+      question_count: questions.length,
+    });
+  }, [quizState, questions.length, topic, quizId, isCustom]);
+
   const finishQuiz = async (finalScore: number, answersOverride?: string[]) => {
+    trackEvent('quiz_complete', {
+      topic: (topic || 'general').slice(0, 100),
+      quiz_id: quizId,
+      quiz_kind: isCustom ? 'custom' : 'public',
+      score: finalScore,
+      question_count: questions.length,
+    });
     const key = user ? `micalingo_scores_${user.uid}` : 'micalingo_guest_scores';
     const scores = JSON.parse(localStorage.getItem(key) || '{}');
     const quizKey = isCustom ? `custom_${topic || 'general'}_${quizId}` : `${topic || 'custom'}_${quizId}`;

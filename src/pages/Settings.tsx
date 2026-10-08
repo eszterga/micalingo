@@ -556,13 +556,16 @@ export default function Settings() {
           <h2 className="text-2xl font-extrabold text-blue-950 mb-2">{t('cookie_settings_title')}</h2>
           <p className="text-blue-900/70 text-sm mb-4 font-medium">{t('cookie_settings_desc')}</p>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between p-5 bg-white/50 rounded-2xl border border-blue-50 shadow-sm gap-4">
-            <p className="text-sm font-medium text-blue-900/70">
-              {cookieConsent == null
-                ? t('cookie_settings_status_unset')
-                : cookieConsent.advertising
-                  ? t('cookie_settings_status_accepted')
-                  : t('cookie_settings_status_rejected')}
-            </p>
+            <div className="text-sm font-medium text-blue-900/70 space-y-1">
+              {cookieConsent == null ? (
+                <p>{t('cookie_settings_status_unset')}</p>
+              ) : (
+                <>
+                  <p>{cookieConsent.analytics ? t('cookie_settings_analytics_on') : t('cookie_settings_analytics_off')}</p>
+                  <p>{cookieConsent.advertising ? t('cookie_settings_status_accepted') : t('cookie_settings_status_rejected')}</p>
+                </>
+              )}
+            </div>
             <button
               type="button"
               onClick={openCookieSettings}

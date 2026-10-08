@@ -48,11 +48,14 @@
         var stored = localStorage.getItem('micalingo_cookie_consent');
         if (stored) {
           var consent = JSON.parse(stored);
-          if (consent && consent.advertising === true) {
+          if (consent && consent.version === 2) {
+            var ads = consent.advertising === true ? 'granted' : 'denied';
+            var stats = consent.analytics === true ? 'granted' : 'denied';
             gtag('consent', 'update', {
-              ad_storage: 'granted',
-              ad_user_data: 'granted',
-              ad_personalization: 'granted'
+              ad_storage: ads,
+              ad_user_data: ads,
+              ad_personalization: ads,
+              analytics_storage: stats
             });
           }
         }

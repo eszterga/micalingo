@@ -6,6 +6,7 @@ import { useI18n } from '../I18nContext';
 import { Capacitor } from '@capacitor/core';
 import { App as CapacitorApp } from '@capacitor/app';
 import { openCookieSettings } from '../lib/consent';
+import { trackEvent } from '../lib/analytics';
 
 const BackgroundBlobs = () => (
   <>
@@ -70,6 +71,7 @@ export default function Layout() {
     };
 
     const handleOpenSupportModal = () => {
+      trackEvent('support_click', { source: 'page_link' });
       setIsSupportModalOpen(true);
     };
   
@@ -118,10 +120,10 @@ export default function Layout() {
     : 'max(2rem, calc(env(safe-area-inset-top, 0px) + 0.5rem))';
 
   const supportTiers = [
-    { href: 'https://buy.stripe.com/7sY9AM8HY345eAcb1a4Ja05', label: t('support_tier_1') || 'Coffee Tier', amount: '€3', featured: false },
-    { href: 'https://donate.stripe.com/28EcMYcYecEFcs4d9i4Ja01', label: t('support_tier_2') || 'Snack Tier', amount: '€5', featured: false },
-    { href: 'https://donate.stripe.com/9B6bIU8HYeMN1Nq0mw4Ja02', label: t('support_tier_3') || 'Drink Tier', amount: '€8', featured: false },
-    { href: 'https://donate.stripe.com/9B67sE5vMawxfEgb1a4Ja03', label: t('support_tier_4') || 'Hero Tier 🚀', amount: '€10', featured: true },
+    { id: 'coffee', href: 'https://buy.stripe.com/7sY9AM8HY345eAcb1a4Ja05', label: t('support_tier_1') || 'Coffee Tier', amount: '€3', amountEur: 3, featured: false },
+    { id: 'snack', href: 'https://donate.stripe.com/28EcMYcYecEFcs4d9i4Ja01', label: t('support_tier_2') || 'Snack Tier', amount: '€5', amountEur: 5, featured: false },
+    { id: 'drink', href: 'https://donate.stripe.com/9B6bIU8HYeMN1Nq0mw4Ja02', label: t('support_tier_3') || 'Drink Tier', amount: '€8', amountEur: 8, featured: false },
+    { id: 'hero', href: 'https://donate.stripe.com/9B67sE5vMawxfEgb1a4Ja03', label: t('support_tier_4') || 'Hero Tier 🚀', amount: '€10', amountEur: 10, featured: true },
   ];
   const customSupportUrl = 'https://buy.stripe.com/aFaeV64rI8opajWedm4Ja04';
 
@@ -133,7 +135,8 @@ export default function Layout() {
 
   // On Capacitor, target=_blank often no-ops. Top-level navigation to a non-allowlisted
   // host is handed off to the system browser, matching desktop "open Stripe" behavior.
-  const openDonateUrl = (url: string) => {
+  const openDonateUrl = (url: string, tier: string, amountEur: number) => {
+    trackEvent('support_checkout', { tier, amount_eur: amountEur });
     closeSupportModal();
     if (Capacitor.isNativePlatform()) {
       window.location.href = url;
@@ -156,7 +159,7 @@ export default function Layout() {
       setCustomAmountError(true);
       return;
     }
-    openDonateUrl(`${customSupportUrl}?prefilled_amount=${cents}`);
+    openDonateUrl(`${customSupportUrl}?prefilled_amount=${cents}`, 'custom', cents / 100);
   };
 
   return (
@@ -263,7 +266,10 @@ export default function Layout() {
                   <a 
                     href="/MicaLingo_v7.apk" 
                     download="MicaLingo_v7.apk"
-                    onClick={() => setIsMobileMenuOpen(false)}
+                    onClick={() => {
+                      trackEvent('app_download', { source: 'menu' });
+                      setIsMobileMenuOpen(false);
+                    }}
                     className="flex items-center gap-3 px-4 py-3 rounded-lg bg-purple-600/20 text-purple-200 hover:bg-purple-600/40 transition-colors border border-purple-500/30"
                   >
                     <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
@@ -278,6 +284,7 @@ export default function Layout() {
                 <button
                   type="button"
                   onClick={() => {
+                    trackEvent('support_click', { source: 'menu' });
                     setIsMobileMenuOpen(false);
                     setIsSupportModalOpen(true);
                   }}
@@ -419,7 +426,10 @@ export default function Layout() {
 
       <button
         type="button"
-        onClick={() => setIsSupportModalOpen(true)}
+        onClick={() => {
+          trackEvent('support_click', { source: 'button' });
+          setIsSupportModalOpen(true);
+        }}
         aria-label={t('support_micalingo') || 'Support MicaLingo'}
         className="fixed z-40 flex items-center gap-2 px-4 py-2.5 max-w-[calc(100vw-2rem)] bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold rounded-full shadow-lg hover:scale-105 hover:shadow-xl transition-all duration-300 text-sm md:text-base"
         style={{
@@ -477,7 +487,7 @@ export default function Layout() {
                   rel="noopener noreferrer"
                   onClick={(e) => {
                     e.preventDefault();
-                    openDonateUrl(tier.href);
+                    openDonateUrl(tier.href, tier.id, tier.amountEur);
                   }}
                   className={
                     tier.featured
@@ -561,6 +571,7 @@ export default function Layout() {
               <button
                 type="button"
                 onClick={() => {
+                  trackEvent('support_click', { source: 'prompt' });
                   setShowConsiderSupport(false);
                   setIsSupportModalOpen(true);
                 }}

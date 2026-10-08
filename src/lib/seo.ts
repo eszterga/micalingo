@@ -286,9 +286,9 @@ const ROUTES: Record<string, Localized> = {
     hu: { title: 'ÁSZF | MicaLingo', description: 'A MicaLingo használati feltételei.', keywords: 'MicaLingo ÁSZF' },
   },
   '/cookies': {
-    en: { title: 'Cookie Policy | MicaLingo', description: 'How MicaLingo and Google use cookies, including advertising cookies for AdSense.', keywords: 'MicaLingo cookies' },
-    de: { title: 'Cookie-Richtlinie | MicaLingo', description: 'Wie MicaLingo und Google Cookies verwenden, einschließlich Werbe-Cookies für AdSense.', keywords: 'MicaLingo Cookies' },
-    hu: { title: 'Süti szabályzat | MicaLingo', description: 'Hogyan használja a MicaLingo és a Google a sütiket, beleértve a hirdetési sütiket.', keywords: 'MicaLingo sütik' },
+    en: { title: 'Cookie Policy | MicaLingo', description: 'How MicaLingo and Google use cookies, including analytics and advertising cookies.', keywords: 'MicaLingo cookies' },
+    de: { title: 'Cookie-Richtlinie | MicaLingo', description: 'Wie MicaLingo und Google Cookies verwenden, einschließlich Statistik- und Werbe-Cookies.', keywords: 'MicaLingo Cookies' },
+    hu: { title: 'Süti szabályzat | MicaLingo', description: 'Hogyan használja a MicaLingo és a Google a sütiket, beleértve a statisztikai és hirdetési sütiket.', keywords: 'MicaLingo sütik' },
   },
   '/impressum': {
     en: { title: 'Impressum | MicaLingo', description: 'Legal notice and operator information for MicaLingo.', keywords: 'MicaLingo impressum' },

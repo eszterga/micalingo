@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
-import React, { Suspense } from "react";
+import React, { Suspense, useEffect } from "react";
+import { installAnalytics, trackPageView } from "./lib/analytics";
+import { CONSENT_CHANGED_EVENT } from "./lib/consent";
 import Layout from "./components/Layout";
 import AdminPrompt from "./components/AdminPrompt";
 import SeoManager from "./components/SeoManager";
@@ -118,10 +120,26 @@ function AppRoutes() {
   );
 }
 
+function AnalyticsTracker() {
+  const location = useLocation();
+
+  useEffect(() => installAnalytics(), []);
+
+  useEffect(() => {
+    const send = () => trackPageView(`${location.pathname}${location.search}`);
+    send();
+    window.addEventListener(CONSENT_CHANGED_EVENT, send);
+    return () => window.removeEventListener(CONSENT_CHANGED_EVENT, send);
+  }, [location.pathname, location.search]);
+
+  return null;
+}
+
 // Main Application Router
 export default function App() {
   return (
     <BrowserRouter>
+      <AnalyticsTracker />
       <SeoManager />
       <AdminPrompt />
       <AdController />

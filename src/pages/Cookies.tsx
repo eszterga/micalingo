@@ -1,3 +1,4 @@
+import { Fragment } from 'react';
 import { Link } from 'react-router-dom';
 import { useI18n } from '../I18nContext';
 import { LegalParagraph } from '../components/LegalText';
@@ -18,10 +19,18 @@ export default function Cookies() {
         <LegalParagraph text={t('cookies_intro')} className="mb-8" />
         <div className="space-y-8">
           {SECTION_KEYS.map((n) => (
-            <section key={n}>
-              <h2 className="text-lg font-extrabold text-blue-900 mb-2">{t(`cookies_s${n}_title`)}</h2>
-              <LegalParagraph text={t(`cookies_s${n}_body`)} />
-            </section>
+            <Fragment key={n}>
+              <section>
+                <h2 className="text-lg font-extrabold text-blue-900 mb-2">{t(`cookies_s${n}_title`)}</h2>
+                <LegalParagraph text={t(`cookies_s${n}_body`)} />
+              </section>
+              {n === 3 && (
+                <section>
+                  <h2 className="text-lg font-extrabold text-blue-900 mb-2">{t('cookies_analytics_title')}</h2>
+                  <LegalParagraph text={t('cookies_analytics_body')} />
+                </section>
+              )}
+            </Fragment>
           ))}
         </div>
       </article>

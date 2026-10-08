@@ -15,20 +15,23 @@ export default function CookieBanner() {
   const [visible, setVisible] = useState(false);
   const [customize, setCustomize] = useState(false);
   const [adsEnabled, setAdsEnabled] = useState(false);
+  const [analyticsEnabled, setAnalyticsEnabled] = useState(false);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
     const stored = readConsent();
     setConsent(stored);
     setAdsEnabled(stored?.advertising ?? false);
+    setAnalyticsEnabled(stored?.analytics ?? false);
     setVisible(!stored);
     setReady(true);
-    if (stored) applyGoogleConsent(stored.advertising);
+    if (stored) applyGoogleConsent(stored.advertising, stored.analytics);
 
     const reopen = () => {
       const current = readConsent();
       setConsent(current);
       setAdsEnabled(current?.advertising ?? false);
+      setAnalyticsEnabled(current?.analytics ?? false);
       setCustomize(true);
       setVisible(true);
     };
@@ -39,10 +42,11 @@ export default function CookieBanner() {
 
   if (!ready || !visible) return null;
 
-  const apply = (advertising: boolean) => {
-    const next = saveConsent(advertising);
+  const apply = (advertising: boolean, analytics: boolean) => {
+    const next = saveConsent(advertising, analytics);
     setConsent(next);
     setAdsEnabled(advertising);
+    setAnalyticsEnabled(analytics);
     setCustomize(false);
     setVisible(false);
   };
@@ -85,6 +89,18 @@ export default function CookieBanner() {
             </div>
             <label className="flex items-start justify-between gap-4 p-4 rounded-2xl bg-white border border-blue-100 cursor-pointer">
               <div>
+                <p className="font-extrabold text-blue-950">{t('cookie_banner_analytics')}</p>
+                <p className="text-xs text-blue-900/70 mt-1 font-medium">{t('cookie_banner_analytics_desc')}</p>
+              </div>
+              <input
+                type="checkbox"
+                className="mt-1 h-5 w-5 accent-blue-600"
+                checked={analyticsEnabled}
+                onChange={(event) => setAnalyticsEnabled(event.target.checked)}
+              />
+            </label>
+            <label className="flex items-start justify-between gap-4 p-4 rounded-2xl bg-white border border-blue-100 cursor-pointer">
+              <div>
                 <p className="font-extrabold text-blue-950">{t('cookie_banner_ads')}</p>
                 <p className="text-xs text-blue-900/70 mt-1 font-medium">{t('cookie_banner_ads_desc')}</p>
               </div>
@@ -101,14 +117,14 @@ export default function CookieBanner() {
         <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2">
           <button
             type="button"
-            onClick={() => apply(true)}
+            onClick={() => apply(true, true)}
             className="sm:flex-1 px-4 py-2.5 rounded-xl bg-blue-700 text-white font-bold hover:bg-blue-800 transition-colors"
           >
             {t('cookie_banner_accept')}
           </button>
           <button
             type="button"
-            onClick={() => apply(false)}
+            onClick={() => apply(false, false)}
             className="sm:flex-1 px-4 py-2.5 rounded-xl bg-white border border-blue-200 text-blue-900 font-bold hover:bg-blue-50 transition-colors"
           >
             {t('cookie_banner_reject')}
@@ -116,7 +132,7 @@ export default function CookieBanner() {
           {customize ? (
             <button
               type="button"
-              onClick={() => apply(adsEnabled)}
+              onClick={() => apply(adsEnabled, analyticsEnabled)}
               className="sm:flex-1 px-4 py-2.5 rounded-xl bg-blue-100 text-blue-950 font-bold hover:bg-blue-200 transition-colors"
             >
               {t('cookie_banner_save')}
@@ -126,6 +142,7 @@ export default function CookieBanner() {
               type="button"
               onClick={() => {
                 setAdsEnabled(consent?.advertising ?? false);
+                setAnalyticsEnabled(consent?.analytics ?? false);
                 setCustomize(true);
               }}
               className="sm:flex-1 px-4 py-2.5 rounded-xl bg-blue-100 text-blue-950 font-bold hover:bg-blue-200 transition-colors"

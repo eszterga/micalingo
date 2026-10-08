@@ -1,5 +1,5 @@
 export const CONSENT_STORAGE_KEY = 'micalingo_cookie_consent';
-export const CONSENT_VERSION = 1;
+export const CONSENT_VERSION = 2;
 export const CONSENT_CHANGED_EVENT = 'micalingo-consent-changed';
 export const OPEN_COOKIE_SETTINGS_EVENT = 'openCookieSettings';
 
@@ -7,6 +7,7 @@ export type CookieConsent = {
   version: number;
   necessary: true;
   advertising: boolean;
+  analytics: boolean;
   updatedAt: string;
 };
 
@@ -26,13 +27,18 @@ export function readConsent(): CookieConsent | null {
     const raw = localStorage.getItem(CONSENT_STORAGE_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as Partial<CookieConsent>;
-    if (parsed.version !== CONSENT_VERSION || typeof parsed.advertising !== 'boolean') {
+    if (
+      parsed.version !== CONSENT_VERSION ||
+      typeof parsed.advertising !== 'boolean' ||
+      typeof parsed.analytics !== 'boolean'
+    ) {
       return null;
     }
     return {
       version: CONSENT_VERSION,
       necessary: true,
       advertising: parsed.advertising,
+      analytics: parsed.analytics,
       updatedAt: typeof parsed.updatedAt === 'string' ? parsed.updatedAt : new Date().toISOString(),
     };
   } catch {
@@ -40,13 +46,14 @@ export function readConsent(): CookieConsent | null {
   }
 }
 
-export function applyGoogleConsent(advertising: boolean) {
-  const state = advertising ? 'granted' : 'denied';
+export function applyGoogleConsent(advertising: boolean, analytics: boolean) {
+  const ads = advertising ? 'granted' : 'denied';
+  const stats = analytics ? 'granted' : 'denied';
   const payload = {
-    ad_storage: state,
-    ad_user_data: state,
-    ad_personalization: state,
-    analytics_storage: 'denied',
+    ad_storage: ads,
+    ad_user_data: ads,
+    ad_personalization: ads,
+    analytics_storage: stats,
   };
 
   if (typeof window.gtag === 'function') {
@@ -58,15 +65,16 @@ export function applyGoogleConsent(advertising: boolean) {
   window.dataLayer.push(['consent', 'update', payload]);
 }
 
-export function saveConsent(advertising: boolean): CookieConsent {
+export function saveConsent(advertising: boolean, analytics: boolean): CookieConsent {
   const consent: CookieConsent = {
     version: CONSENT_VERSION,
     necessary: true,
     advertising,
+    analytics,
     updatedAt: new Date().toISOString(),
   };
   localStorage.setItem(CONSENT_STORAGE_KEY, JSON.stringify(consent));
-  applyGoogleConsent(advertising);
+  applyGoogleConsent(advertising, analytics);
   notifyConsentChanged();
   return consent;
 }
