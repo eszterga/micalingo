@@ -1,6 +1,8 @@
 ﻿import { useState, useEffect, useMemo } from "react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthContext";
+import { useQuizLabels } from "../lib/quizLabels";
+import { QuizCategoryOptions } from "../components/QuizCategoryOptions";
 import { 
   useCloudVocabulary, 
   addCloudWord, 
@@ -43,6 +45,7 @@ export default function Vocabulary() {
   const personalWordsRaw = useCloudVocabulary(user?.uid);
   const publicDbWords = useCloudVocabulary("PUBLIC_LIBRARY") || [];
   const { t } = useI18n();
+  const { labels: quizLabels } = useQuizLabels(user?.uid);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -762,12 +765,7 @@ export default function Vocabulary() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">{t('modal_category_label') || 'Quiz category'}</label>
                 <select value={moveTargetCategory} onChange={(e) => setMoveTargetCategory(e.target.value)} className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50">
-                  <option value="vocabulary">{t('dropdown_vocabulary') || 'Vocabulary quiz'}</option>
-                  <option value="articles">{t('dropdown_articles') || 'Articles quiz'}</option>
-                  <option value="phrases">{t('dropdown_phrases') || 'Phrases and sentences quiz'}</option>
-                  <option value="prepositions">{t('dropdown_prepositions') || 'Prepositions quiz'}</option>
-                  <option value="adjectives">{t('dropdown_adjectives') || 'Adjectives quiz'}</option>
-                  <option value="verbs">{t('dropdown_verbs') || 'Verbs quiz'}</option>
+                  <QuizCategoryOptions labels={quizLabels} t={t} />
                 </select>
               </div>
             </div>

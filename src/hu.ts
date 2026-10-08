@@ -54,7 +54,7 @@ export const hu = {
   verbs_quiz: "Igék",
   verbs_quiz_subtitle: "Gyakorold az igéket, a ragozást és a múlt időket.",
   create_your_own_quizzes: "Saját kvízek",
-  create_your_own_quizzes_subtitle_loggedin: "Gyakorolj a saját magad által felépített adatbázisból!",
+  create_your_own_quizzes_subtitle_loggedin: "Gyakorolj a saját adatbázisoddal!",
   vocabulary_quiz: "Szókincs",
   create_your_own_quizzes_subtitle_loggedout: "Jelentkezz be saját kvízek készítéséhez.",
   login_to_create_quizzes: "Bejelentkezés",

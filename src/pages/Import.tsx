@@ -9,6 +9,8 @@ import { publicVocabulary, publicPhrases, publicArticles, publicPrepositions, pu
 import { useCloudVocabulary, addCloudWord, bulkAddCloudWords, bulkDeleteCloudWords, updateCloudWord, purgeVocabDuplicatesKeeping, purgeSoftDeletedVocabSiblings, isActiveVocabItem, findVocabDuplicate, vocabCategoryKey, vocabGermanKey } from "../lib/firestore";
 import { useI18n } from "../I18nContext";
 import { isPrivateQuizTopic } from "../lib/quizPool";
+import { isMatchQuizTopic, matchColumnLabel, useQuizLabels } from "../lib/quizLabels";
+import { QuizCategoryOptions } from "../components/QuizCategoryOptions";
 
 const getEditItemKey = (item: any, idx: number) => String(item?.id ?? `idx_${idx}`);
 
@@ -92,6 +94,7 @@ export default function Import() {
   const [destination, setDestination] = useState(initialDestination);
   const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
   const { t } = useI18n();
+  const { labels: quizLabels } = useQuizLabels(user?.uid);
   const [previewItems, setPreviewItems] = useState<any[]>([]);
 
   const [editingFile, setEditingFile] = useState<string | null>(null);
@@ -1259,21 +1262,21 @@ export default function Import() {
                       </>
                     ) : destination === 'adjectives' ? (
                       <>
-                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('adjective') || 'Adjective'} <span className="text-xs font-normal text-gray-500 block">{t('column_a')}</span></th>
-                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('hungarian')} <span className="text-xs font-normal text-gray-500 block">{t('column_b')}</span></th>
-                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('levels') || 'Levels'} <span className="text-xs font-normal text-gray-500 block">{t('column_c')}</span></th>
+                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{matchColumnLabel(quizLabels, destination, 'a', t('adjective') || 'Adjective')} <span className="text-xs font-normal text-gray-500 block">{t('column_a')}</span></th>
+                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{matchColumnLabel(quizLabels, destination, 'b', t('hungarian'))} <span className="text-xs font-normal text-gray-500 block">{t('column_b')}</span></th>
+                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{matchColumnLabel(quizLabels, destination, 'c', t('levels') || 'Levels')} <span className="text-xs font-normal text-gray-500 block">{t('column_c')}</span></th>
                       </>
                     ) : destination === 'verbs' ? (
                       <>
-                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('german')} <span className="text-xs font-normal text-gray-500 block">{t('column_a')}</span></th>
-                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('hungarian')} <span className="text-xs font-normal text-gray-500 block">{t('column_b')}</span></th>
-                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('hint') || 'Hint / Past Form'} <span className="text-xs font-normal text-gray-500 block">{t('column_c')}</span></th>
+                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{matchColumnLabel(quizLabels, destination, 'a', t('german'))} <span className="text-xs font-normal text-gray-500 block">{t('column_a')}</span></th>
+                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{matchColumnLabel(quizLabels, destination, 'b', t('hungarian'))} <span className="text-xs font-normal text-gray-500 block">{t('column_b')}</span></th>
+                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{matchColumnLabel(quizLabels, destination, 'c', t('hint') || 'Hint / Past Form')} <span className="text-xs font-normal text-gray-500 block">{t('column_c')}</span></th>
                       </>
                     ) : (
                       <>
-                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('german')} <span className="text-xs font-normal text-gray-500 block">{t('column_a')}</span></th>
-                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('hungarian')} <span className="text-xs font-normal text-gray-500 block">{t('column_b')}</span></th>
-                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('example')} <span className="text-xs font-normal text-gray-500 block">{t('column_c_d')}</span></th>
+                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{matchColumnLabel(quizLabels, destination, 'a', t('german'))} <span className="text-xs font-normal text-gray-500 block">{t('column_a')}</span></th>
+                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{matchColumnLabel(quizLabels, destination, 'b', t('hungarian'))} <span className="text-xs font-normal text-gray-500 block">{t('column_b')}</span></th>
+                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{matchColumnLabel(quizLabels, destination, 'c', t('example'))} <span className="text-xs font-normal text-gray-500 block">{t('column_c_d')}</span></th>
                       </>
                     )}
                     <th className="p-2 sm:p-3 w-10"></th>
@@ -1341,30 +1344,37 @@ export default function Import() {
 
           <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between pt-4 border-t border-gray-200 gap-4">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full lg:w-auto">
-              <div className="flex items-center gap-3 w-full sm:w-auto">
+              <div className="flex flex-col gap-1 w-full sm:w-auto">
+                <div className="flex items-center gap-3 w-full sm:w-auto">
                 <label className="text-sm font-medium text-gray-700 whitespace-nowrap">{t('save_to')}</label>
                 <select
                   value={destination}
                   onChange={(e) => setDestination(e.target.value)}
                   className="bg-white border border-gray-200 text-gray-900 font-medium rounded-xl focus:ring-2 focus:ring-blue-500 block w-full p-3 shadow-sm outline-none"
                 >
-                  <option value="vocabulary">{t('dropdown_vocabulary') || 'Vocabulary quiz'}</option>
-                  <option value="reading">{t('dropdown_reading') || 'Vocabulary (to read)'}</option>
-                  <option value="articles">{t('dropdown_articles') || 'Articles quiz'}</option>
-                  <option value="phrases">{t('dropdown_phrases') || 'Phrases and sentences quiz'}</option>
-                  <option value="prepositions">{t('dropdown_prepositions') || 'Prepositions quiz'}</option>
-                  <option value="adjectives">{t('dropdown_adjectives') || 'Adjectives quiz'}</option>
-                  <option value="verbs">{t('dropdown_verbs') || 'Verbs quiz'}</option>
-                  {isAdmin && (
-                    <option value="telc-b2">{t('dropdown_telc_b2') || 'Telc B2 (private)'}</option>
-                  )}
-                  {isAdmin && adminMode && saveToPublic && (
-                    <>
-                      <option value="false_friends">{t('false_friends') || 'False Friends'}</option>
-                      <option value="idioms">{t('idioms') || 'Idioms'}</option>
-                    </>
-                  )}
+                  <QuizCategoryOptions
+                    labels={quizLabels}
+                    t={t}
+                    includeReading
+                    includeTelc={isAdmin}
+                    includePublicExtras={isAdmin && adminMode && saveToPublic}
+                  />
                 </select>
+                </div>
+                {isMatchQuizTopic(destination) && (
+                  <p className="text-xs text-gray-500 sm:pl-[4.5rem]">
+                    {t('import_custom_columns_hint', {
+                      a: matchColumnLabel(quizLabels, destination, 'a', t('german')),
+                      b: matchColumnLabel(quizLabels, destination, 'b', t('hungarian')),
+                      c: matchColumnLabel(
+                        quizLabels,
+                        destination,
+                        'c',
+                        destination === 'adjectives' ? (t('levels') || 'Levels') : destination === 'verbs' ? (t('hint') || 'Hint') : t('example')
+                      ),
+                    })}
+                  </p>
+                )}
               </div>
             </div>
             <div className="w-full lg:w-auto flex flex-col sm:flex-row gap-3 justify-end">
@@ -1402,22 +1412,13 @@ export default function Import() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">{t('modal_category_label') || 'Category'}</label>
                 <select value={newCategory} onChange={(e) => setNewCategory(e.target.value)} className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50">
-                  <option value="vocabulary">{t('dropdown_vocabulary') || 'Vocabulary quiz'}</option>
-                  <option value="reading">{t('dropdown_reading') || 'Vocabulary (to read)'}</option>
-                  <option value="articles">{t('dropdown_articles') || 'Articles quiz'}</option>
-                  <option value="phrases">{t('dropdown_phrases') || 'Phrases and sentences quiz'}</option>
-                  <option value="prepositions">{t('dropdown_prepositions') || 'Prepositions quiz'}</option>
-                  <option value="adjectives">{t('dropdown_adjectives') || 'Adjectives quiz'}</option>
-                  <option value="verbs">{t('dropdown_verbs') || 'Verbs quiz'}</option>
-                  {isAdmin && (
-                    <option value="telc-b2">{t('dropdown_telc_b2') || 'Telc B2 (private)'}</option>
-                  )}
-                  {isAdmin && adminMode && saveToPublic && (
-                    <>
-                      <option value="false_friends">{t('false_friends') || 'False Friends'}</option>
-                      <option value="idioms">{t('idioms') || 'Idioms'}</option>
-                    </>
-                  )}
+                  <QuizCategoryOptions
+                    labels={quizLabels}
+                    t={t}
+                    includeReading
+                    includeTelc={isAdmin}
+                    includePublicExtras={isAdmin && adminMode && saveToPublic}
+                  />
                 </select>
               </div>
              {(() => {
@@ -1445,6 +1446,30 @@ export default function Import() {
                 germanLabel = t('idiom_german_label') || "German Idiom *";
                 germanPlaceholder = t('idiom_german_placeholder') || "e.g. Ich verstehe nur Bahnhof";
                 hungarianPlaceholder = t('idiom_hungarian_placeholder') || "e.g. Nekem ez kínai";
+              }
+              let hungarianLabel = newCategory === 'idioms'
+                ? (t('idiom_hungarian_label') || 'Hungarian Meaning *')
+                : newCategory === 'prepositions'
+                  ? (t('prep_case_label') || 'Preposition + Case *')
+                  : t('modal_hungarian_label');
+              let exampleLabel = newCategory === 'idioms'
+                ? (t('explanation_label') || 'Explanation')
+                : newCategory === 'prepositions'
+                  ? (t('meaning_example_label') || 'Example Sentence')
+                  : t('modal_example_label');
+              if (isMatchQuizTopic(newCategory)) {
+                const customA = quizLabels[newCategory]?.columnA;
+                const customB = quizLabels[newCategory]?.columnB;
+                const customC = quizLabels[newCategory]?.columnC;
+                if (customA) {
+                  germanLabel = customA;
+                  germanPlaceholder = customA;
+                }
+                if (customB) {
+                  hungarianLabel = customB;
+                  hungarianPlaceholder = customB;
+                }
+                if (customC) exampleLabel = customC;
               }
               return (
                 <div className="space-y-4">
@@ -1488,7 +1513,7 @@ export default function Import() {
                 </div>
               )}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{newCategory === 'idioms' ? (t('idiom_hungarian_label') || 'Hungarian Meaning *') : newCategory === 'prepositions' ? (t('prep_case_label') || 'Preposition + Case *') : t('modal_hungarian_label')}</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{hungarianLabel}</label>
                 <input
                   type="text"
                   value={newHungarian}
@@ -1498,7 +1523,7 @@ export default function Import() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{newCategory === 'idioms' ? (t('explanation_label') || 'Explanation') : newCategory === 'prepositions' ? (t('meaning_example_label') || 'Example Sentence') : t('modal_example_label')}</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{exampleLabel}</label>
                 <input
                   type="text"
                   value={newExample}

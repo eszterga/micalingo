@@ -10,9 +10,6 @@ import { addCloudWord, useCloudVocabulary, findVocabDuplicate, vocabCategoryKey 
 import { ImageLightbox, useImageLightbox } from '../components/ImageLightbox';
 import ArticleContent from '../components/ArticleContent';
 import EditorFormatControls from '../components/EditorFormatControls';
-import ArticleBody from '../components/ArticleBody';
-import { grammarIndexArticle } from '../lib/learnContent';
-import type { LearnLang } from '../lib/learnContent';
 import {
   getSelectionBookmark,
   type SelectionBookmark,
@@ -39,7 +36,7 @@ const BackgroundBlobs = () => (
 );
 
 export default function Grammar() {
-  const { t, language } = useI18n();
+  const { t } = useI18n();
   const { user, isAdmin, adminMode } = useAuth();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -573,8 +570,9 @@ export default function Grammar() {
             {t('back_button')}
           </AppLink>
           <div>
-            <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600 tracking-tight pb-2">{t('grammar_page_title')}</h1>
-            <p className="text-lg text-blue-900/70 font-medium mt-1">{t('grammar_page_subtitle')}</p>
+            <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600 tracking-tight pb-2">{t(activeTab === 'private' ? 'grammar_page_title_private' : 'grammar_page_title')}</h1>
+            <p className="text-lg text-blue-900/70 font-medium mt-1">{t(activeTab === 'private' ? 'grammar_page_subtitle_private' : 'grammar_page_subtitle')}</p>
+            {activeTab === 'public' && (
             <nav className="flex flex-wrap gap-2 mt-3" aria-label={t('grammar_page_title')}>
               {publicCategories.map((cat) => (
                 <AppLink key={cat.id} to={`/grammar/${cat.id}`} className="px-3 py-1 rounded-full bg-white/80 border border-blue-100 text-xs sm:text-sm font-bold text-blue-800 hover:border-blue-300 hover:bg-white transition-colors">
@@ -585,11 +583,8 @@ export default function Grammar() {
                 {t('learn_hub_title')}
               </AppLink>
             </nav>
+            )}
           </div>
-        </div>
-
-        <div className="bg-white/70 backdrop-blur-xl border border-white rounded-[1.5rem] p-5 md:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-          <ArticleBody markdown={grammarIndexArticle(language as LearnLang)} />
         </div>
 
         <div className="flex overflow-x-auto whitespace-nowrap border-b border-white/60">

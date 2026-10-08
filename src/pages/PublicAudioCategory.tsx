@@ -6,6 +6,8 @@ import { dbCloud } from '../lib/firebase';
 import { useAuth } from '../AuthContext';
 import { useI18n } from '../I18nContext';
 import { addCloudWord, useCloudVocabulary, findVocabDuplicate, vocabCategoryKey } from '../lib/firestore';
+import { useQuizLabels } from '../lib/quizLabels';
+import { QuizCategoryOptions } from '../components/QuizCategoryOptions';
 import { fetchVisibleLibraryItems } from '../lib/libraryContent';
 import { ImageLightbox, useImageLightbox } from '../components/ImageLightbox';
 import ArticleContent from '../components/ArticleContent';
@@ -62,6 +64,7 @@ export default function PublicAudioCategory({ type }: { type: 'music' | 'podcast
   const { categoryId } = useParams<{ categoryId: string }>();
   const { t } = useI18n();
   const { user, isAdmin, adminMode } = useAuth();
+  const { labels: quizLabels } = useQuizLabels(user?.uid);
   const userVocabulary = useCloudVocabulary(user?.uid) || [];
   const publicVocabulary = useCloudVocabulary("PUBLIC_LIBRARY") || [];
   
@@ -819,13 +822,7 @@ export default function PublicAudioCategory({ type }: { type: 'music' | 'podcast
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">{t('modal_category_label') || 'Category'}</label>
                 <select value={newCategory} onChange={(e) => setNewCategory(e.target.value)} className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50">
-                  <option value="vocabulary">{t('dropdown_vocabulary') || 'Vocabulary quiz'}</option>
-                  <option value="reading">{t('dropdown_reading') || 'Vocabulary (to read)'}</option>
-                  <option value="articles">{t('dropdown_articles') || 'Articles quiz'}</option>
-                  <option value="phrases">{t('dropdown_phrases') || 'Phrases and sentences quiz'}</option>
-                  <option value="prepositions">{t('dropdown_prepositions') || 'Prepositions quiz'}</option>
-                  <option value="adjectives">{t('dropdown_adjectives') || 'Adjectives quiz'}</option>
-                  <option value="verbs">{t('dropdown_verbs') || 'Verbs quiz'}</option>
+                  <QuizCategoryOptions labels={quizLabels} t={t} includeReading />
                 </select>
               </div>
 

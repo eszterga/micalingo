@@ -15,6 +15,7 @@ import {
   getItemsInQuizLevel,
   isPrivateQuizTopic,
 } from "../lib/quizPool";
+import { isPrivateQuizCard, quizDisplayTitle, useQuizLabels } from "../lib/quizLabels";
 
 const BackgroundBlobs = () => (
   <>
@@ -41,6 +42,7 @@ export default function TopicQuizzes() {
   const navigate = useNavigate();
   const { user, isAdmin } = useAuth();
   const { t, language } = useI18n();
+  const { labels: quizLabels } = useQuizLabels(user?.uid);
   const publicDbWordsRaw = useCloudVocabulary("PUBLIC_LIBRARY");
   const publicDbWords = publicDbWordsRaw || [];
   const userVocabulary = useCloudVocabulary(user?.uid);
@@ -87,14 +89,18 @@ export default function TopicQuizzes() {
   const pageTitle = useMemo(() => {
     if (!topic) return "";
     if (isPrivateQuizTopic(topic)) return isAdmin ? (t('telc_b2') || "Telc B2") : "";
-    return topic === 'vocabulary' ? t('vocabulary') || "Vocabulary"
+    const base = topic === 'vocabulary' ? t('vocabulary') || "Vocabulary"
       : topic === 'phrases' ? t('phrases_sentences_quiz') || "Phrases and sentences quiz"
       : topic === 'articles' ? t('articles_quiz') || "Articles"
       : topic === 'prepositions' ? t('prepositions_quiz') || "Prepositions"
       : topic === 'adjectives' ? t('adjectives_quiz') || "Adjectives"
       : topic === 'verbs' ? t('verbs_quiz') || "Verbs"
       : "";
-  }, [topic, t, isAdmin]);
+    if (activeTab === 'custom' && isPrivateQuizCard(topic)) {
+      return quizDisplayTitle(quizLabels, topic, base);
+    }
+    return base;
+  }, [topic, t, isAdmin, activeTab, quizLabels]);
 
   const topicIntro = topic && !isPrivateQuizTopic(topic) ? t(`seo_intro_${topic}`) : '';
   const topicIntroText = topicIntro && topicIntro !== `seo_intro_${topic}` ? topicIntro : '';

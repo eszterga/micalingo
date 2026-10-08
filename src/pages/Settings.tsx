@@ -11,6 +11,7 @@ import {
 import { publicVocabulary, publicPhrases, publicArticles, publicPrepositions, publicFalseFriends, publicAdjectives } from '../lib/public-data';
 import * as XLSX from 'xlsx';
 import { doc, getDoc, setDoc } from "firebase/firestore";
+import { quizDisplayTitle, useQuizLabels } from "../lib/quizLabels";
 import { dbCloud } from "../lib/firebase";
 import { CONSENT_CHANGED_EVENT, openCookieSettings, readConsent } from "../lib/consent";
 
@@ -41,6 +42,7 @@ interface UserSettings {
 export default function Settings() {
   const { t, language, setLanguage } = useI18n();
   const { user, isAdmin, adminMode } = useAuth();
+  const { labels: quizLabels } = useQuizLabels(user?.uid);
   const personalWords = useCloudVocabulary(user?.uid) || [];
   const publicWords = useCloudVocabulary("PUBLIC_LIBRARY") || [];
   const [isWiping, setIsWiping] = useState(false);
@@ -755,7 +757,7 @@ export default function Settings() {
                           </td>
                           <td className="p-3 sm:p-5 font-bold text-blue-950 break-all">{file.fileName}</td>
                           <td className="p-3 sm:p-5 text-gray-600 uppercase text-sm font-bold">{file.fileType}</td>
-                          <td className="p-3 sm:p-5"><span className="px-2.5 py-1 text-xs font-bold rounded-full bg-blue-100 text-blue-800 uppercase tracking-wider">{file.destination}</span></td>
+                          <td className="p-3 sm:p-5"><span className="px-2.5 py-1 text-xs font-bold rounded-full bg-blue-100 text-blue-800 tracking-wider">{quizDisplayTitle(quizLabels, file.destination, file.destination)}</span></td>
                           <td className="p-3 sm:p-5 text-gray-700 font-medium">{file.itemCount}</td>
                           <td className="p-3 sm:p-5 text-right">
                             <div className="flex flex-nowrap items-center justify-end gap-1.5 opacity-100 transition-opacity">

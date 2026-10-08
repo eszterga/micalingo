@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 import { useI18n } from "../I18nContext";
 import { useCloudVocabulary, vocabCategoryKey, isReadingVocabCategory, isMarkedVocabCategory } from "../lib/firestore";
+import { isPrivateQuizCard, quizDisplayTitle, useQuizLabels } from "../lib/quizLabels";
 import { publicVocabulary, publicPhrases, publicArticles, publicPrepositions, publicAdjectives } from "../lib/public-data";
 import {
   WORDS_PER_QUIZ,
@@ -103,6 +104,7 @@ export default function Quiz() {
   const isMarked = topic === 'marked';
   const isRedo = searchParams.get("redo") === 'true';
   const userVocabulary = useCloudVocabulary(user?.uid);
+  const { labels: quizLabels } = useQuizLabels(user?.uid);
   const publicDbWordsRaw = useCloudVocabulary("PUBLIC_LIBRARY");
   const publicDbWords = publicDbWordsRaw || [];
 
@@ -140,6 +142,9 @@ export default function Quiz() {
     : topic === 'marked' ? (t('marked_words') || 'Marked words')
     : topic === 'telc-b2' ? (t('telc_b2') || 'Telc B2')
     : t('personalized_space');
+  const displayTopic = isCustom && isPrivateQuizCard(topic)
+    ? quizDisplayTitle(quizLabels, topic, translatedTopic)
+    : translatedTopic;
 
   const markedWords = useMemo(
     () => filterMarkedWords(userVocabulary || []),
@@ -203,7 +208,7 @@ export default function Quiz() {
   if (isMarked) {
     pageTitle = t('quiz_title_marked', { id: quizId || '' }).trim();
   } else if (isCustom) {
-    pageTitle = t('quiz_title_custom', { topic: translatedTopic, id: quizId || '' }).trim();
+    pageTitle = t('quiz_title_custom', { topic: displayTopic, id: quizId || '' }).trim();
   } else if (topic) {
     pageTitle = t('quiz_title_public', { topic: translatedTopic, id: quizId || '' }).trim();
   } else {
@@ -782,7 +787,7 @@ export default function Quiz() {
               <p className="text-lg text-blue-900/70 font-medium max-w-md mx-auto break-words">
                 {isMarked
                   ? (t('marked_words_empty_desc') || t('not_enough_words_desc', { topic: translatedTopic }))
-                  : t('not_enough_words_desc', { topic: translatedTopic })}
+                  : t('not_enough_words_desc', { topic: displayTopic })}
               </p>
               {!isMarked && (
                 <p className="text-gray-500 mt-2 font-medium">{t('need_more_items', { topic: topic || 'custom' })}</p>
