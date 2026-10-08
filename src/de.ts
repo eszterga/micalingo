@@ -392,8 +392,11 @@ export const de = {
   // Library & Learning Materials
   library: "Bibliothek",
   library_subtitle: "Öffentliche Deutsch–Ungarisch-Wortschatzlisten sowie Lese- und Hörmaterialien. Nach dem Google-Login kann deine private Bibliothek beliebige Sprachen nutzen.",
+  library_card_public_note: "(öffentliche Bibliothek). Klicke und erstelle deine eigene Bibliothek!",
   learning_materials: "Deutsch Lernmaterialien",
   learning_materials_subtitle: "Deutsch lesen und hören: Artikel, Redewendungen, Bücher, Musik und Podcasts.",
+  learning_materials_private: "Lernmaterialien",
+  learning_materials_private_subtitle: "Stelle deine eigene Bibliothek zusammen, mit Materialien zum Lesen und Hören: Artikel, Redewendungen, Bücher, Musik und Podcasts.",
   read_materials: "Lesen",
   read_materials_desc: "Texte, Artikel und Geschichten lesen.",
   listen_materials: "Hören",

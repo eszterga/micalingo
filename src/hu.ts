@@ -390,8 +390,11 @@ _items_save: "Nincsenek érvényes szavak a mentéshez, vagy nem vagy bejelentke
   // Library & Learning Materials
   library: "Könyvtár",
   library_subtitle: "Nyilvános német–magyar szókincslisták, olvasnivaló és hallásértés. Google-belépés után a saját könyvtárad bármilyen nyelvű lehet.",
+  library_card_public_note: "(nyilvános könyvtár). Kattints és hozd létre saját könyvtárad!",
   learning_materials: "Német tananyagok",
   learning_materials_subtitle: "Német olvasás és hallásértés: cikkek, szólások, könyvek, zene és podcastok.",
+  learning_materials_private: "Tananyagok",
+  learning_materials_private_subtitle: "Állítsd össze a saját könyvtárad, olvasnivalóval és hallgatnivalóval: cikkek, szólások, könyvek, zene és podcastok.",
   read_materials: "Olvasás",
   read_materials_desc: "Olvass szövegeket, cikkeket és történeteket.",
   listen_materials: "Hallgatás",

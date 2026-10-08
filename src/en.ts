@@ -392,8 +392,11 @@ export const en = {
   // Library & Learning Materials
   library: "Library",
   library_subtitle: "Public German–Hungarian vocabulary lists plus reading and listening. After Google login, your private library can use any languages.",
+  library_card_public_note: "(public library). Click and create your own library!",
   learning_materials: "German Learning Materials",
   learning_materials_subtitle: "German reading and listening: articles, idioms, books, music, and podcasts.",
+  learning_materials_private: "Learning materials",
+  learning_materials_private_subtitle: "Customize your own library, with materials to read or to listen: articles, idioms, books, music, and podcasts.",
   read_materials: "Reading",
   read_materials_desc: "Read texts, articles, and stories.",
   listen_materials: "Listening",

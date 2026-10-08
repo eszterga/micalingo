@@ -64,10 +64,10 @@ export default function LearningMaterials() {
           </AppLink>
           <div>
             <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600 tracking-tight pb-2">
-              {t("learning_materials")}
+              {t(activeTab === "private" ? "learning_materials_private" : "learning_materials")}
             </h1>
             <p className="text-lg text-blue-900/70 font-medium mt-1">
-              {t("learning_materials_subtitle")}
+              {t(activeTab === "private" ? "learning_materials_private_subtitle" : "learning_materials_subtitle")}
             </p>
           </div>
         </div>

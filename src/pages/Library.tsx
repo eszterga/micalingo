@@ -47,7 +47,7 @@ export default function Library() {
             <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center text-3xl mb-10 group-hover:scale-110 transition-transform duration-500 border border-gray-100">📖</div>
             <div className="relative z-10 w-full">
               <h3 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-2xl drop-shadow-sm mb-1">{t("vocabulary")}</h3>
-              <p className="text-gray-600 font-medium text-sm leading-relaxed">{t("vocab_subtitle") || 'Manage your words.'}</p>
+              <p className="text-gray-600 font-medium text-sm leading-relaxed">{t("vocab_subtitle") || 'Manage your words.'} {t("library_card_public_note")}</p>
             </div>
           </AppLink>
           
@@ -55,7 +55,7 @@ export default function Library() {
             <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center text-3xl mb-10 group-hover:scale-110 transition-transform duration-500 border border-gray-100">🎧</div>
             <div className="relative z-10 w-full">
               <h3 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-2xl drop-shadow-sm mb-1">{t("learning_materials")}</h3>
-              <p className="text-gray-600 font-medium text-sm leading-relaxed">{t("learning_materials_subtitle")}</p>
+              <p className="text-gray-600 font-medium text-sm leading-relaxed">{t("learning_materials_subtitle")} {t("library_card_public_note")}</p>
             </div>
           </AppLink>
         </div>
