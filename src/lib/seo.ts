@@ -270,8 +270,8 @@ const ROUTES: Record<string, Localized> = {
       keywords: 'Deutsch Lernratgeber, der die das, Kasus, Selbstlernen',
     },
     hu: {
-      title: 'Német tanulási útmutatók: névelők, esetek | MicaLingo',
-      description: 'Saját útmutatók önálló tanuláshoz: nyilvános vs saját könyvtár, der/die/das és német esetek.',
+      title: 'Útmutató | MicaLingo',
+      description: 'Gyakorolj az előre elkészített német-magyar kvízekkel, vagy belépés és egy excel táblányi tudásanyag feltöltése után generálj személyreszabott kvízeket.',
       keywords: 'német útmutató, der die das, német esetek, önálló tanulás',
     },
   },

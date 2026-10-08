@@ -18,7 +18,7 @@ export default function Learn() {
           <p className="text-blue-900/70 font-medium leading-relaxed">{t('learn_hub_intro')}</p>
         </div>
         <ul className="space-y-4">
-          {LEARN_GUIDES.map((guide) => (
+          {LEARN_GUIDES.filter((guide) => guide.slug === 'public-and-private').map((guide) => (
             <li key={guide.slug}>
               <AppLink
                 to={`/learn/${guide.slug}`}
@@ -33,11 +33,6 @@ export default function Learn() {
             </li>
           ))}
         </ul>
-        <nav className="flex flex-wrap gap-3 pt-2 border-t border-blue-100 text-sm font-bold">
-          <AppLink to="/quizzes" className="text-blue-700 hover:text-blue-900">{t('quizzes')}</AppLink>
-          <AppLink to="/grammar" className="text-blue-700 hover:text-blue-900">{t('grammar')}</AppLink>
-          <AppLink to="/about" className="text-blue-700 hover:text-blue-900">{t('footer_about')}</AppLink>
-        </nav>
       </article>
     </div>
   );

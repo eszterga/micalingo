@@ -8,106 +8,61 @@ export const publicPrivateGuide = {
     hu: 'Nyilvános német–magyar könyvtár és a saját kvízeid',
   },
   description: {
-    en: 'How MicaLingo works for self-learners: the public quizzes are German–Hungarian, and a Google login lets you build a private library in any languages and generate your own quizzes.',
-    de: 'So funktioniert MicaLingo zum Selbstlernen: die öffentlichen Quizze sind Deutsch–Ungarisch, mit Google-Login baust du eine private Bibliothek in beliebigen Sprachen und eigene Quizze.',
-    hu: 'Így működik a MicaLingo önálló tanuláshoz: a nyilvános kvízek német–magyarok, Google-belépéssel bármilyen nyelvű saját könyvtárat és kvízeket készíthetsz.',
+    en: 'This is how MicaLingo works for self-study: the public quizzes focus on German–Hungarian vocabulary, but with a Google login you can practise any language pair. Just pay attention to the structure of the quizzes and the materials you upload.',
+    de: 'So funktioniert MicaLingo zum Selbstlernen: die öffentlichen Quizze konzentrieren sich auf deutsch–ungarischen Wortschatz, mit Google-Login kannst du aber mit jedem Sprachenpaar üben. Achte nur auf die Struktur der Quizze und der Materialien, die du hochlädst.',
+    hu: 'Így működik a MicaLingo önálló tanuláshoz: a nyilvános kvízek német–magyar szókincsre fókuszálnak, azonban Google-belépéssel bármilyen nyelvpárral gyakorolhatsz. Mindössze a kvízek és a feltöltendő anyagok struktúrájára figyelj!',
   },
   body: {
-    en: `MicaLingo is a **self-learning** site, not an exam centre and not a course that follows a named certificate. The public materials exist so German–Hungarian learners can practise every day. Everything else — other language pairs, other subjects, your own lists — lives in a private library after you sign in with Google.
+    en: `MicaLingo is a self-study site. The public materials are for people who want to learn German in Hungarian. Everything else — other language pairs, other topics, your own lists — is available in your private library after you sign in with Google.
 
-## What you get without an account
+## Just sign in with your Google account
 
-The open library is built for people who learn **German with Hungarian meanings**. Public vocabulary, articles, verbs, phrases and prepositions quizzes show German on one side and Hungarian on the other. Grammar primers explain German in the site language you chose (English, German or Hungarian), but the words you drill in the public quizzes are that HU–DE pair.
+With a Google account you get your own library and storage space.
 
-You can finish every public quiz level as a guest. You do not need a certificate goal to use them. The point is retrieval: see a word or pattern, try to produce it, then see whether you were right.
+- You can practise **any language pair** (German–English, Spanish–Hungarian, French–German …). You create and upload the list.
+- With the same quiz generator you can also practise **topics that are not a language**: dates, capitals, formulae — you only fill in two (sometimes three) columns of the Excel sheet you upload.
+- If you make a mistake, you can mark the question with a star and collect those items separately.
+- From a text you are reading you can select and save phrases and words to your own library or dictionary, and you can upload your favourite videos and articles — so you can open them in one tap, including from your phone.
 
-## What a Google login unlocks
+The contents of your private library are not mixed with the public content. Feel free to choose a topic other than language learning.
 
-Sign in with a Google account when you want a **private space**. That space is yours. You can:
+## How to get started
 
-- Import or type lists in **any language pair** you actually study (German–English, Spanish–Hungarian, French–German, and so on).
-- Use the same quiz engine for **non-language topics** if you want: dates, capitals, formulae — whatever two columns you upload.
-- Generate quizzes from your own files instead of the public HU–DE lists.
-- Keep marked words and scores on your account.
+1. Decide what you want to learn. A language? Historical events? Maybe maths problems? Once you have decided:
+2. Get to know the site and how it works: download the sample Excel sheets from the [Import](/import/) page so you can see the format the system understands. **Important:** if you put years in column A and the correct answer in column B, keep that structure all the way through. Do not swap the columns, and do not mix in language questions. The basic logic: column A is always the question, column B is always the correct answer (the system shuffles it for you, and you choose among four answers), and in column C you can write an example sentence or a hint or explanation.`,
+    de: `MicaLingo ist eine Seite zum Selbstlernen. Die öffentlichen Materialien sind für Menschen, die Deutsch auf Ungarisch lernen möchten. Alles andere — andere Sprachenpaare, andere Themen, eigene Listen — steht nach der Anmeldung mit Google in deiner privaten Bibliothek.
 
-Your private library is not mixed into the public one. Other visitors still see the German–Hungarian materials.
+## Melde dich einfach mit deinem Google-Konto an
 
-## How to start, depending on who you are
+Mit einem Google-Konto bekommst du eine eigene Bibliothek und Speicherplatz.
 
-**If you are a Hungarian learner of German:** stay on [Quizzes](/quizzes/) and the [grammar](/grammar/) primers. Learn nouns with *der/die/das*, then verbs and prepositions.
+- Du kannst mit **jedem Sprachenpaar** üben (Deutsch–Englisch, Spanisch–Ungarisch, Französisch–Deutsch …). Die Liste erstellst und lädst du selbst hoch.
+- Mit demselben Quiz-Generator kannst du auch **Themen üben, die keine Sprache sind**: Jahreszahlen, Hauptstädte, Formeln — du füllst nur zwei (manchmal drei) Spalten der Excel-Tabelle aus, die du hochlädst.
+- Wenn du einen Fehler machst, kannst du die Frage mit einem Stern markieren und diese Einträge getrennt sammeln.
+- Aus einem gelesenen Text kannst du Ausdrücke und Wörter auswählen und in deine eigene Bibliothek oder dein Wörterbuch speichern. Du kannst auch Lieblingsvideos und Artikel hochladen — so erreichst du sie jederzeit mit einem Klick, auch vom Handy.
 
-**If German–Hungarian is not your pair:** log in, open Import or your personal quiz tab, and build lists that match how *you* learn. The public quizzes will still be there if you ever want German with Hungarian glosses; they are not a requirement.
+Der Inhalt deiner privaten Bibliothek vermischt sich nicht mit den öffentlichen Inhalten. Wähle ruhig ein Thema außerhalb des Sprachenlernens.
 
-**If you teach or share a household account:** public quizzes are the shared set. Private lists stay on the signed-in Google account.
+## So fängst du an
 
-## Honest limits
+1. Entscheide, was du lernen möchtest. Eine Sprache? Geschichtliche Ereignisse? Vielleicht Mathematikaufgaben? Wenn du dich entschieden hast:
+2. Lerne die Seite und ihre Funktionen kennen: lade die Beispiel-Excel-Tabellen von der Seite [Importieren](/import/) herunter, damit du siehst, welches Format das System versteht. **Wichtig:** Wenn du in Spalte A Jahreszahlen und in Spalte B die richtige Antwort schreibst, behalte diese Struktur durchgehend bei. Tausche die Spalten nicht, und mische keine Sprachfragen darunter. Die Grundlogik: In Spalte A steht immer die Frage, in Spalte B immer die richtige Antwort (das System mischt sie für dich, du wählst aus vier Antworten), und in Spalte C kannst du einen Beispielsatz oder einen Hinweis bzw. eine Erklärung schreiben.`,
+    hu: `A MicaLingo önálló tanuló oldal, a nyilvános anyagok azoknak szólnak, akik németet szeretnének tanulni, magyar nyelven. Minden más — más nyelvpár, más téma, saját lista — a Google-belépés utáni saját könyvtárban lesz elérhető.
 
-MicaLingo does not sell exam dates, does not issue certificates, and does not copy official papers. The public set is a HU–DE practice library plus original grammar notes. The private set is a tool you fill yourself. That split is the product.
+## Egyszerűen lépj be Google-fiókoddal
 
-Next: [How to learn der, die, das](/learn/der-die-das/) if you use the public German quizzes, or [log in](/login/) when you are ready to generate your own.`,
-    de: `MicaLingo ist eine Seite zum **Selbstlernen**, kein Prüfungszentrum und kein Kurs für ein bestimmtes Zertifikat. Die öffentlichen Materialien sind für Menschen, die Deutsch mit ungarischen Bedeutungen üben. Alles andere — andere Sprachenpaare, andere Themen, eigene Listen — liegt in der privaten Bibliothek nach der Anmeldung mit Google.
+Google-fiókkal saját könyvtárat, tárhelyet kapsz.
 
-## Ohne Konto
+- **Bármilyen nyelvpárral** gyakorolhatsz (német–angol, spanyol–magyar, francia–német …), a listát te készíted és töltöd fel.
+- Ugyanezzel a kvízgenerátorral, akár **nem nyelvi témát** is gyakorolhatsz: évszámok, fővárosok, képletek — mindössze a feltöltendő excel tábla két (esetenként három) oszlopát kell kitöltened.
+- Ha hibát ejtettél, csillaggal megjelölheted a kérdést és ezzel külön gyűjtheted őket.
+- Olvasott szövegből kijelölhetsz és menthetsz kifejezéseket, szavakat a saját könyvtáradba vagy szótáradba, feltöltheted kedvenc videóidat, cikkjeidet – így bármikor egy kattintással, telefonodról is elérheted őket.
 
-Die offene Bibliothek ist für **Deutsch mit ungarischer Bedeutung**. Öffentliche Wortschatz-, Artikel-, Verben-, Redemittel- und Präpositionen-Quizze zeigen Deutsch auf der einen Seite und Ungarisch auf der anderen. Grammatik-Primer erklären Deutsch in der Oberflächensprache (Englisch, Deutsch oder Ungarisch), aber die Wörter in den öffentlichen Quizzen sind dieses DE–HU-Paar.
+A saját könyvtárad tartalma nem keveredik a nyilvános tartalommal, bátran válassz nyelvtanuláson kívül más témát.
 
-Als Gast kannst du alle öffentlichen Level spielen. Du brauchst kein Prüfungsziel. Es geht um Abrufen: sehen, produzieren, prüfen.
+## Hogyan kezdj neki
 
-## Was das Google-Login öffnet
-
-Mit Google-Konto bekommst du einen **privaten Bereich**. Der gehört dir. Du kannst:
-
-- Listen in **beliebigen Sprachenpaaren** importieren oder eintippen (Deutsch–Englisch, Spanisch–Ungarisch, Französisch–Deutsch …).
-- Denselben Quiz-Generator für **andere Themen** nutzen: Jahreszahlen, Hauptstädte, Formeln — zwei Spalten, die du hochlädst.
-- Quizze aus eigenen Dateien erzeugen, nicht aus den öffentlichen DE–HU-Listen.
-- Markierte Wörter und Punkte am Konto behalten.
-
-Deine private Bibliothek landet nicht in der öffentlichen. Andere sehen weiter die deutsch–ungarischen Materialien.
-
-## Wie du startest
-
-**Wenn du Ungarisch sprichst und Deutsch lernst:** [Quizze](/quizzes/) und [Grammatik](/grammar/). Nomen mit *der/die/das*, dann Verben und Präpositionen.
-
-**Wenn Deutsch–Ungarisch nicht dein Paar ist:** einloggen, Import oder privaten Quiz-Tab, Listen bauen, die zu *dir* passen. Die öffentlichen Quizze bleiben optional.
-
-**Wenn du unterrichtest:** öffentlich ist der gemeinsame Satz. Private Listen bleiben beim Google-Konto.
-
-## Klare Grenze
-
-MicaLingo verkauft keine Prüfungstermine, stellt keine Zertifikate aus und kopiert keine offiziellen Aufgaben. Öffentlich: DE–HU-Übung plus eigene Grammatiknotizen. Privat: ein Werkzeug, das du selbst füllst.
-
-Weiter: [Artikel lernen](/learn/der-die-das/) für die öffentlichen Deutsch-Quizze, oder [anmelden](/login/), um eigene Quizze zu erzeugen.`,
-    hu: `A MicaLingo **önálló tanuló** oldal, nem vizsgaközpont és nem egy névre szóló bizonyítvány kurzusa. A nyilvános anyagok azoknak szólnak, akik németet magyar jelentéssel gyakorolnak. Minden más — más nyelvpár, más téma, saját lista — a Google-belépés utáni saját könyvtárban van.
-
-## Fiók nélkül
-
-A nyilvános könyvtár **német + magyar jelentés**. A nyilvános szókincs-, névelő-, ige-, kifejezés- és prepozíciókvízek egyik oldalon németet, a másikon magyart mutatnak. A nyelvtan-bevezetők a felület nyelvén magyaráznak (angol, német vagy magyar), de a nyilvános kvízszavak ez a HU–DE pár.
-
-Vendégként végigjátszhatod a nyilvános szinteket. Nem kell vizsgacél. A lényeg az előhívás: látod, próbálod, ellenőrzöd.
-
-## Mit nyit a Google-belépés
-
-Google-fiókkal **saját teret** kapsz. Az a tiéd. Tudsz:
-
-- **Bármilyen nyelvpáros** listát importálni vagy beírni (német–angol, spanyol–magyar, francia–német …).
-- Ugyanazzal a kvízgenerátorral **nem nyelvi témát** is gyakorolni: évszámok, fővárosok, képletek — két oszlop, amit feltöltesz.
-- Saját fájlból kvízt generálni, nem a nyilvános HU–DE listából.
-- Megjelölt szavakat és pontokat a fióknál tartani.
-
-A saját könyvtár nem keveredik a nyilvánosba. A többiek továbbra is a német–magyar anyagot látják.
-
-## Hogyan kezdj
-
-**Ha magyarul tanulsz németet:** [Kvízek](/quizzes/) és [nyelvtan](/grammar/). Főnév *der/die/das*-szal, aztán igék és prepozíciók.
-
-**Ha a német–magyar nem a te párod:** lépj be, Import vagy saját kvíz fül, építs listát, ami *neked* való. A nyilvános kvízek opcionálisak maradnak.
-
-**Ha tanítasz:** a nyilvános a közös készlet. A saját lista a Google-fióknál marad.
-
-## Őszinte határ
-
-A MicaLingo nem árul vizsgaidőpontot, nem ad ki bizonyítványt, és nem másol hivatalos feladatlapot. Nyilvános: HU–DE gyakorlókönyvtár plusz saját nyelvtan. Saját: eszköz, amit te töltesz.
-
-Következő: [der, die, das](/learn/der-die-das/) a nyilvános német kvízekhez, vagy [belépés](/login/), ha saját kvízt akarsz.`,
+1. Döntsd el, mit szeretnél tanulni! Nyelvet? Történelmi eseményeket? Esetleg matematikai feladványokat? Ha döntöttél:
+2. Ismerkedj az oldallal és annak funkcióival: töltsd le az [Importálás](/import/) oldalról az alap excel táblákat, hogy lásd, milyen formátumot ért a rendszer. **FONTOS:** ha az A oszlopban évszámokat írsz és a B oszlopba a helyes választ, tartsd ezt a struktúrát végig, ne cseréld meg és ne keverd nyelvi kérdésekkel, stb.! Az alaplogika: A oszlopban mindig a kérdés szerepel, B oszlopban mindig a helyes válasz (ezt keveri neked össze a rendszer, négy válasz közül választhatsz) és a C oszlopba írhatsz példamondatot, segítő/magyarázó szöveget.`,
   },
 } as const;
