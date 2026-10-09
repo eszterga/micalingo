@@ -9,7 +9,7 @@ import { publicVocabulary, publicPhrases, publicArticles, publicPrepositions, pu
 import { useCloudVocabulary, addCloudWord, bulkAddCloudWords, bulkDeleteCloudWords, updateCloudWord, purgeVocabDuplicatesKeeping, purgeSoftDeletedVocabSiblings, isActiveVocabItem, findVocabDuplicate, vocabCategoryKey, vocabGermanKey } from "../lib/firestore";
 import { useI18n } from "../I18nContext";
 import { isPrivateQuizTopic } from "../lib/quizPool";
-import { isMatchQuizTopic, matchColumnLabel, privateCardTitle, privateSlotNumber, quizDisplayTitle, useQuizLabels } from "../lib/quizLabels";
+import { defaultQuizTopicTitle, isMatchQuizTopic, matchColumnLabel, privateCardTitle, privateSlotNumber, quizDisplayTitle, useQuizLabels } from "../lib/quizLabels";
 import { QuizCategoryOptions } from "../components/QuizCategoryOptions";
 import { downloadWorkbook } from "../lib/downloadWorkbook";
 
@@ -1077,7 +1077,7 @@ export default function Import() {
         alert(t('saved') || 'Saved!');
     } catch (e) {
       console.error("Failed to save word:", e);
-      alert("Failed to save word. Please try again.");
+      alert(t('error_saving_db'));
     }
   };
 
@@ -1709,7 +1709,7 @@ export default function Import() {
                     </td>
                     <td className="p-3 sm:p-5 text-gray-600 uppercase text-sm font-bold">{file.fileType}</td>
                     <td className="p-3 sm:p-5">
-                      <span className="px-2.5 py-1 text-xs font-bold rounded-full bg-blue-100 text-blue-800 tracking-wider">{saveToPublic ? quizDisplayTitle(quizLabels, file.destination, file.destination) : privateCardTitle(quizLabels, file.destination, file.destination, t('quiz_slot_title_placeholder', { n: privateSlotNumber(file.destination) }))}</span>
+                      <span className="px-2.5 py-1 text-xs font-bold rounded-full bg-blue-100 text-blue-800 tracking-wider">{saveToPublic ? quizDisplayTitle(quizLabels, file.destination, defaultQuizTopicTitle(file.destination, t)) : privateCardTitle(quizLabels, file.destination, defaultQuizTopicTitle(file.destination, t), t('quiz_slot_title_placeholder', { n: privateSlotNumber(file.destination) }))}</span>
                     </td>
                     <td className="p-3 sm:p-5 text-gray-700 font-medium">{file.itemCount}</td>
                     <td className="p-3 sm:p-5 text-right">
@@ -1722,7 +1722,7 @@ export default function Import() {
                           <svg className="w-4 h-4 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536M9 11l6.768-6.768a2.5 2.5 0 113.536 3.536L12.536 14.536A4 4 0 019.172 15.9L6 16l.1-3.172A4 4 0 017.464 9.464z" />
                           </svg>
-                          <span className="hidden sm:inline">Edit</span>
+                          <span className="hidden sm:inline">{t('edit_word')}</span>
                         </button>
                         <button
                           onClick={() => handleDownloadFiles([file.uniqueKey])}
@@ -1759,17 +1759,17 @@ export default function Import() {
                 disabled={currentPage === 1}
                 className="px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-blue-600 font-bold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-50 transition-colors shadow-sm flex items-center gap-2"
               >
-                &larr; <span className="hidden sm:inline">Previous</span>
+                &larr; <span className="hidden sm:inline">{t('pager_previous')}</span>
               </button>
               <span className="text-gray-600 font-medium text-sm bg-white px-4 py-2 rounded-xl border border-gray-100 shadow-sm">
-                Page {currentPage} of {totalPages}
+                {t('pager_page', { current: currentPage, total: totalPages })}
               </span>
               <button
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
                 className="px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-blue-600 font-bold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-50 transition-colors shadow-sm flex items-center gap-2"
               >
-                <span className="hidden sm:inline">Next</span> &rarr;
+                <span className="hidden sm:inline">{t('pager_next')}</span> &rarr;
               </button>
             </div>
           )}
@@ -1793,7 +1793,7 @@ export default function Import() {
                 <input
                   type="search"
                   enterKeyHint="search"
-                  placeholder="Highlight specific word..."
+                  placeholder={t('highlight_word')}
                   value={modalSearchTerm}
                   onChange={(e) => {
                     const value = e.target.value;

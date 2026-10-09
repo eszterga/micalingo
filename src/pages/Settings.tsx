@@ -12,7 +12,7 @@ import { publicVocabulary, publicPhrases, publicArticles, publicPrepositions, pu
 import * as XLSX from 'xlsx';
 import { downloadWorkbook } from '../lib/downloadWorkbook';
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import { privateCardTitle, privateSlotNumber, quizDisplayTitle, useQuizLabels } from "../lib/quizLabels";
+import { defaultQuizTopicTitle, privateCardTitle, privateSlotNumber, quizDisplayTitle, useQuizLabels } from "../lib/quizLabels";
 import { dbCloud } from "../lib/firebase";
 import { CONSENT_CHANGED_EVENT, openCookieSettings, readConsent } from "../lib/consent";
 
@@ -266,7 +266,7 @@ export default function Settings() {
       window.location.reload();
     } catch (error) {
       console.error("Error during cleanup:", error);
-      window.alert("An error occurred during cleanup. Please try again.");
+      window.alert(t('error_bulk_delete_desc'));
     } finally {
       setIsCleaning(false);
       setIsCleanupModalOpen(false);
@@ -760,13 +760,13 @@ export default function Settings() {
                           </td>
                           <td className="p-3 sm:p-5 font-bold text-blue-950 break-all">{file.fileName}</td>
                           <td className="p-3 sm:p-5 text-gray-600 uppercase text-sm font-bold">{file.fileType}</td>
-                          <td className="p-3 sm:p-5"><span className="px-2.5 py-1 text-xs font-bold rounded-full bg-blue-100 text-blue-800 tracking-wider">{saveToPublic ? quizDisplayTitle(quizLabels, file.destination, file.destination) : privateCardTitle(quizLabels, file.destination, file.destination, t('quiz_slot_title_placeholder', { n: privateSlotNumber(file.destination) }))}</span></td>
+                          <td className="p-3 sm:p-5"><span className="px-2.5 py-1 text-xs font-bold rounded-full bg-blue-100 text-blue-800 tracking-wider">{saveToPublic ? quizDisplayTitle(quizLabels, file.destination, defaultQuizTopicTitle(file.destination, t)) : privateCardTitle(quizLabels, file.destination, defaultQuizTopicTitle(file.destination, t), t('quiz_slot_title_placeholder', { n: privateSlotNumber(file.destination) }))}</span></td>
                           <td className="p-3 sm:p-5 text-gray-700 font-medium">{file.itemCount}</td>
                           <td className="p-3 sm:p-5 text-right">
                             <div className="flex flex-nowrap items-center justify-end gap-1.5 opacity-100 transition-opacity">
                               <button onClick={(e) => handleEditFile(e, file)} disabled={isSaving} className="flex items-center text-blue-600 hover:text-blue-800 p-2 rounded-lg hover:bg-blue-50 transition-colors disabled:opacity-50 font-bold text-sm">
                                 <svg className="w-4 h-4 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536M9 11l6.768-6.768a2.5 2.5 0 113.536 3.536L12.536 14.536A4 4 0 019.172 15.9L6 16l.1-3.172A4 4 0 017.464 9.464z" /></svg>
-                                <span className="hidden sm:inline">Edit</span>
+                                <span className="hidden sm:inline">{t('edit_word')}</span>
                               </button>
                               <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleDownloadFiles([file.uniqueKey]); }} disabled={isSaving} className="flex items-center text-green-600 hover:text-green-800 p-2 rounded-lg hover:bg-green-50 transition-colors disabled:opacity-50 font-bold text-sm">
                                 <svg className="w-4 h-4 sm:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M8 12l4 4m0 0l4-4m-4 4V4" /></svg>
@@ -787,11 +787,11 @@ export default function Settings() {
                 {totalPages > 1 && (
                   <div className="flex justify-between items-center pt-6 px-2">
                     <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-blue-600 font-bold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-50 transition-colors shadow-sm flex items-center gap-2">
-                      &larr; <span className="hidden sm:inline">Previous</span>
+                      &larr; <span className="hidden sm:inline">{t('pager_previous')}</span>
                     </button>
-                    <span className="text-gray-600 font-medium text-sm bg-white px-4 py-2 rounded-xl border border-gray-100 shadow-sm">Page {currentPage} of {totalPages}</span>
+                    <span className="text-gray-600 font-medium text-sm bg-white px-4 py-2 rounded-xl border border-gray-100 shadow-sm">{t('pager_page', { current: currentPage, total: totalPages })}</span>
                     <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-blue-600 font-bold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-50 transition-colors shadow-sm flex items-center gap-2">
-                      <span className="hidden sm:inline">Next</span> &rarr;
+                      <span className="hidden sm:inline">{t('pager_next')}</span> &rarr;
                     </button>
                   </div>
                 )}
@@ -805,13 +805,13 @@ export default function Settings() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-blue-950/40 backdrop-blur-sm">
           <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col animate-fade-in-up">
             <div className="p-4 sm:p-6 md:p-8 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-              <h2 className="text-2xl font-extrabold text-blue-950">Manage Data Sources</h2>
+              <h2 className="text-2xl font-extrabold text-blue-950">{t('manage_sources_title')}</h2>
               <button onClick={() => setIsCleanupModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-full hover:bg-gray-200">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
               </button>
             </div>
             <div className="p-4 sm:p-6 md:p-8 overflow-y-auto space-y-4">
-              <p className="text-sm text-gray-600">Select the file sources you want to permanently delete all associated words from. This is useful for cleaning up old or "ghost" imports.</p>
+              <p className="text-sm text-gray-600">{t('manage_sources_desc')}</p>
               <div className="bg-white rounded-2xl shadow-sm border border-blue-50 max-h-96 overflow-auto">
                 <table className="w-full text-left border-collapse min-w-[500px]">
                   <thead className="bg-blue-50/50 border-b border-blue-100 sticky top-0">
@@ -832,7 +832,7 @@ export default function Settings() {
                             className="w-5 h-5 text-blue-600 rounded border-blue-200 cursor-pointer"
                           />
                         </td>
-                        <td className="p-3 sm:p-4 font-bold text-blue-950 break-all">{source.name} <span className="text-xs text-blue-600 ml-2">({source.category})</span></td>
+                        <td className="p-3 sm:p-4 font-bold text-blue-950 break-all">{source.name} <span className="text-xs text-blue-600 ml-2">({defaultQuizTopicTitle(source.category, t)})</span></td>
                         <td className="p-3 sm:p-4 text-gray-700 font-medium text-right">{source.count}</td>
                       </tr>
                     ))}
@@ -842,12 +842,12 @@ export default function Settings() {
             </div>
             <div className="p-4 sm:p-6 md:p-8 border-t border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row justify-between items-center gap-3">
               <span className="text-sm font-medium text-red-600 text-center sm:text-left mb-2 sm:mb-0">
-                {selectedSources.size > 0 ? `Selected ${selectedSources.size} sources to delete.` : 'No sources selected.'}
+                {selectedSources.size > 0 ? t('sources_selected', { count: selectedSources.size }) : t('sources_none')}
               </span>
               <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                <button onClick={() => setIsCleanupModalOpen(false)} className="w-full sm:w-auto px-6 py-3 font-bold text-gray-600 hover:bg-gray-200 rounded-xl transition-colors">Cancel</button>
+                <button onClick={() => setIsCleanupModalOpen(false)} className="w-full sm:w-auto px-6 py-3 font-bold text-gray-600 hover:bg-gray-200 rounded-xl transition-colors">{t('cancel')}</button>
                 <button onClick={handleBulkDeleteFromSources} disabled={selectedSources.size === 0 || isCleaning} className="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-xl shadow-sm transition-colors disabled:opacity-50">
-                  {isCleaning ? 'Deleting...' : 'Delete Selected'}
+                  {isCleaning ? t('saving') : t('delete_selected')}
                 </button>
               </div>
             </div>
@@ -865,7 +865,7 @@ export default function Settings() {
               <div className="flex-1 max-w-md mx-auto w-full">
                  <input
                    type="text"
-                   placeholder="Highlight specific word..."
+                   placeholder={t('highlight_word')}
                    value={modalSearchTerm}
                    onChange={e => setModalSearchTerm(e.target.value)}
                    className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"

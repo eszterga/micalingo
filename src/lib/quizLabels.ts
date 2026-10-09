@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { deleteField, doc, onSnapshot, setDoc } from 'firebase/firestore';
 import { dbCloud } from './firebase';
+import { isBuiltinTopicTitle, isQuizSlotPlaceholder, localizedColumnLabel } from './localizedLabel';
 
 /** Private quiz buckets. The stored category key stays fixed so existing imports keep working. */
 export const PRIVATE_QUIZ_CARDS = [
@@ -84,9 +85,32 @@ export function isBlankUntilTitled(topic?: string | null): topic is PrivateQuizT
   return isPrivateQuizCard(topic);
 }
 
+/** Translated built-in name for a quiz topic. Raw ids such as "verbs" are not shown. */
+export function defaultQuizTopicTitle(
+  topic: string | null | undefined,
+  translate: (key: string) => string,
+): string {
+  const card = privateQuizCard(topic);
+  if (card) return translate(card.titleKey);
+  if (topic === 'reading') return translate('dropdown_reading');
+  if (topic === 'false_friends') return translate('false_friends');
+  if (topic === 'idioms') return translate('idioms');
+  if (topic === 'telc-b2') return translate('telc_b2');
+  if (topic === 'marked') return translate('marked_words');
+  return topic || '';
+}
+
+function savedTopicTitle(labels: QuizLabelMap, topic: string | null | undefined): string {
+  if (!isPrivateQuizCard(topic)) return '';
+  const custom = labels[topic]?.title || '';
+  if (!custom) return '';
+  if (isBuiltinTopicTitle(topic, custom) || isQuizSlotPlaceholder(privateSlotNumber(topic), custom)) return '';
+  return custom;
+}
+
 export function quizDisplayTitle(labels: QuizLabelMap, topic: string | null | undefined, fallback: string) {
   if (!isPrivateQuizCard(topic)) return fallback;
-  return labels[topic]?.title || fallback;
+  return savedTopicTitle(labels, topic) || fallback;
 }
 
 /** Private card title. Open slots use a fill-in label until the user names them. */
@@ -97,14 +121,17 @@ export function privateCardTitle(
   blankLabel: string,
 ) {
   if (!isPrivateQuizCard(topic)) return namedFallback;
-  const custom = labels[topic]?.title;
+  const custom = savedTopicTitle(labels, topic);
   if (custom) return custom;
-  if (isBlankUntilTitled(topic)) return blankLabel;
+  const stored = labels[topic]?.title || '';
+  if (isBlankUntilTitled(topic) && !isBuiltinTopicTitle(topic, stored)) return blankLabel;
   return namedFallback;
 }
 
 export function privateCardIsBlank(labels: QuizLabelMap, topic?: string | null) {
-  return isBlankUntilTitled(topic) && !labels[topic]?.title;
+  if (!isBlankUntilTitled(topic)) return false;
+  const stored = labels[topic]?.title || '';
+  return !stored || isQuizSlotPlaceholder(privateSlotNumber(topic), stored);
 }
 
 /** Custom column header for match quizzes. Other formats keep their own headers. */
@@ -116,7 +143,7 @@ export function matchColumnLabel(
 ) {
   if (!isMatchQuizTopic(topic)) return fallback;
   const custom = which === 'a' ? labels[topic]?.columnA : which === 'b' ? labels[topic]?.columnB : labels[topic]?.columnC;
-  return custom || fallback;
+  return localizedColumnLabel(custom || '', fallback);
 }
 
 export function useQuizLabels(userId: string | undefined) {

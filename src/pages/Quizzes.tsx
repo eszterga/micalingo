@@ -110,7 +110,14 @@ export default function Quizzes() {
   };
 
   const openLabelEditor = (topic: PrivateQuizTopic) => {
-    setLabelDraft({ title: labels[topic]?.title || '' });
+    const card = PRIVATE_QUIZ_CARDS.find((item) => item.topic === topic);
+    const shown = privateCardTitle(
+      labels,
+      topic,
+      card ? t(card.titleKey) : '',
+      t('quiz_slot_title_placeholder', { n: privateSlotNumber(topic) }),
+    );
+    setLabelDraft({ title: privateCardIsBlank(labels, topic) ? '' : shown });
     setEditingTopic(topic);
   };
 
