@@ -14,6 +14,13 @@ import {
 } from "../lib/quizPool";
 import { isPrivateQuizCard, privateCardTitle, privateSlotNumber, useQuizLabels } from "../lib/quizLabels";
 
+const QUIZ_ACTION_BTN =
+  'inline-flex h-7 min-w-[3.5rem] items-center justify-center rounded-md px-2.5 text-[11px] font-bold shadow-sm transition-colors whitespace-nowrap shrink-0';
+
+function quizActionLabel(label: string) {
+  return label.replace(/\s*→\s*$/, '');
+}
+
 const BackgroundBlobs = () => (
   <>
     <style>{`
@@ -134,17 +141,17 @@ export default function TopicQuizzes() {
   return (
     <div className="relative min-h-[85vh] w-full flex flex-col pt-4 md:pt-8 pb-12">
       <BackgroundBlobs />
-      <div className="relative z-10 w-full max-w-7xl mx-auto space-y-8 px-4 md:px-8">
-        <div className="flex items-center gap-4">
+      <div className="relative z-10 w-full max-w-7xl mx-auto space-y-6 sm:space-y-8 px-2 sm:px-4 md:px-8">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
           <AppLink
             to={isPrivateTopic ? '/quizzes?tab=telc' : activeTab === 'custom' ? '/quizzes?tab=personal' : '/quizzes'}
-            className="bg-white/70 backdrop-blur-md border border-white text-gray-700 hover:bg-white font-bold px-5 py-2.5 rounded-xl shadow-sm transition-all flex items-center gap-2"
+            className="self-start bg-white/70 backdrop-blur-md border border-white text-gray-700 hover:bg-white font-bold px-4 py-2 rounded-xl shadow-sm transition-all flex items-center gap-2 text-sm"
           >
             {t('back_button')}
           </AppLink>
-          <div>
-            <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600 tracking-tight pb-2">{pageTitle} {t('quizzes_title') || 'Quizzes'}</h1>
-            <p className="text-lg text-blue-900/70 font-medium mt-1">{t('select_level_to_start') || 'Select a quiz to start practicing.'}</p>
+          <div className="min-w-0 text-left">
+            <h1 className="text-2xl sm:text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600 tracking-tight pb-1 sm:pb-2">{pageTitle} {t('quizzes_title') || 'Quizzes'}</h1>
+            <p className="text-sm sm:text-lg text-blue-900/70 font-medium mt-0.5 sm:mt-1">{t('select_level_to_start') || 'Select a quiz to start practicing.'}</p>
           </div>
         </div>
 
@@ -166,14 +173,14 @@ export default function TopicQuizzes() {
       )}
 
       {effectiveTab === 'default' && (
-        <div className="bg-white/60 backdrop-blur-xl p-6 md:p-8 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white">
+        <div className="bg-white/60 backdrop-blur-xl p-3 sm:p-6 md:p-8 rounded-[2rem] sm:rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white">
           {quizzes.length === 0 && publicDbWordsRaw === null ? (
             <div className="flex flex-col items-center justify-center py-12 space-y-4">
               <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
               <p className="text-blue-900/70 font-medium">{t('loading') || 'Loading...'}</p>
             </div>
           ) : (
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-3 sm:gap-4">
             {quizzes.map((quizId) => {
               const scoreKey = `${topic}_${quizId}`;
               const score = scores[scoreKey];
@@ -185,70 +192,60 @@ export default function TopicQuizzes() {
               return (
                 <div
                   key={quizId}
-                  className={`group flex flex-col sm:flex-row items-start sm:items-center justify-between p-5 rounded-[1.5rem] border-2 transition-all duration-300 gap-4 ${
+                  className={`relative p-4 pb-11 sm:p-5 sm:pb-12 rounded-[1.5rem] border-2 transition-colors duration-200 ${
                     isPerfect ? "bg-green-50/80 border-green-300 shadow-sm" : "bg-white/80 border-blue-50 hover:border-blue-200 hover:shadow-md shadow-sm"
                   }`}
                 >
-                  <div className="flex items-center gap-4 w-full sm:w-auto">
-                    <div className="w-6 flex justify-center flex-shrink-0">
-                      {isFinished && !hasProgress && (
-                        <svg className="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
-                        </svg>
-                      )}
-                    </div>
-                    <div className="flex-1">
-                      <span className={`block font-extrabold text-lg ${isPerfect ? 'text-green-900' : 'text-gray-900'}`}>{t('level_id', { id: quizId }) || `Quiz ${quizId}`}</span>
-                      <span className={`text-sm font-medium ${isPerfect ? 'text-green-700' : 'text-gray-500'}`}>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 text-left">
+                      <span className={`font-extrabold text-base sm:text-lg leading-tight ${isPerfect ? 'text-green-900' : 'text-gray-900'}`}>{t('level_id', { id: quizId }) || `Quiz ${quizId}`}</span>
+                      <span className={`block text-xs sm:text-sm font-medium ${isPerfect ? 'text-green-700' : 'text-gray-500'}`}>
                         {t('items_count', { count: itemsInThisQuiz }) || `${itemsInThisQuiz} items`}
                       </span>
                     </div>
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto justify-end sm:justify-start">
                     {isFinished && !hasProgress && (
-                      <span className={`font-bold text-lg mr-2 ${isPerfect ? 'text-green-700' : 'text-gray-700'}`}>
-                        {score} / {itemsInThisQuiz}
+                      <span className={`shrink-0 text-sm font-extrabold tabular-nums whitespace-nowrap ${isPerfect ? 'text-green-700' : 'text-blue-950'}`}>
+                        {score}/{itemsInThisQuiz}
                       </span>
                     )}
+                  </div>
+
+                  <div className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 flex items-center gap-1.5">
                     {hasProgress ? (
                       <>
                         <AppLink
                           to={`/quiz?topic=${topic}&quizId=${quizId}&redo=true`}
-                          className="flex-1 sm:flex-none text-center bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 font-bold px-5 py-2.5 rounded-xl shadow-sm transition-colors"
+                          className={`${QUIZ_ACTION_BTN} bg-white border border-gray-300 text-gray-700 hover:bg-gray-50`}
                         >
-                          {t('redo_button') || 'Restart'}
+                          {quizActionLabel(t('redo_button') || 'Redo')}
                         </AppLink>
                         <AppLink
                           to={`/quiz?topic=${topic}&quizId=${quizId}`}
-                          className="flex-1 sm:flex-none text-center bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2.5 rounded-xl shadow-sm transition-colors"
+                          className={`${QUIZ_ACTION_BTN} bg-blue-600 hover:bg-blue-700 text-white`}
                         >
-                          {t('continue_button') || 'Continue →'}
+                          {quizActionLabel(t('continue_button') || 'Continue')}
                         </AppLink>
                       </>
                     ) : isPerfect ? (
                       <AppLink
                         to={`/quiz?topic=${topic}&quizId=${quizId}&redo=true`}
-                        className="flex-1 sm:flex-none text-center bg-green-500 hover:bg-green-600 text-white font-bold px-5 py-2.5 rounded-xl shadow-sm transition-colors flex items-center justify-center gap-2"
+                        className={`${QUIZ_ACTION_BTN} bg-green-500 hover:bg-green-600 text-white`}
                       >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                        </svg>
-                        {t('redo_button') || 'Restart'}
+                        {quizActionLabel(t('redo_button') || 'Redo')}
                       </AppLink>
                     ) : isFinished ? (
                       <AppLink
                         to={`/quiz?topic=${topic}&quizId=${quizId}&redo=true`}
-                        className="flex-1 sm:flex-none text-center bg-blue-100 hover:bg-blue-200 text-blue-700 font-bold px-5 py-2.5 rounded-xl shadow-sm transition-colors"
+                        className={`${QUIZ_ACTION_BTN} bg-blue-100 hover:bg-blue-200 text-blue-700`}
                       >
-                        {t('retry_quiz') || 'Retry'}
+                        {quizActionLabel(t('retry_quiz') || 'Retry')}
                       </AppLink>
                     ) : (
                       <AppLink
                         to={`/quiz?topic=${topic}&quizId=${quizId}`}
-                        className="flex-1 sm:flex-none text-center bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-xl shadow-sm transition-colors"
+                        className={`${QUIZ_ACTION_BTN} bg-blue-600 hover:bg-blue-700 text-white`}
                       >
-                        {t('start_button') || 'Start →'}
+                        {quizActionLabel(t('start_button') || 'Start')}
                       </AppLink>
                     )}
                   </div>
@@ -292,8 +289,8 @@ export default function TopicQuizzes() {
               <AppLink to={`/import?destination=${topic}`} className="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-700 shadow-sm">{t('import_more_words') || 'Import Data'}</AppLink>
             </div>
           ) : (
-            <div className="bg-white/60 backdrop-blur-xl p-6 md:p-8 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white">
-              <div className="flex flex-col gap-4">
+            <div className="bg-white/60 backdrop-blur-xl p-3 sm:p-6 md:p-8 rounded-[2rem] sm:rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white">
+              <div className="flex flex-col gap-3 sm:gap-4">
               {customQuizzes.map((quizId) => {
                 const scoreKey = `custom_${topic}_${quizId}`;
                 const score = scores[scoreKey];
@@ -307,70 +304,60 @@ export default function TopicQuizzes() {
                 return (
                   <div
                     key={quizId}
-                    className={`group flex flex-col sm:flex-row items-start sm:items-center justify-between p-5 rounded-[1.5rem] border-2 transition-all duration-300 gap-4 ${
+                    className={`relative p-4 pb-11 sm:p-5 sm:pb-12 rounded-[1.5rem] border-2 transition-colors duration-200 ${
                       isPerfect ? "bg-green-50/80 border-green-300 shadow-sm" : "bg-white/80 border-blue-50 hover:border-blue-200 hover:shadow-md shadow-sm"
                     }`}
                   >
-                    <div className="flex items-center gap-4 w-full sm:w-auto">
-                      <div className="w-6 flex justify-center flex-shrink-0">
-                        {isFinished && !hasProgress && (
-                          <svg className="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
-                          </svg>
-                        )}
-                      </div>
-                      <div className="flex-1">
-                        <span className={`block font-extrabold text-lg ${isPerfect ? 'text-green-900' : 'text-gray-900'}`}>{t('level_id', { id: quizId }) || `Quiz ${quizId}`}</span>
-                        <span className={`text-sm font-medium ${isPerfect ? 'text-green-700' : 'text-gray-500'}`}>
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0 text-left">
+                        <span className={`font-extrabold text-base sm:text-lg leading-tight ${isPerfect ? 'text-green-900' : 'text-gray-900'}`}>{t('level_id', { id: quizId }) || `Quiz ${quizId}`}</span>
+                        <span className={`block text-xs sm:text-sm font-medium ${isPerfect ? 'text-green-700' : 'text-gray-500'}`}>
                           {t('items_count', { count: itemsInThisQuiz }) || `${itemsInThisQuiz} items`}
                         </span>
                       </div>
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto justify-end sm:justify-start">
                       {isFinished && !hasProgress && (
-                        <span className={`font-bold text-lg mr-2 ${isPerfect ? 'text-green-700' : 'text-gray-700'}`}>
-                          {score} / {itemsInThisQuiz}
+                        <span className={`shrink-0 text-sm font-extrabold tabular-nums whitespace-nowrap ${isPerfect ? 'text-green-700' : 'text-blue-950'}`}>
+                          {score}/{itemsInThisQuiz}
                         </span>
                       )}
+                    </div>
+
+                    <div className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 flex items-center gap-1.5">
                       {hasProgress ? (
                         <>
                           <AppLink
                             to={`/quiz?topic=${topic}&quizId=${quizId}&custom=true&redo=true`}
-                            className="flex-1 sm:flex-none text-center bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 font-bold px-5 py-2.5 rounded-xl shadow-sm transition-colors"
+                            className={`${QUIZ_ACTION_BTN} bg-white border border-gray-300 text-gray-700 hover:bg-gray-50`}
                           >
-                            {t('redo_button') || 'Restart'}
+                            {quizActionLabel(t('redo_button') || 'Redo')}
                           </AppLink>
                           <AppLink
                             to={`/quiz?topic=${topic}&quizId=${quizId}&custom=true`}
-                            className="flex-1 sm:flex-none text-center bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2.5 rounded-xl shadow-sm transition-colors"
+                            className={`${QUIZ_ACTION_BTN} bg-blue-600 hover:bg-blue-700 text-white`}
                           >
-                            {t('continue_button') || 'Continue →'}
+                            {quizActionLabel(t('continue_button') || 'Continue')}
                           </AppLink>
                         </>
                       ) : isPerfect ? (
                         <AppLink
                           to={`/quiz?topic=${topic}&quizId=${quizId}&custom=true&redo=true`}
-                          className="flex-1 sm:flex-none text-center bg-green-500 hover:bg-green-600 text-white font-bold px-5 py-2.5 rounded-xl shadow-sm transition-colors flex items-center justify-center gap-2"
+                          className={`${QUIZ_ACTION_BTN} bg-green-500 hover:bg-green-600 text-white`}
                         >
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                          </svg>
-                          {t('redo_button') || 'Restart'}
+                          {quizActionLabel(t('redo_button') || 'Redo')}
                         </AppLink>
                       ) : isFinished ? (
                         <AppLink
                           to={`/quiz?topic=${topic}&quizId=${quizId}&custom=true&redo=true`}
-                          className="flex-1 sm:flex-none text-center bg-blue-100 hover:bg-blue-200 text-blue-700 font-bold px-5 py-2.5 rounded-xl shadow-sm transition-colors"
+                          className={`${QUIZ_ACTION_BTN} bg-blue-100 hover:bg-blue-200 text-blue-700`}
                         >
-                          {t('retry_quiz') || 'Retry'}
+                          {quizActionLabel(t('retry_quiz') || 'Retry')}
                         </AppLink>
                       ) : (
                         <AppLink
                           to={`/quiz?topic=${topic}&quizId=${quizId}&custom=true`}
-                          className="flex-1 sm:flex-none text-center bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-xl shadow-sm transition-colors"
+                          className={`${QUIZ_ACTION_BTN} bg-blue-600 hover:bg-blue-700 text-white`}
                         >
-                          {t('start_button') || 'Start →'}
+                          {quizActionLabel(t('start_button') || 'Start')}
                         </AppLink>
                       )}
                     </div>
@@ -383,7 +370,7 @@ export default function TopicQuizzes() {
         </div>
       )}
 
-        {sampleWords.length > 0 && (
+        {effectiveTab === 'default' && sampleWords.length > 0 && (
           <div className="bg-white/70 backdrop-blur-xl border border-white rounded-[1.5rem] p-5 md:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
             <h2 className="text-lg font-extrabold text-blue-950 mb-2">{t('sample_words_heading')}</h2>
             <p className="text-sm text-blue-900/70 font-medium mb-3">{t('sample_words_intro')}</p>
