@@ -68,6 +68,74 @@ function getStaticGermanTerms(): Set<string> {
   return set;
 }
 
+/** Shrinks a label so words stay whole, matching the MicaXls portrait fit. */
+function FitOptionText({ text, freeze }: { text: string; freeze?: boolean }) {
+  const labelRef = useRef<HTMLSpanElement>(null);
+  const fittedForText = useRef<string | null>(null);
+
+  useLayoutEffect(() => {
+    const label = labelRef.current;
+    if (!label) return;
+
+    const fit = () => {
+      const compact = window.matchMedia("(max-width: 639px)").matches;
+      const base = compact ? 15 : 18;
+      const minSize = compact ? 11 : 13;
+      const maxLines = 2;
+
+      label.style.overflowWrap = "normal";
+      label.style.wordBreak = "keep-all";
+      label.style.hyphens = "manual";
+
+      const maxW = label.clientWidth;
+      if (maxW <= 0) return;
+
+      const lineCount = () => {
+        const range = document.createRange();
+        range.selectNodeContents(label);
+        return range.getClientRects().length || 1;
+      };
+      const overflows = () => label.scrollWidth > maxW + 1;
+
+      let size = base;
+      label.style.fontSize = `${size}px`;
+      label.style.lineHeight = "1.2";
+
+      while (size > minSize && (overflows() || lineCount() > maxLines)) {
+        size -= 0.5;
+        label.style.fontSize = `${size}px`;
+      }
+
+      // A single compound that still cannot fit may break, but only then.
+      if (overflows()) {
+        label.style.overflowWrap = "break-word";
+        label.style.wordBreak = "normal";
+      }
+
+      fittedForText.current = text;
+    };
+
+    // After an answer the card scales; refitting would make the label jump.
+    if (freeze) {
+      if (fittedForText.current !== text) fit();
+      return;
+    }
+
+    fit();
+    const button = label.closest("button");
+    if (!button) return;
+    const observer = new ResizeObserver(fit);
+    observer.observe(button);
+    return () => observer.disconnect();
+  }, [text, freeze]);
+
+  return (
+    <span ref={labelRef} className="quiz-card-text">
+      {text}
+    </span>
+  );
+}
+
 function shuffleInPlace<T>(arr: T[]): T[] {
   for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -983,7 +1051,7 @@ export default function Quiz() {
       style={{ paddingBottom: 'max(3rem, calc(1.5rem + env(safe-area-inset-bottom, 0px)))' }}
     >
       <BackgroundBlobs />
-      <div className="relative z-10 w-full max-w-4xl mx-auto space-y-6 px-4 md:px-8">
+      <div className="relative z-10 w-full max-w-4xl mx-auto space-y-5 sm:space-y-6 px-1 sm:px-4 md:px-8">
         <div>
           <h1 className="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600 tracking-tight break-words leading-tight">{pageTitle}</h1>
           <p className="text-blue-900/70 font-medium mt-1 text-sm sm:text-base">{t('question_of', { current: currentQuestionIndex + 1, total: questions.length })}</p>
@@ -995,7 +1063,7 @@ export default function Quiz() {
           </div>
         </div>
         
-        <div className="bg-white/80 backdrop-blur-xl p-5 sm:p-6 md:p-10 rounded-[2rem] sm:rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white relative">
+        <div className="bg-white/80 backdrop-blur-xl p-4 sm:p-6 md:p-10 rounded-[1.75rem] sm:rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white relative">
           {user && (
             <button
               type="button"
@@ -1007,27 +1075,27 @@ export default function Quiz() {
               disabled={markBusy}
               title={isCurrentMarked ? (t('unmark_word') || 'Remove mark') : (t('mark_word') || 'Mark question')}
               aria-label={isCurrentMarked ? (t('unmark_word') || 'Remove mark') : (t('mark_word') || 'Mark question')}
-              className={`absolute top-2.5 right-2.5 sm:top-4 sm:right-4 z-20 w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all shadow-sm border touch-manipulation active:scale-95 ${
+              className={`absolute top-2.5 right-2.5 sm:top-4 sm:right-4 z-20 w-7 h-7 sm:w-9 sm:h-9 rounded-full flex items-center justify-center transition-all border touch-manipulation active:scale-95 ${
                 isCurrentMarked
                   ? 'bg-amber-100 border-amber-300 text-amber-500'
-                  : 'bg-white border-blue-100 text-gray-300 hover:text-amber-400 hover:border-amber-200'
+                  : 'bg-white border-amber-200 text-amber-400'
               } disabled:opacity-50`}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-4 h-4 sm:w-5 sm:h-5" fill={isCurrentMarked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.8">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill={isCurrentMarked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.8">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
               </svg>
             </button>
           )}
-          <div data-quiz-question className={`text-center mb-8 sm:mb-10 ${user ? 'px-9 sm:px-12' : ''}`}>
-            <p className="text-base sm:text-lg text-blue-900/60 font-bold uppercase tracking-wider mb-2 sm:mb-3">{t('choose_correct_one')}</p>
-            <p className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-blue-950 break-words leading-snug sm:leading-tight">
+          <div data-quiz-question className={`text-center mb-4 sm:mb-8 ${user ? 'px-8 sm:px-12' : ''}`}>
+            <p className="text-xs sm:text-sm text-blue-900/60 font-bold uppercase tracking-wider mb-1.5 sm:mb-2">{t('choose_correct_one')}</p>
+            <p className="text-xl sm:text-3xl md:text-4xl font-extrabold text-blue-950 break-words leading-snug">
               {currentQuestion.questionText}
             </p>
           </div>
 
           <div
             data-quiz-answers
-            className={`quiz-answers grid grid-cols-2 gap-3 sm:gap-4 ${
+            className={`quiz-answers grid grid-cols-2 gap-2 sm:gap-3 md:gap-4 auto-rows-fr ${
               !isAnswered
                 ? ""
                 : selectedAnswer === currentQuestion.correctAnswer
@@ -1056,7 +1124,7 @@ export default function Quiz() {
                   disabled={isAnswered}
                   className={`quiz-card ${cardState}`.trim()}
                 >
-                  <span className="quiz-card-text">{option}</span>
+                  <FitOptionText text={option} freeze={isAnswered} />
                   {isAnswered && isCorrect && (
                     <span className="quiz-check" aria-hidden="true">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
@@ -1080,7 +1148,7 @@ export default function Quiz() {
 
           {isAnswered && (selectedAnswer !== currentQuestion.correctAnswer || answerPinned) && (
             <div className="text-center mt-8 sm:mt-10 animate-fade-in-up">
-              <button onClick={handleNext} className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-blue-700 text-white font-extrabold px-8 sm:px-10 py-3.5 sm:py-4 rounded-xl shadow-lg hover:shadow-xl hover:from-blue-700 hover:to-blue-800 transition-all text-lg sm:text-xl transform hover:scale-105 active:scale-95 touch-manipulation">
+              <button onClick={handleNext} className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold px-6 sm:px-10 py-3 sm:py-3.5 rounded-xl shadow-md hover:shadow-lg hover:from-blue-700 hover:to-blue-800 transition-all text-base sm:text-lg active:scale-[0.98] touch-manipulation">
                 {currentQuestionIndex < questions.length - 1 ? t('next_question') : t('finish_quiz')}
               </button>
             </div>
