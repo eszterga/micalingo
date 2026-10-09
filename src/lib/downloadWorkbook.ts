@@ -89,16 +89,27 @@ async function shareWithNativePlugins(bytes: Uint8Array, filename: string): Prom
 }
 
 /**
- * The installed app's WebView drops a normal download and cannot open a file
- * share sheet. A link the app does not own is handed to the phone's browser,
- * and that browser can save the Excel file.
+ * The installed app treats micalingo.com as its own page and drops downloads
+ * there. A different host is handed to the phone browser, the same way support
+ * links already leave the app. The file rides in the hash so the page request
+ * itself stays short.
  */
 function openInPhoneBrowser(bytes: Uint8Array, filename: string): void {
-  const url = new URL('https://micalingo.com/excel-save');
-  url.searchParams.set('name', filename);
-  url.searchParams.set('file', bytesToBase64(bytes));
-  const hierarchical = url.toString().replace(/^https:\/\//, '');
-  window.location.href = `intent://${hierarchical}#Intent;scheme=https;action=android.intent.action.VIEW;end`;
+  const params = new URLSearchParams();
+  params.set('name', filename);
+  params.set('file', bytesToBase64(bytes));
+  params.set('lang', appLanguage());
+  window.location.href = `https://eszterga.github.io/micalingo/save-excel.html#${params.toString()}`;
+}
+
+function appLanguage(): string {
+  try {
+    const stored = localStorage.getItem('micalingo_language');
+    if (stored === 'hu' || stored === 'de' || stored === 'en') return stored;
+  } catch {
+    /* Storage can be blocked. English copy is the fallback. */
+  }
+  return 'en';
 }
 
 export function downloadBase64Excel(base64: string, filename: string): void {

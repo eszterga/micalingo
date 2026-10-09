@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex" />
+  <title>Save Excel</title>
+  <style>
+    body { margin: 0; background: #f8fafc; color: #1e3a8a; font-family: Georgia, "Times New Roman", serif; }
+    main { max-width: 28rem; margin: 0 auto; padding: 3.5rem 1.25rem; text-align: center; }
+    h1 { margin: 0 0 0.75rem; font-size: 1.75rem; }
+    p { margin: 0 0 1.75rem; color: #4b5563; line-height: 1.5; font-family: "Segoe UI", sans-serif; }
+    button { width: 100%; padding: 1rem 1.5rem; font-size: 1.125rem; font-weight: 700; color: #fff; background: #2563eb; border: 0; border-radius: 1rem; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1 id="title">Save the Excel file</h1>
+    <p id="body">The file is saved in Downloads. If it does not start, tap the button.</p>
+    <button id="save" type="button">Download Excel</button>
+  </main>
+  <script>
+    var copy = {
+      hu: {
+        title: "Excel-fájl mentése",
+        body: "A fájl a Letöltések mappába kerül. Ha nem indul el, érintsd meg a gombot.",
+        button: "Excel letöltése",
+        missing: "Az Excel-fájlt nem sikerült megnyitni."
+      },
+      de: {
+        title: "Excel-Datei speichern",
+        body: "Die Datei wird im Ordner Downloads gespeichert. Wenn nichts passiert, tippe auf die Schaltfläche.",
+        button: "Excel herunterladen",
+        missing: "Die Excel-Datei konnte nicht geöffnet werden."
+      },
+      en: {
+        title: "Save the Excel file",
+        body: "The file is saved in Downloads. If it does not start, tap the button.",
+        button: "Download Excel",
+        missing: "The Excel file could not be opened."
+      }
+    };
+
+    var raw = location.hash.charAt(0) === "#" ? location.hash.slice(1) : "";
+    var params = new URLSearchParams(raw);
+    var lang = (params.get("lang") || "").slice(0, 2);
+    var text = copy[lang] || copy.en;
+    document.documentElement.lang = copy[lang] ? lang : "en";
+    document.getElementById("title").textContent = text.title;
+    document.getElementById("body").textContent = text.body;
+    var button = document.getElementById("save");
+    button.textContent = text.button;
+
+    function filePayload() {
+      var file = params.get("file");
+      var name = (params.get("name") || "MicaLingo.xlsx").replace(/[\\/:*?"<>|\u0000-\u001F]/g, "_").trim() || "MicaLingo.xlsx";
+      if (!/\.xlsx$/i.test(name)) name += ".xlsx";
+      if (!file) return null;
+      return { file: file.replace(/\s/g, ""), name: name };
+    }
+
+    function saveFile() {
+      var data = filePayload();
+      if (!data) return;
+      var binary = atob(data.file);
+      var bytes = new Uint8Array(binary.length);
+      for (var i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
+      var blob = new Blob([bytes], { type: "application/octet-stream" });
+      var url = URL.createObjectURL(blob);
+      var link = document.createElement("a");
+      link.href = url;
+      link.download = data.name;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
+    }
+
+    if (!filePayload()) {
+      document.getElementById("body").textContent = text.missing;
+      button.hidden = true;
+    } else {
+      button.addEventListener("click", saveFile);
+      saveFile();
+    }
+  </script>
+</body>
+</html>
