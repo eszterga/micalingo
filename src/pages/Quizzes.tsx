@@ -1,3 +1,4 @@
+import BackLabel from "../components/BackLabel";
 import { useState, useEffect, useMemo } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import AppLink from "../components/AppLink";
@@ -167,8 +168,8 @@ export default function Quizzes() {
       <BackgroundBlobs />
       <div className="relative z-10 w-full max-w-7xl mx-auto space-y-6 sm:space-y-8 px-4 md:px-8">
         <div className="flex items-start sm:items-center gap-3 sm:gap-4">
-          <AppLink to="/" className="flex-shrink-0 bg-white/70 backdrop-blur-md border border-white text-gray-700 hover:bg-white font-bold px-4 sm:px-5 py-2.5 rounded-xl shadow-sm transition-all flex items-center gap-2 active:scale-[0.98] touch-manipulation">
-            {t('back_button')}
+          <AppLink to="/" className="flex-shrink-0 bg-white/70 backdrop-blur-md border border-white text-gray-700 hover:bg-white font-bold px-4 sm:px-5 py-2.5 rounded-xl shadow-sm transition-all flex items-center gap-2 active:scale-[0.98] touch-manipulation whitespace-nowrap">
+            <BackLabel label={t('back_button')} />
           </AppLink>
           <div className="min-w-0">
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600 tracking-tight pb-1 sm:pb-2">{t('quizzes_title')}</h1>

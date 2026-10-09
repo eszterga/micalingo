@@ -1,3 +1,4 @@
+import BackLabel from "../components/BackLabel";
 import { useMemo, useState } from 'react';
 import AppLink from "../components/AppLink";
 import { useI18n } from "../I18nContext";
@@ -109,8 +110,8 @@ export default function FalseFriends() {
       <BackgroundBlobs />
       <div className="relative z-10 w-full max-w-7xl mx-auto space-y-8 px-4 md:px-8">
         <div className="flex items-center gap-4">
-          <AppLink to="/learning-materials/reading" className="bg-white/70 backdrop-blur-md border border-white text-gray-700 hover:bg-white font-bold px-5 py-2.5 rounded-xl shadow-sm transition-all flex items-center gap-2">
-            {t('back_button')}
+          <AppLink to="/learning-materials/reading" className="bg-white/70 backdrop-blur-md border border-white text-gray-700 hover:bg-white font-bold px-5 py-2.5 rounded-xl shadow-sm transition-all flex items-center gap-2 whitespace-nowrap shrink-0">
+            <BackLabel label={t('back_button')} />
           </AppLink>
           <div>
             <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600 tracking-tight pb-2">{t('false_friends')}</h1>

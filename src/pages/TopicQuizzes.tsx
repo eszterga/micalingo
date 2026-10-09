@@ -1,3 +1,4 @@
+import BackLabel from "../components/BackLabel";
 import { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate, useSearchParams, Navigate } from "react-router-dom";
 import AppLink from "../components/AppLink";
@@ -161,9 +162,9 @@ export default function TopicQuizzes() {
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
           <AppLink
             to={isPrivateTopic ? '/quizzes?tab=telc' : activeTab === 'custom' ? '/quizzes?tab=personal' : '/quizzes'}
-            className="self-start bg-white/70 backdrop-blur-md border border-white text-gray-700 hover:bg-white font-bold px-4 py-2 rounded-xl shadow-sm transition-all flex items-center gap-2 text-sm"
+            className="self-start bg-white/70 backdrop-blur-md border border-white text-gray-700 hover:bg-white font-bold px-4 py-2 rounded-xl shadow-sm transition-all flex items-center gap-2 text-sm whitespace-nowrap shrink-0"
           >
-            {t('back_button')}
+            <BackLabel label={t('back_button')} />
           </AppLink>
           <div className="min-w-0 text-left">
             <h1 className="text-2xl sm:text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600 tracking-tight pb-1 sm:pb-2">{pageTitle} {t('quizzes_title') || 'Quizzes'}</h1>
