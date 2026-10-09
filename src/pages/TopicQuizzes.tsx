@@ -393,7 +393,7 @@ export default function TopicQuizzes() {
         </div>
       )}
 
-        {effectiveTab === 'default' && sampleWords.length > 0 && (
+        {sampleWords.length > 0 && (
           <div className="bg-white/70 backdrop-blur-xl border border-white rounded-[1.5rem] p-5 md:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
             <h2 className="text-lg font-extrabold text-blue-950 mb-2">{t('sample_words_heading')}</h2>
             <p className="text-sm text-blue-900/70 font-medium mb-3">{t('sample_words_intro')}</p>
