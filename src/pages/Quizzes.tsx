@@ -110,13 +110,7 @@ export default function Quizzes() {
   };
 
   const openLabelEditor = (topic: PrivateQuizTopic) => {
-    const current = labels[topic] || {};
-    setLabelDraft({
-      title: current.title || '',
-      columnA: current.columnA || '',
-      columnB: current.columnB || '',
-      columnC: current.columnC || '',
-    });
+    setLabelDraft({ title: labels[topic]?.title || '' });
     setEditingTopic(topic);
   };
 
@@ -347,50 +341,18 @@ export default function Quizzes() {
               </button>
             </div>
             <div className="p-6 md:p-8 overflow-y-auto space-y-4">
-              <p className="text-sm text-gray-600">{t('rename_quiz_hint_match')}</p>
+              <p className="text-sm text-gray-600">{t('rename_quiz_account_hint')}</p>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">{t('rename_quiz_title_label')}</label>
                 <input
                   type="text"
                   value={labelDraft.title || ''}
-                  onChange={(e) => setLabelDraft((prev) => ({ ...prev, title: e.target.value }))}
+                  onChange={(e) => setLabelDraft({ title: e.target.value })}
                   placeholder={t('rename_quiz_title_example')}
                   maxLength={48}
                   className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-gray-400"
                   autoFocus
                 />
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('rename_quiz_column_a')}</label>
-                  <input
-                    type="text"
-                    value={labelDraft.columnA || ''}
-                    onChange={(e) => setLabelDraft((prev) => ({ ...prev, columnA: e.target.value }))}
-                    maxLength={40}
-                    className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('rename_quiz_column_b')}</label>
-                  <input
-                    type="text"
-                    value={labelDraft.columnB || ''}
-                    onChange={(e) => setLabelDraft((prev) => ({ ...prev, columnB: e.target.value }))}
-                    maxLength={40}
-                    className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('rename_quiz_column_c')}</label>
-                  <input
-                    type="text"
-                    value={labelDraft.columnC || ''}
-                    onChange={(e) => setLabelDraft((prev) => ({ ...prev, columnC: e.target.value }))}
-                    maxLength={40}
-                    className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
               </div>
             </div>
             <div className="p-6 md:p-8 border-t border-gray-100 bg-gray-50/50 flex justify-end gap-3">

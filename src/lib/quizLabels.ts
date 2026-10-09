@@ -147,7 +147,15 @@ export function useQuizLabels(userId: string | undefined) {
       ref,
       {
         quizLabels: {
-          [topic]: cleaned ? { ...cleaned, description: deleteField() } : deleteField(),
+          [topic]: cleaned?.title
+            ? {
+                title: cleaned.title,
+                description: deleteField(),
+                columnA: deleteField(),
+                columnB: deleteField(),
+                columnC: deleteField(),
+              }
+            : deleteField(),
         },
       },
       { merge: true }

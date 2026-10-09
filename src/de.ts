@@ -76,6 +76,7 @@ export const de = {
   rename_quiz_column_b: "Spalte B",
   rename_quiz_column_c: "Spalte C",
   rename_quiz_hint_match: "Schreibe die Frage in Spalte A, die richtige Antwort in Spalte B und einen Beispielsatz oder einen anderen Hinweis in Spalte C.",
+  rename_quiz_account_hint: "Dieser Name wird in deinem Google-Konto gespeichert. Beim Import erscheint er in der Auswahlliste.",
   rename_quiz_save: "Name speichern",
   rename_quiz_title_example: "z. B. Jahreszahlen, Verbpräfixe",
   rename_quiz_placeholder_a: "z. B. Frage",

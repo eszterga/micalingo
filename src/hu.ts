@@ -76,6 +76,7 @@ export const hu = {
   rename_quiz_column_b: "B oszlop",
   rename_quiz_column_c: "C oszlop",
   rename_quiz_hint_match: "A oszlopba írd be a kérdést, B oszlopba a helyes választ és C oszlopba egy példamondatot, vagy egyéb segítséget.",
+  rename_quiz_account_hint: "A név ehhez a Google-fiókhoz mentődik. Importáláskor ugyanez a név jelenik meg a listában.",
   rename_quiz_save: "Név mentése",
   rename_quiz_title_example: "pl. évszámok, igekötők",
   rename_quiz_placeholder_a: "pl. Kérdés",

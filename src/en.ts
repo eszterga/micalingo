@@ -76,6 +76,7 @@ export const en = {
   rename_quiz_column_b: "Column B",
   rename_quiz_column_c: "Column C",
   rename_quiz_hint_match: "Put the question in column A, the correct answer in column B, and an example sentence or other hint in column C.",
+  rename_quiz_account_hint: "This name is saved to your Google account. It appears in the list when you import a file.",
   rename_quiz_save: "Save name",
   rename_quiz_title_example: "e.g. historical dates, verb prefixes",
   rename_quiz_placeholder_a: "e.g. Question",
