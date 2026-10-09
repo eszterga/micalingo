@@ -21,6 +21,22 @@ function quizActionLabel(label: string) {
   return label.replace(/\s*→\s*$/, '');
 }
 
+function quizScorePresentation(score: number, total: number) {
+  const percentage = total > 0 ? Math.round((score / total) * 100) : 0;
+  if (percentage >= 76) return { percentage, scoreClass: "text-green-700" };
+  if (percentage >= 41) return { percentage, scoreClass: "text-yellow-700" };
+  return { percentage, scoreClass: "text-red-700" };
+}
+
+function QuizScore({ score, total }: { score: number; total: number }) {
+  const { percentage, scoreClass } = quizScorePresentation(score, total);
+  return (
+    <span className={`shrink-0 text-sm font-extrabold tabular-nums whitespace-nowrap ${scoreClass}`}>
+      {score} / {total} ({percentage}%)
+    </span>
+  );
+}
+
 const BackgroundBlobs = () => (
   <>
     <style>{`
@@ -204,9 +220,7 @@ export default function TopicQuizzes() {
                       </span>
                     </div>
                     {isFinished && !hasProgress && (
-                      <span className={`shrink-0 text-sm font-extrabold tabular-nums whitespace-nowrap ${isPerfect ? 'text-green-700' : 'text-blue-950'}`}>
-                        {score}/{itemsInThisQuiz}
-                      </span>
+                      <QuizScore score={score} total={itemsInThisQuiz} />
                     )}
                   </div>
 
@@ -316,9 +330,7 @@ export default function TopicQuizzes() {
                         </span>
                       </div>
                       {isFinished && !hasProgress && (
-                        <span className={`shrink-0 text-sm font-extrabold tabular-nums whitespace-nowrap ${isPerfect ? 'text-green-700' : 'text-blue-950'}`}>
-                          {score}/{itemsInThisQuiz}
-                        </span>
+                        <QuizScore score={score} total={itemsInThisQuiz} />
                       )}
                     </div>
 
