@@ -153,9 +153,9 @@ html {
   max-width: 100%;
   hyphens: manual;
   overflow-wrap: normal;
-  word-break: keep-all;
+  word-break: normal;
+  white-space: normal;
   text-align: center;
-  text-wrap: balance;
 }
 
 @media (hover: hover) {

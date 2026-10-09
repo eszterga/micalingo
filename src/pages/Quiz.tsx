@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useState, useCallback, useRef } from "react";
+import { useEffect, useLayoutEffect, useMemo, useState, useCallback, useRef, type RefObject } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 import { useI18n } from "../I18nContext";
@@ -68,9 +68,19 @@ function getStaticGermanTerms(): Set<string> {
   return set;
 }
 
-/** Shrinks a label so words stay whole, matching the MicaXls portrait fit. */
-function FitOptionText({ text, freeze }: { text: string; freeze?: boolean }) {
-  const labelRef = useRef<HTMLSpanElement>(null);
+/** Shrinks text so it wraps only between words. A word is never cut in half. */
+function FitText({
+  text,
+  kind,
+  freeze,
+  className,
+}: {
+  text: string;
+  kind: "prompt" | "option";
+  freeze?: boolean;
+  className?: string;
+}) {
+  const labelRef = useRef<HTMLParagraphElement | HTMLSpanElement>(null);
   const fittedForText = useRef<string | null>(null);
 
   useLayoutEffect(() => {
@@ -79,58 +89,60 @@ function FitOptionText({ text, freeze }: { text: string; freeze?: boolean }) {
 
     const fit = () => {
       const compact = window.matchMedia("(max-width: 639px)").matches;
-      const base = compact ? 15 : 18;
-      const minSize = compact ? 11 : 13;
-      const maxLines = 2;
+      const base = kind === "prompt" ? (compact ? 22 : 30) : (compact ? 15 : 18);
+      // Full size unless the sentence needs it. The floor is only a little smaller.
+      const minSize = kind === "prompt" ? (compact ? 17 : 24) : (compact ? 13 : 15);
+      const maxLines = kind === "prompt" ? 4 : (compact ? 5 : 4);
 
       label.style.overflowWrap = "normal";
-      label.style.wordBreak = "keep-all";
+      label.style.wordBreak = "normal";
       label.style.hyphens = "manual";
+      label.style.whiteSpace = "normal";
 
-      const maxW = label.clientWidth;
-      if (maxW <= 0) return;
+      if (label.clientWidth <= 0) return;
 
       const lineCount = () => {
         const range = document.createRange();
         range.selectNodeContents(label);
         return range.getClientRects().length || 1;
       };
-      const overflows = () => label.scrollWidth > maxW + 1;
+      const overflows = () => label.scrollWidth > label.clientWidth + 1;
 
       let size = base;
       label.style.fontSize = `${size}px`;
-      label.style.lineHeight = "1.2";
+      label.style.lineHeight = kind === "prompt" ? "1.15" : "1.25";
 
       while (size > minSize && (overflows() || lineCount() > maxLines)) {
         size -= 0.5;
         label.style.fontSize = `${size}px`;
       }
 
-      // A single compound that still cannot fit may break, but only then.
-      if (overflows()) {
-        label.style.overflowWrap = "break-word";
-        label.style.wordBreak = "normal";
-      }
-
       fittedForText.current = text;
     };
 
-    // After an answer the card scales; refitting would make the label jump.
     if (freeze) {
       if (fittedForText.current !== text) fit();
       return;
     }
 
     fit();
-    const button = label.closest("button");
-    if (!button) return;
+    const box = kind === "option" ? label.closest("button") : label.parentElement;
+    if (!box) return;
     const observer = new ResizeObserver(fit);
-    observer.observe(button);
+    observer.observe(box);
     return () => observer.disconnect();
-  }, [text, freeze]);
+  }, [text, freeze, kind]);
+
+  if (kind === "prompt") {
+    return (
+      <p ref={labelRef as RefObject<HTMLParagraphElement>} className={className}>
+        {text}
+      </p>
+    );
+  }
 
   return (
-    <span ref={labelRef} className="quiz-card-text">
+    <span ref={labelRef as RefObject<HTMLSpanElement>} className={`quiz-card-text ${className || ""}`.trim()}>
       {text}
     </span>
   );
@@ -1088,9 +1100,11 @@ export default function Quiz() {
           )}
           <div data-quiz-question className={`text-center mb-4 sm:mb-8 ${user ? 'px-8 sm:px-12' : ''}`}>
             <p className="text-xs sm:text-sm text-blue-900/60 font-bold uppercase tracking-wider mb-1.5 sm:mb-2">{t('choose_correct_one')}</p>
-            <p className="text-xl sm:text-3xl md:text-4xl font-extrabold text-blue-950 break-words leading-snug">
-              {currentQuestion.questionText}
-            </p>
+            <FitText
+              kind="prompt"
+              text={currentQuestion.questionText}
+              className="font-extrabold text-blue-950"
+            />
           </div>
 
           <div
@@ -1124,7 +1138,7 @@ export default function Quiz() {
                   disabled={isAnswered}
                   className={`quiz-card ${cardState}`.trim()}
                 >
-                  <FitOptionText text={option} freeze={isAnswered} />
+                  <FitText kind="option" text={option} freeze={isAnswered} />
                   {isAnswered && isCorrect && (
                     <span className="quiz-check" aria-hidden="true">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
