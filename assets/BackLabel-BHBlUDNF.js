@@ -1,0 +1,1 @@
+import{j as e}from"./vendor-BYfr3Rbx.js";function t({label:s}){const a=s.replace(/^\s*←\s*/,"");return e.jsxs("span",{className:"inline-flex items-center gap-1.5",children:[e.jsx("span",{"aria-hidden":"true",className:"inline-block -translate-y-[0.07em]",children:"←"}),a]})}export{t as B};
