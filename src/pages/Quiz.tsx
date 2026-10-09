@@ -120,10 +120,22 @@ export default function Quiz() {
   const [quizState, setQuizState] = useState<'loading' | 'ongoing' | 'finished' | 'no_data'>('loading');
   const [showQuitModal, setShowQuitModal] = useState(false);
   const [markBusy, setMarkBusy] = useState(false);
+  /** Correct answer was starred, so the question stays until Next. */
+  const [answerPinned, setAnswerPinned] = useState(false);
   /** germanKey → firestore id (empty string = pending / known marked without id yet) */
   const [localMarkedIds, setLocalMarkedIds] = useState<Record<string, string | null>>({});
   /** Prevents regenerating (and flickering) when cloud vocab arrives after questions are ready. */
   const builtQuizKeyRef = useRef<string | null>(null);
+  const advanceTimerRef = useRef<number | null>(null);
+
+  const clearAdvanceTimer = () => {
+    if (advanceTimerRef.current != null) {
+      window.clearTimeout(advanceTimerRef.current);
+      advanceTimerRef.current = null;
+    }
+  };
+
+  useEffect(() => clearAdvanceTimer, []);
 
   useEffect(() => {
     if (isPrivate && !isAdmin) {
@@ -686,8 +698,11 @@ export default function Quiz() {
       setScore(s => s + 1);
 
       const currentExample = questions[currentQuestionIndex].example;
-      const delay = (showExamples && currentExample) ? (currentExample.length > 20 ? 3300 : 2500) : 1000;
-      setTimeout(() => {
+      const delay = (showExamples && currentExample) ? (currentExample.length > 20 ? 3300 : 2500) : 1500;
+      clearAdvanceTimer();
+      setAnswerPinned(false);
+      advanceTimerRef.current = window.setTimeout(() => {
+        advanceTimerRef.current = null;
         setIsAnswered(false);
         setSelectedAnswer(null);
         if (currentQuestionIndex < questions.length - 1) {
@@ -700,6 +715,8 @@ export default function Quiz() {
   };
 
   const handleNext = () => {
+    clearAdvanceTimer();
+    setAnswerPinned(false);
     setIsAnswered(false);
     setSelectedAnswer(null);
     if (currentQuestionIndex < questions.length - 1) {
@@ -711,6 +728,8 @@ export default function Quiz() {
 
   const handleNextQuiz = () => {
     if (!topic || !hasNextQuiz) return;
+    clearAdvanceTimer();
+    setAnswerPinned(false);
     const nextId = quizId + 1;
     builtQuizKeyRef.current = null;
     navigate(
@@ -736,6 +755,13 @@ export default function Quiz() {
     const q = questions[currentQuestionIndex];
     const key = (q.german || '').toLowerCase().trim();
     if (!key) return;
+
+    // A correct answer moves on by itself. Starring it keeps this question
+    // on screen so the word can be saved to marked questions.
+    if (advanceTimerRef.current != null) {
+      clearAdvanceTimer();
+      setAnswerPinned(true);
+    }
 
     setMarkBusy(true);
     try {
@@ -970,7 +996,7 @@ export default function Quiz() {
         </div>
         
         <div className="bg-white/80 backdrop-blur-xl p-5 sm:p-6 md:p-10 rounded-[2rem] sm:rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white relative">
-          {user && isAnswered && selectedAnswer !== currentQuestion.correctAnswer && (
+          {user && (
             <button
               type="button"
               onClick={(e) => {
@@ -992,29 +1018,52 @@ export default function Quiz() {
               </svg>
             </button>
           )}
-          <div data-quiz-question className={`text-center mb-8 sm:mb-10 ${user && isAnswered && selectedAnswer !== currentQuestion.correctAnswer ? 'pr-12 sm:pr-14' : ''}`}>
+          <div data-quiz-question className={`text-center mb-8 sm:mb-10 ${user ? 'pr-12 sm:pr-14' : ''}`}>
             <p className="text-base sm:text-lg text-blue-900/60 font-bold uppercase tracking-wider mb-2 sm:mb-3">{t('choose_correct_one')}</p>
             <p className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-blue-950 break-words leading-snug sm:leading-tight">
               {currentQuestion.questionText}
             </p>
           </div>
 
-          <div data-quiz-answers className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div
+            data-quiz-answers
+            className={`quiz-answers grid grid-cols-2 gap-3 sm:gap-4 ${
+              !isAnswered
+                ? ""
+                : selectedAnswer === currentQuestion.correctAnswer
+                  ? "is-hit"
+                  : "is-miss"
+            }`}
+          >
             {currentQuestion.options.map((option, index) => {
               const isCorrect = option === currentQuestion.correctAnswer;
               const isSelected = option === selectedAnswer;
-              let buttonClass = "p-4 sm:p-5 border-2 rounded-2xl text-lg sm:text-xl text-left transition-all duration-300 font-bold break-words leading-snug shadow-sm outline-none ";
-              
-              if (isAnswered) {
-                if (isCorrect) buttonClass += "bg-green-50 border-green-400 text-green-800 shadow-[0_0_20px_rgba(74,222,128,0.2)]";
-                else if (isSelected) buttonClass += "bg-red-50 border-red-400 text-red-800 shadow-[0_0_20px_rgba(248,113,113,0.2)]";
-                else buttonClass += "border-white bg-white/50 opacity-50 text-gray-500";
-              } else {
-                buttonClass += "bg-white border-blue-50 text-gray-800 hover:border-blue-400 hover:shadow-md hover:-translate-y-1 hover:text-blue-700";
-              }
+              const pickedRight = isAnswered && selectedAnswer === currentQuestion.correctAnswer;
+              const cardState = !isAnswered
+                ? ""
+                : isCorrect
+                  ? pickedRight
+                    ? "is-correct"
+                    : "is-correct is-revealed"
+                  : isSelected
+                    ? "is-wrong"
+                    : "is-dimmed";
               return (
-                <button key={index} onClick={() => handleAnswer(option)} disabled={isAnswered} className={buttonClass}>
-                  {option}
+                <button
+                  key={index}
+                  type="button"
+                  onClick={() => handleAnswer(option)}
+                  disabled={isAnswered}
+                  className={`quiz-card ${cardState}`.trim()}
+                >
+                  <span className="quiz-card-text">{option}</span>
+                  {isAnswered && isCorrect && (
+                    <span className="quiz-check" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M5 13l4 4L19 7" />
+                      </svg>
+                    </span>
+                  )}
                 </button>
               );
             })}
@@ -1029,7 +1078,7 @@ export default function Quiz() {
             </div>
           )}
 
-          {isAnswered && selectedAnswer !== currentQuestion.correctAnswer && (
+          {isAnswered && (selectedAnswer !== currentQuestion.correctAnswer || answerPinned) && (
             <div className="text-center mt-8 sm:mt-10 animate-fade-in-up">
               <button onClick={handleNext} className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-blue-700 text-white font-extrabold px-8 sm:px-10 py-3.5 sm:py-4 rounded-xl shadow-lg hover:shadow-xl hover:from-blue-700 hover:to-blue-800 transition-all text-lg sm:text-xl transform hover:scale-105 active:scale-95 touch-manipulation">
                 {currentQuestionIndex < questions.length - 1 ? t('next_question') : t('finish_quiz')}

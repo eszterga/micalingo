@@ -60,9 +60,10 @@ export function isWordMarked(
 }
 
 /**
- * Star a wrongly answered word into the user's marked-words library.
- * Works for public AND private quizzes: always creates/copies into the user's
- * own `marked` category — never mutates the public library.
+ * Save the current quiz question into the user's marked-questions library.
+ * A correct answer and a wrong answer both qualify. Works for public and
+ * private quizzes: always copies into the user's own `marked` category —
+ * never mutates the public library.
  * No-ops if already marked or missing german/hungarian.
  */
 export async function markWrongWord(
