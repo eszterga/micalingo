@@ -452,39 +452,6 @@ Klasszikus csapda: a *weil*-mondat ige nélkül. Írj tíz *weil/dass* mondatot 
   },
 };
 
-const QUIZ_PRIMERS: Record<string, Record<LearnLang, string>> = {
-  vocabulary: {
-    en: `These levels recycle high-frequency German words with Hungarian meanings. Study them in small sets: say the German aloud, hide the translation, then check. Pair this with [articles](/quizzes/articles/) so you never store a noun without *der/die/das*.`,
-    de: `Diese Level wiederholen häufige deutsche Wörter mit ungarischer Bedeutung. Kleine Mengen: Deutsch laut sagen, Übersetzung verdecken, prüfen. Mit [Artikeln](/quizzes/articles/) koppeln.`,
-    hu: `Ezek a szintek gyakori német szavakat forgatnak magyar jelentéssel és példamondattal. Kis adagokban: mondd hangosan a németet, takard a fordítást, ellenőrizd. Kösd a [névelőkhöz](/quizzes/articles/).`,
-  },
-  articles: {
-    en: `Each item asks for **der, die or das** (and later the form that fits the case). Guessing by “how the word feels” fails under pressure. Use ending patterns (*-ung* → *die*) and always learn the noun with its article. Full method: [How to learn der, die, das](/learn/der-die-das/).`,
-    de: `Jedes Item fragt **der, die oder das** (später die Kasusform). Nach Gefühl raten scheitert unter Druck. Endungen nutzen und Nomen immer mit Artikel lernen. Methode: [Artikel lernen](/learn/der-die-das/).`,
-    hu: `Minden tétel **der, die vagy das** (később az esetnek megfelelő alak). Az „érzésre” tippelés nyomás alatt megbukik. Végződések + főnév névelővel. Módszer: [der, die, das](/learn/der-die-das/).`,
-  },
-  verbs: {
-    en: `Verb quizzes mix conjugation, Präsens, Perfekt and common irregulars (*gehen, sehen, nehmen, essen*). For B1 speaking, Perfekt of everyday verbs matters more than rare Präteritum forms — except *war* and *hatte*, which you need constantly. After a level, write four original sentences with the verbs you missed.`,
-    de: `Das Verben-Quiz mischt Konjugation, Präsens, Perfekt und unregelmäßige Verben. Für B1-Sprechen zählt das Perfekt des Alltags mehr als seltenes Präteritum — außer *war* und *hatte*. Nach einem Level vier eigene Sätze mit den Fehlern schreiben.`,
-    hu: `Az ige kvíz keveri a ragozást, Präsenst, Perfektet és a rendhagyó igéket. B1 beszédhez a hétköznapi Perfekt fontosabb, mint a ritka Präteritum — kivéve a *war* és *hatte*. Szint után négy saját mondat a hibás igékkel.`,
-  },
-  adjectives: {
-    en: `Practice endings after *der/die/das* and *ein*, plus comparatives (*besser, am besten*). Say the full noun phrase, not the adjective alone: *ein altes Haus* sticks; *alt* does not. Grammar notes: [adjective declension](/grammar/adjectives/).`,
-    de: `Endungen nach *der/die/das* und *ein*, plus Steigerung. Die ganze Nominalphrase sagen: *ein altes Haus* bleibt hängen, *alt* nicht. Notizen: [Adjektivdeklination](/grammar/adjectives/).`,
-    hu: `Végződések *der/die/das* és *ein* után, plusz fokozás. Az egész nominális szerkezetet mondd: *ein altes Haus* megmarad, a puszta *alt* nem. Jegyzet: [melléknévragozás](/grammar/adjectives/).`,
-  },
-  prepositions: {
-    en: `These items train Akkusativ, Dativ and two-way prepositions. Always ask: is something **already there** or **moving there**? That single question decides *auf dem Tisch* vs *auf den Tisch*. Longer explanation: [German cases](/learn/german-cases/).`,
-    de: `Akkusativ, Dativ und Wechselpräpositionen. Immer fragen: ist etwas **schon da** oder **bewegt es sich dorthin**? Das entscheidet *auf dem Tisch* gegen *auf den Tisch*. Länger: [Fälle](/learn/german-cases/).`,
-    hu: `Akkusativ, Dativ és Wechsel. Kérdezd: **már ott van**, vagy **oda mozog**? Ettől lesz *auf dem Tisch* vagy *auf den Tisch*. Hosszabban: [esetek](/learn/german-cases/).`,
-  },
-  phrases: {
-    en: `Phrase quizzes store word order, articles and verbs together. Learn them as ready replies for speaking (*Könnten Sie das bitte wiederholen?*, *Das wäre schön.*). After each level, reuse three phrases in a new context — a café, an email, a complaint.`,
-    de: `Redemittel-Quizze speichern Wortstellung, Artikel und Verb zusammen. Als fertige Repliken lernen. Nach jedem Level drei Phrasen in einem neuen Kontext wiederverwenden.`,
-    hu: `A kifejezés kvízekben szórend, névelő és ige együtt ül. Kész válaszként tanuld. Szint után három kifejezést új helyzetben használd — kávézó, e-mail, panasz.`,
-  },
-};
-
 export const HOME_ARTICLE: Record<LearnLang, string> = {
   en: `MicaLingo is a free website — and app — where you can test your language skills with ready-made quizzes (German–Hungarian). You can practice without an account, but after you sign in you can save and download the results you have reached so far, upload your own word collection, and generate more quizzes, including ones on other topics. The app is currently free, and if you find the site useful, you can send any amount with the Support MicaLingo button.
 
@@ -504,15 +471,15 @@ export const GRAMMAR_INDEX_ARTICLE: Record<LearnLang, string> = {
 };
 
 export const QUIZ_INDEX_ARTICLE: Record<LearnLang, string> = {
-  en: `The **public** quizzes are German–Hungarian and grouped by skill. Start with the leak you already know — for most learners that is [articles](/quizzes/articles/) or [verbs](/quizzes/verbs/). Each topic page includes a short explanation and a sample of the words you will meet, so you can learn something even before you press Start.
+  en: `The **public** quizzes are German–Hungarian and grouped by skill. Start with the leak you already know — for most learners that is [articles](/quizzes/articles/) or [verbs](/quizzes/verbs/). Each topic page includes a sample of the words you will meet, so you can look them over before you press Start.
 
-With a Google login you can switch to a private tab and generate quizzes from your own lists in any languages. Guests can still complete every public HU–DE level. How the two libraries differ: [public vs private](/learn/public-and-private/).`,
-  de: `Die **öffentlichen** Quizze sind Deutsch–Ungarisch und nach Fertigkeit gruppiert. Starte beim bekannten Leck — oft [Artikel](/quizzes/articles/) oder [Verben](/quizzes/verbs/). Jede Themenseite hat eine kurze Erklärung und Beispielwörter, bevor du auf Start drückst.
+With a Google login you can switch to a private tab and generate quizzes from your own lists in any languages. Guests can still complete every public HU–DE quiz. How the two libraries differ: [public vs private](/learn/public-and-private/).`,
+  de: `Die **öffentlichen** Quizze sind Deutsch–Ungarisch und nach Fertigkeit gruppiert. Starte beim bekannten Leck — oft [Artikel](/quizzes/articles/) oder [Verben](/quizzes/verbs/). Jede Themenseite zeigt Beispielwörter, bevor du auf Start drückst.
 
-Mit Google-Login: privater Tab und eigene Listen in beliebigen Sprachen. Gäste können alle öffentlichen DE–HU-Level spielen. Unterschied: [öffentlich vs privat](/learn/public-and-private/).`,
-  hu: `A **nyilvános** kvízek német–magyarok, készség szerint csoportosítva. Kezdd a ismert lyukkal — sokaknál [névelők](/quizzes/articles/) vagy [igék](/quizzes/verbs/). Minden témaoldalon van rövid magyarázat és mintaszavak, még a Start előtt.
+Mit Google-Login: privater Tab und eigene Listen in beliebigen Sprachen. Gäste können alle öffentlichen DE–HU-Quizze spielen. Unterschied: [öffentlich vs privat](/learn/public-and-private/).`,
+  hu: `A **nyilvános** kvízek német–magyarok, készség szerint csoportosítva. Kezdd a ismert lyukkal — sokaknál [névelők](/quizzes/articles/) vagy [igék](/quizzes/verbs/). Minden témaoldalon mintaszavak vannak, még a Start előtt.
 
-Google-belépéssel saját kvíz bármilyen nyelven. Vendégként is végigjátszhatod a nyilvános HU–DE szinteket. A két könyvtár: [nyilvános vs saját](/learn/public-and-private/).`,
+Google-belépéssel saját kvíz bármilyen nyelven. Vendégként is végigjátszhatod a nyilvános HU–DE kvízeket. A két könyvtár: [nyilvános vs saját](/learn/public-and-private/).`,
 };
 
 export function getLearnGuide(slug: string): LearnGuide | undefined {
@@ -535,11 +502,6 @@ export function guideBody(guide: LearnGuide, lang: LearnLang) {
 export function grammarPrimer(categoryId: string | undefined, lang: LearnLang): string | null {
   if (!categoryId || !GRAMMAR_PRIMERS[categoryId]) return null;
   return pick(GRAMMAR_PRIMERS[categoryId], lang);
-}
-
-export function quizPrimer(topic: string | undefined, lang: LearnLang): string | null {
-  if (!topic || !QUIZ_PRIMERS[topic]) return null;
-  return pick(QUIZ_PRIMERS[topic], lang);
 }
 
 export function homeArticle(lang: LearnLang) {

@@ -5,9 +5,6 @@ import { useAuth } from "../AuthContext";
 import { isUserCancelledAuthError, signInWithGoogle } from '../lib/googleAuth';
 import { useCloudVocabulary } from "../lib/firestore";
 import { useI18n } from "../I18nContext";
-import ArticleBody from "../components/ArticleBody";
-import { quizPrimer } from "../lib/learnContent";
-import type { LearnLang } from "../lib/learnContent";
 import {
   buildPublicQuizPool,
   buildCustomQuizPool,
@@ -41,7 +38,7 @@ export default function TopicQuizzes() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user, isAdmin } = useAuth();
-  const { t, language } = useI18n();
+  const { t } = useI18n();
   const { labels: quizLabels } = useQuizLabels(user?.uid);
   const publicDbWordsRaw = useCloudVocabulary("PUBLIC_LIBRARY");
   const publicDbWords = publicDbWordsRaw || [];
@@ -102,9 +99,6 @@ export default function TopicQuizzes() {
     return base;
   }, [topic, t, isAdmin, activeTab, quizLabels]);
 
-  const topicIntro = topic && !isPrivateQuizTopic(topic) ? t(`seo_intro_${topic}`) : '';
-  const topicIntroText = topicIntro && topicIntro !== `seo_intro_${topic}` ? topicIntro : '';
-  const primer = isPrivateQuizTopic(topic) ? null : quizPrimer(topic, language as LearnLang);
   const sampleWords = isPrivateQuizTopic(topic) ? [] : sourceData.slice(0, 6);
   const isPrivateTopic = isPrivateQuizTopic(topic);
   const effectiveTab = isPrivateTopic ? 'custom' : activeTab;
@@ -150,16 +144,9 @@ export default function TopicQuizzes() {
           </AppLink>
           <div>
             <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-blue-950 via-blue-800 to-blue-600 tracking-tight pb-2">{pageTitle} {t('quizzes_title') || 'Quizzes'}</h1>
-            <p className="text-lg text-blue-900/70 font-medium mt-1">{t('select_level_to_start') || 'Select a level to start practicing.'}</p>
-            {topicIntroText && <p className="text-sm text-blue-900/55 font-medium mt-2 max-w-2xl">{topicIntroText}</p>}
+            <p className="text-lg text-blue-900/70 font-medium mt-1">{t('select_level_to_start') || 'Select a quiz to start practicing.'}</p>
           </div>
         </div>
-
-        {primer && (
-          <div className="bg-white/70 backdrop-blur-xl border border-white rounded-[1.5rem] p-5 md:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-            <ArticleBody markdown={primer} />
-          </div>
-        )}
 
       {!isPrivateTopic && (
       <div className="flex overflow-x-auto whitespace-nowrap border-b border-white/60">
@@ -216,7 +203,7 @@ export default function TopicQuizzes() {
                       {quizId}
                     </div>
                     <div className="flex-1">
-                      <span className={`block font-extrabold text-lg ${isPerfect ? 'text-green-900' : 'text-gray-900'}`}>{t('level_id', { id: quizId }) || `Level ${quizId}`}</span>
+                      <span className={`block font-extrabold text-lg ${isPerfect ? 'text-green-900' : 'text-gray-900'}`}>{t('level_id', { id: quizId }) || `Quiz ${quizId}`}</span>
                       <span className={`text-sm font-medium ${isPerfect ? 'text-green-700' : 'text-gray-500'}`}>
                         {t('items_count', { count: itemsInThisQuiz }) || `${itemsInThisQuiz} items`}
                       </span>
@@ -343,7 +330,7 @@ export default function TopicQuizzes() {
                         {quizId}
                       </div>
                       <div className="flex-1">
-                        <span className={`block font-extrabold text-lg ${isPerfect ? 'text-green-900' : 'text-gray-900'}`}>{t('level_id', { id: quizId }) || `Level ${quizId}`}</span>
+                        <span className={`block font-extrabold text-lg ${isPerfect ? 'text-green-900' : 'text-gray-900'}`}>{t('level_id', { id: quizId }) || `Quiz ${quizId}`}</span>
                         <span className={`text-sm font-medium ${isPerfect ? 'text-green-700' : 'text-gray-500'}`}>
                           {t('items_count', { count: itemsInThisQuiz }) || `${itemsInThisQuiz} items`}
                         </span>
