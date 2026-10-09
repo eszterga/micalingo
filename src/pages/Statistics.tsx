@@ -177,7 +177,7 @@ export default function Statistics() {
     const topic = parts.join('_');
 
     if (topic === 'marked') {
-      return t('quiz_title_marked', { id: quizId || '' }).trim() || `${t('marked_words') || 'Marked words'} #${quizId}`;
+      return t('quiz_title_marked', { id: quizId || '' }).trim() || `${t('marked_words') || 'Marked questions'} #${quizId}`;
     }
     
     let translatedTopic = topic;

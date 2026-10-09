@@ -162,7 +162,7 @@ export default function Quiz() {
     : topic === 'prepositions' ? t('prepositions_quiz')
     : topic === 'adjectives' ? (t('adjectives_quiz') || 'Adjectives')
     : topic === 'verbs' ? (t('verbs_quiz') || 'Verbs')
-    : topic === 'marked' ? (t('marked_words') || 'Marked words')
+    : topic === 'marked' ? (t('marked_words') || 'Marked questions')
     : topic === 'telc-b2' ? (t('telc_b2') || 'Telc B2')
     : t('personalized_space');
   const displayTopic = isCustom && isPrivateQuizCard(topic)
@@ -979,8 +979,8 @@ export default function Quiz() {
                 handleToggleMark();
               }}
               disabled={markBusy}
-              title={isCurrentMarked ? (t('unmark_word') || 'Remove mark') : (t('mark_word') || 'Mark word')}
-              aria-label={isCurrentMarked ? (t('unmark_word') || 'Remove mark') : (t('mark_word') || 'Mark word')}
+              title={isCurrentMarked ? (t('unmark_word') || 'Remove mark') : (t('mark_word') || 'Mark question')}
+              aria-label={isCurrentMarked ? (t('unmark_word') || 'Remove mark') : (t('mark_word') || 'Mark question')}
               className={`absolute top-3 right-3 sm:top-5 sm:right-5 z-20 min-w-[2.75rem] min-h-[2.75rem] w-12 h-12 sm:w-11 sm:h-11 rounded-full flex items-center justify-center transition-all shadow-md border touch-manipulation active:scale-95 ${
                 isCurrentMarked
                   ? 'bg-amber-100 border-amber-300 text-amber-500 scale-105'

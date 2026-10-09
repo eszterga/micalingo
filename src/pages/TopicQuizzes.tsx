@@ -197,11 +197,6 @@ export default function TopicQuizzes() {
                         </svg>
                       )}
                     </div>
-                    <div className={`w-12 h-12 flex-shrink-0 rounded-xl flex items-center justify-center font-bold text-lg shadow-sm ${
-                      isPerfect ? "bg-green-500 text-white" : "bg-white text-blue-600 border border-blue-100"
-                    }`}>
-                      {quizId}
-                    </div>
                     <div className="flex-1">
                       <span className={`block font-extrabold text-lg ${isPerfect ? 'text-green-900' : 'text-gray-900'}`}>{t('level_id', { id: quizId }) || `Quiz ${quizId}`}</span>
                       <span className={`text-sm font-medium ${isPerfect ? 'text-green-700' : 'text-gray-500'}`}>
@@ -323,11 +318,6 @@ export default function TopicQuizzes() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
                           </svg>
                         )}
-                      </div>
-                      <div className={`w-12 h-12 flex-shrink-0 rounded-xl flex items-center justify-center font-bold text-lg shadow-sm ${
-                        isPerfect ? "bg-green-500 text-white" : "bg-white text-blue-600 border border-blue-100"
-                      }`}>
-                        {quizId}
                       </div>
                       <div className="flex-1">
                         <span className={`block font-extrabold text-lg ${isPerfect ? 'text-green-900' : 'text-gray-900'}`}>{t('level_id', { id: quizId }) || `Quiz ${quizId}`}</span>

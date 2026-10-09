@@ -129,7 +129,7 @@ export default function Quizzes() {
 
   const handleRemoveMarked = async (id: string | undefined, german: string) => {
     if (!id) return;
-    if (!window.confirm(t('alert_confirm_delete_word') || `Remove "${german}"?`)) return;
+    if (!window.confirm(t('marked_confirm_delete') || `Remove "${german}"?`)) return;
     setRemovingId(id);
     try {
       await unmarkWord(id);
@@ -208,7 +208,7 @@ export default function Quizzes() {
             onClick={() => handleTabChange('marked')}
             className={`flex-shrink-0 py-3 px-4 sm:px-6 font-bold text-sm border-b-2 transition-colors touch-manipulation ${activeTab === 'marked' ? 'border-blue-600 text-blue-700' : 'border-transparent text-blue-900/50 hover:text-blue-900/80'}`}
           >
-            {t('marked_words') || 'Marked words'}
+            {t('marked_words') || 'Marked questions'}
           </button>
         </div>
 
@@ -367,12 +367,12 @@ export default function Quizzes() {
       {activeTab === 'marked' && (
         <div className="space-y-4">
           {!user ? (
-            <LoginGate title={t('marked_words') || 'Marked words'} />
+            <LoginGate title={t('marked_words') || 'Marked questions'} />
           ) : (
             <div className="space-y-4 sm:space-y-6">
               <div className="bg-white/60 backdrop-blur-xl p-5 sm:p-6 md:p-8 rounded-[2rem] sm:rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white space-y-4">
                 <div>
-                  <h2 className="text-xl sm:text-2xl font-extrabold text-blue-950">{t('marked_words') || 'Marked words'}</h2>
+                  <h2 className="text-xl sm:text-2xl font-extrabold text-blue-950">{t('marked_words') || 'Marked questions'}</h2>
                   <p className="text-base sm:text-lg text-blue-900/70 font-medium leading-snug">{t('marked_words_description') || t('marked_words_subtitle')}</p>
                 </div>
 
@@ -384,22 +384,22 @@ export default function Quizzes() {
                 ) : markedWords.length < 4 ? (
                   <div className="text-center py-8 sm:py-10 px-2 sm:px-4">
                     <div className="w-14 h-14 sm:w-16 sm:h-16 bg-amber-50 text-amber-500 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl sm:text-3xl">⭐</div>
-                    <h3 className="text-lg sm:text-xl font-extrabold text-blue-950 mb-2">{t('marked_words_empty') || 'No marked words yet'}</h3>
+                    <h3 className="text-lg sm:text-xl font-extrabold text-blue-950 mb-2">{t('marked_words_empty') || 'No marked questions yet'}</h3>
                     <p className="text-blue-900/70 font-medium max-w-lg mx-auto text-sm sm:text-base leading-relaxed">
                       {markedWords.length === 0
                         ? (t('marked_words_empty_desc') || 'Miss a question, then tap the star to save it here.')
-                        : (t('not_enough_words_desc', { topic: t('marked_words') || 'marked' }) || 'Mark a few more words to start a quiz.')}
+                        : (t('not_enough_words_desc', { topic: t('marked_words') || 'marked' }) || 'Mark a few more questions to start a quiz.')}
                     </p>
                     {markedWords.length > 0 && (
                       <p className="text-sm text-blue-900/50 font-medium mt-2">
-                        {t('words_count', { count: markedWords.length })}
+                        {t('items_count', { count: markedWords.length })}
                       </p>
                     )}
                   </div>
                 ) : (
                   <div className="flex flex-col gap-3 sm:gap-4">
                     <p className="text-blue-900/60 font-medium text-sm">
-                      {t('words_count', { count: markedWords.length })} · {markedLevels} {t('quizzes_title') || 'Quizzes'}
+                      {t('items_count', { count: markedWords.length })} · {markedLevels} {t('quizzes_title') || 'Quizzes'}
                     </p>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                     {Array.from({ length: markedLevels }, (_, i) => i + 1).map((quizId) => {
@@ -417,9 +417,9 @@ export default function Quizzes() {
                             <div className="w-11 h-11 flex-shrink-0 rounded-xl bg-amber-50 text-amber-500 flex items-center justify-center text-xl group-hover:scale-110 transition-transform">⭐</div>
                             <div className="min-w-0">
                               <h3 className="font-extrabold text-blue-950 group-hover:text-blue-700 transition-colors text-base sm:text-lg truncate">
-                                {t('quiz_title_marked', { id: quizId }) || `Marked words quiz ${quizId}`}
+                                {t('quiz_title_marked', { id: quizId }) || `Marked questions quiz ${quizId}`}
                               </h3>
-                              <p className="text-sm text-gray-500 font-medium">{t('words_count', { count: itemsInLevel })}</p>
+                              <p className="text-sm text-gray-500 font-medium">{t('items_count', { count: itemsInLevel })}</p>
                             </div>
                           </div>
                           <span className="text-blue-600 font-bold text-lg flex-shrink-0 group-hover:translate-x-1 transition-transform" aria-hidden>→</span>
@@ -441,7 +441,7 @@ export default function Quizzes() {
                   <div className="text-left min-w-0">
                     <h3 className="text-lg sm:text-xl font-extrabold text-blue-950">{t('marked_words_manage') || 'Manage library'}</h3>
                     <p className="text-xs sm:text-sm text-blue-900/60 font-medium mt-0.5 leading-snug">
-                      {t('marked_words_manage_desc') || 'Remove words one by one from your marked list only. Public library quizzes are never changed.'}
+                      {t('marked_words_manage_desc') || 'Remove entries one by one from your marked list.'}
                     </p>
                   </div>
                   <div className={`w-10 h-10 flex-shrink-0 rounded-full bg-white flex items-center justify-center shadow-sm text-blue-600 transition-transform duration-500 ${manageOpen ? 'rotate-180' : ''}`}>
@@ -468,8 +468,8 @@ export default function Quizzes() {
                                 disabled={removingId === word.id}
                                 onClick={() => handleRemoveMarked(word.id, word.german)}
                                 className="flex-shrink-0 min-w-[2.75rem] min-h-[2.75rem] inline-flex items-center justify-center text-red-500 hover:text-red-700 rounded-xl hover:bg-red-50 active:bg-red-100 transition-colors disabled:opacity-40 touch-manipulation"
-                                title={t('delete_word') || 'Delete word'}
-                                aria-label={t('delete_word') || 'Delete word'}
+                                title={t('marked_delete_entry') || 'Delete entry'}
+                                aria-label={t('marked_delete_entry') || 'Delete entry'}
                               >
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
                               </button>
@@ -498,8 +498,8 @@ export default function Quizzes() {
                                       disabled={removingId === word.id}
                                       onClick={() => handleRemoveMarked(word.id, word.german)}
                                       className="text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-40 touch-manipulation"
-                                      title={t('delete_word') || 'Delete word'}
-                                      aria-label={t('delete_word') || 'Delete word'}
+                                      title={t('marked_delete_entry') || 'Delete entry'}
+                                      aria-label={t('marked_delete_entry') || 'Delete entry'}
                                     >
                                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
                                     </button>
