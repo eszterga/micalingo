@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useCallback, useRef } from "react";
+import { useEffect, useLayoutEffect, useMemo, useState, useCallback, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 import { useI18n } from "../I18nContext";
@@ -22,6 +22,7 @@ import { dbCloud } from '../lib/firebase';
 import * as XLSX from 'xlsx';
 import { downloadWorkbook } from '../lib/downloadWorkbook';
 import { trackEvent } from '../lib/analytics';
+import { scrollAppToTop, scrollQuizQuestionIntoView } from '../lib/scrollAppToTop';
 import { Capacitor } from '@capacitor/core';
 import { App as CapacitorApp } from '@capacitor/app';
 import {
@@ -134,6 +135,26 @@ export default function Quiz() {
     const stored = localStorage.getItem('micalingo_show_examples');
     return stored !== null ? JSON.parse(stored) : true;
   });
+
+  // A tapped answer stays focused, and Android scrolls that button into the
+  // middle of the screen. After each question (and when the quiz starts),
+  // put the question and answers at the top.
+  useLayoutEffect(() => {
+    if (quizState === 'loading') return;
+    const active = document.activeElement;
+    if (active instanceof HTMLElement && active !== document.body) active.blur();
+    const align = () => {
+      if (quizState === 'ongoing') scrollQuizQuestionIntoView();
+      else scrollAppToTop();
+    };
+    align();
+    const frame = requestAnimationFrame(align);
+    const timer = window.setTimeout(align, 80);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.clearTimeout(timer);
+    };
+  }, [quizState, currentQuestionIndex]);
 
   const translatedTopic = topic === 'vocabulary' ? t('vocabulary')
     : topic === 'articles' ? t('articles_quiz')
@@ -971,14 +992,14 @@ export default function Quiz() {
               </svg>
             </button>
           )}
-          <div className={`text-center mb-8 sm:mb-10 ${user && isAnswered && selectedAnswer !== currentQuestion.correctAnswer ? 'pr-12 sm:pr-14' : ''}`}>
+          <div data-quiz-question className={`text-center mb-8 sm:mb-10 ${user && isAnswered && selectedAnswer !== currentQuestion.correctAnswer ? 'pr-12 sm:pr-14' : ''}`}>
             <p className="text-base sm:text-lg text-blue-900/60 font-bold uppercase tracking-wider mb-2 sm:mb-3">{t('choose_correct_one')}</p>
             <p className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-blue-950 break-words leading-snug sm:leading-tight">
               {currentQuestion.questionText}
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div data-quiz-answers className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {currentQuestion.options.map((option, index) => {
               const isCorrect = option === currentQuestion.correctAnswer;
               const isSelected = option === selectedAnswer;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useLayoutEffect } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import AppLink from './AppLink';
 import { useAuth } from '../AuthContext';
@@ -7,6 +7,7 @@ import { Capacitor } from '@capacitor/core';
 import { App as CapacitorApp } from '@capacitor/app';
 import { openCookieSettings } from '../lib/consent';
 import { trackEvent } from '../lib/analytics';
+import { scrollAppToTop } from '../lib/scrollAppToTop';
 
 const BackgroundBlobs = () => (
   <>
@@ -61,6 +62,22 @@ export default function Layout() {
   ];
 
   const currentLanguageFlag = languages.find(l => l.code === language)?.flag || 'EN';
+
+  useLayoutEffect(() => {
+    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  }, []);
+
+  // `<main>` keeps its scroll offset across routes. Opening a card or quiz
+  // from lower on a long page otherwise lands mid-page, especially on Android.
+  useLayoutEffect(() => {
+    scrollAppToTop();
+    const frame = requestAnimationFrame(scrollAppToTop);
+    const timer = window.setTimeout(scrollAppToTop, 80);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.clearTimeout(timer);
+    };
+  }, [location.pathname, location.search]);
 
   useEffect(() => {
     const handleShowSupportPrompt = () => {
@@ -395,7 +412,7 @@ export default function Layout() {
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto p-4 md:p-8">
+        <main className="flex-1 overflow-y-auto p-4 md:p-8 [overflow-anchor:none]">
           <div className="max-w-6xl mx-auto h-full flex flex-col min-h-full">
             <div className="flex-1">
               <Outlet />
