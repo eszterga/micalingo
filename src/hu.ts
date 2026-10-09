@@ -287,10 +287,10 @@ _items_save: "Nincsenek érvényes szavak a mentéshez, vagy nem vagy bejelentke
 
   // Quiz Page
   loading_questions: "Kérdések betöltése...",
-  not_enough_words: "Nincs elég szó",
-  not_enough_words_desc: "Nincs elég szó a személyes szótáradban egy {topic} kvízhez.",
+  not_enough_words: "Nincs elég tétel",
+  not_enough_words_desc: "Nincs elég tétel a személyes könyvtáradban egy {topic} kvízhez.",
   need_more_items: "Legalább 4 '{topic}' kategóriájú elemre van szükség.",
-  import_more_words: "További szavak importálása",
+  import_more_words: "További tételek importálása",
   quiz_complete: "Kvíz befejezve!",
   no_more_quizzes: "Ebből a témából minden elérhető kvízt teljesítettél!",
   great_job: "Szép munka, így tovább!",
@@ -770,8 +770,8 @@ _items_save: "Nincsenek érvényes szavak a mentéshez, vagy nem vagy bejelentke
   home_quiet_blurb: "Tanulási útmutatók, ha a kvízek mögötti módszer is kell:",
   grammar_primer_heading: "Itt kezd",
   grammar_more_notes_later: "A nyilvános könyvtár hosszabb jegyzetei itt jelennek meg, ha publikálva vannak. A fenti magyarázat elég a gyakorlás indításához.",
-  sample_words_heading: "Mintaszavak ebben a könyvtárban",
-  sample_words_intro: "Néhány tétel, amivel a nyilvános kvízekben találkozol.",
+  sample_words_heading: "Mintaadatok ebben a könyvtárban",
+  sample_words_intro: "Néhány tétel, amivel a nyilvános kvízekben találkozol. A privát térben bármilyen témára átalakíthatod őket — más nyelvpárokra, vagy más típusú kérdés–válaszokra.",
 
   about_who_heading: "Ki üzemelteti a MicaLingo-t",
   about_who_body: "A MicaLingo önállóan működtetett oktatási projekt önálló tanulóknak. Nem vizsgaközpont. A webhely és az Android app egy ingyenes tanulóeszköz. Kérdés: support.micalingo@gmail.com.",

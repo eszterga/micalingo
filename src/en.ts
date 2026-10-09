@@ -287,10 +287,10 @@ export const en = {
 
   // Quiz Page
   loading_questions: "Loading your questions...",
-  not_enough_words: "Not Enough Words",
-  not_enough_words_desc: "You don't have enough words in your personal library for a {topic} quiz.",
+  not_enough_words: "Not Enough Entries",
+  not_enough_words_desc: "You don't have enough entries in your personal library for a {topic} quiz.",
   need_more_items: "You need at least 4 items categorized as '{topic}'.",
-  import_more_words: "Import More Words",
+  import_more_words: "Import More Entries",
   quiz_complete: "Quiz Complete!",
   no_more_quizzes: "You have completed all available quizzes for this topic!",
   great_job: "Great job with your progress!",
@@ -772,8 +772,8 @@ export const en = {
   home_quiet_blurb: "Study guides if you want the method behind the quizzes:",
   grammar_primer_heading: "Start here",
   grammar_more_notes_later: "Longer notes from the public library will appear here when they are published. The explanation above is enough to start practising.",
-  sample_words_heading: "Sample words in this library",
-  sample_words_intro: "A few items you will meet in the public quizzes on this topic.",
+  sample_words_heading: "Sample data in this library",
+  sample_words_intro: "A few items you will meet in the public quizzes. In your private space you can customize them for any topic you wish — different language pairs, or other kinds of questions and answers.",
 
   about_who_heading: "Who runs MicaLingo",
   about_who_body: "MicaLingo is an independently operated educational project for self-learners. It is not an exam centre. The website and Android app are maintained as one free learning tool. For questions, write to support.micalingo@gmail.com.",
