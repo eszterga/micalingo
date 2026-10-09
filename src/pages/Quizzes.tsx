@@ -110,14 +110,7 @@ export default function Quizzes() {
   };
 
   const openLabelEditor = (topic: PrivateQuizTopic) => {
-    const card = PRIVATE_QUIZ_CARDS.find((item) => item.topic === topic);
-    const shown = privateCardTitle(
-      labels,
-      topic,
-      card ? t(card.titleKey) : '',
-      t('quiz_slot_title_placeholder', { n: privateSlotNumber(topic) }),
-    );
-    setLabelDraft({ title: privateCardIsBlank(labels, topic) ? '' : shown });
+    setLabelDraft({ title: labels[topic]?.title || '' });
     setEditingTopic(topic);
   };
 
@@ -129,6 +122,7 @@ export default function Quizzes() {
       setEditingTopic(null);
     } catch (error) {
       console.error(error);
+      alert(t('error_saving_db'));
     } finally {
       setSavingLabel(false);
     }

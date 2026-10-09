@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { deleteField, doc, onSnapshot, setDoc } from 'firebase/firestore';
+import { deleteField, doc, getDocFromServer, onSnapshot, setDoc, updateDoc } from 'firebase/firestore';
 import { dbCloud } from './firebase';
-import { isBuiltinTopicTitle, isQuizSlotPlaceholder, localizedColumnLabel } from './localizedLabel';
+import { localizedColumnLabel } from './localizedLabel';
 
 /** Private quiz buckets. The stored category key stays fixed so existing imports keep working. */
 export const PRIVATE_QUIZ_CARDS = [
@@ -100,17 +100,15 @@ export function defaultQuizTopicTitle(
   return topic || '';
 }
 
-function savedTopicTitle(labels: QuizLabelMap, topic: string | null | undefined): string {
+/** The title the user saved. Anything they typed stays, including names that resemble a default category. */
+function storedTitle(labels: QuizLabelMap, topic: string | null | undefined): string {
   if (!isPrivateQuizCard(topic)) return '';
-  const custom = labels[topic]?.title || '';
-  if (!custom) return '';
-  if (isBuiltinTopicTitle(topic, custom) || isQuizSlotPlaceholder(privateSlotNumber(topic), custom)) return '';
-  return custom;
+  return labels[topic]?.title || '';
 }
 
 export function quizDisplayTitle(labels: QuizLabelMap, topic: string | null | undefined, fallback: string) {
   if (!isPrivateQuizCard(topic)) return fallback;
-  return savedTopicTitle(labels, topic) || fallback;
+  return storedTitle(labels, topic) || fallback;
 }
 
 /** Private card title. Open slots use a fill-in label until the user names them. */
@@ -121,17 +119,11 @@ export function privateCardTitle(
   blankLabel: string,
 ) {
   if (!isPrivateQuizCard(topic)) return namedFallback;
-  const custom = savedTopicTitle(labels, topic);
-  if (custom) return custom;
-  const stored = labels[topic]?.title || '';
-  if (isBlankUntilTitled(topic) && !isBuiltinTopicTitle(topic, stored)) return blankLabel;
-  return namedFallback;
+  return storedTitle(labels, topic) || blankLabel;
 }
 
 export function privateCardIsBlank(labels: QuizLabelMap, topic?: string | null) {
-  if (!isBlankUntilTitled(topic)) return false;
-  const stored = labels[topic]?.title || '';
-  return !stored || isQuizSlotPlaceholder(privateSlotNumber(topic), stored);
+  return isBlankUntilTitled(topic) && !storedTitle(labels, topic);
 }
 
 /** Custom column header for match quizzes. Other formats keep their own headers. */
@@ -146,6 +138,71 @@ export function matchColumnLabel(
   return localizedColumnLabel(custom || '', fallback);
 }
 
+const LABEL_CACHE_PREFIX = 'micalingo_quiz_labels_';
+const restoredTopicKeys = new Set<string>();
+
+function labelCacheKey(userId: string) {
+  return LABEL_CACHE_PREFIX + userId;
+}
+
+function readCachedLabels(userId: string): QuizLabelMap {
+  try {
+    if (typeof localStorage === 'undefined') return {};
+    const raw = localStorage.getItem(labelCacheKey(userId));
+    return sanitizeQuizLabels(raw ? JSON.parse(raw) : null);
+  } catch {
+    return {};
+  }
+}
+
+function writeCachedLabels(userId: string, labels: QuizLabelMap) {
+  try {
+    if (typeof localStorage === 'undefined') return;
+    localStorage.setItem(labelCacheKey(userId), JSON.stringify(labels));
+  } catch {
+    /* private mode or a full disk should not block the account write */
+  }
+}
+
+/** Cloud titles win. A title that exists only in this browser is filled back in. */
+function mergeQuizLabels(cloud: QuizLabelMap, local: QuizLabelMap) {
+  const labels: QuizLabelMap = {};
+  const missing: PrivateQuizTopic[] = [];
+  for (const card of PRIVATE_QUIZ_CARDS) {
+    if (cloud[card.topic]?.title) labels[card.topic] = cloud[card.topic];
+    else if (local[card.topic]?.title) {
+      labels[card.topic] = local[card.topic];
+      missing.push(card.topic);
+    }
+  }
+  return { labels, missing };
+}
+
+function firestoreCode(error: unknown) {
+  return typeof error === 'object' && error !== null && 'code' in error ? String((error as { code?: string }).code) : '';
+}
+
+/** Writes one topic title without touching the other topics or the rest of the settings document. */
+async function writeTopicTitle(userId: string, topic: PrivateQuizTopic, title: string) {
+  const ref = doc(dbCloud, 'user_settings', userId);
+  const field = `quizLabels.${topic}.title`;
+  try {
+    await updateDoc(ref, title ? { [field]: title } : { [`quizLabels.${topic}`]: deleteField() });
+  } catch (error) {
+    if (firestoreCode(error) !== 'not-found') throw error;
+    if (!title) return;
+    await setDoc(ref, { quizLabels: { [topic]: { title } } }, { merge: true });
+  }
+  try {
+    const snap = await getDocFromServer(ref);
+    const stored = sanitizeQuizLabels(snap.exists() ? snap.data().quizLabels : null)[topic]?.title || '';
+    if (stored !== title) throw new Error('Quiz name was not stored on the account');
+  } catch (error) {
+    if (error instanceof Error && error.message === 'Quiz name was not stored on the account') throw error;
+    console.error('Could not confirm quiz name from the server', error);
+  }
+}
+
 export function useQuizLabels(userId: string | undefined) {
   const [labels, setLabels] = useState<QuizLabelMap>({});
 
@@ -154,39 +211,73 @@ export function useQuizLabels(userId: string | undefined) {
       setLabels({});
       return;
     }
+    let cancelled = false;
+    let unsub = () => {};
+    let attempt = 0;
+    const cached = readCachedLabels(userId);
+    setLabels(cached);
     const ref = doc(dbCloud, 'user_settings', userId);
-    return onSnapshot(
-      ref,
-      (snap) => {
-        setLabels(sanitizeQuizLabels(snap.exists() ? snap.data().quizLabels : null));
-      },
-      (error) => {
-        console.error('Failed to load quiz labels', error);
-      }
-    );
+
+    const apply = (raw: unknown) => {
+      if (cancelled) return;
+      const cloud = sanitizeQuizLabels(raw);
+      const { labels: merged, missing } = mergeQuizLabels(cloud, readCachedLabels(userId));
+      setLabels(merged);
+      writeCachedLabels(userId, merged);
+      const pending = missing.filter((topic) => !restoredTopicKeys.has(`${userId}:${topic}`));
+      if (!pending.length) return;
+      pending.forEach((topic) => restoredTopicKeys.add(`${userId}:${topic}`));
+      void (async () => {
+        for (const topic of pending) {
+          const title = merged[topic]?.title;
+          if (!title) continue;
+          try {
+            await writeTopicTitle(userId, topic, title);
+          } catch (error) {
+            console.error('Failed to restore quiz label', topic, error);
+          }
+        }
+      })();
+    };
+
+    const listen = () => {
+      unsub();
+      unsub = onSnapshot(
+        ref,
+        (snap) => {
+          attempt = 0;
+          apply(snap.exists() ? snap.data().quizLabels : null);
+        },
+        (error) => {
+          console.error('Failed to load quiz labels', error);
+          if (cancelled) return;
+          setLabels(readCachedLabels(userId));
+          if (attempt >= 3) return;
+          attempt += 1;
+          window.setTimeout(() => {
+            if (!cancelled) listen();
+          }, 400 * attempt);
+        }
+      );
+    };
+    listen();
+
+    return () => {
+      cancelled = true;
+      unsub();
+    };
   }, [userId]);
 
   const saveTopic = async (topic: PrivateQuizTopic, next: QuizLabelOverride | null) => {
-    if (!userId) return;
-    const cleaned = cleanOverride(next);
-    const ref = doc(dbCloud, 'user_settings', userId);
-    await setDoc(
-      ref,
-      {
-        quizLabels: {
-          [topic]: cleaned?.title
-            ? {
-                title: cleaned.title,
-                description: deleteField(),
-                columnA: deleteField(),
-                columnB: deleteField(),
-                columnC: deleteField(),
-              }
-            : deleteField(),
-        },
-      },
-      { merge: true }
-    );
+    if (!userId) throw new Error('Not signed in');
+    const title = cleanOverride(next)?.title || '';
+    const optimistic = mergeQuizLabels(labels, readCachedLabels(userId)).labels;
+    if (title) optimistic[topic] = { ...(optimistic[topic] || {}), title };
+    else delete optimistic[topic];
+    setLabels(optimistic);
+    writeCachedLabels(userId, optimistic);
+    await writeTopicTitle(userId, topic, title);
+    restoredTopicKeys.add(`${userId}:${topic}`);
   };
 
   return { labels, saveTopic };

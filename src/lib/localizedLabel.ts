@@ -9,15 +9,6 @@ const DICTS: Dict[] = [en as Dict, de as Dict, hu as Dict];
 /** Quiz / kvíz / Quizze — stripped so "Igék kvíz" and "Verbs" name the same topic. */
 const QUIZ_WORD = /^(quiz|quizzes|quizze|kviz|kvizek)$/;
 
-const TOPIC_TITLE_KEYS: Record<string, string[]> = {
-  vocabulary: ['vocabulary', 'vocabulary_quiz', 'dropdown_vocabulary', 'vocab_title'],
-  articles: ['articles_quiz', 'dropdown_articles', 'articles_quiz_label'],
-  phrases: ['phrases_quiz', 'phrases_sentences_quiz', 'dropdown_phrases'],
-  prepositions: ['prepositions_quiz', 'dropdown_prepositions', 'prepositions_quiz_format_title'],
-  adjectives: ['adjectives_quiz', 'dropdown_adjectives', 'adjectives_quiz_label', 'adjective'],
-  verbs: ['verbs_quiz', 'dropdown_verbs', 'verbs_quiz_format_title'],
-};
-
 const COLUMN_KEYS = ['german', 'hungarian', 'adjective', 'hint', 'levels', 'note', 'example', 'article'];
 
 function dictValue(dict: Dict, key: string): string {
@@ -73,20 +64,6 @@ function conceptKey(value: string, keys: string[]): string | null {
     if (matchesAnyLabel(value, variantsFor([key]))) return key;
   }
   return null;
-}
-
-/** Saved fill-in names such as Téma6 / Thema6 / Topic6 follow the current interface language. */
-export function isQuizSlotPlaceholder(slotNumber: number, title: string): boolean {
-  const variants = DICTS.map((dict) =>
-    dictValue(dict, 'quiz_slot_title_placeholder').replace(/\{n\}/g, String(slotNumber)),
-  );
-  return matchesAnyLabel(title, variants);
-}
-
-/** Saved name is the built-in topic label in English, German, or Hungarian. */
-export function isBuiltinTopicTitle(topic: string | null | undefined, title: string): boolean {
-  if (!topic || !TOPIC_TITLE_KEYS[topic]) return false;
-  return matchesAnyLabel(title, variantsFor(TOPIC_TITLE_KEYS[topic]));
 }
 
 /**
