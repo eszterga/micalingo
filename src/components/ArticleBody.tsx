@@ -141,11 +141,11 @@ export function parseArticleBlocks(markdown: string): Block[] {
   return blocks;
 }
 
-export default function ArticleBody({ markdown, className = '' }: { markdown: string; className?: string }) {
+export default function ArticleBody({ markdown, className = '', id, selectionId }: { markdown: string; className?: string; id?: string; selectionId?: string }) {
   const blocks = parseArticleBlocks(markdown);
 
   return (
-    <div className={`space-y-4 text-gray-700 leading-relaxed ${className}`.trim()}>
+    <div id={id} data-reading-selection={selectionId || undefined} className={`space-y-4 text-gray-700 leading-relaxed ${className}`.trim()}>
       {blocks.map((block, i) => {
         if (block.type === 'h2') {
           return (

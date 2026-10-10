@@ -6,6 +6,7 @@ interface ArticleContentProps {
   id?: string;
   html: string;
   className?: string;
+  selectionId?: string;
   onImageClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
   onExpandTable?: (table: HTMLTableElement) => void;
   onMouseUp?: (e: React.MouseEvent<HTMLDivElement>) => void;
@@ -15,7 +16,7 @@ interface ArticleContentProps {
 // Renders rich-text HTML content (from the CMS editor) while making any pasted
 // tables mobile/app-friendly: they become horizontally scrollable instead of
 // getting clipped, and gain a small button to open them in a full-screen view.
-export default function ArticleContent({ id, html, className, onImageClick, onExpandTable, onMouseUp, onTouchEnd }: ArticleContentProps) {
+export default function ArticleContent({ id, html, className, selectionId, onImageClick, onExpandTable, onMouseUp, onTouchEnd }: ArticleContentProps) {
   const { t } = useI18n();
   const ref = useRef<HTMLDivElement>(null);
 
@@ -30,6 +31,7 @@ export default function ArticleContent({ id, html, className, onImageClick, onEx
       id={id}
       ref={ref}
       className={className}
+      data-reading-selection={selectionId || undefined}
       onClick={onImageClick}
       onMouseUp={onMouseUp}
       onTouchEnd={onTouchEnd}

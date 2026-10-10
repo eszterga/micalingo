@@ -1,6 +1,6 @@
 import BackLabel from "../components/BackLabel";
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { doc, getDocFromServer, setDoc, deleteDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { dbCloud } from '../lib/firebase';
 import { useAuth } from '../AuthContext';
@@ -11,6 +11,8 @@ import { localizedPrivateCategoryTitle } from '../lib/localizedLabel';
 import { QuizCategoryOptions } from '../components/QuizCategoryOptions';
 import { ImageLightbox, useImageLightbox } from '../components/ImageLightbox';
 import ArticleContent from '../components/ArticleContent';
+import ReadingSelectionPopover from '../components/ReadingSelectionPopover';
+import { useReadingSelectionPopup } from '../lib/useReadingSelectionPopup';
 import EditorFormatControls from '../components/EditorFormatControls';
 import {
   getSelectionBookmark,
@@ -63,6 +65,7 @@ const MediaPlayer = ({ url, t }: { url: string, t: any }) => {
 export default function PrivateMaterials({ type }: { type: 'reading' | 'listening' }) {
   const { t } = useI18n();
   const { user, isAdmin, adminMode } = useAuth();
+  const navigate = useNavigate();
   const { labels: quizLabels } = useQuizLabels(user?.uid);
   const userVocabulary = useCloudVocabulary(user?.uid) || [];
   const publicVocabulary = useCloudVocabulary("PUBLIC_LIBRARY") || [];
@@ -92,7 +95,7 @@ export default function PrivateMaterials({ type }: { type: 'reading' | 'listenin
   
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const [bookmarks, setBookmarks] = useState<Record<string, string>>({});
-  const [bookmarkPopup, setBookmarkPopup] = useState<{ itemId: string, text: string, x: number, y: number } | null>(null);
+  const { popup: bookmarkPopup, dismiss: dismissSelectionPopup } = useReadingSelectionPopup();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
@@ -244,19 +247,6 @@ export default function PrivateMaterials({ type }: { type: 'reading' | 'listenin
     fetchBookmarks();
   }, [user?.uid, collectionName]);
 
-  useEffect(() => {
-    const handleGlobalClick = (e: MouseEvent | TouchEvent) => {
-      if (!(e.target as Element).closest("#bookmark-popover")) {
-        setBookmarkPopup(null);
-      }
-    };
-    document.addEventListener("mousedown", handleGlobalClick);
-    document.addEventListener("touchstart", handleGlobalClick);
-    return () => {
-      document.removeEventListener("mousedown", handleGlobalClick);
-      document.removeEventListener("touchstart", handleGlobalClick);
-    };
-  }, []);
 
   useEffect(() => {
     const loadData = async () => {
@@ -327,37 +317,27 @@ export default function PrivateMaterials({ type }: { type: 'reading' | 'listenin
     return next;
   });
   
-  const handleMouseUp = (_e: React.MouseEvent | React.TouchEvent, itemId: string) => {
-    if (!user) return;
-    setTimeout(() => {
-      const selection = window.getSelection();
-      const text = selection?.toString().trim();
-      if (text && text.length > 2) {
-        const rect = selection!.getRangeAt(0).getBoundingClientRect();
-        setBookmarkPopup({ itemId, text, x: rect.left + rect.width / 2, y: rect.top - 45 });
-      } else {
-        setBookmarkPopup(null);
-      }
-    }, 150);
-  };
-
   const saveBookmark = async () => {
-    if (bookmarkPopup && user) {
-      try {
-        const { itemId, text } = bookmarkPopup;
-        await setDoc(doc(dbCloud, "bookmarks", `${user.uid}_${itemId}`), {
-          userId: user.uid,
-          categoryId: collectionName,
-          itemId,
-          snippet: text,
-          updatedAt: Date.now()
-        });
-        setBookmarks(prev => ({ ...prev, [itemId]: text }));
-        setBookmarkPopup(null);
-        window.getSelection()?.removeAllRanges();
-      } catch (e) {
-        console.error("Error saving bookmark:", e);
-      }
+    if (!bookmarkPopup) return;
+    if (!user) {
+      dismissSelectionPopup();
+      navigate("/login");
+      return;
+    }
+    try {
+      const { itemId, text } = bookmarkPopup;
+      await setDoc(doc(dbCloud, "bookmarks", `${user.uid}_${itemId}`), {
+        userId: user.uid,
+        categoryId: collectionName,
+        itemId,
+        snippet: text,
+        updatedAt: Date.now()
+      });
+      setBookmarks(prev => ({ ...prev, [itemId]: text }));
+      dismissSelectionPopup();
+      window.getSelection()?.removeAllRanges();
+    } catch (e) {
+      console.error("Error saving bookmark:", e);
     }
   };
 
@@ -439,6 +419,12 @@ export default function PrivateMaterials({ type }: { type: 'reading' | 'listenin
   };
 
   const openSaveWordModal = () => {
+    if (!bookmarkPopup) return;
+    if (!user) {
+      dismissSelectionPopup();
+      navigate("/login");
+      return;
+    }
     if (bookmarkPopup) {
       const text = bookmarkPopup.text;
       setNewGerman(text);
@@ -455,7 +441,7 @@ export default function PrivateMaterials({ type }: { type: 'reading' | 'listenin
       setNewNote("");
       setNewCategory("vocabulary");
       setIsSaveWordModalOpen(true);
-      setBookmarkPopup(null);
+      dismissSelectionPopup();
     }
   };
 
@@ -763,7 +749,7 @@ export default function PrivateMaterials({ type }: { type: 'reading' | 'listenin
                                     {type === 'listening' && item.url ? (
                                       <div className="flex flex-col lg:flex-row gap-8 items-start">
                                         <div className="flex-1 w-full order-2 lg:order-1">
-                                          <ArticleContent id={`article-content-${item.id}`} html={item.content} onImageClick={handleImageClick} onExpandTable={openTable} onMouseUp={(e) => handleMouseUp(e, item.id)} onTouchEnd={(e) => handleMouseUp(e, item.id)} className="prose prose-blue max-w-none text-gray-700 leading-relaxed space-y-4 mb-4" />
+                                          <ArticleContent id={`article-content-${item.id}`} html={item.content} onImageClick={handleImageClick} onExpandTable={openTable} selectionId={item.id} className="prose prose-blue max-w-none text-gray-700 leading-relaxed space-y-4 mb-4" />
                                         </div>
                                         <div className="w-full lg:w-80 flex-shrink-0 lg:sticky lg:top-4 bg-blue-50/50 p-4 rounded-3xl border border-blue-100 shadow-sm order-1 lg:order-2 mb-4 lg:mb-0">
                                           <div className="text-xs font-bold text-blue-800 uppercase tracking-wider mb-3 px-2">{t("media_player") || "Media Player"}</div>
@@ -772,7 +758,7 @@ export default function PrivateMaterials({ type }: { type: 'reading' | 'listenin
                                       </div>
                                   ) : ( // This is the reading block
                                     <>
-                                      <ArticleContent id={`article-content-${item.id}`} html={item.content} onImageClick={handleImageClick} onExpandTable={openTable} onMouseUp={(e) => handleMouseUp(e, item.id)} onTouchEnd={(e) => handleMouseUp(e, item.id)} className="prose prose-blue max-w-none text-gray-700 leading-relaxed space-y-4 mb-4" />
+                                      <ArticleContent id={`article-content-${item.id}`} html={item.content} onImageClick={handleImageClick} onExpandTable={openTable} selectionId={item.id} className="prose prose-blue max-w-none text-gray-700 leading-relaxed space-y-4 mb-4" />
                                       {item.url && (
                                         <a href={item.url} target="_blank" rel="noopener noreferrer" className="inline-block mt-4 text-blue-600 hover:text-blue-800 font-medium text-sm">
                                           {t("original_source") || "Original source"} ↗
@@ -879,16 +865,13 @@ export default function PrivateMaterials({ type }: { type: 'reading' | 'listenin
         </div>
       )}
 
-      {bookmarkPopup && (
-        <div id="bookmark-popover" className="fixed z-50 animate-fade-in-up flex gap-[1px]" style={{ left: window.innerWidth > 768 ? bookmarkPopup.x : "50%", top: window.innerWidth > 768 ? bookmarkPopup.y : "auto", bottom: window.innerWidth > 768 ? "auto" : "30px", transform: "translateX(-50%)" }}>
-          <button onClick={saveBookmark} className="bg-blue-900 text-white font-bold text-sm px-5 py-3 md:px-4 md:py-2 rounded-l-full md:rounded-l-xl shadow-2xl md:shadow-xl flex items-center gap-2 hover:bg-blue-800 transition-all">
-            🔖 {t("save_bookmark") || "Bookmark"}
-          </button>
-          <button onClick={openSaveWordModal} className="bg-green-600 text-white font-bold text-sm px-5 py-3 md:px-4 md:py-2 rounded-r-full md:rounded-r-xl shadow-2xl md:shadow-xl flex items-center gap-2 hover:bg-green-700 transition-all">
-            💾 {t("save_to_vocabulary") || "Save Word"}
-          </button>
-        </div>
-      )}
+      <ReadingSelectionPopover
+        popup={bookmarkPopup}
+        bookmarkLabel={t("save_bookmark") || "Bookmark"}
+        saveLabel={t("save_to_vocabulary") || "Save Word"}
+        onBookmark={saveBookmark}
+        onSave={openSaveWordModal}
+      />
 
       {isSaveWordModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-blue-950/40 backdrop-blur-sm transition-opacity">

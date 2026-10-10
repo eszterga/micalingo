@@ -16,6 +16,11 @@ html {
   cursor: zoom-in;
 }
 
+[data-reading-selection] {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
 .prose h2 {
   font-size: 1.5rem;
   font-weight: 800;
