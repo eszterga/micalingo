@@ -1,6 +1,6 @@
 import BackLabel from "../components/BackLabel";
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import AppLink from '../components/AppLink';
 import { collection, query, where, getDocs, doc, setDoc, deleteDoc } from 'firebase/firestore';
 import { dbCloud } from '../lib/firebase';
@@ -13,6 +13,8 @@ import { fetchVisibleLibraryItems } from '../lib/libraryContent';
 import { categoryTitleKey } from '../lib/categoryTitle';
 import { ImageLightbox, useImageLightbox } from '../components/ImageLightbox';
 import ArticleContent from '../components/ArticleContent';
+import ReadingSelectionPopover from '../components/ReadingSelectionPopover';
+import { useReadingSelectionPopup } from '../lib/useReadingSelectionPopup';
 import EditorFormatControls from '../components/EditorFormatControls';
 import {
   getSelectionBookmark,
@@ -41,6 +43,7 @@ const BackgroundBlobs = () => (
 
 export default function PublicContentCategory({ type }: { type: 'articles' | 'books' | 'interesting' }) {
   const { categoryId } = useParams<{ categoryId: string }>();
+  const navigate = useNavigate();
   const { t } = useI18n();
   const { user, isAdmin, adminMode } = useAuth();
   const { labels: quizLabels } = useQuizLabels(user?.uid);
@@ -53,9 +56,8 @@ export default function PublicContentCategory({ type }: { type: 'articles' | 'bo
   const [items, setItems] = useState<any[]>([]);
   const [itemsLoading, setItemsLoading] = useState(true);
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
-  const autoExpandedFor = useRef<string | null>(null);
   const [bookmarks, setBookmarks] = useState<Record<string, string>>({});
-  const [bookmarkPopup, setBookmarkPopup] = useState<{ itemId: string, text: string, x: number, y: number } | null>(null);
+  const { popup: bookmarkPopup, dismiss: dismissSelectionPopup } = useReadingSelectionPopup();
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
@@ -220,45 +222,15 @@ export default function PublicContentCategory({ type }: { type: 'articles' | 'bo
     fetchItems();
   }, [fetchItems]);
 
-  useEffect(() => {
-    if (itemsLoading || items.length === 0 || !categoryId) return;
-    if (autoExpandedFor.current === categoryId) return;
-    autoExpandedFor.current = categoryId;
-    setExpandedItems(new Set(items.map((item) => item.id)));
-  }, [itemsLoading, items, categoryId]);
-
-  useEffect(() => {
-    const handleGlobalClick = (e: MouseEvent | TouchEvent) => {
-      if (!(e.target as Element).closest("#bookmark-popover")) {
-        setBookmarkPopup(null);
-      }
-    };
-    document.addEventListener("mousedown", handleGlobalClick);
-    document.addEventListener("touchstart", handleGlobalClick);
-    return () => {
-      document.removeEventListener("mousedown", handleGlobalClick);
-      document.removeEventListener("touchstart", handleGlobalClick);
-    };
-  }, []);
-
-  const handleMouseUp = (_e: React.MouseEvent | React.TouchEvent, itemId: string) => {
-    if (!user) return; // Only allow highlighting features for logged-in users
-    setTimeout(() => {
-      const selection = window.getSelection();
-      const text = selection?.toString().trim();
-      if (text && text.length > 2) {
-        const rect = selection!.getRangeAt(0).getBoundingClientRect();
-        setBookmarkPopup({ itemId, text, x: rect.left + rect.width / 2, y: rect.top - 45 });
-      } else {
-        setBookmarkPopup(null);
-      }
-    }, 150);
-  };
-
   const saveBookmark = async () => {
-    if (bookmarkPopup && user) {
-      try {
-        const { itemId, text } = bookmarkPopup;
+    if (!bookmarkPopup) return;
+    if (!user) {
+      dismissSelectionPopup();
+      navigate("/login");
+      return;
+    }
+    try {
+      const { itemId, text } = bookmarkPopup;
         await setDoc(doc(dbCloud, "bookmarks", `${user.uid}_${itemId}`), {
           userId: user.uid,
           categoryId,
@@ -267,11 +239,10 @@ export default function PublicContentCategory({ type }: { type: 'articles' | 'bo
           updatedAt: Date.now()
         });
         setBookmarks(prev => ({ ...prev, [itemId]: text }));
-        setBookmarkPopup(null);
+        dismissSelectionPopup();
         window.getSelection()?.removeAllRanges();
-      } catch (e) {
-        console.error("Error saving bookmark:", e);
-      }
+    } catch (e) {
+      console.error("Error saving bookmark:", e);
     }
   };
 
@@ -406,6 +377,12 @@ export default function PublicContentCategory({ type }: { type: 'articles' | 'bo
   };
 
   const openSaveWordModal = () => {
+    if (!bookmarkPopup) return;
+    if (!user) {
+      dismissSelectionPopup();
+      navigate("/login");
+      return;
+    }
     if (bookmarkPopup) {
       const text = bookmarkPopup.text;
       setNewGerman(text);
@@ -422,7 +399,7 @@ export default function PublicContentCategory({ type }: { type: 'articles' | 'bo
       setNewNote("");
       setNewCategory("vocabulary");
       setIsSaveWordModalOpen(true);
-      setBookmarkPopup(null);
+      dismissSelectionPopup();
     }
   };
 
@@ -632,21 +609,23 @@ export default function PublicContentCategory({ type }: { type: 'articles' | 'bo
                     )}
                   </div>
                   
-                  {isExpanded && (
+                  <div className={`grid transition-[grid-template-rows,opacity] duration-300 ease-in-out ${isExpanded ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}>
+                    <div className="min-h-0 overflow-hidden">
                       <div className="pt-2 border-t border-blue-50/50 mt-6">
                         {item.source && (
                           <p className="text-sm font-bold text-blue-600 mt-4 mb-6 flex items-center gap-2">
                             <span className="bg-blue-100 p-1.5 rounded-lg text-xs shadow-sm">{type === 'articles' ? '📰' : '📚'}</span> {item.source}
                           </p>
                         )}
-                          <ArticleContent id={`article-content-${item.id}`} html={item.content} onImageClick={handleImageClick} onExpandTable={openTable} onMouseUp={(e) => handleMouseUp(e, item.id)} onTouchEnd={(e) => handleMouseUp(e, item.id)} className="prose prose-blue max-w-none text-gray-700 leading-relaxed space-y-4 mb-4" />
+                          <ArticleContent id={`article-content-${item.id}`} selectionId={item.id} html={item.content} onImageClick={handleImageClick} onExpandTable={openTable} className="prose prose-blue max-w-none text-gray-700 leading-relaxed space-y-4 mb-4" />
                         {item.url && (
                           <a href={item.url} target="_blank" rel="noopener noreferrer" className="inline-block mt-4 text-blue-600 hover:text-blue-800 font-medium text-sm">
                             {t("original_source") || "Original source"} ↗
                           </a>
                         )}
                       </div>
-                  )}
+                    </div>
+                  </div>
                 </div>
               );
             })}
@@ -764,16 +743,13 @@ export default function PublicContentCategory({ type }: { type: 'articles' | 'bo
         </div>
       )}
 
-      {bookmarkPopup && (
-        <div id="bookmark-popover" className="fixed z-50 animate-fade-in-up flex gap-[1px]" style={{ left: window.innerWidth > 768 ? bookmarkPopup.x : "50%", top: window.innerWidth > 768 ? bookmarkPopup.y : "auto", bottom: window.innerWidth > 768 ? "auto" : "30px", transform: "translateX(-50%)" }}>
-          <button onClick={saveBookmark} className="bg-blue-900 text-white font-bold text-sm px-5 py-3 md:px-4 md:py-2 rounded-l-full md:rounded-l-xl shadow-2xl md:shadow-xl flex items-center gap-2 hover:bg-blue-800 transition-all">
-            🔖 {t("save_bookmark") || "Bookmark"}
-          </button>
-          <button onClick={openSaveWordModal} className="bg-green-600 text-white font-bold text-sm px-5 py-3 md:px-4 md:py-2 rounded-r-full md:rounded-r-xl shadow-2xl md:shadow-xl flex items-center gap-2 hover:bg-green-700 transition-all">
-            💾 {t("save_to_vocabulary") || "Save Word"}
-          </button>
-        </div>
-      )}
+      <ReadingSelectionPopover
+        popup={bookmarkPopup}
+        bookmarkLabel={t("save_bookmark") || "Bookmark"}
+        saveLabel={t("save_to_vocabulary") || "Save Word"}
+        onBookmark={saveBookmark}
+        onSave={openSaveWordModal}
+      />
 
       {isSaveWordModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-blue-950/40 backdrop-blur-sm transition-opacity">

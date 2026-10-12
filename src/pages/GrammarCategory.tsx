@@ -1,6 +1,6 @@
 import BackLabel from "../components/BackLabel";
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import AppLink from '../components/AppLink';
 import { collection, query, where, getDocs, doc, setDoc, deleteDoc } from 'firebase/firestore';
 import { dbCloud } from '../lib/firebase';
@@ -12,6 +12,8 @@ import { QuizCategoryOptions } from '../components/QuizCategoryOptions';
 import { fetchVisibleLibraryItems } from '../lib/libraryContent';
 import { ImageLightbox, useImageLightbox } from '../components/ImageLightbox';
 import ArticleContent from '../components/ArticleContent';
+import ReadingSelectionPopover from '../components/ReadingSelectionPopover';
+import { useReadingSelectionPopup } from '../lib/useReadingSelectionPopup';
 import EditorFormatControls from '../components/EditorFormatControls';
 import ArticleBody from '../components/ArticleBody';
 import { grammarPrimer } from '../lib/learnContent';
@@ -43,6 +45,7 @@ const BackgroundBlobs = () => (
 
 export default function GrammarCategory() {
   const { categoryId } = useParams<{ categoryId: string }>();
+  const navigate = useNavigate();
   const { t, language } = useI18n();
   const { user, isAdmin, adminMode } = useAuth();
   const { labels: quizLabels } = useQuizLabels(user?.uid);
@@ -58,7 +61,7 @@ export default function GrammarCategory() {
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const autoExpandedFor = useRef<string | null>(null);
   const [bookmarks, setBookmarks] = useState<Record<string, string>>({});
-  const [bookmarkPopup, setBookmarkPopup] = useState<{ itemId: string, text: string, x: number, y: number } | null>(null);
+  const { popup: bookmarkPopup, dismiss: dismissSelectionPopup } = useReadingSelectionPopup();
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
@@ -230,51 +233,27 @@ export default function GrammarCategory() {
     setExpandedItems(new Set([items[0].id]));
   }, [itemsLoading, items, categoryId]);
 
-  useEffect(() => {
-    const handleGlobalClick = (e: MouseEvent | TouchEvent) => {
-      if (!(e.target as Element).closest("#bookmark-popover")) {
-        setBookmarkPopup(null);
-      }
-    };
-    document.addEventListener("mousedown", handleGlobalClick);
-    document.addEventListener("touchstart", handleGlobalClick);
-    return () => {
-      document.removeEventListener("mousedown", handleGlobalClick);
-      document.removeEventListener("touchstart", handleGlobalClick);
-    };
-  }, []);
-
-  const handleMouseUp = (_e: React.MouseEvent | React.TouchEvent, itemId: string) => {
-    if (!user) return;
-    setTimeout(() => {
-      const selection = window.getSelection();
-      const text = selection?.toString().trim();
-      if (text && text.length > 2) {
-        const rect = selection!.getRangeAt(0).getBoundingClientRect();
-        setBookmarkPopup({ itemId, text, x: rect.left + rect.width / 2, y: rect.top - 45 });
-      } else {
-        setBookmarkPopup(null);
-      }
-    }, 150);
-  };
-
   const saveBookmark = async () => {
-    if (bookmarkPopup && user) {
-      try {
-        const { itemId, text } = bookmarkPopup;
-        await setDoc(doc(dbCloud, "bookmarks", `${user.uid}_${itemId}`), {
-          userId: user.uid,
-          categoryId,
-          itemId,
-          snippet: text,
-          updatedAt: Date.now()
-        });
-        setBookmarks(prev => ({ ...prev, [itemId]: text }));
-        setBookmarkPopup(null);
-        window.getSelection()?.removeAllRanges();
-      } catch (e) {
-        console.error("Error saving bookmark:", e);
-      }
+    if (!bookmarkPopup) return;
+    if (!user) {
+      dismissSelectionPopup();
+      navigate("/login");
+      return;
+    }
+    try {
+      const { itemId, text } = bookmarkPopup;
+      await setDoc(doc(dbCloud, "bookmarks", `${user.uid}_${itemId}`), {
+        userId: user.uid,
+        categoryId,
+        itemId,
+        snippet: text,
+        updatedAt: Date.now()
+      });
+      setBookmarks(prev => ({ ...prev, [itemId]: text }));
+      dismissSelectionPopup();
+      window.getSelection()?.removeAllRanges();
+    } catch (e) {
+      console.error("Error saving bookmark:", e);
     }
   };
 
@@ -409,6 +388,12 @@ export default function GrammarCategory() {
   };
 
   const openSaveWordModal = () => {
+    if (!bookmarkPopup) return;
+    if (!user) {
+      dismissSelectionPopup();
+      navigate("/login");
+      return;
+    }
     if (bookmarkPopup) {
       const text = bookmarkPopup.text;
       setNewGerman(text);
@@ -425,7 +410,7 @@ export default function GrammarCategory() {
       setNewNote("");
       setNewCategory("vocabulary");
       setIsSaveWordModalOpen(true);
-      setBookmarkPopup(null);
+      dismissSelectionPopup();
     }
   };
 
@@ -581,7 +566,17 @@ export default function GrammarCategory() {
         {primer && (
           <div className="bg-white/80 backdrop-blur-xl border border-white rounded-[1.75rem] p-5 md:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
             <h2 className="text-xl font-extrabold text-blue-950 mb-3">{t("grammar_primer_heading")}</h2>
-            <ArticleBody markdown={primer} />
+            {categoryId && bookmarks[`primer-${categoryId}`] && (
+              <div className="flex items-center gap-2 mb-3">
+                <span onClick={(e) => handleContinueFrom(e, `primer-${categoryId}`, bookmarks[`primer-${categoryId}`])} className="inline-flex items-center gap-1.5 text-xs font-bold bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-lg hover:bg-yellow-200 transition-colors shadow-sm cursor-pointer border border-yellow-300">
+                  🔖 {t("continue_from") || "Continue from:"} "{bookmarks[`primer-${categoryId}`].substring(0, 25)}..."
+                </span>
+                <button onClick={(e) => deleteBookmark(e, `primer-${categoryId}`)} className="p-1 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors shadow-sm" title="Delete bookmark">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+              </div>
+            )}
+            <ArticleBody id={`article-content-primer-${categoryId}`} selectionId={`primer-${categoryId}`} markdown={primer} />
             <p className="mt-4 text-sm font-bold">
               <AppLink to="/learn" className="text-blue-700 hover:text-blue-900">{t("learn_hub_title")} →</AppLink>
             </p>
@@ -652,7 +647,7 @@ export default function GrammarCategory() {
                             <span className="bg-blue-100 p-1.5 rounded-lg text-xs shadow-sm">✍️</span> {item.source}
                           </p>
                         )}
-                          <ArticleContent id={`article-content-${item.id}`} html={item.content} onImageClick={handleImageClick} onExpandTable={openTable} onMouseUp={(e) => handleMouseUp(e, item.id)} onTouchEnd={(e) => handleMouseUp(e, item.id)} className="prose prose-blue max-w-none text-gray-700 leading-relaxed space-y-4 mb-4" />
+                          <ArticleContent id={`article-content-${item.id}`} selectionId={item.id} html={item.content} onImageClick={handleImageClick} onExpandTable={openTable} className="prose prose-blue max-w-none text-gray-700 leading-relaxed space-y-4 mb-4" />
                         {item.url && (
                           <a href={item.url} target="_blank" rel="noopener noreferrer" className="inline-block mt-4 text-blue-600 hover:text-blue-800 font-medium text-sm">
                             {t("original_source") || "Original source"} ↗
@@ -777,16 +772,13 @@ export default function GrammarCategory() {
         </div>
       )}
 
-      {bookmarkPopup && (
-        <div id="bookmark-popover" className="fixed z-50 animate-fade-in-up flex gap-[1px]" style={{ left: window.innerWidth > 768 ? bookmarkPopup.x : "50%", top: window.innerWidth > 768 ? bookmarkPopup.y : "auto", bottom: window.innerWidth > 768 ? "auto" : "30px", transform: "translateX(-50%)" }}>
-          <button onClick={saveBookmark} className="bg-blue-900 text-white font-bold text-sm px-5 py-3 md:px-4 md:py-2 rounded-l-full md:rounded-l-xl shadow-2xl md:shadow-xl flex items-center gap-2 hover:bg-blue-800 transition-all">
-            🔖 {t("save_bookmark") || "Bookmark"}
-          </button>
-          <button onClick={openSaveWordModal} className="bg-green-600 text-white font-bold text-sm px-5 py-3 md:px-4 md:py-2 rounded-r-full md:rounded-r-xl shadow-2xl md:shadow-xl flex items-center gap-2 hover:bg-green-700 transition-all">
-            💾 {t("save_to_vocabulary") || "Save Word"}
-          </button>
-        </div>
-      )}
+      <ReadingSelectionPopover
+        popup={bookmarkPopup}
+        bookmarkLabel={t("save_bookmark") || "Bookmark"}
+        saveLabel={t("save_to_vocabulary") || "Save Word"}
+        onBookmark={saveBookmark}
+        onSave={openSaveWordModal}
+      />
 
       {isSaveWordModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-blue-950/40 backdrop-blur-sm transition-opacity">

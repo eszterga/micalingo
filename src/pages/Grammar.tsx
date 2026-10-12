@@ -10,8 +10,8 @@ import { signInWithGoogle } from '../lib/googleAuth';
 import { addCloudWord, useCloudVocabulary, findVocabDuplicate, vocabCategoryKey } from '../lib/firestore';
 import { ImageLightbox, useImageLightbox } from '../components/ImageLightbox';
 import ArticleContent from '../components/ArticleContent';
-import ArticleBody from '../components/ArticleBody';
-import { grammarIndexArticle, type LearnLang } from '../lib/learnContent';
+import ReadingSelectionPopover from '../components/ReadingSelectionPopover';
+import { useReadingSelectionPopup } from '../lib/useReadingSelectionPopup';
 import EditorFormatControls from '../components/EditorFormatControls';
 import {
   getSelectionBookmark,
@@ -42,7 +42,7 @@ const BackgroundBlobs = () => (
 );
 
 export default function Grammar() {
-  const { t, language } = useI18n();
+  const { t } = useI18n();
   const { user, isAdmin, adminMode } = useAuth();
   const { labels: quizLabels } = useQuizLabels(user?.uid);
   const [searchParams] = useSearchParams();
@@ -112,14 +112,6 @@ export default function Grammar() {
   const [openPrivateSections, setOpenPrivateSections] = useState<Record<string, boolean>>({});
   const [openPublicSections, setOpenPublicSections] = useState<Record<string, boolean>>({});
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
-  const publicNotesOpened = useRef(false);
-
-  useEffect(() => {
-    if (publicNotesOpened.current || publicItems.length === 0) return;
-    publicNotesOpened.current = true;
-    setOpenPublicSections(Object.fromEntries(publicCategories.map((cat) => [cat.id, true])));
-    setExpandedItems(new Set(publicItems.map((item) => item.id)));
-  }, [publicItems, publicCategories]);
   
   // Edit Categories
   const [editingCategory, setEditingCategory] = useState<string | null>(null);
@@ -237,7 +229,7 @@ export default function Grammar() {
 
   // Bookmarks & Vocabulary Add
   const [bookmarks, setBookmarks] = useState<Record<string, string>>({});
-  const [bookmarkPopup, setBookmarkPopup] = useState<{ itemId: string, text: string, x: number, y: number } | null>(null);
+  const { popup: bookmarkPopup, dismiss: dismissSelectionPopup } = useReadingSelectionPopup();
   const [isSaveWordModalOpen, setIsSaveWordModalOpen] = useState(false);
   const [newGerman, setNewGerman] = useState("");
   const [newArticle, setNewArticle] = useState("der");
@@ -286,16 +278,6 @@ export default function Grammar() {
       fetchBMs();
     }
   }, [user]);
-
-  // Global dismiss for popups
-  useEffect(() => {
-    const handleGlobalClick = (e: MouseEvent | TouchEvent) => {
-      if (!(e.target as Element).closest("#bookmark-popover")) setBookmarkPopup(null);
-    };
-    document.addEventListener("mousedown", handleGlobalClick);
-    document.addEventListener("touchstart", handleGlobalClick);
-    return () => { document.removeEventListener("mousedown", handleGlobalClick); document.removeEventListener("touchstart", handleGlobalClick); };
-  }, []);
 
   // Editor Sync
   useEffect(() => {
@@ -509,28 +491,19 @@ export default function Grammar() {
     }, 300);
   }, []);
 
-  // Bookmarks Logic
-  const handleMouseUp = useCallback((_e: React.MouseEvent | React.TouchEvent, itemId: string) => {
-    if (!user) return;
-    setTimeout(() => {
-      const selection = window.getSelection();
-      const text = selection?.toString().trim();
-      if (text && text.length > 2) {
-        const rect = selection!.getRangeAt(0).getBoundingClientRect();
-        setBookmarkPopup({ itemId, text, x: rect.left + rect.width / 2, y: rect.top - 45 });
-      } else setBookmarkPopup(null);
-    }, 150);
-  }, [user]);
-
   const saveBookmark = useCallback(async () => {
-    if (bookmarkPopup && user) {
-      const { itemId, text } = bookmarkPopup;
-      await setDoc(doc(dbCloud, "bookmarks", `${user.uid}_${itemId}`), { userId: user.uid, categoryId: "grammar", itemId, snippet: text, updatedAt: Date.now() });
-      setBookmarks(prev => ({ ...prev, [itemId]: text }));
-      setBookmarkPopup(null);
-      window.getSelection()?.removeAllRanges();
+    if (!bookmarkPopup) return;
+    if (!user) {
+      dismissSelectionPopup();
+      navigate("/login");
+      return;
     }
-  }, [bookmarkPopup, user]);
+    const { itemId, text } = bookmarkPopup;
+    await setDoc(doc(dbCloud, "bookmarks", `${user.uid}_${itemId}`), { userId: user.uid, categoryId: "grammar", itemId, snippet: text, updatedAt: Date.now() });
+    setBookmarks(prev => ({ ...prev, [itemId]: text }));
+    dismissSelectionPopup();
+    window.getSelection()?.removeAllRanges();
+  }, [bookmarkPopup, user, dismissSelectionPopup, navigate]);
 
   const deleteBookmark = useCallback(async (e: React.MouseEvent, itemId: string) => {
     e.stopPropagation(); e.preventDefault();
@@ -541,11 +514,16 @@ export default function Grammar() {
   }, [user]);
 
   const openSaveWordModal = useCallback(() => {
-    if (bookmarkPopup) {
-      setNewGerman(bookmarkPopup.text); setNewArticle("der"); setNewNoun(""); setNewHungarian(""); setNewExample(""); setNewNote(""); setNewCategory("vocabulary");
-      setIsSaveWordModalOpen(true); setBookmarkPopup(null);
+    if (!bookmarkPopup) return;
+    if (!user) {
+      dismissSelectionPopup();
+      navigate("/login");
+      return;
     }
-  }, [bookmarkPopup]);
+    setNewGerman(bookmarkPopup.text); setNewArticle("der"); setNewNoun(""); setNewHungarian(""); setNewExample(""); setNewNote(""); setNewCategory("vocabulary");
+    setIsSaveWordModalOpen(true);
+    dismissSelectionPopup();
+  }, [bookmarkPopup, user, dismissSelectionPopup, navigate]);
 
   const handleSaveWord = useCallback(async () => {
     const finalGerman = newCategory === 'articles' ? `${newArticle} ${newNoun.trim()}` : newGerman.trim();
@@ -601,12 +579,6 @@ export default function Grammar() {
             )}
           </div>
         </div>
-
-        {activeTab === 'public' && (
-          <article className="bg-white/80 backdrop-blur-xl border border-white rounded-[1.75rem] p-5 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-            <ArticleBody markdown={grammarIndexArticle(language as LearnLang)} />
-          </article>
-        )}
 
         <div className="flex overflow-x-auto whitespace-nowrap border-b border-white/60">
           <button onClick={() => handleTabChange('public')} className={`py-3 px-6 font-bold text-sm border-b-2 transition-colors ${activeTab === 'public' ? 'border-blue-600 text-blue-700' : 'border-transparent text-blue-900/50 hover:text-blue-900/80'}`}>
@@ -690,7 +662,7 @@ export default function Grammar() {
                                           <span className="bg-blue-100 p-1.5 rounded-lg text-xs shadow-sm flex-shrink-0">✍️</span> {item.source}
                                         </p>
                                       )}
-                                      <ArticleContent id={`article-content-${item.id}`} html={item.content} onImageClick={handleImageClick} onExpandTable={openTable} onMouseUp={(e) => handleMouseUp(e, item.id)} onTouchEnd={(e) => handleMouseUp(e, item.id)} className="prose prose-blue max-w-none text-gray-700 leading-relaxed space-y-4 mb-4 overflow-x-auto" />
+                                      <ArticleContent id={`article-content-${item.id}`} html={item.content} onImageClick={handleImageClick} onExpandTable={openTable} selectionId={item.id} className="prose prose-blue max-w-none text-gray-700 leading-relaxed space-y-4 mb-4 overflow-x-auto" />
                                       {item.url && (
                                         <a href={item.url} target="_blank" rel="noopener noreferrer" className="inline-block mt-4 text-blue-600 hover:text-blue-800 font-medium text-sm break-all">
                                           {t("original_source") || "Original source"} ↗
@@ -794,7 +766,7 @@ export default function Grammar() {
                                               <span className="bg-blue-100 p-1.5 rounded-lg text-xs shadow-sm flex-shrink-0">✍️</span> {item.source}
                                             </p>
                                           )}
-                                          <ArticleContent id={`article-content-${item.id}`} html={item.content} onImageClick={handleImageClick} onExpandTable={openTable} onMouseUp={(e) => handleMouseUp(e, item.id)} onTouchEnd={(e) => handleMouseUp(e, item.id)} className="prose prose-blue max-w-none text-gray-700 leading-relaxed space-y-4 mb-4 overflow-x-auto" />
+                                          <ArticleContent id={`article-content-${item.id}`} html={item.content} onImageClick={handleImageClick} onExpandTable={openTable} selectionId={item.id} className="prose prose-blue max-w-none text-gray-700 leading-relaxed space-y-4 mb-4 overflow-x-auto" />
                                           {item.url && (
                                             <a href={item.url} target="_blank" rel="noopener noreferrer" className="inline-block mt-4 text-blue-600 hover:text-blue-800 font-medium text-sm break-all">
                                               {t("original_source") || "Original source"} ↗
@@ -905,13 +877,13 @@ export default function Grammar() {
         </div>
       )}
 
-      {/* Bookmark Popover */}
-      {bookmarkPopup && (
-        <div id="bookmark-popover" className="fixed z-50 animate-fade-in-up flex gap-[1px]" style={{ left: window.innerWidth > 768 ? bookmarkPopup.x : "50%", top: window.innerWidth > 768 ? bookmarkPopup.y : "auto", bottom: window.innerWidth > 768 ? "auto" : "30px", transform: "translateX(-50%)" }}>
-          <button onClick={saveBookmark} className="bg-blue-900 text-white font-bold text-sm px-5 py-3 md:px-4 md:py-2 rounded-l-full md:rounded-l-xl shadow-2xl md:shadow-xl hover:bg-blue-800 transition-all">🔖 {t("save_bookmark") || "Bookmark"}</button>
-          <button onClick={openSaveWordModal} className="bg-green-600 text-white font-bold text-sm px-5 py-3 md:px-4 md:py-2 rounded-r-full md:rounded-r-xl shadow-2xl md:shadow-xl hover:bg-green-700 transition-all">💾 {t("save_to_vocabulary") || "Save Word"}</button>
-        </div>
-      )}
+      <ReadingSelectionPopover
+        popup={bookmarkPopup}
+        bookmarkLabel={t("save_bookmark") || "Bookmark"}
+        saveLabel={t("save_to_vocabulary") || "Save Word"}
+        onBookmark={saveBookmark}
+        onSave={openSaveWordModal}
+      />
 
       {/* Save Word Modal */}
       {isSaveWordModalOpen && (

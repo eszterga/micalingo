@@ -22,8 +22,6 @@ import {
   unmarkWord,
 } from "./markedWordsQuizEngine";
 import { PRIVATE_QUIZ_TOPIC } from "../lib/quizPool";
-import ArticleBody from "../components/ArticleBody";
-import { quizIndexArticle, type LearnLang } from "../lib/learnContent";
 
 const BackgroundBlobs = () => (
   <>
@@ -60,7 +58,7 @@ function PrivateQuizIntro({ t }: { t: (key: string) => string }) {
 type QuizTab = 'library' | 'personal' | 'marked' | 'telc';
 
 export default function Quizzes() {
-  const { t, language } = useI18n();
+  const { t } = useI18n();
   const { user, isAdmin } = useAuth();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -219,9 +217,6 @@ export default function Quizzes() {
       {/* Public Quizzes */}
       {activeTab === 'library' && (
         <div className="bg-white/60 backdrop-blur-xl p-6 md:p-8 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white space-y-6">
-          <article className="bg-white/80 border border-blue-50 rounded-[1.5rem] p-5 md:p-6">
-            <ArticleBody markdown={quizIndexArticle(language as LearnLang)} />
-          </article>
           <div>
             <h2 className="text-2xl font-extrabold text-blue-950">{t('test_your_knowledge')}</h2>
             <p className="text-lg text-blue-900/70 font-medium">{t('test_your_knowledge_subtitle')}</p>

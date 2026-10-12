@@ -453,9 +453,15 @@ Klasszikus csapda: a *weil*-mondat ige nélkül. Írj tíz *weil/dass* mondatot 
 };
 
 export const HOME_ARTICLE: Record<LearnLang, string> = {
-  en: `MicaLingo is a free German self-study site. The public library is German–Hungarian: quizzes for vocabulary, articles (der, die, das), verbs, adjectives, phrases and prepositions, and grammar notes you can read before you practise. The study guides explain how to learn noun gender and the four cases. You can practise without an account. After you sign in with Google, you can save your results and build a private library in other languages.`,
-  de: `MicaLingo ist eine kostenlose Seite zum Deutschlernen im Selbststudium. Die öffentliche Bibliothek ist Deutsch–Ungarisch: Quizze zu Wortschatz, Artikeln (der, die, das), Verben, Adjektiven, Wendungen und Präpositionen, dazu Grammatiktexte, die du vor dem Üben lesen kannst. Die Lernratgeber erklären das Genus und die vier Fälle. Üben geht ohne Konto. Nach der Anmeldung mit Google kannst du Ergebnisse speichern und eine private Bibliothek in anderen Sprachen anlegen.`,
-  hu: `A MicaLingo ingyenes német önálló tanulóoldal. A nyilvános könyvtár német–magyar: kvízek szókincsre, névelőkre (der, die, das), igékre, melléknevekre, kifejezésekre és prepozíciókra, valamint nyelvtani jegyzetek, amelyeket gyakorlás előtt el lehet olvasni. Az útmutatók a főnévnemet és a négy esetet magyarázzák. Fiók nélkül is lehet gyakorolni. Google-belépés után mentheted az eredményeidet, és más nyelveken is építhetsz saját könyvtárat.`,
+  en: `MicaLingo is a free website — and app — where you can test your language skills with ready-made quizzes (German–Hungarian). You can practice without an account, but after you sign in you can save and download the results you have reached so far, upload your own word collection, and generate more quizzes, including ones on other topics. The app is currently free, and if you find the site useful, you can send any amount with the Support MicaLingo button.
+
+The site and the app are still being developed, so please excuse any errors. We welcome your feedback and comments at support.micalingo@gmail.com.`,
+  de: `MicaLingo ist eine kostenlose Website – und App –, auf der du deine Sprachkenntnisse mit fertigen Quizzen testen kannst (Deutsch–Ungarisch). Du kannst auch ohne Konto üben, aber nach der Anmeldung kannst du deine bisherigen Ergebnisse speichern und herunterladen, deine eigene Wortsammlung hochladen und weitere Quizze erzeugen, auch zu anderen Themen. Die App ist derzeit kostenlos. Wenn dir die Seite nützlich ist, kannst du über den Button MicaLingo unterstützen einen beliebigen Betrag überweisen.
+
+Die Seite und die App werden laufend weiterentwickelt, bitte entschuldige daher mögliche Fehler. Feedback und Hinweise nehmen wir gern unter support.micalingo@gmail.com entgegen.`,
+  hu: `A MicaLingo egy ingyenes oldal – és applikáció –, ahol előre elkészített kvízekkel tesztelheted nyelvtudásod (német-magyar nyelven). Fiók (bejelentkezés) nélkül is gyakorolhatsz, de bejelentkezés után elmentheted és letöltheted eddig elért eredményeidet, feltöltheted saját szógyűjteményedet és újabb, akár más témájú kvízeket is generálhatsz. Az alkalmazás jelenleg ingyenesen elérhető, de ha úgy érzed, az oldal hasznos számodra, a Támogasd a MicaLingot gombbal tetszőleges összeget utalhatsz.
+
+Az oldal és az applikáció folyamatos fejlesztés alatt áll, így az esetleges hibákért elnézésedet kérjük. Véleményed és észrevételeidet várjuk a support.micalingo@gmail.com e-mail címre.`,
 };
 
 export const GRAMMAR_INDEX_ARTICLE: Record<LearnLang, string> = {
