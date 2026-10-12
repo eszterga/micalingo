@@ -53,6 +53,7 @@ export default function PublicContentCategory({ type }: { type: 'articles' | 'bo
   const [items, setItems] = useState<any[]>([]);
   const [itemsLoading, setItemsLoading] = useState(true);
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
+  const autoExpandedFor = useRef<string | null>(null);
   const [bookmarks, setBookmarks] = useState<Record<string, string>>({});
   const [bookmarkPopup, setBookmarkPopup] = useState<{ itemId: string, text: string, x: number, y: number } | null>(null);
   
@@ -218,6 +219,13 @@ export default function PublicContentCategory({ type }: { type: 'articles' | 'bo
   useEffect(() => {
     fetchItems();
   }, [fetchItems]);
+
+  useEffect(() => {
+    if (itemsLoading || items.length === 0 || !categoryId) return;
+    if (autoExpandedFor.current === categoryId) return;
+    autoExpandedFor.current = categoryId;
+    setExpandedItems(new Set(items.map((item) => item.id)));
+  }, [itemsLoading, items, categoryId]);
 
   useEffect(() => {
     const handleGlobalClick = (e: MouseEvent | TouchEvent) => {

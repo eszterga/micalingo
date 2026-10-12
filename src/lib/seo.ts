@@ -543,6 +543,9 @@ const NOINDEX_PATHS = new Set([
   '/create-quiz',
   '/quiz',
   '/results',
+  '/statistics',
+  '/settings',
+  '/login',
 ]);
 
 export type ResolvedSeo = SeoCopy & {
@@ -975,7 +978,6 @@ export const SITEMAP_PATHS = [
   '/library',
   '/grammar',
   '/vocabulary',
-  '/statistics',
   '/quizzes/vocabulary',
   '/quizzes/articles',
   '/quizzes/phrases',

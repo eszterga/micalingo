@@ -3,6 +3,7 @@ import { useAuth } from '../AuthContext';
 import { useI18n } from '../I18nContext';
 import { Capacitor } from '@capacitor/core';
 import { trackEvent } from '../lib/analytics';
+import { LEARN_GUIDES, guideDescription, guideTitle, type LearnLang } from '../lib/learnContent';
 
 const SUPPORT_EMAIL = 'support.micalingo@gmail.com';
 
@@ -46,7 +47,8 @@ function HomeDisclaimer({ text }: { text: string }) {
 
 export default function Home() {
   const { user } = useAuth();
-  const { t } = useI18n();
+  const { t, language } = useI18n();
+  const lang = language as LearnLang;
 
   const flyingWords = [
     { text: "der Hund", left: "10%", delay: "0s", duration: "12s" },
@@ -163,6 +165,19 @@ export default function Home() {
           <HomeAbout text={t('home_about')} supportLabel={t('support_micalingo')} />
           <HomeDisclaimer text={t('home_disclaimer')} />
         </article>
+        <ul className="mt-4 space-y-3">
+          {LEARN_GUIDES.map((guide) => (
+            <li key={guide.slug}>
+              <AppLink
+                to={`/learn/${guide.slug}`}
+                className="block p-5 rounded-[1.25rem] bg-white/75 backdrop-blur-xl border border-white hover:border-blue-200 hover:bg-white transition-colors shadow-[0_8px_30px_rgb(0,0,0,0.04)]"
+              >
+                <h2 className="text-lg font-extrabold text-blue-950 mb-1">{guideTitle(guide, lang)}</h2>
+                <p className="text-sm text-gray-700 font-medium leading-relaxed">{guideDescription(guide, lang)}</p>
+              </AppLink>
+            </li>
+          ))}
+        </ul>
       </section>
 
       {/* Android Download App Button (Centered below grid) */}

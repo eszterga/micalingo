@@ -10,6 +10,8 @@ import { signInWithGoogle } from '../lib/googleAuth';
 import { addCloudWord, useCloudVocabulary, findVocabDuplicate, vocabCategoryKey } from '../lib/firestore';
 import { ImageLightbox, useImageLightbox } from '../components/ImageLightbox';
 import ArticleContent from '../components/ArticleContent';
+import ArticleBody from '../components/ArticleBody';
+import { grammarIndexArticle, type LearnLang } from '../lib/learnContent';
 import EditorFormatControls from '../components/EditorFormatControls';
 import {
   getSelectionBookmark,
@@ -40,7 +42,7 @@ const BackgroundBlobs = () => (
 );
 
 export default function Grammar() {
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const { user, isAdmin, adminMode } = useAuth();
   const { labels: quizLabels } = useQuizLabels(user?.uid);
   const [searchParams] = useSearchParams();
@@ -110,6 +112,14 @@ export default function Grammar() {
   const [openPrivateSections, setOpenPrivateSections] = useState<Record<string, boolean>>({});
   const [openPublicSections, setOpenPublicSections] = useState<Record<string, boolean>>({});
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
+  const publicNotesOpened = useRef(false);
+
+  useEffect(() => {
+    if (publicNotesOpened.current || publicItems.length === 0) return;
+    publicNotesOpened.current = true;
+    setOpenPublicSections(Object.fromEntries(publicCategories.map((cat) => [cat.id, true])));
+    setExpandedItems(new Set(publicItems.map((item) => item.id)));
+  }, [publicItems, publicCategories]);
   
   // Edit Categories
   const [editingCategory, setEditingCategory] = useState<string | null>(null);
@@ -591,6 +601,12 @@ export default function Grammar() {
             )}
           </div>
         </div>
+
+        {activeTab === 'public' && (
+          <article className="bg-white/80 backdrop-blur-xl border border-white rounded-[1.75rem] p-5 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+            <ArticleBody markdown={grammarIndexArticle(language as LearnLang)} />
+          </article>
+        )}
 
         <div className="flex overflow-x-auto whitespace-nowrap border-b border-white/60">
           <button onClick={() => handleTabChange('public')} className={`py-3 px-6 font-bold text-sm border-b-2 transition-colors ${activeTab === 'public' ? 'border-blue-600 text-blue-700' : 'border-transparent text-blue-900/50 hover:text-blue-900/80'}`}>

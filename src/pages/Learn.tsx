@@ -18,7 +18,7 @@ export default function Learn() {
           <p className="text-blue-900/70 font-medium leading-relaxed">{t('learn_hub_intro')}</p>
         </div>
         <ul className="space-y-4">
-          {LEARN_GUIDES.filter((guide) => guide.slug === 'public-and-private').map((guide) => (
+          {LEARN_GUIDES.map((guide) => (
             <li key={guide.slug}>
               <AppLink
                 to={`/learn/${guide.slug}`}

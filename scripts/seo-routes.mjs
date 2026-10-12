@@ -42,7 +42,6 @@ export const INDEXABLE_ROUTES = [
   '/grammar',
   ...GRAMMAR_CATS.map((cat) => `/grammar/${cat}`),
   '/vocabulary',
-  '/statistics',
   '/learning-materials',
   '/learning-materials/reading',
   '/learning-materials/reading/false-friends',
@@ -67,6 +66,7 @@ export const INDEXABLE_ROUTES = [
 /** Routes that must return HTTP 200 on GitHub Pages (copied as dist/<path>/index.html). */
 export const PUBLIC_SPA_ROUTES = [
   ...INDEXABLE_ROUTES,
+  '/statistics',
   '/settings',
   '/login',
   '/excel-save',
@@ -81,7 +81,6 @@ export const SITEMAP_ENTRIES = [
   { path: '/library', changefreq: 'daily', priority: '0.9' },
   { path: '/grammar', changefreq: 'monthly', priority: '0.8' },
   { path: '/vocabulary', changefreq: 'weekly', priority: '0.8' },
-  { path: '/statistics', changefreq: 'weekly', priority: '0.5' },
   ...QUIZ_TOPICS.map((topic) => ({ path: `/quizzes/${topic}`, changefreq: 'weekly', priority: '0.8' })),
   ...GRAMMAR_CATS.map((cat) => ({ path: `/grammar/${cat}`, changefreq: 'monthly', priority: '0.7' })),
   { path: '/learning-materials', changefreq: 'weekly', priority: '0.75' },
@@ -129,8 +128,10 @@ export function routeCanonicalPath(route) {
   return LEGACY_CANONICAL[route] || DIRECTORY_CANONICAL[route] || route;
 }
 
+const NOINDEX_ROUTES = new Set(['/excel-save', '/statistics', '/settings', '/login']);
+
 export function routeNoindex(route) {
-  return route === '/excel-save';
+  return NOINDEX_ROUTES.has(route);
 }
 
 export function absoluteUrl(path) {

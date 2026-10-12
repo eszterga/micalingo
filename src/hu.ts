@@ -115,8 +115,8 @@ export const hu = {
   // Home
   welcome_back: "Üdvözlünk, jó, hogy itt vagy!",
   ready_to_learn: "Tanulj németül ingyenes, előre elkészített német-magyar kvízekkel, vagy hozz létre újakat a saját szótáradból és szókincsedből! Google-fiókoddal saját könyvtárat hozhatsz létre, és más nyelveket, vagy akár matematikai és történelmi feladványokat is gyakorolhatsz!",
-  home_about: "A MicaLingo egy ingyenes oldal – és applikáció –, ahol előre elkészített kvízekkel tesztelheted nyelvtudásod (német-magyar nyelven). Fiók (bejelentkezés) nélkül is gyakorolhatsz, de bejelentkezés után elmentheted és letöltheted eddig elért eredményeidet, feltöltheted saját szógyűjteményedet és újabb kvízeket generálhatsz. Az alkalmazás jelenleg ingyenesen elérhető, de ha úgy érzed, az oldal hasznos számodra, a {support_link} gombbal tetszőleges összeget utalhatsz.",
-  home_disclaimer: "Az oldal és az applikáció folyamatos fejlesztés alatt áll, így az esetleges hibákért elnézésedet kérjük. Véleményed és észrevételeidet várjuk a {email} e-mail címre.",
+  home_about: "A MicaLingo ingyenes német önálló tanulóoldal. A nyilvános könyvtár német–magyar: kvízek szókincsre, névelőkre (der, die, das), igékre, melléknevekre, kifejezésekre és prepozíciókra, valamint nyelvtani jegyzetek, amelyeket gyakorlás előtt el lehet olvasni. Az útmutatók a főnévnemet és a négy esetet magyarázzák. Fiók nélkül is lehet gyakorolni. Google-belépés után mentheted az eredményeidet, és más nyelveken is építhetsz saját könyvtárat.",
+  home_disclaimer: "Kérdés vagy javítás: {email}.",
   import_data: "Adatok importálása és kezelése",
   upload_new_materials: "Tölts fel új szavakat és kifejezéseket.",
   login_required: "Bejelentkezés szükséges",
@@ -770,7 +770,7 @@ _items_save: "Nincsenek érvényes szavak a mentéshez, vagy nem vagy bejelentke
   seo_faq_a6: "A felület angol, német és magyar. Nyilvánosan németet gyakorolsz magyar jelentéssel. Google-belépés után a saját listád bármilyen nyelvpár lehet.",
 
   learn_hub_title: "Útmutató",
-  learn_hub_intro: "Gyakorolj az előre elkészített német-magyar kvízekkel, vagy belépés és egy excel táblányi tudásanyag (lehet matematikai, vagy akár történelmi feladvány!) feltöltése után generálj személyreszabott kvízeket.",
+  learn_hub_intro: "Saját útmutatók önálló tanuláshoz: miben más a nyilvános német–magyar könyvtár a saját kvízektől, hogyan tanuld a der, die, das névelőket, és hogyan működnek a német esetek. Előbb olvasd el, utána jöhetnek a kvízek.",
   learn_read_time: "{minutes} perc olvasás",
   learn_byline: "MicaLingo útmutató · kb. {minutes} perc",
   learn_more_guides: "További útmutatók",
