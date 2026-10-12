@@ -452,6 +452,16 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/learn/german-cases" />
   </url>
   <url>
+    <loc>https://micalingo.com/learn/german-verbs</loc>
+    <lastmod>2026-10-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://micalingo.com/learn/german-verbs" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://micalingo.com/learn/german-verbs?lang=de" />
+    <xhtml:link rel="alternate" hreflang="hu" href="https://micalingo.com/learn/german-verbs?lang=hu" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://micalingo.com/learn/german-verbs" />
+  </url>
+  <url>
     <loc>https://micalingo.com/about</loc>
     <lastmod>2026-10-12</lastmod>
     <changefreq>monthly</changefreq>
