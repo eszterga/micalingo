@@ -56,6 +56,7 @@ export const INDEXABLE_ROUTES = [
   '/learn/public-and-private',
   '/learn/der-die-das',
   '/learn/german-cases',
+  '/learn/german-verbs',
   '/about',
   '/privacy',
   '/terms',
@@ -117,6 +118,7 @@ export const SITEMAP_ENTRIES = [
   { path: '/learn/public-and-private', changefreq: 'monthly', priority: '0.85' },
   { path: '/learn/der-die-das', changefreq: 'monthly', priority: '0.85' },
   { path: '/learn/german-cases', changefreq: 'monthly', priority: '0.85' },
+  { path: '/learn/german-verbs', changefreq: 'monthly', priority: '0.85' },
   { path: '/about', changefreq: 'monthly', priority: '0.5' },
   { path: '/privacy', changefreq: 'yearly', priority: '0.3' },
   { path: '/terms', changefreq: 'yearly', priority: '0.3' },
@@ -282,8 +284,8 @@ export const PAGE_META = {
     description: 'Improve German listening with music, podcasts, and audiobooks selected for language learners.',
   },
   '/learn': {
-    title: 'German Study Guides: Articles & Cases | MicaLingo',
-    description: 'Original German study guides for self-learners: public vs private library, der/die/das, and German cases.',
+    title: 'German Study Guides: Articles, Cases & Verbs | MicaLingo',
+    description: 'Original German study guides for self-learners: public vs private library, der/die/das, German cases, and verbs.',
   },
   '/learn/public-and-private': {
     title: 'Public German–Hungarian library vs your own quizzes | MicaLingo',
@@ -296,6 +298,10 @@ export const PAGE_META = {
   '/learn/german-cases': {
     title: 'German cases without panic | MicaLingo',
     description: 'Nominativ, Akkusativ, Dativ and Genitiv for self-learners, plus Wechselpräpositionen for location vs direction.',
+  },
+  '/learn/german-verbs': {
+    title: 'German verbs you actually need | MicaLingo',
+    description: 'Present tense, Perfekt with haben or sein, and separable verbs for German self-learners.',
   },
   '/about': {
     title: 'About MicaLingo — Learn German Online',

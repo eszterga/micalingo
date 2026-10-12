@@ -380,6 +380,203 @@ Nem kell az összes Genitiv melléknévvégződés az első napon. Kell viszont:
 
 Az esetek akkor nyugszanak meg, ha **mondatokhoz tapadnak, amiket tényleg kimondasz**. Azokat építsd; a maradékot a [kvízek](/quizzes/) elkapják.`,
     },
+  },
+  {
+    slug: 'german-verbs',
+    published: '2026-10-12',
+    minutes: 11,
+    title: {
+      en: 'German verbs you actually need: present, Perfekt, separable verbs',
+      de: 'Deutsche Verben, die du brauchst: Präsens, Perfekt, trennbare Verben',
+      hu: 'Német igék, amik tényleg kellenek: jelen, Perfekt, szétváló igék',
+    },
+    description: {
+      en: 'A small verb system for self-learners: one present-tense pattern, haben or sein in the Perfekt, and prefixes that jump to the end of the sentence.',
+      de: 'Ein kleines Verbsystem zum Selbstlernen: ein Präsensmuster, haben oder sein im Perfekt, und Vorsilben, die ans Satzende springen.',
+      hu: 'Kis igerendszer önálló tanuláshoz: egy jelen idejű minta, haben vagy sein a Perfektben, és az igekötő, ami a mondat végére ugrik.',
+    },
+    body: {
+      en: `German verb tables are a wall. For the public quizzes and for ordinary sentences you need three habits: a present-tense ending, a past with *haben* or *sein*, and a prefix that sometimes leaves the verb.
+
+## One present-tense pattern
+
+Take the stem (*mach-* from *machen*) and add an ending:
+
+| | ending | *machen* |
+| --- | --- | --- |
+| ich | *-e* | ich mache |
+| du | *-st* | du machst |
+| er / sie / es | *-t* | er macht |
+| wir | *-en* | wir machen |
+| ihr | *-t* | ihr macht |
+| sie / Sie | *-en* | sie machen |
+
+If the stem ends in *-t* or *-d*, *du* and *er* usually take an extra *e*: *du arbeitest, er arbeitet*.
+
+*sein* and *haben* do not follow the table. Learn them as they are:
+
+- *ich bin, du bist, er ist, wir sind, ihr seid, sie sind*
+- *ich habe, du hast, er hat, wir haben, ihr habt, sie haben*
+
+Modal verbs drop the ending on *ich* and *er*: *ich kann, er kann, ich muss, er muss*. Their past is a later pattern. Leave it until these present forms are automatic.
+
+## The prefix leaves the verb
+
+*anrufen, aufstehen, einkaufen* split in a normal main clause. The prefix goes to the end.
+
+- *Ich rufe dich morgen **an**.*
+- *Stehst du um sieben **auf**?*
+- *Ich kaufe heute **ein**.*
+
+In a *weil* or *dass* clause the pieces join again, at the end: *weil ich dich anrufe*.
+
+## Perfekt: haben or sein
+
+Most verbs take **haben** plus a participle. Regular participles are *ge-* + stem + *-t*: *Ich habe gestern **gearbeitet**.*
+
+**sein** is the usual choice when the subject changes place or state, and with *sein* and *bleiben*:
+
+- *Ich bin nach Hause **gegangen**.*
+- *Ich bin **eingeschlafen**.*
+- *Ich bin zu Hause **geblieben**.*
+- *Ich bin müde **gewesen**.*
+
+This is the usual pattern, not a law for every verb in a dictionary. *gehen, kommen, fahren, werden* follow it. If one verb breaks it, mark that verb. Do not rebuild the whole list.
+
+A separable prefix sticks to the participle: *Ich habe dich **angerufen**. Ich bin um sieben **aufgestanden**.*
+
+A few irregular participles show up immediately: *gesehen, gegessen, getrunken, genommen, gewesen, gehabt*. Learn the ones you miss. You do not need two hundred on day one.
+
+In speech, the past of *sein* and *haben* is usually Präteritum: *ich war, ich hatte*. Longer notes on when Perfekt sounds like an email and Präteritum sounds like a story are on [tenses](/grammar/tenses/).
+
+## One sitting
+
+1. Write *ich / du / er* for *machen*, *sein* and *haben*.
+2. Write three split-verb sentences: *anrufen, einkaufen, aufstehen*.
+3. Put the same three into Perfekt.
+4. Do one level of the [verbs quiz](/quizzes/verbs/).
+5. If the ending is right and the sentence still feels wrong, the gap is case or word order. Read [cases](/learn/german-cases/) and [sentence structure](/grammar/sentence-structure/).`,
+      de: `Verbtabellen sind eine Wand. Für die öffentlichen Quizze und für normale Sätze brauchst du drei Gewohnheiten: eine Präsensendung, eine Vergangenheit mit *haben* oder *sein*, und eine Vorsilbe, die das Verb manchmal verlässt.
+
+## Ein Präsensmuster
+
+Stamm (*mach-* von *machen*) plus Endung:
+
+| | Endung | *machen* |
+| --- | --- | --- |
+| ich | *-e* | ich mache |
+| du | *-st* | du machst |
+| er / sie / es | *-t* | er macht |
+| wir | *-en* | wir machen |
+| ihr | *-t* | ihr macht |
+| sie / Sie | *-en* | sie machen |
+
+Endet der Stamm auf *-t* oder *-d*, kommt bei *du* und *er* meist ein *e* dazu: *du arbeitest, er arbeitet*.
+
+*sein* und *haben* folgen der Tabelle nicht:
+
+- *ich bin, du bist, er ist, wir sind, ihr seid, sie sind*
+- *ich habe, du hast, er hat, wir haben, ihr habt, sie haben*
+
+Modalverben ohne Endung bei *ich* und *er*: *ich kann, er kann, ich muss, er muss*. Ihre Vergangenheit ist ein späteres Muster. Erst dieses Präsens sitzen lassen.
+
+## Die Vorsilbe verlässt das Verb
+
+*anrufen, aufstehen, einkaufen* trennen sich im normalen Hauptsatz. Die Vorsilbe steht am Ende.
+
+- *Ich rufe dich morgen **an**.*
+- *Stehst du um sieben **auf**?*
+- *Ich kaufe heute **ein**.*
+
+Im *weil*- oder *dass*-Satz stehen die Teile wieder zusammen, am Ende: *weil ich dich anrufe*.
+
+## Perfekt: haben oder sein
+
+Die meisten Verben: **haben** plus Partizip. Regelmäßig: *ge-* + Stamm + *-t*. *Ich habe gestern **gearbeitet**.*
+
+**sein** ist die übliche Wahl, wenn das Subjekt den Ort oder den Zustand wechselt, und bei *sein* und *bleiben*:
+
+- *Ich bin nach Hause **gegangen**.*
+- *Ich bin **eingeschlafen**.*
+- *Ich bin zu Hause **geblieben**.*
+- *Ich bin müde **gewesen**.*
+
+Das ist das übliche Muster, kein Gesetz für jedes Verb im Wörterbuch. *gehen, kommen, fahren, werden* folgen ihm. Bricht ein Verb aus, markiere dieses Verb.
+
+Eine trennbare Vorsilbe klebt am Partizip: *Ich habe dich **angerufen**. Ich bin um sieben **aufgestanden**.*
+
+Ein paar unregelmäßige Partizipien kommen sofort: *gesehen, gegessen, getrunken, genommen, gewesen, gehabt*. Die Fehler lernen, nicht zweihundert Formen am ersten Tag.
+
+Im Gespräch ist die Vergangenheit von *sein* und *haben* meist Präteritum: *ich war, ich hatte*. Wann Perfekt nach E-Mail klingt und Präteritum nach Geschichte, steht bei [Zeitformen](/grammar/tenses/).
+
+## Eine Sitzung
+
+1. *ich / du / er* für *machen*, *sein* und *haben*.
+2. Drei getrennte Sätze: *anrufen, einkaufen, aufstehen*.
+3. Dieselben drei ins Perfekt.
+4. Eine Stufe im [Verben-Quiz](/quizzes/verbs/).
+5. Stimmt die Endung, der Satz fühlt sich aber falsch an: Kasus oder Wortstellung. Dazu [Fälle](/learn/german-cases/) und [Satzbau](/grammar/sentence-structure/).`,
+      hu: `Az igetáblázat fal. A nyilvános kvízekhez és a hétköznapi mondatokhoz három szokás kell: egy jelen idejű végződés, múlt *haben* vagy *sein* igével, és egy igekötő, ami néha elhagyja az igét.
+
+## Egy jelen idejű minta
+
+A tő (*mach-* a *machen* igéből) plusz végződés:
+
+| | végződés | *machen* |
+| --- | --- | --- |
+| ich | *-e* | ich mache |
+| du | *-st* | du machst |
+| er / sie / es | *-t* | er macht |
+| wir | *-en* | wir machen |
+| ihr | *-t* | ihr macht |
+| sie / Sie | *-en* | sie machen |
+
+Ha a tő *-t* vagy *-d* végű, a *du* és az *er* általában kap egy *e*-t: *du arbeitest, er arbeitet*.
+
+A *sein* és a *haben* nem követi a táblát:
+
+- *ich bin, du bist, er ist, wir sind, ihr seid, sie sind*
+- *ich habe, du hast, er hat, wir haben, ihr habt, sie haben*
+
+A módbeli segédigéknek *ich* és *er* mellett nincs végződésük: *ich kann, er kann, ich muss, er muss*. A múltjuk későbbi minta. Előbb ez a jelen üljön meg.
+
+## Az igekötő elhagyja az igét
+
+Az *anrufen, aufstehen, einkaufen* szétválik a rendes főmondatban. Az igekötő a végére megy.
+
+- *Ich rufe dich morgen **an**.*
+- *Stehst du um sieben **auf**?*
+- *Ich kaufe heute **ein**.*
+
+*weil* vagy *dass* mellett a darabok újra összeállnak, a mondat végén: *weil ich dich anrufe*.
+
+## Perfekt: haben vagy sein
+
+A legtöbb ige: **haben** + melléknévi igenév. Szabályos alak: *ge-* + tő + *-t*. *Ich habe gestern **gearbeitet**.*
+
+A **sein** a szokásos választás, ha az alany helyet vagy állapotot vált, és a *sein* meg a *bleiben* mellett:
+
+- *Ich bin nach Hause **gegangen**.*
+- *Ich bin **eingeschlafen**.*
+- *Ich bin zu Hause **geblieben**.*
+- *Ich bin müde **gewesen**.*
+
+Ez a szokásos minta, nem törvény minden szótári igére. A *gehen, kommen, fahren, werden* követi. Ha egy ige kilóg, azt az egyet jelöld. Ne építsd újra az egész listát.
+
+A szétváló igekötő ráragad az igenévre: *Ich habe dich **angerufen**. Ich bin um sieben **aufgestanden**.*
+
+Néhány rendhagyó igenév azonnal előjön: *gesehen, gegessen, getrunken, genommen, gewesen, gehabt*. A hibázottakat tanuld, az első napon nem kétszázat.
+
+Beszédben a *sein* és a *haben* múltja általában Präteritum: *ich war, ich hatte*. Hogy a Perfekt mikor hangzik e-mailnek, a Präteritum pedig történetnek, az [igeidők](/grammar/tenses/) oldalán van.
+
+## Egy kör
+
+1. Írd le az *ich / du / er* alakot a *machen*, *sein* és *haben* igékre.
+2. Három szétváló mondat: *anrufen, einkaufen, aufstehen*.
+3. Ugyanez a három Perfektben.
+4. Egy szint az [ige kvízben](/quizzes/verbs/).
+5. Ha a végződés jó, a mondat mégis rossz: eset vagy szórend. Olvasd az [eseteket](/learn/german-cases/) és a [mondatszerkezetet](/grammar/sentence-structure/).`,
+    },
   }
 ];
 
@@ -398,13 +595,13 @@ Sok hiba nem a táblázat, hanem a hely vs irány: *Ich bin in der Schule* (Dati
   tenses: {
     en: `For spoken German and most B1 writing, you need a clean **Präsens** and a reliable **Perfekt** (*Ich habe gestern gearbeitet*). **Präteritum** is the narrative past in writing and the normal past of *sein* and *haben* (*ich war, ich hatte*). **Futur I** with *werden* is useful, but Germans often use present + a time word (*Morgen fahre ich*).
 
-Writing tip: in emails about the past, Perfekt sounds natural. In a story paragraph, a few Präteritum forms (*ging, sagte, war*) make the text look more written. Practise both in the [verbs quiz](/quizzes/verbs/).`,
+Writing tip: in emails about the past, Perfekt sounds natural. In a story paragraph, a few Präteritum forms (*ging, sagte, war*) make the text look more written. The longer walkthrough is [German verbs](/learn/german-verbs/). Practise both in the [verbs quiz](/quizzes/verbs/).`,
     de: `Fürs Sprechen und die meisten B1-Texte brauchst du ein klares **Präsens** und ein sicheres **Perfekt**. **Präteritum** ist die Erzählzeit und die normale Vergangenheit von *sein* und *haben*. **Futur I** mit *werden* geht, oft reicht Präsens plus Zeitangabe (*Morgen fahre ich*).
 
-In E-Mails über die Vergangenheit klingt Perfekt natürlich. In einer Geschichte wirken ein paar Präteritumformen schriftlicher. Beides im [Verben-Quiz](/quizzes/verbs/).`,
+In E-Mails über die Vergangenheit klingt Perfekt natürlich. In einer Geschichte wirken ein paar Präteritumformen schriftlicher. Länger: [Verben](/learn/german-verbs/). Beides im [Verben-Quiz](/quizzes/verbs/).`,
     hu: `Beszédhez és a legtöbb B1 íráshoz kell egy tiszta **Präsens** és egy biztos **Perfekt**. A **Präteritum** az írott elbeszélő múlt, és a *sein/haben* természetes múltja (*ich war, ich hatte*). A **Futur I** működik, de gyakran elég a jelen idő + időhatározó (*Morgen fahre ich*).
 
-Múltról szóló e-mailben a Perfekt természetes. Történetben néhány Präteritum írásosabb. Mindkettő az [ige kvízben](/quizzes/verbs/).`,
+Múltról szóló e-mailben a Perfekt természetes. Történetben néhány Präteritum írásosabb. Hosszabban: [német igék](/learn/german-verbs/). Mindkettő az [ige kvízben](/quizzes/verbs/).`,
   },
   articles: {
     en: `Every German noun has a gender, shown in the singular by **der, die, das**. Gender is grammatical: *das Mädchen* is neuter. The useful method is to learn the article glued to the noun (*die Wohnung*, not *Wohnung*) and to remember high-value endings (*-ung* → usually *die*, *-chen* → *das*).

@@ -260,13 +260,13 @@ const ROUTES: Record<string, Localized> = {
   },
   '/learn': {
     en: {
-      title: 'German Study Guides: Articles & Cases | MicaLingo',
-      description: 'Original German study guides for self-learners: public vs private library, der/die/das, and German cases.',
+      title: 'German Study Guides: Articles, Cases & Verbs | MicaLingo',
+      description: 'Original German study guides for self-learners: public vs private library, der/die/das, German cases, and verbs.',
       keywords: 'German study guides, der die das, German cases, self-learning German',
     },
     de: {
-      title: 'Deutsch-Lernratgeber: Artikel & Fälle | MicaLingo',
-      description: 'Eigene Ratgeber zum Selbstlernen: öffentlich vs privat, der/die/das und deutsche Fälle.',
+      title: 'Deutsch-Lernratgeber: Artikel, Fälle & Verben | MicaLingo',
+      description: 'Eigene Ratgeber zum Selbstlernen: öffentlich vs privat, der/die/das, deutsche Fälle und Verben.',
       keywords: 'Deutsch Lernratgeber, der die das, Kasus, Selbstlernen',
     },
     hu: {
@@ -1018,6 +1018,7 @@ export const SITEMAP_PATHS = [
   '/learn/public-and-private',
   '/learn/der-die-das',
   '/learn/german-cases',
+  '/learn/german-verbs',
   '/about',
   '/privacy',
   '/terms',
