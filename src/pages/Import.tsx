@@ -98,6 +98,7 @@ export default function Import() {
   const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
   const { t } = useI18n();
   const { labels: quizLabels } = useQuizLabels(user?.uid);
+  const effectiveLabels = saveToPublic ? {} : quizLabels;
   const [previewItems, setPreviewItems] = useState<any[]>([]);
 
   const [editingFile, setEditingFile] = useState<string | null>(null);
@@ -1290,21 +1291,21 @@ export default function Import() {
                       </>
                     ) : destination === 'adjectives' ? (
                       <>
-                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{matchColumnLabel(quizLabels, destination, 'a', t('adjective') || 'Adjective')} <span className="text-xs font-normal text-gray-500 block">{t('column_a')}</span></th>
-                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{matchColumnLabel(quizLabels, destination, 'b', t('hungarian'))} <span className="text-xs font-normal text-gray-500 block">{t('column_b')}</span></th>
-                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{matchColumnLabel(quizLabels, destination, 'c', t('levels') || 'Levels')} <span className="text-xs font-normal text-gray-500 block">{t('column_c')}</span></th>
+                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{matchColumnLabel(effectiveLabels, destination, 'a', t('adjective') || 'Adjective')} <span className="text-xs font-normal text-gray-500 block">{t('column_a')}</span></th>
+                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{matchColumnLabel(effectiveLabels, destination, 'b', t('hungarian'))} <span className="text-xs font-normal text-gray-500 block">{t('column_b')}</span></th>
+                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{matchColumnLabel(effectiveLabels, destination, 'c', t('levels') || 'Levels')} <span className="text-xs font-normal text-gray-500 block">{t('column_c')}</span></th>
                       </>
                     ) : destination === 'verbs' ? (
                       <>
-                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{matchColumnLabel(quizLabels, destination, 'a', t('german'))} <span className="text-xs font-normal text-gray-500 block">{t('column_a')}</span></th>
-                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{matchColumnLabel(quizLabels, destination, 'b', t('hungarian'))} <span className="text-xs font-normal text-gray-500 block">{t('column_b')}</span></th>
-                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{matchColumnLabel(quizLabels, destination, 'c', t('hint') || 'Hint / Past Form')} <span className="text-xs font-normal text-gray-500 block">{t('column_c')}</span></th>
+                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{matchColumnLabel(effectiveLabels, destination, 'a', t('german'))} <span className="text-xs font-normal text-gray-500 block">{t('column_a')}</span></th>
+                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{matchColumnLabel(effectiveLabels, destination, 'b', t('hungarian'))} <span className="text-xs font-normal text-gray-500 block">{t('column_b')}</span></th>
+                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{matchColumnLabel(effectiveLabels, destination, 'c', t('hint') || 'Hint / Past Form')} <span className="text-xs font-normal text-gray-500 block">{t('column_c')}</span></th>
                       </>
                     ) : (
                       <>
-                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{matchColumnLabel(quizLabels, destination, 'a', t('german'))} <span className="text-xs font-normal text-gray-500 block">{t('column_a')}</span></th>
-                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{matchColumnLabel(quizLabels, destination, 'b', t('hungarian'))} <span className="text-xs font-normal text-gray-500 block">{t('column_b')}</span></th>
-                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{matchColumnLabel(quizLabels, destination, 'c', t('example'))} <span className="text-xs font-normal text-gray-500 block">{t('column_c_d')}</span></th>
+                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{matchColumnLabel(effectiveLabels, destination, 'a', t('german'))} <span className="text-xs font-normal text-gray-500 block">{t('column_a')}</span></th>
+                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{matchColumnLabel(effectiveLabels, destination, 'b', t('hungarian'))} <span className="text-xs font-normal text-gray-500 block">{t('column_b')}</span></th>
+                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{matchColumnLabel(effectiveLabels, destination, 'c', t('example'))} <span className="text-xs font-normal text-gray-500 block">{t('column_c_d')}</span></th>
                       </>
                     )}
                     <th className="p-2 sm:p-3 w-10"></th>
@@ -1381,7 +1382,7 @@ export default function Import() {
                   className="bg-white border border-gray-200 text-gray-900 font-medium rounded-xl focus:ring-2 focus:ring-blue-500 block w-full p-3 shadow-sm outline-none"
                 >
                   <QuizCategoryOptions
-                    labels={quizLabels}
+                    labels={effectiveLabels}
                     t={t}
                     includeReading
                     includeTelc={isAdmin}
@@ -1393,10 +1394,10 @@ export default function Import() {
                 {isMatchQuizTopic(destination) && (
                   <p className="text-xs text-gray-500 sm:pl-[4.5rem]">
                     {t('import_custom_columns_hint', {
-                      a: matchColumnLabel(quizLabels, destination, 'a', t('german')),
-                      b: matchColumnLabel(quizLabels, destination, 'b', t('hungarian')),
+                      a: matchColumnLabel(effectiveLabels, destination, 'a', t('german')),
+                      b: matchColumnLabel(effectiveLabels, destination, 'b', t('hungarian')),
                       c: matchColumnLabel(
-                        quizLabels,
+                        effectiveLabels,
                         destination,
                         'c',
                         destination === 'adjectives' ? (t('levels') || 'Levels') : destination === 'verbs' ? (t('hint') || 'Hint') : t('example')
@@ -1442,7 +1443,7 @@ export default function Import() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">{t('modal_category_label') || 'Category'}</label>
                 <select value={newCategory} onChange={(e) => setNewCategory(e.target.value)} className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50">
                   <QuizCategoryOptions
-                    labels={quizLabels}
+                    labels={effectiveLabels}
                     t={t}
                     includeReading
                     includeTelc={isAdmin}
@@ -1488,9 +1489,9 @@ export default function Import() {
                   ? (t('meaning_example_label') || 'Example Sentence')
                   : t('modal_example_label');
               if (isMatchQuizTopic(newCategory)) {
-                const customA = quizLabels[newCategory]?.columnA;
-                const customB = quizLabels[newCategory]?.columnB;
-                const customC = quizLabels[newCategory]?.columnC;
+                const customA = effectiveLabels[newCategory]?.columnA;
+                const customB = effectiveLabels[newCategory]?.columnB;
+                const customC = effectiveLabels[newCategory]?.columnC;
                 if (customA) {
                   germanLabel = customA;
                   germanPlaceholder = customA;
@@ -1710,7 +1711,7 @@ export default function Import() {
                     </td>
                     <td className="p-3 sm:p-5 text-gray-600 uppercase text-sm font-bold">{file.fileType}</td>
                     <td className="p-3 sm:p-5">
-                      <span className="px-2.5 py-1 text-xs font-bold rounded-full bg-blue-100 text-blue-800 tracking-wider">{saveToPublic ? quizDisplayTitle(quizLabels, file.destination, defaultQuizTopicTitle(file.destination, t)) : privateCardTitle(quizLabels, file.destination, defaultQuizTopicTitle(file.destination, t), t('quiz_slot_title_placeholder', { n: privateSlotNumber(file.destination) }))}</span>
+                      <span className="px-2.5 py-1 text-xs font-bold rounded-full bg-blue-100 text-blue-800 tracking-wider">{saveToPublic ? quizDisplayTitle(effectiveLabels, file.destination, defaultQuizTopicTitle(file.destination, t)) : privateCardTitle(effectiveLabels, file.destination, defaultQuizTopicTitle(file.destination, t), t('quiz_slot_title_placeholder', { n: privateSlotNumber(file.destination) }))}</span>
                     </td>
                     <td className="p-3 sm:p-5 text-gray-700 font-medium">{file.itemCount}</td>
                     <td className="p-3 sm:p-5 text-right">
