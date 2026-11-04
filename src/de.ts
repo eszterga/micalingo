@@ -262,7 +262,7 @@ export const de = {
   modal_german_verb_label: "Deutsches Verb *",
   modal_german_verb_placeholder: "z.B. machen",
   modal_hungarian_verb_placeholder: "z.B. csinálni",
-  modal_german_ff_label: "Falscher Freund (Deutsch) *",
+  modal_german_ff_label: "Deutsches Lehnwort *",
   modal_german_ff_placeholder: "z.B. das Gift, die Gifte",
   modal_hungarian_ff_placeholder: "z.B. a méreg",
   modal_hungarian_label: "Ungarisch *",
@@ -292,7 +292,7 @@ export const de = {
   dropdown_prepositions: "Präpositionen-Quiz",
   dropdown_adjectives: "Adjektive-Quiz",
   dropdown_verbs: "Verben-Quiz",
-  dropdown_false_friends: "Falsche Freunde",
+  dropdown_false_friends: "Lehnwörter",
 
   // Quiz Page
   loading_questions: "Ihre Fragen werden geladen...",
@@ -500,10 +500,10 @@ export const de = {
   admin_mode_dev: "Entwicklermodus",
   admin_mode_normal: "Normaler Benutzermodus",
 
-  // False Friends
-  false_friends: "Falsche Freunde",
-  false_friends_desc: "Wörter, die ähnlich aussehen oder klingen.",
-  false_friends_template: "Falsche Freunde Vorlage (lesen)",
+  // Loanwords
+  false_friends: "Lehnwörter",
+  false_friends_desc: "Wörter, die im Deutschen und im Ungarischen ähnlich aussehen oder klingen und dasselbe (oder fast genau dasselbe) bedeuten.",
+  false_friends_template: "Lehnwörter-Vorlage (lesen)",
   template_note_header: "Notiz (D)",
   note: "Notiz / Bedeutung",
   admin_save_public: "Admin: In öffentlicher Bibliothek speichern",
@@ -609,8 +609,8 @@ export const de = {
   idiom_note_placeholder: "Wörtliche Bedeutung...",
   save_content: "Inhalt speichern",
   confirm_delete_idiom: "Bist du sicher, dass du diese Redewendung löschen möchtest?",
-  confirm_delete_ff: "Bist du sicher, dass du diesen falschen Freund löschen möchtest?",
-  ff_note_placeholder: "z.B. Falscher Freund: gift != ajándék",
+  confirm_delete_ff: "Bist du sicher, dass du dieses Lehnwort löschen möchtest?",
+  ff_note_placeholder: "z.B. gleiche Bedeutung auf Deutsch und Ungarisch",
   alert_fill_fields_admin: "Bitte fülle mindestens die deutschen und ungarischen Felder aus.",
   confirm_exit_app: "Möchten Sie die App wirklich beenden?",
 

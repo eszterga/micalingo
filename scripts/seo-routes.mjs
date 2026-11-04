@@ -265,15 +265,15 @@ export const PAGE_META = {
   },
   '/learning-materials': {
     title: 'German Learning Materials: Reading & Listening | MicaLingo',
-    description: 'German reading and listening practice: articles, idioms, false friends, books, music, podcasts, and audiobooks.',
+    description: 'German reading and listening practice: articles, idioms, loanwords, books, music, podcasts, and audiobooks.',
   },
   '/learning-materials/reading': {
     title: 'German Reading Practice: Articles, Idioms & Books | MicaLingo',
-    description: 'Read German texts including articles, idioms, false friends, and books to grow vocabulary and comprehension.',
+    description: 'Read German texts including articles, idioms, loanwords, and books to grow vocabulary and comprehension.',
   },
   '/learning-materials/reading/false-friends': {
-    title: 'German False Friends: Common Translation Traps | MicaLingo',
-    description: 'Learn common German–English and German–Hungarian false friends so you avoid typical translation mistakes.',
+    title: 'German–Hungarian Loanwords | MicaLingo',
+    description: 'Words that look or sound similar both in German and Hungarian and mean the same (or almost exactly the same).',
   },
   '/learning-materials/reading/idioms': {
     title: 'German Idioms & Everyday Expressions | MicaLingo',

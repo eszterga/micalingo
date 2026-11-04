@@ -78,7 +78,7 @@ English has *the* for everything, so the brain treats gender as decoration. Hung
 
 Also watch plural: many learners lock *die* to “feminine” and then panic in the plural, where **die** is also the plural article (*die Tische, die Frauen, die Kinder*). Separate the two jobs of *die* in your notes: feminine singular vs all plurals.
 
-False friends make it worse. Hungarian *személy* feels close to *Person*, which is *die Person*. English *book* does not hint *das Buch*. Use the [false friends](/learning-materials/reading/false-friends/) list when a word looks familiar and still betrays you.
+Hungarian *személy* feels close to *Person*, which is *die Person*. English *book* does not hint *das Buch*. Use the [loanwords](/learning-materials/reading/false-friends/) list when a German word looks or sounds like the Hungarian one and means the same.
 
 ## What “mastered” looks like
 
@@ -136,7 +136,7 @@ Englisch hat *the* für alles. Ungarisch hat kein *der/die/das*. Unter Stress la
 
 Und der Plural: *die* ist feminin **und** Pluralartikel (*die Tische*). In den Notizen die zwei Jobs trennen.
 
-Falsche Freunde verschärfen es. Nutze die [Liste](/learning-materials/reading/false-friends/), wenn ein Wort vertraut aussieht und trotzdem täuscht.
+Ungarisch *személy* liegt nah an *Person*, also *die Person*. Nutze die [Lehnwörter](/learning-materials/reading/false-friends/), wenn ein Wort ähnlich aussieht oder klingt und dasselbe bedeutet.
 
 ## Wann es „sitzt“
 
@@ -192,7 +192,7 @@ Az angolban mindenre *the* van. A magyarban nincs *der/die/das*. Stresszben a ta
 
 A többes szám: a *die* nőnemű **és** többes névelő (*die Tische*). A füzetben válaszd szét a két szerepet.
 
-A hamis barátok rontanak rajta. Használd a [listát](/learning-materials/reading/false-friends/), ha a szó ismerősnek tűnik, és mégis átver.
+A magyar *személy* közel áll a *Person* szóhoz, ez *die Person*. Használd a [jövevényszavak](/learning-materials/reading/false-friends/) listáját, ha a szó hasonlóan néz ki vagy hangzik, és ugyanazt jelenti.
 
 ## Mikor „megvan”
 

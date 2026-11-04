@@ -262,7 +262,7 @@ _items_save: "Nincsenek érvényes szavak a mentéshez, vagy nem vagy bejelentke
   modal_german_verb_label: "Német ige *",
   modal_german_verb_placeholder: "pl. machen",
   modal_hungarian_verb_placeholder: "pl. csinálni",
-  modal_german_ff_label: "Német hamis barát *",
+  modal_german_ff_label: "Német jövevényszó *",
   modal_german_ff_placeholder: "pl. das Gift, die Gifte",
   modal_hungarian_ff_placeholder: "pl. a méreg",
   modal_hungarian_label: "Helyes válasz (a kvízben) *",
@@ -293,7 +293,7 @@ _items_save: "Nincsenek érvényes szavak a mentéshez, vagy nem vagy bejelentke
   dropdown_prepositions: "Elöljárószavak kvíz",
   dropdown_adjectives: "Melléknevek kvíz",
   dropdown_verbs: "Igék kvíz",
-  dropdown_false_friends: "Hamis barátok",
+  dropdown_false_friends: "Jövevényszavak",
 
   // Quiz Page
   loading_questions: "Kérdések betöltése...",
@@ -499,10 +499,10 @@ _items_save: "Nincsenek érvényes szavak a mentéshez, vagy nem vagy bejelentke
   admin_mode_dev: "Fejlesztői Mód (Nyilvános könyvtár szerkesztése)",
   admin_mode_normal: "Normál Felhasználói Mód (Csak privát)",
 
-  // False Friends
-  false_friends: "Hamis barátok",
-  false_friends_desc: "Olyan szavak, amelyek hasonlóan néznek ki vagy hangzanak, sőt néha ugyanazt is jelentik németül és magyarul. Könnyű megjegyezni őket!",
-  false_friends_template: "Hamis barátok sablon",
+  // Loanwords
+  false_friends: "Jövevényszavak",
+  false_friends_desc: "Olyan szavak, amelyek németül és magyarul is hasonlóan néznek ki vagy hangzanak, és ugyanazt (vagy majdnem pontosan ugyanazt) jelentik.",
+  false_friends_template: "Jövevényszavak sablon",
   template_note_header: "Megjegyzés (D)",
   note: "Megjegyzés / Jelentés",
   admin_save_public: "Admin: Mentés a nyilvános könyvtárba",
@@ -608,8 +608,8 @@ _items_save: "Nincsenek érvényes szavak a mentéshez, vagy nem vagy bejelentke
   idiom_note_placeholder: "Szó szerinti jelentés...",
   save_content: "Tartalom mentése",
   confirm_delete_idiom: "Biztosan törölni szeretnéd ezt a szólást?",
-  confirm_delete_ff: "Biztosan törölni szeretnéd ezt a hamis barátot?",
-  ff_note_placeholder: "pl. Hamis barát: gift != ajándék",
+  confirm_delete_ff: "Biztosan törölni szeretnéd ezt a jövevényszót?",
+  ff_note_placeholder: "pl. ugyanaz a jelentés németül és magyarul",
   alert_fill_fields_admin: "Kérlek, töltsd ki legalább a német és magyar mezőket.",
   confirm_exit_app: "Biztosan ki akarsz lépni az alkalmazásból?",
 

@@ -262,7 +262,7 @@ export const en = {
   modal_german_verb_label: "German Verb *",
   modal_german_verb_placeholder: "e.g. machen",
   modal_hungarian_verb_placeholder: "e.g. csinálni",
-  modal_german_ff_label: "German False Friend *",
+  modal_german_ff_label: "German Loanword *",
   modal_german_ff_placeholder: "e.g. das Gift, die Gifte",
   modal_hungarian_ff_placeholder: "e.g. a méreg",
   modal_hungarian_label: "Correct answer (in the quiz) *",
@@ -293,7 +293,7 @@ export const en = {
   dropdown_prepositions: "Prepositions Quiz",
   dropdown_adjectives: "Adjectives Quiz",
   dropdown_verbs: "Verbs Quiz",
-  dropdown_false_friends: "False Friends",
+  dropdown_false_friends: "Loanwords",
 
   // Quiz Page
   loading_questions: "Loading your questions...",
@@ -501,10 +501,10 @@ export const en = {
   admin_mode_dev: "Developer Mode (Edit Public Library)",
   admin_mode_normal: "Normal User Mode (Private Only)",
 
-  // False Friends
-  false_friends: "False Friends",
-  false_friends_desc: "Words that look or sound similar and sometimes even mean the same both in German and Hungarian. Easy to remember these!",
-  false_friends_template: "False Friends Template (read)",
+  // Loanwords
+  false_friends: "Loanwords",
+  false_friends_desc: "Words that look or sound similar both in German and Hungarian and mean the same (or almost exactly the same).",
+  false_friends_template: "Loanwords Template (read)",
   template_note_header: "Note (D)",
   note: "Note / Meaning",
   admin_save_public: "Admin: Save to Public Library",
@@ -610,8 +610,8 @@ export const en = {
   idiom_note_placeholder: "Literal meaning...",
   save_content: "Save Content",
   confirm_delete_idiom: "Are you sure you want to delete this idiom?",
-  confirm_delete_ff: "Are you sure you want to delete this false friend?",
-  ff_note_placeholder: "e.g. False friend: gift != ajándék",
+  confirm_delete_ff: "Are you sure you want to delete this loanword?",
+  ff_note_placeholder: "e.g. same meaning in German and Hungarian",
   alert_fill_fields_admin: "Please fill in at least the German and Hungarian fields.",
   confirm_exit_app: "Are you sure you want to exit the app?",
 

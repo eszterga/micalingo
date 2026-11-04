@@ -157,54 +157,54 @@ const ROUTES: Record<string, Localized> = {
     en: {
       title: 'German Learning Materials: Reading & Listening | MicaLingo',
       description:
-        'German reading and listening practice: articles, idioms, false friends, books, music, podcasts, and audiobooks.',
+        'German reading and listening practice: articles, idioms, loanwords, books, music, podcasts, and audiobooks.',
       keywords: 'German reading, German listening, German articles, German idioms, German podcasts',
     },
     de: {
       title: 'Deutsch Lernmaterialien: Lesen & Hören | MicaLingo',
       description:
-        'Lese- und Hörtraining auf Deutsch: Artikel, Redewendungen, falsche Freunde, Bücher, Musik, Podcasts und Hörbücher.',
+        'Lese- und Hörtraining auf Deutsch: Artikel, Redewendungen, Lehnwörter, Bücher, Musik, Podcasts und Hörbücher.',
       keywords: 'Deutsch Lesen, Deutsch Hören, deutsche Artikel, Redewendungen, Podcasts',
     },
     hu: {
       title: 'Német tananyagok: olvasás és hallásértés | MicaLingo',
       description:
-        'Német olvasás- és hallásértés-gyakorlás: cikkek, szólások, hamis barátok, könyvek, zene, podcastok és hangoskönyvek.',
+        'Német olvasás- és hallásértés-gyakorlás: cikkek, szólások, jövevényszavak, könyvek, zene, podcastok és hangoskönyvek.',
       keywords: 'német olvasás, német hallásértés, német cikkek, szólások, podcast',
     },
   },
   '/learning-materials/reading': {
     en: {
       title: 'German Reading Practice: Articles, Idioms & Books | MicaLingo',
-      description: 'Read German texts including articles, idioms, false friends, and books to grow vocabulary and comprehension.',
-      keywords: 'German reading practice, German texts, German idioms, false friends',
+      description: 'Read German texts including articles, idioms, loanwords, and books to grow vocabulary and comprehension.',
+      keywords: 'German reading practice, German texts, German idioms, loanwords',
     },
     de: {
       title: 'Deutsch Lesen: Artikel, Redewendungen & Bücher | MicaLingo',
-      description: 'Lies deutsche Texte: Artikel, Redewendungen, falsche Freunde und Bücher für Wortschatz und Leseverstehen.',
-      keywords: 'Deutsch Lesen, deutsche Texte, Redewendungen, falsche Freunde',
+      description: 'Lies deutsche Texte: Artikel, Redewendungen, Lehnwörter und Bücher für Wortschatz und Leseverstehen.',
+      keywords: 'Deutsch Lesen, deutsche Texte, Redewendungen, Lehnwörter',
     },
     hu: {
       title: 'Német olvasás: cikkek, szólások és könyvek | MicaLingo',
-      description: 'Olvasd a német szövegeket: cikkek, szólások, hamis barátok és könyvek a szókincs és szövegértés fejlesztéséhez.',
-      keywords: 'német olvasás, német szövegek, szólások, hamis barátok',
+      description: 'Olvasd a német szövegeket: cikkek, szólások, jövevényszavak és könyvek a szókincs és szövegértés fejlesztéséhez.',
+      keywords: 'német olvasás, német szövegek, szólások, jövevényszavak',
     },
   },
   '/learning-materials/reading/false-friends': {
     en: {
-      title: 'German False Friends: Common Translation Traps | MicaLingo',
-      description: 'Learn common German–English and German–Hungarian false friends so you avoid typical translation mistakes.',
-      keywords: 'German false friends, falsche Freunde, translation mistakes, learn German',
+      title: 'German–Hungarian Loanwords | MicaLingo',
+      description: 'Words that look or sound similar both in German and Hungarian and mean the same (or almost exactly the same).',
+      keywords: 'German loanwords, Hungarian loanwords, Lehnwörter, learn German',
     },
     de: {
-      title: 'Falsche Freunde im Deutschen | MicaLingo',
-      description: 'Lerne häufige deutsch–englische und deutsch–ungarische falsche Freunde und vermeide Übersetzungsfehler.',
-      keywords: 'falsche Freunde Deutsch, Übersetzungsfehler, Deutsch lernen',
+      title: 'Deutsche und ungarische Lehnwörter | MicaLingo',
+      description: 'Wörter, die im Deutschen und im Ungarischen ähnlich aussehen oder klingen und dasselbe (oder fast genau dasselbe) bedeuten.',
+      keywords: 'Lehnwörter Deutsch Ungarisch, ähnliche Wörter, Deutsch lernen',
     },
     hu: {
-      title: 'Német hamis barátok: fordítási csapdák | MicaLingo',
-      description: 'Ismerd meg a gyakori német–angol és német–magyar hamis barátokat, hogy elkerüld a tipikus fordítási hibákat.',
-      keywords: 'német hamis barátok, fordítási hibák, német tanulás',
+      title: 'Német–magyar jövevényszavak | MicaLingo',
+      description: 'Olyan szavak, amelyek németül és magyarul is hasonlóan néznek ki vagy hangzanak, és ugyanazt (vagy majdnem pontosan ugyanazt) jelentik.',
+      keywords: 'német jövevényszavak, hasonló szavak, német tanulás',
     },
   },
   '/learning-materials/reading/idioms': {

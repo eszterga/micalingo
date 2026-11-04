@@ -829,7 +829,7 @@ export default function PublicAudioCategory({ type }: { type: 'music' | 'podcast
                 germanPlaceholder = t('modal_german_verb_placeholder') || "e.g. machen";
                 hungarianPlaceholder = t('modal_hungarian_verb_placeholder') || "e.g. csinálni";
               } else if (newCategory === 'false_friends') {
-                germanLabel = t('modal_german_ff_label') || "German False Friend *";
+                germanLabel = t('modal_german_ff_label') || "German Loanword *";
                 germanPlaceholder = t('modal_german_ff_placeholder') || "e.g. das Gift, die Gifte";
                 hungarianPlaceholder = t('modal_hungarian_ff_placeholder') || "e.g. a méreg";
               }

@@ -47,6 +47,7 @@ export default function FalseFriends() {
 
     for (const word of combined) {
       const key = (word.german || "").toLowerCase().trim();
+      if (key === "schmutzig") continue;
       if (!seen.has(key)) {
         seen.add(key);
         if (!word.deleted) unique.push(word);
@@ -76,7 +77,7 @@ export default function FalseFriends() {
   };
 
   const handleDelete = async (item: any) => {
-    if (!confirm(t('confirm_delete_ff') || "Are you sure you want to delete this false friend?")) return;
+    if (!confirm(t('confirm_delete_ff') || "Are you sure you want to delete this loanword?")) return;
     if (item.id) {
       await deleteCloudWordPurgingSoftDeleted(item, publicDbWords as any[]);
     } else {
@@ -177,7 +178,7 @@ export default function FalseFriends() {
           <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col animate-fade-in-up">
             <div className="p-6 md:p-8 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
               <h2 className="text-2xl font-extrabold text-blue-950">
-                {editingId || editingStaticWord ? (t('modal_edit_word_title') || 'Edit False Friend') : (t('modal_add_word_title') || 'Add False Friend')}
+                {editingId || editingStaticWord ? (t('modal_edit_word_title') || 'Edit Loanword') : (t('modal_add_word_title') || 'Add Loanword')}
               </h2>
               <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-full hover:bg-gray-200">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -185,7 +186,7 @@ export default function FalseFriends() {
             </div>
             <div className="p-6 md:p-8 overflow-y-auto space-y-6">
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">{t('modal_german_ff_label') || 'German False Friend *'}</label>
+                <label className="block text-sm font-bold text-gray-700 mb-2">{t('modal_german_ff_label') || 'German Loanword *'}</label>
                 <input type="text" value={formData.german} onChange={e => setFormData({ ...formData, german: e.target.value })} placeholder={t('modal_german_ff_placeholder') || "e.g. das Gift, die Gifte"} className="w-full rounded-xl border-gray-200 border p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" />
               </div>
               <div>
@@ -194,7 +195,7 @@ export default function FalseFriends() {
               </div>
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2">{t('note') || 'Note'} *</label>
-                <input type="text" value={formData.note} onChange={e => setFormData({ ...formData, note: e.target.value })} placeholder={t('ff_note_placeholder') || "e.g. False friend: gift != ajándék"} className="w-full rounded-xl border-gray-200 border p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" />
+                <input type="text" value={formData.note} onChange={e => setFormData({ ...formData, note: e.target.value })} placeholder={t('ff_note_placeholder') || "e.g. same meaning in German and Hungarian"} className="w-full rounded-xl border-gray-200 border p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" />
               </div>
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2">{t('modal_example_label') || 'Example Sentence'}</label>
