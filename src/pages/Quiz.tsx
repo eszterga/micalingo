@@ -253,6 +253,7 @@ export default function Quiz() {
     : topic === 'phrases' ? (t('phrases_sentences_quiz') || 'Phrases and sentences')
     : topic === 'prepositions' ? t('prepositions_quiz')
     : topic === 'adjectives' ? (t('adjectives_quiz') || 'Adjectives')
+    : topic === 'adjectives_sentences' ? (t('adjectives_sentences_quiz') || 'Adjectives (Sentences)')
     : topic === 'verbs' ? (t('verbs_quiz') || 'Verbs')
     : topic === 'marked' ? (t('marked_words') || 'Marked questions')
     : topic === 'telc-b2' ? (t('telc_b2') || 'Telc B2')
@@ -267,7 +268,10 @@ export default function Quiz() {
   );
 
   const publicQuizPool = useMemo(() => {
-    if (!topic || !isQuizTopic(topic)) return [];
+    if (!topic || (!isQuizTopic(topic) && topic !== 'adjectives_sentences')) return [];
+    if (topic === 'adjectives_sentences') {
+      return publicDbWords.filter((w: any) => !w.deleted && w.category === 'adjectives_sentences');
+    }
     // Merge static seed with whatever cloud data we have (cache or live).
     // Higher levels that need PUBLIC_LIBRARY stay empty until it arrives — see quiz effect.
     return buildPublicQuizPool(topic, publicDbWords);
@@ -277,12 +281,15 @@ export default function Quiz() {
     if (isMarked) {
       return Math.max(1, getMarkedQuizLevels(markedWords));
     }
-    if (!topic || !isQuizTopic(topic)) return 0;
+    if (!topic || (!isQuizTopic(topic) && topic !== 'adjectives_sentences')) return 0;
     return Math.max(1, Math.ceil(publicQuizPool.length / WORDS_PER_QUIZ));
   }, [topic, publicQuizPool, isMarked, markedWords]);
 
   const customTopicWords = useMemo(() => {
     if (!isCustom || !topic) return [];
+    if (topic === 'adjectives_sentences') {
+      return (userVocabulary || []).filter((w: any) => !w.deleted && w.category === 'adjectives_sentences');
+    }
     return buildCustomQuizPool(topic, userVocabulary || undefined);
   }, [isCustom, topic, userVocabulary]);
 
@@ -418,6 +425,20 @@ export default function Quiz() {
           const lowerStr = str.toLowerCase().trim();
           // Allow if it's the correct answer itself
           if (lowerStr === (correctAnswer || '').toLowerCase().trim()) return true;
+          
+          if (topic === 'adjectives_sentences') {
+            const lowerCorrect = (correctAnswer || '').toLowerCase().trim();
+            let correctEnding = "";
+            if (lowerCorrect.endsWith('en')) correctEnding = 'en';
+            else if (lowerCorrect.endsWith('em')) correctEnding = 'em';
+            else if (lowerCorrect.endsWith('er')) correctEnding = 'er';
+            else if (lowerCorrect.endsWith('es')) correctEnding = 'es';
+            else if (lowerCorrect.endsWith('e')) correctEnding = 'e';
+
+            if (correctEnding && lowerStr.endsWith(correctEnding)) return false;
+            return true;
+          }
+
           // Otherwise, reject if it's a known German word (prevents data entry errors leaking into Hungarian options)
           return !allGermanTerms.has(lowerStr);
         };
@@ -427,7 +448,7 @@ export default function Quiz() {
         if (distractorPool.length < 3) {
           let fallbackSource = isCustom
             ? (userVocabulary || []).filter((w: any) => !isReadingVocabCategory(w.category) && !isMarkedVocabCategory(w.category) && vocabCategoryKey(w.category) === topic)
-            : (topic === 'phrases' ? publicPhrases : publicVocabulary);
+            : (topic === 'phrases' ? publicPhrases : topic === 'adjectives_sentences' ? publicQuizPool : publicVocabulary);
           // Filter out invalid vocabulary entries (like articles) from being used as distractors.
           if (topic === 'vocabulary') {
             fallbackSource = fallbackSource.filter((w: any) => !['der', 'die', 'das'].includes((w.german || '').trim().toLowerCase()));
@@ -437,7 +458,37 @@ export default function Quiz() {
         }
 
         shuffleInPlace(distractorPool);
-        const distractors = distractorPool.slice(0, 3);
+        
+        let distractors: string[] = [];
+        if (topic === 'adjectives_sentences') {
+           const getEnding = (w: string) => {
+             const lower = (w || '').toLowerCase().trim();
+             if (lower.endsWith('en')) return 'en';
+             if (lower.endsWith('em')) return 'em';
+             if (lower.endsWith('er')) return 'er';
+             if (lower.endsWith('es')) return 'es';
+             if (lower.endsWith('e')) return 'e';
+             return '';
+           };
+           const usedEndings = new Set<string>();
+           usedEndings.add(getEnding(correctAnswer));
+           for (const d of distractorPool) {
+             const ending = getEnding(d);
+             if (!usedEndings.has(ending)) {
+               distractors.push(d);
+               if (ending) usedEndings.add(ending);
+             }
+             if (distractors.length === 3) break;
+           }
+           if (distractors.length < 3) {
+             for (const d of distractorPool) {
+               if (!distractors.includes(d)) distractors.push(d);
+               if (distractors.length === 3) break;
+             }
+           }
+        } else {
+           distractors = distractorPool.slice(0, 3);
+        }
 
         const options = shuffleInPlace([...distractors, correctAnswer]);
 
@@ -452,7 +503,7 @@ export default function Quiz() {
       }
     }).filter(Boolean) as Question[];
     return shuffleInPlace(built);
-  }, [topic, isCustom, germanTermsLookup, userVocabulary]);
+  }, [topic, isCustom, germanTermsLookup, userVocabulary, publicQuizPool]);
 
   useEffect(() => {
     const quizKey = isCustom ? `custom_${topic || 'general'}_${quizId}` : `${topic || 'custom'}_${quizId}`;
@@ -566,7 +617,7 @@ export default function Quiz() {
         builtQuizKeyRef.current = quizKey;
         return;
       }
-    } else if (topic && isQuizTopic(topic)) {
+    } else if (topic && (isQuizTopic(topic) || topic === 'adjectives_sentences')) {
       // Same pool / same slice as TopicQuizzes — keeps level N identical on web + app
       wordsForQuiz = shuffleInPlace([...getQuizLevelWords(publicQuizPool, quizId, topic ?? undefined)]);
 

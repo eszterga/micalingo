@@ -187,6 +187,7 @@ export default function Statistics() {
     else if (topic === 'phrases') translatedTopic = t('phrases_sentences_quiz') || t('phrases_quiz') || 'Phrases';
     else if (topic === 'prepositions') translatedTopic = t('prepositions_quiz') || 'Prepositions';
     else if (topic === 'adjectives') translatedTopic = t('adjectives_quiz') || 'Adjectives';
+    else if (topic === 'adjectives_sentences') translatedTopic = t('adjectives_sentences_quiz') || 'Adjectives (Sentences)';
     else if (topic === 'verbs') translatedTopic = t('verbs_quiz') || 'Verbs';
     else if (topic === 'telc-b2') translatedTopic = t('telc_b2') || 'Telc B2';
 

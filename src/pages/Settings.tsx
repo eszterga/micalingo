@@ -911,6 +911,12 @@ export default function Settings() {
                           <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('hungarian')}</th>
                           <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('levels' as any) || 'Levels'}</th>
                         </>
+                      ) : editingFileCategory === 'adjectives_sentences' ? (
+                        <>
+                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('question_label') || 'Question'}</th>
+                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('correct_answer_label') || 'Correct Answer'}</th>
+                          <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('comment_notes_label') || 'Comment / Notes'}</th>
+                        </>
                       ) : editingFileCategory === 'verbs' ? (
                         <>
                           <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('german')}</th>
@@ -979,6 +985,12 @@ export default function Settings() {
                             <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.german || ''} onChange={(e) => handleEditItemChange(idx, 'german', e.target.value)} className={getMatchClass(item.german)} /></td>
                             <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleEditItemChange(idx, 'hungarian', e.target.value)} className={getMatchClass(item.hungarian)} /></td>
                             <td className="p-1 sm:p-2 align-top"><textarea rows={2} value={item.levels || ''} onChange={(e) => handleEditItemChange(idx, 'levels', e.target.value)} className={getMatchClass(item.levels)} /></td>
+                          </>
+                        ) : editingFileCategory === 'adjectives_sentences' ? (
+                          <>
+                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.german || ''} onChange={(e) => handleEditItemChange(idx, 'german', e.target.value)} className={getMatchClass(item.german)} /></td>
+                            <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleEditItemChange(idx, 'hungarian', e.target.value)} className={getMatchClass(item.hungarian)} /></td>
+                            <td className="p-1 sm:p-2 align-top"><textarea rows={2} value={item.example || ''} onChange={(e) => handleEditItemChange(idx, 'example', e.target.value)} className={getMatchClass(item.example)} /></td>
                           </>
                         ) : (
                           <>

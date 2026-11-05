@@ -97,8 +97,9 @@ export default function Import() {
   const [destination, setDestination] = useState(initialDestination);
   const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
   const { t } = useI18n();
-  const { labels: quizLabels } = useQuizLabels(user?.uid);
-  const effectiveLabels = saveToPublic ? {} : quizLabels;
+  const { labels: privateLabels } = useQuizLabels(user?.uid);
+  const { labels: publicLabels } = useQuizLabels('PUBLIC_LIBRARY');
+  const effectiveLabels = saveToPublic ? publicLabels : privateLabels;
   const [previewItems, setPreviewItems] = useState<any[]>([]);
 
   const [editingFile, setEditingFile] = useState<string | null>(null);
@@ -735,7 +736,7 @@ export default function Import() {
         : 'bg-white text-blue-600 border-blue-200'
     }`;
 
-  const handleDownloadTemplate = async (type: 'standard' | 'articles' | 'adjectives' | 'verbs' | 'false_friends' | 'idioms' | 'prepositions') => {
+  const handleDownloadTemplate = async (type: 'standard' | 'articles' | 'adjectives' | 'adjectives_sentences' | 'verbs' | 'false_friends' | 'idioms' | 'prepositions') => {
     setActiveTemplate(type);
     try {
     await runDownloadTemplate(type);
@@ -744,7 +745,7 @@ export default function Import() {
     }
   };
 
-  const runDownloadTemplate = async (type: 'standard' | 'articles' | 'adjectives' | 'verbs' | 'false_friends' | 'idioms' | 'prepositions') => {
+  const runDownloadTemplate = async (type: 'standard' | 'articles' | 'adjectives' | 'adjectives_sentences' | 'verbs' | 'false_friends' | 'idioms' | 'prepositions') => {
     let templateData: object[];
 
     if (type === 'articles') {
@@ -773,6 +774,19 @@ export default function Import() {
           [t('template_adjective_header')]: 'schnell',
           [t('template_hungarian_header')]: 'gyors',
           [t('template_levels_header')]: 'schneller, am schnellsten'
+        }
+      ];
+    } else if (type === 'adjectives_sentences') {
+      templateData = [
+        {
+          [t('template_question_header') || 'Question']: 'Sie kauft ein ...... Buch.',
+          [t('template_correct_answer_header') || 'Correct Answer']: 'interessantes',
+          [t('template_comment_notes_header') || 'Comment / Notes']: 'Akkusativ, neutrum'
+        },
+        {
+          [t('template_question_header') || 'Question']: 'Das ist ein ...... Auto.',
+          [t('template_correct_answer_header') || 'Correct Answer']: 'schnelles',
+          [t('template_comment_notes_header') || 'Comment / Notes']: 'Nominativ, neutrum'
         }
       ];
     } else if (type === 'verbs') {
@@ -838,7 +852,7 @@ export default function Import() {
         ? [{ wch: 30 }, { wch: 30 }, { wch: 60 }]
         : [{ wch: 30 }, { wch: 30 }, { wch: 50 }];
         
-    const sheetName = type === 'articles' ? 'Articles' : type === 'adjectives' ? 'Adjectives' : type === 'verbs' ? 'Verbs' : type === 'false_friends' ? 'False_Friends' : type === 'idioms' ? 'Idioms' : type === 'prepositions' ? 'Prepositions' : 'Vocabulary';
+    const sheetName = type === 'articles' ? 'Articles' : type === 'adjectives' ? 'Adjectives' : type === 'adjectives_sentences' ? 'Adjectives_Sentences' : type === 'verbs' ? 'Verbs' : type === 'false_friends' ? 'False_Friends' : type === 'idioms' ? 'Idioms' : type === 'prepositions' ? 'Prepositions' : 'Vocabulary';
 
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(
@@ -1133,6 +1147,7 @@ export default function Import() {
           <li><strong>{t('articles_quiz_label') || 'Articles Quiz:'}</strong> {t('format_articles')}</li>
           <li><strong>{t('verbs_quiz_format_title') || 'Verbs Quiz:'}</strong> {t('verbs_quiz_format_desc') || 'Column A = German (verb), Column B = Hungarian (Meaning), Column C = Past forms or Examples.'}</li>
           <li><strong>{t('adjectives_quiz_label') || 'Adjectives Quiz:'}</strong> {t('format_adjectives') || 'Column A: German, Column B: Hungarian, Column C: Levels (e.g., besser, am besten).'}</li>
+          <li><strong>{t('adjectives_sentences_quiz_label') || 'Adjectives (Sentences) Quiz:'}</strong> {t('format_adjectives_sentences') || 'Column A: Question, Column B: Correct Answer, Column C: Comment / Notes.'}</li>
           <li><strong>{t('prepositions_quiz_format_title') || 'Prepositions Quiz:'}</strong> {t('prepositions_quiz_format_desc') || 'Column A = German verb + Hungarian meaning, Column B = Preposition + case, Column C = Example sentence.'}</li>
         </ul>
         <p className="text-xs text-blue-700/80 mt-3 leading-relaxed">{t('format_guide_hint')}</p>
@@ -1176,6 +1191,16 @@ export default function Import() {
             </button>
             <button
               type="button"
+              onClick={() => handleDownloadTemplate('adjectives_sentences')}
+              className={templateButtonClass('adjectives_sentences')}
+            >
+              <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M8 12l4 4m0 0l4-4m-4 4V4" />
+              </svg>
+              <span>{t('adjectives_sentences_template') || 'Adjectives (Sentences) Template'}</span>
+            </button>
+            <button
+              type="button"
               onClick={() => handleDownloadTemplate('verbs')}
               className={templateButtonClass('verbs')}
             >
@@ -1204,7 +1229,7 @@ export default function Import() {
                   <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M8 12l4 4m0 0l4-4m-4 4V4" />
                   </svg>
-                  <span>{t('false_friends') || 'False Friends Template'}</span>
+                  <span>{t('false_friends') || 'Loanwords Template'}</span>
                 </button>
                 <button
                   type="button"
@@ -1301,6 +1326,12 @@ export default function Import() {
                         <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{matchColumnLabel(effectiveLabels, destination, 'b', t('hungarian'))} <span className="text-xs font-normal text-gray-500 block">{t('column_b')}</span></th>
                         <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{matchColumnLabel(effectiveLabels, destination, 'c', t('hint') || 'Hint / Past Form')} <span className="text-xs font-normal text-gray-500 block">{t('column_c')}</span></th>
                       </>
+                    ) : destination === 'adjectives_sentences' ? (
+                      <>
+                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{matchColumnLabel(effectiveLabels, destination, 'a', t('question_label') || 'Question')} <span className="text-xs font-normal text-gray-500 block">{t('column_a')}</span></th>
+                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{matchColumnLabel(effectiveLabels, destination, 'b', t('correct_answer_label') || 'Correct Answer')} <span className="text-xs font-normal text-gray-500 block">{t('column_b')}</span></th>
+                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{matchColumnLabel(effectiveLabels, destination, 'c', t('comment_notes_label') || 'Comment / Notes')} <span className="text-xs font-normal text-gray-500 block">{t('column_c')}</span></th>
+                      </>
                     ) : (
                       <>
                         <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{matchColumnLabel(effectiveLabels, destination, 'a', t('german'))} <span className="text-xs font-normal text-gray-500 block">{t('column_a')}</span></th>
@@ -1346,6 +1377,12 @@ export default function Import() {
                           <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleItemChange(idx, 'hungarian', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-base sm:text-sm" /></td>
                           <td className="p-1 sm:p-2 align-top"><textarea rows={2} value={item.hint || ''} onChange={(e) => handleItemChange(idx, 'hint', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-base sm:text-sm" /></td>
                         </>
+                      ) : destination === 'adjectives_sentences' ? (
+                        <>
+                          <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.german || ''} onChange={(e) => handleItemChange(idx, 'german', e.target.value)} placeholder="Sie kauft ein ...... Buch." className="w-full border border-gray-200 rounded p-2 text-base sm:text-sm" /></td>
+                          <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleItemChange(idx, 'hungarian', e.target.value)} placeholder="interessantes" className="w-full border border-gray-200 rounded p-2 text-base sm:text-sm" /></td>
+                          <td className="p-1 sm:p-2 align-top"><textarea rows={2} value={item.example || ''} onChange={(e) => handleItemChange(idx, 'example', e.target.value)} placeholder={t('comment_notes_label') || "Comment / Notes"} className="w-full border border-gray-200 rounded p-2 text-base sm:text-sm" /></td>
+                        </>
                       ) : (
                         <>
                           <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.german || ''} onChange={(e) => handleItemChange(idx, 'german', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-base sm:text-sm" /></td>
@@ -1389,6 +1426,7 @@ export default function Import() {
                     includePublicExtras={isAdmin && adminMode && saveToPublic}
                     blankUntilTitled={!saveToPublic}
                   />
+                  <option value="adjectives_sentences">{t('adjectives_sentences_quiz') || 'Adjectives (Sentences)'}</option>
                 </select>
                 </div>
                 {isMatchQuizTopic(destination) && (
@@ -1450,6 +1488,7 @@ export default function Import() {
                     includePublicExtras={isAdmin && adminMode && saveToPublic}
                     blankUntilTitled={!saveToPublic}
                   />
+                  <option value="adjectives_sentences">{t('adjectives_sentences_quiz') || 'Adjectives (Sentences)'}</option>
                 </select>
               </div>
              {(() => {
@@ -1469,8 +1508,12 @@ export default function Import() {
                 germanLabel = t('modal_german_verb_label') || "German Verb *";
                 germanPlaceholder = t('modal_german_verb_placeholder') || "e.g. machen";
                 hungarianPlaceholder = t('modal_hungarian_verb_placeholder') || "e.g. csinálni";
+              } else if (newCategory === 'adjectives_sentences') {
+                germanLabel = t('modal_question_label') || "Question *";
+                germanPlaceholder = "e.g. Sie kauft ein ...... Buch.";
+                hungarianPlaceholder = "e.g. interessantes";
               } else if (newCategory === 'false_friends') {
-                germanLabel = t('modal_german_ff_label') || "German False Friend *";
+                germanLabel = t('modal_german_ff_label') || "German Loanword *";
                 germanPlaceholder = t('modal_german_ff_placeholder') || "e.g. das Gift, die Gifte";
                 hungarianPlaceholder = t('modal_hungarian_ff_placeholder') || "e.g. a méreg";
               } else if (newCategory === 'idioms') {
@@ -1482,11 +1525,15 @@ export default function Import() {
                 ? (t('idiom_hungarian_label') || 'Hungarian Meaning *')
                 : newCategory === 'prepositions'
                   ? (t('prep_case_label') || 'Preposition + Case *')
+                  : newCategory === 'adjectives_sentences'
+                    ? (t('modal_correct_answer_label') || 'Correct Answer *')
                   : t('modal_hungarian_label');
               let exampleLabel = newCategory === 'idioms'
                 ? (t('explanation_label') || 'Explanation')
                 : newCategory === 'prepositions'
                   ? (t('meaning_example_label') || 'Example Sentence')
+                  : newCategory === 'adjectives_sentences'
+                    ? (t('modal_comment_notes_label') || 'Comment / Notes')
                   : t('modal_example_label');
               if (isMatchQuizTopic(newCategory)) {
                 const customA = effectiveLabels[newCategory]?.columnA;
@@ -1559,7 +1606,7 @@ export default function Import() {
                   type="text"
                   value={newExample}
                   onChange={(e) => setNewExample(e.target.value)}
-                  placeholder={newCategory === 'idioms' ? (t('explanation_placeholder') || 'Explanation') : newCategory === 'prepositions' ? (t('meaning_example_placeholder') || 'e.g. Ich verzichte auf das Angebot.') : t('modal_example_placeholder')}
+                  placeholder={newCategory === 'idioms' ? (t('explanation_placeholder') || 'Explanation') : newCategory === 'prepositions' ? (t('meaning_example_placeholder') || 'e.g. Ich verzichte auf das Angebot.') : newCategory === 'adjectives_sentences' ? 'e.g. Akkusativ, neutrum' : t('modal_example_placeholder')}
                   className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -1894,6 +1941,21 @@ export default function Import() {
                               <textarea rows={2} value={item.levels || ''} onChange={(e) => handleEditItemChange(idx, 'levels', e.target.value)} className={EDIT_FIELD_CLASS} />
                             </div>
                           </>
+                        ) : editingFileCategory === 'adjectives_sentences' ? (
+                          <>
+                            <div>
+                              <label className="block text-xs font-semibold text-gray-500 mb-1">{t('question_label') || 'Question'}</label>
+                              <textarea rows={2} value={item.german || ''} onChange={(e) => handleEditItemChange(idx, 'german', e.target.value)} className={EDIT_FIELD_CLASS} />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-semibold text-gray-500 mb-1">{t('correct_answer_label') || 'Correct Answer'}</label>
+                              <textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleEditItemChange(idx, 'hungarian', e.target.value)} className={EDIT_FIELD_CLASS} />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-semibold text-gray-500 mb-1">{t('comment_notes_label') || 'Comment / Notes'}</label>
+                              <textarea rows={2} value={item.example || ''} onChange={(e) => handleEditItemChange(idx, 'example', e.target.value)} className={EDIT_FIELD_CLASS} />
+                            </div>
+                          </>
                         ) : (
                           <>
                             <div>
@@ -1963,6 +2025,12 @@ export default function Import() {
                               <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('hungarian')}</th>
                               <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('hint') || 'Hint / Past Form'}</th>
                             </>
+                          ) : editingFileCategory === 'adjectives_sentences' ? (
+                            <>
+                              <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('question_label') || 'Question'}</th>
+                              <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('correct_answer_label') || 'Correct Answer'}</th>
+                              <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('comment_notes_label') || 'Comment / Notes'}</th>
+                            </>
                           ) : (
                             <>
                               <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('german')}</th>
@@ -2028,6 +2096,18 @@ export default function Import() {
                                 </td>
                                 <td className="p-1 sm:p-2 align-top">
                                   <textarea rows={2} value={item.levels || ''} onChange={(e) => handleEditItemChange(idx, 'levels', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" />
+                                </td>
+                              </>
+                            ) : editingFileCategory === 'adjectives_sentences' ? (
+                              <>
+                                <td className="p-1 sm:p-2 border-r border-gray-100 align-top">
+                                  <textarea rows={2} value={item.german || ''} onChange={(e) => handleEditItemChange(idx, 'german', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" />
+                                </td>
+                                <td className="p-1 sm:p-2 border-r border-gray-100 align-top">
+                                  <textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleEditItemChange(idx, 'hungarian', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" />
+                                </td>
+                                <td className="p-1 sm:p-2 align-top">
+                                  <textarea rows={2} value={item.example || ''} onChange={(e) => handleEditItemChange(idx, 'example', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" />
                                 </td>
                               </>
                             ) : (

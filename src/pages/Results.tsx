@@ -2,8 +2,7 @@ import BackLabel from "../components/BackLabel";
 import { useState, useEffect } from "react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { useI18n } from "../I18nContext";
-import { useAuth } from "../AuthContext";
-import { useCloudVocabulary } from "../lib/firestore";
+import { useAuth } from "../AuthContext";import { useCloudVocabulary } from "../lib/firestore";
 import {
   buildPublicQuizPool,
   buildCustomQuizPool,
@@ -119,14 +118,24 @@ export default function Results() {
 
     if (isCustom) {
       if (!userVocabulary) return false; // still loading — allow Next
-      const customCount = buildCustomQuizPool(topic, userVocabulary).length;
+      let customCount = 0;
+      if (topic === 'adjectives_sentences') {
+        customCount = userVocabulary.filter((w: any) => !w.deleted && w.category === 'adjectives_sentences').length;
+      } else {
+        customCount = buildCustomQuizPool(topic, userVocabulary).length;
+      }
       const maxQuizzes = Math.max(1, getQuizLevelCount(customCount));
       if (maxQuizzes <= 1) return false; // undercount safeguard — still offer Next
       return quizId >= maxQuizzes;
     }
 
     // Same public pool as TopicQuizzes / Quiz so "next level" agrees with the list
-    const pool = buildPublicQuizPool(topic, publicDbWords);
+    let pool = [];
+    if (topic === 'adjectives_sentences') {
+      pool = publicDbWords.filter((w: any) => !w.deleted && w.category === 'adjectives_sentences');
+    } else {
+      pool = buildPublicQuizPool(topic, publicDbWords);
+    }
     const maxQuizzes = Math.max(1, getQuizLevelCount(pool.length));
     return quizId >= maxQuizzes;
   };
@@ -151,6 +160,7 @@ export default function Results() {
     else if (topic === 'phrases') translatedTopic = t('phrases_sentences_quiz') || 'Phrases';
     else if (topic === 'prepositions') translatedTopic = t('prepositions_quiz') || 'Prepositions';
     else if (topic === 'adjectives') translatedTopic = t('adjectives_quiz') || 'Adjectives';
+    else if (topic === 'adjectives_sentences') translatedTopic = t('adjectives_sentences_quiz') || 'Adjectives (Sentences)';
     else if (topic === 'verbs') translatedTopic = t('verbs_quiz') || 'Verbs';
     else if (topic === 'telc-b2') translatedTopic = t('telc_b2') || 'Telc B2';
 

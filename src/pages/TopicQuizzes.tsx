@@ -103,6 +103,9 @@ export default function TopicQuizzes() {
 
   const sourceData = useMemo(() => {
     if (!topic) return [];
+    if (topic === 'adjectives_sentences') {
+      return publicDbWords.filter((w: any) => !w.deleted && w.category === 'adjectives_sentences');
+    }
     // Show static levels immediately; cloud merges in when cache/network arrives.
     return buildPublicQuizPool(topic, publicDbWords);
   }, [topic, publicDbWords]);
@@ -115,6 +118,7 @@ export default function TopicQuizzes() {
       : topic === 'articles' ? t('articles_quiz') || "Articles"
       : topic === 'prepositions' ? t('prepositions_quiz') || "Prepositions"
       : topic === 'adjectives' ? t('adjectives_quiz') || "Adjectives"
+      : topic === 'adjectives_sentences' ? t('adjectives_sentences_quiz') || "Adjectives (Sentences)"
       : topic === 'verbs' ? t('verbs_quiz') || "Verbs"
       : "";
     if (activeTab === 'custom' && isPrivateQuizCard(topic)) {
@@ -131,7 +135,10 @@ export default function TopicQuizzes() {
   const quizzes = Array.from({ length: totalQuizzes }, (_, i) => i + 1);
 
   const customSourceData = useMemo(
-    () => buildCustomQuizPool(topic || '', userVocabulary || undefined),
+    () => {
+      if (topic === 'adjectives_sentences') return (userVocabulary || []).filter((w: any) => !w.deleted && w.category === 'adjectives_sentences');
+      return buildCustomQuizPool(topic || '', userVocabulary || undefined);
+    },
     [topic, userVocabulary]
   );
   const totalCustomQuizzes = getQuizLevelCount(customSourceData.length);
@@ -391,8 +398,12 @@ export default function TopicQuizzes() {
               <table className="min-w-full text-sm">
                 <thead>
                   <tr className="bg-blue-50 text-blue-950">
-                    <th className="text-left font-extrabold px-3 py-2.5">{t('german') || 'German'}</th>
-                    <th className="text-left font-extrabold px-3 py-2.5">{t('hungarian') || 'Meaning'}</th>
+                    <th className="text-left font-extrabold px-3 py-2.5">
+                      {topic === 'adjectives_sentences' ? (t('question_label') || 'Question') : (t('german') || 'German')}
+                    </th>
+                    <th className="text-left font-extrabold px-3 py-2.5">
+                      {topic === 'adjectives_sentences' ? (t('correct_answer_label') || 'Correct Answer') : (t('hungarian') || 'Meaning')}
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
