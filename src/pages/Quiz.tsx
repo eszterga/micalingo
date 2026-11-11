@@ -23,6 +23,7 @@ import * as XLSX from 'xlsx';
 import { downloadWorkbook } from '../lib/downloadWorkbook';
 import { trackEvent } from '../lib/analytics';
 import { scrollAppToTop, scrollQuizQuestionIntoView } from '../lib/scrollAppToTop';
+import { hintAdvanceDelayMs, readHintReadTime } from '../lib/hintReadTime';
 import { Capacitor } from '@capacitor/core';
 import { App as CapacitorApp } from '@capacitor/app';
 import {
@@ -227,6 +228,7 @@ export default function Quiz() {
     const stored = localStorage.getItem('micalingo_show_examples');
     return stored !== null ? JSON.parse(stored) : true;
   });
+  const [hintReadTime] = useState(() => readHintReadTime());
 
   // A tapped answer stays focused, and Android scrolls that button into the
   // middle of the screen. After each question (and when the quiz starts),
@@ -829,7 +831,7 @@ export default function Quiz() {
       setScore(s => s + 1);
 
       const currentExample = questions[currentQuestionIndex].example;
-      const delay = (showExamples && currentExample) ? (currentExample.length > 20 ? 3300 : 2500) : 1500;
+      const delay = hintAdvanceDelayMs(showExamples, currentExample, hintReadTime);
       clearAdvanceTimer();
       setAnswerPinned(false);
       advanceTimerRef.current = window.setTimeout(() => {

@@ -16,6 +16,7 @@ import { doc, getDoc, setDoc } from "firebase/firestore";
 import { defaultQuizTopicTitle, privateCardTitle, privateSlotNumber, quizDisplayTitle, useQuizLabels } from "../lib/quizLabels";
 import { dbCloud } from "../lib/firebase";
 import { CONSENT_CHANGED_EVENT, openCookieSettings, readConsent } from "../lib/consent";
+import { HINT_READ_TIME_OPTIONS, HINT_READ_TIME_STORAGE_KEY, parseHintReadTime, readHintReadTime, type HintReadTime } from "../lib/hintReadTime";
 
 const BackgroundBlobs = () => (
   <>
@@ -39,6 +40,7 @@ const BackgroundBlobs = () => (
 interface UserSettings {
   language?: 'en' | 'de' | 'hu';
   showExamples?: boolean;
+  hintReadTime?: HintReadTime;
 }
 
 export default function Settings() {
@@ -60,6 +62,7 @@ export default function Settings() {
     const stored = localStorage.getItem('micalingo_show_examples');
     return stored !== null ? JSON.parse(stored) : true;
   });
+  const [hintReadTime, setHintReadTime] = useState<HintReadTime>(() => readHintReadTime());
 
   // State for advanced cleanup modal
   const [isCleanupModalOpen, setIsCleanupModalOpen] = useState(false);
@@ -163,6 +166,11 @@ export default function Settings() {
               setShowExamples(settings.showExamples);
               localStorage.setItem('micalingo_show_examples', JSON.stringify(settings.showExamples));
             }
+            if (settings.hintReadTime !== undefined) {
+              const storedTime = parseHintReadTime(settings.hintReadTime);
+              setHintReadTime(storedTime);
+              localStorage.setItem(HINT_READ_TIME_STORAGE_KEY, storedTime);
+            }
           }
         } catch (error) {
           console.error("Failed to fetch settings from cloud", error);
@@ -183,14 +191,21 @@ export default function Settings() {
     setIsDirty(true);
   };
 
+  const handleHintReadTime = (next: Exclude<HintReadTime, 'default'>) => {
+    if (!showExamples) return;
+    setHintReadTime(next === hintReadTime ? 'default' : next);
+    setIsDirty(true);
+  };
+
   const handleSaveSettings = async () => {
     setIsSaving(true);
     try {
       localStorage.setItem('micalingo_language', language);
       localStorage.setItem('micalingo_show_examples', JSON.stringify(showExamples));
+      localStorage.setItem(HINT_READ_TIME_STORAGE_KEY, hintReadTime);
       if (user) {
         const settingsRef = doc(dbCloud, 'user_settings', user.uid);
-        await setDoc(settingsRef, { language, showExamples }, { merge: true });
+        await setDoc(settingsRef, { language, showExamples, hintReadTime }, { merge: true });
       }
       setIsDirty(false);
     } catch (error) {
@@ -582,21 +597,62 @@ export default function Settings() {
         {/* Practice Settings */}
         <div>
           <h2 className="text-2xl font-extrabold text-blue-950 mb-4">{t('practice_settings') || 'Practice Settings'}</h2>
-          
-          <div className="flex items-center justify-between max-w-md bg-white/50 p-5 rounded-2xl border border-blue-50 shadow-sm">
-            <div>
-              <h3 className="font-bold text-blue-950">{t('show_example_sentences') || 'Show hints/examples'}</h3>
-              <p className="text-xs text-blue-900/60 mt-1 font-medium">{t('show_example_sentences_subtitle') || 'Display hints and examples after answering a question.'}</p>
+
+          <div className="space-y-4">
+            <div className="flex items-center justify-between bg-white/50 p-5 rounded-2xl border border-blue-50 shadow-sm gap-4">
+              <div>
+                <h3 className="font-bold text-blue-950">{t('show_example_sentences') || 'Show hints/examples'}</h3>
+                <p className="text-xs text-blue-900/60 mt-1 font-medium">{t('show_example_sentences_subtitle') || 'Display hints and examples after answering a question.'}</p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                <input 
+                  type="checkbox" 
+                  className="sr-only peer" 
+                  checked={showExamples}
+                  onChange={handleToggleExamples}
+                />
+                <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              </label>
             </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input 
-                type="checkbox" 
-                className="sr-only peer" 
-                checked={showExamples}
-                onChange={handleToggleExamples}
-              />
-              <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-            </label>
+
+            <div className={`p-5 rounded-2xl border shadow-sm transition-colors ${showExamples ? 'bg-white/50 border-blue-50' : 'bg-gray-100/70 border-gray-200'}`}>
+              <h3 id="hint-read-time-title" className={`font-bold ${showExamples ? 'text-blue-950' : 'text-gray-400'}`}>
+                {t('hint_read_time_title')}
+              </h3>
+              <p className={`text-sm mt-1 font-medium leading-relaxed ${showExamples ? 'text-blue-900/60' : 'text-gray-400'}`}>
+                {t('hint_read_time_desc')}
+              </p>
+              <div
+                className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2"
+                role="radiogroup"
+                aria-labelledby="hint-read-time-title"
+                aria-disabled={!showExamples}
+              >
+                {HINT_READ_TIME_OPTIONS.map((option) => {
+                  const selected = hintReadTime === option;
+                  const buttonClass = !showExamples
+                    ? selected
+                      ? 'bg-gray-300 text-gray-500 border-gray-300 cursor-not-allowed'
+                      : 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
+                    : selected
+                      ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
+                      : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50 shadow-sm';
+                  return (
+                    <button
+                      key={option}
+                      type="button"
+                      role="radio"
+                      aria-checked={selected}
+                      disabled={!showExamples}
+                      onClick={() => handleHintReadTime(option)}
+                      className={`px-3 py-2.5 rounded-xl font-bold text-sm border transition-colors text-center leading-snug ${buttonClass}`}
+                    >
+                      {t(`hint_read_time_${option}`)}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -621,9 +677,11 @@ export default function Settings() {
                       if (window.confirm(t('confirm_clear_data' as any) || 'Are you sure you want to clear all local progress? This cannot be undone.')) {
                         const lang = localStorage.getItem('micalingo_language');
                         const examples = localStorage.getItem('micalingo_show_examples');
+                        const hintTime = localStorage.getItem(HINT_READ_TIME_STORAGE_KEY);
                         localStorage.clear();
                         if (lang) localStorage.setItem('micalingo_language', lang);
                         if (examples) localStorage.setItem('micalingo_show_examples', examples);
+                        if (hintTime) localStorage.setItem(HINT_READ_TIME_STORAGE_KEY, hintTime);
                         window.alert(t('data_cleared' as any) || 'Local progress cleared successfully.');
                         window.location.reload();
                       }
