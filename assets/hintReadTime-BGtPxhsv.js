@@ -1,0 +1,1 @@
+const s=["short","longer","longest"],e="micalingo_hint_read_time";function o(t){return t==="short"||t==="longer"||t==="longest"?t:"default"}function _(){try{return o(localStorage.getItem(e))}catch{return"default"}}function a(t,n,r){return!t||!n?1500:r==="short"?2e3:r==="longer"?3500:r==="longest"?4500:n.length>20?3300:2500}export{s as H,e as a,a as h,o as p,_ as r};
