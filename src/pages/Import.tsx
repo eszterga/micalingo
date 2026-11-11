@@ -10,7 +10,7 @@ import { publicVocabulary, publicPhrases, publicArticles, publicPrepositions, pu
 import { useCloudVocabulary, addCloudWord, bulkAddCloudWords, bulkDeleteCloudWords, updateCloudWord, purgeVocabDuplicatesKeeping, purgeSoftDeletedVocabSiblings, isActiveVocabItem, findVocabDuplicate, vocabCategoryKey, vocabGermanKey } from "../lib/firestore";
 import { useI18n } from "../I18nContext";
 import { isPrivateQuizTopic } from "../lib/quizPool";
-import { defaultQuizTopicTitle, isMatchQuizTopic, matchColumnLabel, privateCardTitle, privateSlotNumber, quizDisplayTitle, useQuizLabels } from "../lib/quizLabels";
+import { defaultQuizTopicTitle, isMatchQuizTopic, isPrivateQuizCard, matchColumnLabel, privateCardTitle, privateSlotNumber, quizDisplayTitle, useQuizLabels } from "../lib/quizLabels";
 import { QuizCategoryOptions } from "../components/QuizCategoryOptions";
 import { downloadWorkbook } from "../lib/downloadWorkbook";
 
@@ -126,6 +126,12 @@ export default function Import() {
   const [newNote, setNewNote] = useState("");
   const [newCategory, setNewCategory] = useState("vocabulary");
 
+  // Private quiz slots share keys with the public articles/verbs forms, but they are
+  // generic question–answer quizzes. Only the public library keeps those special forms.
+  const privateEntryLayout = (category: string) => !saveToPublic && isPrivateQuizCard(category);
+  const previewLayout = privateEntryLayout(destination) ? "vocabulary" : destination;
+  const editLayoutCategory = privateEntryLayout(editingFileCategory) ? "vocabulary" : editingFileCategory;
+
   // State for overwrite confirmation
   const [isOverwriteModalOpen, setIsOverwriteModalOpen] = useState(false);
   const [itemsToOverwrite, setItemsToOverwrite] = useState<any[]>([]);
@@ -145,13 +151,13 @@ export default function Import() {
     if (isPrivateQuizTopic(destination) || isPrivateQuizTopic(newCategory)) {
       setSaveToPublic(false);
     }
-    if (!saveToPublic && (destination === 'false_friends' || destination === 'idioms')) {
+    if (!saveToPublic && (previewLayout === 'false_friends' || previewLayout === 'idioms')) {
       setDestination('vocabulary');
     }
     if (!saveToPublic && (newCategory === 'false_friends' || newCategory === 'idioms')) {
       setNewCategory('vocabulary');
     }
-  }, [isAdmin, saveToPublic, destination, newCategory]);
+  }, [isAdmin, saveToPublic, destination, newCategory, previewLayout]);
 
   const allItems = useMemo(() => {
     const cloudItems = existingItems.map((item: any) => ({ ...item, isCloud: true }));
@@ -271,7 +277,7 @@ export default function Import() {
           continue;
         }
 
-        if (destination === 'articles') {
+        if (previewLayout === 'articles') {
           if (!p0.trim() || !p1.trim() || !p2.trim()) {
             console.warn(`Skipping incomplete article row: article="${p0}" | noun="${p1}" | hungarian="${p2}"`);
             continue;
@@ -283,13 +289,13 @@ export default function Import() {
             example: p3.trim(),
             german: `${p0.trim()} ${p1.trim()}`.trim(),
           });
-        } else if (destination === 'false_friends' || destination === 'idioms') {
+        } else if (previewLayout === 'false_friends' || previewLayout === 'idioms') {
           items.push({ german: p0, hungarian: p1, example: p2, note: p3 });
-        } else if (destination === 'verbs') {
+        } else if (previewLayout === 'verbs') {
           items.push({ german: p0, hungarian: p1, hint: p2 });
-        } else if (destination === 'adjectives') {
+        } else if (previewLayout === 'adjectives') {
           items.push({ german: p0, hungarian: p1, levels: p2 });
-        } else if (destination === 'prepositions') {
+        } else if (previewLayout === 'prepositions') {
           items.push({ german: p0, hungarian: p1, example: p2 });
         } else {
           items.push({ german: p0, hungarian: p1, example: p2 });
@@ -297,13 +303,13 @@ export default function Import() {
       }
     }
     setPreviewItems(items);
-  }, [data, destination, t]);
+  }, [data, destination, previewLayout, saveToPublic, t]);
 
   const handleItemChange = (index: number, field: string, value: string) => {
     setPreviewItems(prev => {
       const next = [...prev];
       next[index] = { ...next[index], [field]: value };
-      if (destination === 'articles' && (field === 'article' || field === 'noun')) {
+      if (previewLayout === 'articles' && (field === 'article' || field === 'noun')) {
         next[index].german = `${next[index].article || ''} ${next[index].noun || ''}`.trim();
       }
       return next;
@@ -433,7 +439,7 @@ export default function Import() {
 
   // Keep background page from scrolling / jumping when the mobile keyboard opens
   useEffect(() => {
-    if (!editingFile) return;
+    if (!editingFile && !isAddModalOpen) return;
     const main = document.querySelector("main");
     const prevBodyOverflow = document.body.style.overflow;
     const prevMainOverflow = main instanceof HTMLElement ? main.style.overflow : "";
@@ -443,13 +449,13 @@ export default function Import() {
       document.body.style.overflow = prevBodyOverflow;
       if (main instanceof HTMLElement) main.style.overflow = prevMainOverflow;
     };
-  }, [editingFile]);
+  }, [editingFile, isAddModalOpen]);
 
   const handleEditItemChange = (index: number, field: string, value: string) => {
     setEditFileItems(prev => {
       const next = [...prev];
       next[index] = { ...next[index], [field]: value };
-      if (editingFileCategory === 'articles' && (field === 'article' || field === 'noun')) {
+      if (editLayoutCategory === 'articles' && (field === 'article' || field === 'noun')) {
         next[index].german = `${next[index].article || ''} ${next[index].noun || ''}`.trim();
       }
       return next;
@@ -881,7 +887,7 @@ export default function Import() {
     for (const item of previewItems) {
       let german = item.german?.trim() || '';
       let hungarian = item.hungarian?.trim() || '';
-      if (destination === 'articles') {
+      if (previewLayout === 'articles') {
         german = german || `${item.article || ''} ${item.noun || ''}`.trim();
         if (!german || !/^(der|die|das)\s+/i.test(german) || !hungarian) continue;
       } else if (!german || !hungarian) {
@@ -1047,7 +1053,9 @@ export default function Import() {
   };
 
   const handleSaveNewWord = async () => {
-    const finalGerman = newCategory === 'articles' ? `${newArticle} ${newNoun.trim()}` : newGerman.trim();
+    const finalGerman = newCategory === 'articles' && !privateEntryLayout(newCategory)
+      ? `${newArticle} ${newNoun.trim()}`
+      : newGerman.trim();
 
     if (!finalGerman || !newHungarian.trim()) {
       alert(t('alert_fill_fields_login'));
@@ -1294,39 +1302,39 @@ export default function Import() {
               <table className="w-full text-left border-collapse table-fixed min-w-[800px]">
                 <thead className="bg-blue-50/50 border-b border-blue-100 sticky top-0 backdrop-blur-md z-10">
                   <tr>
-                    {destination === 'articles' ? (
+                    {previewLayout === 'articles' ? (
                       <>
                         <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('article')} <span className="text-xs font-normal text-gray-500 block">{t('column_a')}</span></th>
                         <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('noun')} <span className="text-xs font-normal text-gray-500 block">{t('column_b')}</span></th>
                         <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('hungarian')} <span className="text-xs font-normal text-gray-500 block">{t('column_c')}</span></th>
                         <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('example')} <span className="text-xs font-normal text-gray-500 block">{t('column_d')}</span></th>
                       </>
-                    ) : destination === 'false_friends' || destination === 'idioms' ? (
+                    ) : previewLayout === 'false_friends' || previewLayout === 'idioms' ? (
                       <>
-                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{destination === 'idioms' ? (t('idiom_german_label') || 'German Idiom') : t('german')} <span className="text-xs font-normal text-gray-500 block">{t('column_a')}</span></th>
-                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{destination === 'idioms' ? (t('idiom_hungarian_label') || 'Hungarian Meaning') : t('hungarian')} <span className="text-xs font-normal text-gray-500 block">{t('column_b')}</span></th>
-                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{destination === 'idioms' ? (t('explanation_label') || 'Explanation') : t('example')} <span className="text-xs font-normal text-gray-500 block">{t('column_c')}</span></th>
-                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{destination === 'idioms' ? (t('idiom_note_label') || 'Note (Explanation)') : t('note')} <span className="text-xs font-normal text-gray-500 block">{t('column_d')}</span></th>
+                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{previewLayout === 'idioms' ? (t('idiom_german_label') || 'German Idiom') : t('german')} <span className="text-xs font-normal text-gray-500 block">{t('column_a')}</span></th>
+                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{previewLayout === 'idioms' ? (t('idiom_hungarian_label') || 'Hungarian Meaning') : t('hungarian')} <span className="text-xs font-normal text-gray-500 block">{t('column_b')}</span></th>
+                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{previewLayout === 'idioms' ? (t('explanation_label') || 'Explanation') : t('example')} <span className="text-xs font-normal text-gray-500 block">{t('column_c')}</span></th>
+                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{previewLayout === 'idioms' ? (t('idiom_note_label') || 'Note (Explanation)') : t('note')} <span className="text-xs font-normal text-gray-500 block">{t('column_d')}</span></th>
                       </>
-                    ) : destination === 'prepositions' ? (
+                    ) : previewLayout === 'prepositions' ? (
                       <>
                         <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('template_german_verb_header') || 'German Verb + Hungarian'} <span className="text-xs font-normal text-gray-500 block">{t('column_a')}</span></th>
                         <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('prep_case_label') || 'Preposition + Case'} <span className="text-xs font-normal text-gray-500 block">{t('column_b')}</span></th>
                         <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('template_meaning_example_header') || 'Example Sentence'} <span className="text-xs font-normal text-gray-500 block">{t('column_c')}</span></th>
                       </>
-                    ) : destination === 'adjectives' ? (
+                    ) : previewLayout === 'adjectives' ? (
                       <>
                         <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{matchColumnLabel(effectiveLabels, destination, 'a', t('adjective') || 'Adjective')} <span className="text-xs font-normal text-gray-500 block">{t('column_a')}</span></th>
                         <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{matchColumnLabel(effectiveLabels, destination, 'b', t('hungarian'))} <span className="text-xs font-normal text-gray-500 block">{t('column_b')}</span></th>
                         <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{matchColumnLabel(effectiveLabels, destination, 'c', t('levels') || 'Levels')} <span className="text-xs font-normal text-gray-500 block">{t('column_c')}</span></th>
                       </>
-                    ) : destination === 'verbs' ? (
+                    ) : previewLayout === 'verbs' ? (
                       <>
                         <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{matchColumnLabel(effectiveLabels, destination, 'a', t('german'))} <span className="text-xs font-normal text-gray-500 block">{t('column_a')}</span></th>
                         <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{matchColumnLabel(effectiveLabels, destination, 'b', t('hungarian'))} <span className="text-xs font-normal text-gray-500 block">{t('column_b')}</span></th>
                         <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{matchColumnLabel(effectiveLabels, destination, 'c', t('hint') || 'Hint / Past Form')} <span className="text-xs font-normal text-gray-500 block">{t('column_c')}</span></th>
                       </>
-                    ) : destination === 'adjectives_sentences' ? (
+                    ) : previewLayout === 'adjectives_sentences' ? (
                       <>
                         <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{matchColumnLabel(effectiveLabels, destination, 'a', t('question_label') || 'Question')} <span className="text-xs font-normal text-gray-500 block">{t('column_a')}</span></th>
                         <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{matchColumnLabel(effectiveLabels, destination, 'b', t('correct_answer_label') || 'Correct Answer')} <span className="text-xs font-normal text-gray-500 block">{t('column_b')}</span></th>
@@ -1334,9 +1342,9 @@ export default function Import() {
                       </>
                     ) : (
                       <>
-                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{matchColumnLabel(effectiveLabels, destination, 'a', t('german'))} <span className="text-xs font-normal text-gray-500 block">{t('column_a')}</span></th>
-                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{matchColumnLabel(effectiveLabels, destination, 'b', t('hungarian'))} <span className="text-xs font-normal text-gray-500 block">{t('column_b')}</span></th>
-                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{matchColumnLabel(effectiveLabels, destination, 'c', t('example'))} <span className="text-xs font-normal text-gray-500 block">{t('column_c_d')}</span></th>
+                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{matchColumnLabel(effectiveLabels, destination, 'a', privateEntryLayout(destination) ? t('modal_german_label') : t('german'))} <span className="text-xs font-normal text-gray-500 block">{t('column_a')}</span></th>
+                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{matchColumnLabel(effectiveLabels, destination, 'b', privateEntryLayout(destination) ? t('modal_hungarian_label') : t('hungarian'))} <span className="text-xs font-normal text-gray-500 block">{t('column_b')}</span></th>
+                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{matchColumnLabel(effectiveLabels, destination, 'c', privateEntryLayout(destination) ? t('modal_example_label') : t('example'))} <span className="text-xs font-normal text-gray-500 block">{t('column_c_d')}</span></th>
                       </>
                     )}
                     <th className="p-2 sm:p-3 w-10"></th>
@@ -1345,39 +1353,39 @@ export default function Import() {
                 <tbody className="divide-y divide-gray-100">
                   {previewItems.map((item: any, idx: number) => (
                     <tr key={idx} className="hover:bg-gray-50 transition-colors">
-                      {destination === 'articles' ? (
+                      {previewLayout === 'articles' ? (
                         <>
                           <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.article || ''} onChange={(e) => handleItemChange(idx, 'article', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-base sm:text-sm" /></td>
                           <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.noun || ''} onChange={(e) => handleItemChange(idx, 'noun', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-base sm:text-sm" /></td>
                           <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleItemChange(idx, 'hungarian', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-base sm:text-sm" /></td>
                           <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.example || ''} onChange={(e) => handleItemChange(idx, 'example', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-base sm:text-sm" /></td>
                         </>
-                      ) : destination === 'prepositions' ? (
+                      ) : previewLayout === 'prepositions' ? (
                         <>
                           <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.german || ''} onChange={(e) => handleItemChange(idx, 'german', e.target.value)} placeholder={t('modal_german_prep_verb_placeholder') || "e.g. verzichten, lemondani, felhagyni valamivel"} className="w-full border border-gray-200 rounded p-2 text-base sm:text-sm" /></td>
                           <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleItemChange(idx, 'hungarian', e.target.value)} placeholder={t('modal_prep_case_placeholder') || "e.g. auf + Akk."} className="w-full border border-gray-200 rounded p-2 text-base sm:text-sm" /></td>
                           <td className="p-1 sm:p-2 align-top"><textarea rows={2} value={item.example || ''} onChange={(e) => handleItemChange(idx, 'example', e.target.value)} placeholder={t('meaning_example_placeholder') || "e.g. Ich verzichte auf das Angebot."} className="w-full border border-gray-200 rounded p-2 text-base sm:text-sm" /></td>
                         </>
-                      ) : destination === 'false_friends' || destination === 'idioms' ? (
+                      ) : previewLayout === 'false_friends' || previewLayout === 'idioms' ? (
                         <>
                           <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.german || ''} onChange={(e) => handleItemChange(idx, 'german', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-base sm:text-sm" /></td>
                           <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleItemChange(idx, 'hungarian', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-base sm:text-sm" /></td>
                           <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.example || ''} onChange={(e) => handleItemChange(idx, 'example', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-base sm:text-sm" /></td>
                           <td className="p-1 sm:p-2 align-top"><textarea rows={2} value={item.note || ''} onChange={(e) => handleItemChange(idx, 'note', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-base sm:text-sm" /></td>
                         </>
-                      ) : destination === 'adjectives' ? (
+                      ) : previewLayout === 'adjectives' ? (
                         <>
                           <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.german || ''} onChange={(e) => handleItemChange(idx, 'german', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-base sm:text-sm" /></td>
                           <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleItemChange(idx, 'hungarian', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-base sm:text-sm" /></td>
                           <td className="p-1 sm:p-2 align-top"><textarea rows={2} value={item.levels || ''} onChange={(e) => handleItemChange(idx, 'levels', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-base sm:text-sm" /></td>
                         </>
-                      ) : destination === 'verbs' ? (
+                      ) : previewLayout === 'verbs' ? (
                         <>
                           <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.german || ''} onChange={(e) => handleItemChange(idx, 'german', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-base sm:text-sm" /></td>
                           <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleItemChange(idx, 'hungarian', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-base sm:text-sm" /></td>
                           <td className="p-1 sm:p-2 align-top"><textarea rows={2} value={item.hint || ''} onChange={(e) => handleItemChange(idx, 'hint', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-base sm:text-sm" /></td>
                         </>
-                      ) : destination === 'adjectives_sentences' ? (
+                      ) : previewLayout === 'adjectives_sentences' ? (
                         <>
                           <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.german || ''} onChange={(e) => handleItemChange(idx, 'german', e.target.value)} placeholder="Sie kauft ein ...... Buch." className="w-full border border-gray-200 rounded p-2 text-base sm:text-sm" /></td>
                           <td className="p-1 sm:p-2 border-r border-gray-100 align-top"><textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleItemChange(idx, 'hungarian', e.target.value)} placeholder="interessantes" className="w-full border border-gray-200 rounded p-2 text-base sm:text-sm" /></td>
@@ -1432,13 +1440,15 @@ export default function Import() {
                 {isMatchQuizTopic(destination) && (
                   <p className="text-xs text-gray-500 sm:pl-[4.5rem]">
                     {t('import_custom_columns_hint', {
-                      a: matchColumnLabel(effectiveLabels, destination, 'a', t('german')),
-                      b: matchColumnLabel(effectiveLabels, destination, 'b', t('hungarian')),
+                      a: matchColumnLabel(effectiveLabels, destination, 'a', privateEntryLayout(destination) ? t('modal_german_label') : t('german')),
+                      b: matchColumnLabel(effectiveLabels, destination, 'b', privateEntryLayout(destination) ? t('modal_hungarian_label') : t('hungarian')),
                       c: matchColumnLabel(
                         effectiveLabels,
                         destination,
                         'c',
-                        destination === 'adjectives' ? (t('levels') || 'Levels') : destination === 'verbs' ? (t('hint') || 'Hint') : t('example')
+                        privateEntryLayout(destination)
+                          ? t('modal_example_label')
+                          : previewLayout === 'adjectives' ? (t('levels') || 'Levels') : previewLayout === 'verbs' ? (t('hint') || 'Hint') : t('example')
                       ),
                     })}
                   </p>
@@ -1465,18 +1475,18 @@ export default function Import() {
         </div>
       )}
 
-      {/* ADD CONTENT MODAL */}
-      {isAddModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-blue-950/40 backdrop-blur-sm transition-opacity">
-          <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-md max-h-[90vh] overflow-hidden flex flex-col animate-fade-in-up">
-            <div className="p-6 md:p-8 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+      {/* ADD CONTENT MODAL — portaled so the page footer cannot cover Save */}
+      {isAddModalOpen && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-blue-950/75">
+          <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-md max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="p-6 md:p-8 border-b border-gray-100 flex justify-between items-center bg-white shrink-0">
               <h2 className="text-2xl font-extrabold text-blue-950">{t('modal_add_word_title')}</h2>
               <button onClick={() => setIsAddModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-full hover:bg-gray-200">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
               </button>
             </div>
 
-            <div className="p-6 md:p-8 overflow-y-auto space-y-6">
+            <div className="p-6 md:p-8 overflow-y-auto space-y-6 flex-1 min-h-0">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">{t('modal_category_label') || 'Category'}</label>
                 <select value={newCategory} onChange={(e) => setNewCategory(e.target.value)} className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50">
@@ -1492,50 +1502,55 @@ export default function Import() {
                 </select>
               </div>
              {(() => {
+              const privateLayout = privateEntryLayout(newCategory);
               let germanLabel = t('modal_german_label');
               let germanPlaceholder = t('modal_german_placeholder');
               let hungarianPlaceholder = t('modal_hungarian_placeholder');
 
-              if (newCategory === 'phrases') {
+              if (!privateLayout && newCategory === 'phrases') {
                 germanLabel = t('modal_german_phrase_label') || "German Phrase/Sentence *";
                 germanPlaceholder = t('modal_german_phrase_placeholder') || "e.g. Wie geht es Ihnen?";
                 hungarianPlaceholder = t('modal_hungarian_phrase_placeholder') || "e.g. Hogy van?";
-              } else if (newCategory === 'prepositions') {
+              } else if (!privateLayout && newCategory === 'prepositions') {
                 germanLabel = t('modal_german_prep_verb_label') || "German Verb + Hungarian *";
                 germanPlaceholder = t('modal_german_prep_verb_placeholder') || "e.g. verzichten, lemondani, felhagyni valamivel";
                 hungarianPlaceholder = t('modal_prep_case_placeholder') || "e.g. auf + Akk.";
-              } else if (newCategory === 'verbs') {
+              } else if (!privateLayout && newCategory === 'verbs') {
                 germanLabel = t('modal_german_verb_label') || "German Verb *";
                 germanPlaceholder = t('modal_german_verb_placeholder') || "e.g. machen";
                 hungarianPlaceholder = t('modal_hungarian_verb_placeholder') || "e.g. csinálni";
-              } else if (newCategory === 'adjectives_sentences') {
+              } else if (!privateLayout && newCategory === 'adjectives_sentences') {
                 germanLabel = t('modal_question_label') || "Question *";
                 germanPlaceholder = "e.g. Sie kauft ein ...... Buch.";
                 hungarianPlaceholder = "e.g. interessantes";
-              } else if (newCategory === 'false_friends') {
+              } else if (!privateLayout && newCategory === 'false_friends') {
                 germanLabel = t('modal_german_ff_label') || "German Loanword *";
                 germanPlaceholder = t('modal_german_ff_placeholder') || "e.g. das Gift, die Gifte";
                 hungarianPlaceholder = t('modal_hungarian_ff_placeholder') || "e.g. a méreg";
-              } else if (newCategory === 'idioms') {
+              } else if (!privateLayout && newCategory === 'idioms') {
                 germanLabel = t('idiom_german_label') || "German Idiom *";
                 germanPlaceholder = t('idiom_german_placeholder') || "e.g. Ich verstehe nur Bahnhof";
                 hungarianPlaceholder = t('idiom_hungarian_placeholder') || "e.g. Nekem ez kínai";
               }
-              let hungarianLabel = newCategory === 'idioms'
+              let hungarianLabel = privateLayout
+                ? t('modal_hungarian_label')
+                : newCategory === 'idioms'
                 ? (t('idiom_hungarian_label') || 'Hungarian Meaning *')
                 : newCategory === 'prepositions'
                   ? (t('prep_case_label') || 'Preposition + Case *')
                   : newCategory === 'adjectives_sentences'
                     ? (t('modal_correct_answer_label') || 'Correct Answer *')
                   : t('modal_hungarian_label');
-              let exampleLabel = newCategory === 'idioms'
+              let exampleLabel = privateLayout
+                ? t('modal_example_label')
+                : newCategory === 'idioms'
                 ? (t('explanation_label') || 'Explanation')
                 : newCategory === 'prepositions'
                   ? (t('meaning_example_label') || 'Example Sentence')
                   : newCategory === 'adjectives_sentences'
                     ? (t('modal_comment_notes_label') || 'Comment / Notes')
                   : t('modal_example_label');
-              if (isMatchQuizTopic(newCategory)) {
+              if (!privateLayout && isMatchQuizTopic(newCategory)) {
                 const customA = effectiveLabels[newCategory]?.columnA;
                 const customB = effectiveLabels[newCategory]?.columnB;
                 const customC = effectiveLabels[newCategory]?.columnC;
@@ -1551,7 +1566,7 @@ export default function Import() {
               }
               return (
                 <div className="space-y-4">
-              {newCategory === 'articles' ? (
+              {newCategory === 'articles' && !privateLayout ? (
                 <div className="flex gap-4">
                   <div className="w-1/3">
                     <label className="block text-sm font-medium text-gray-700 mb-1">{t('modal_article_label') || 'Article *'}</label>
@@ -1606,11 +1621,11 @@ export default function Import() {
                   type="text"
                   value={newExample}
                   onChange={(e) => setNewExample(e.target.value)}
-                  placeholder={newCategory === 'idioms' ? (t('explanation_placeholder') || 'Explanation') : newCategory === 'prepositions' ? (t('meaning_example_placeholder') || 'e.g. Ich verzichte auf das Angebot.') : newCategory === 'adjectives_sentences' ? 'e.g. Akkusativ, neutrum' : t('modal_example_placeholder')}
+                  placeholder={privateLayout ? t('modal_example_placeholder') : newCategory === 'idioms' ? (t('explanation_placeholder') || 'Explanation') : newCategory === 'prepositions' ? (t('meaning_example_placeholder') || 'e.g. Ich verzichte auf das Angebot.') : newCategory === 'adjectives_sentences' ? 'e.g. Akkusativ, neutrum' : t('modal_example_placeholder')}
                   className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-              {(newCategory === 'false_friends' || newCategory === 'idioms') && (
+              {!privateLayout && (newCategory === 'false_friends' || newCategory === 'idioms') && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">{newCategory === 'idioms' ? (t('idiom_note_label') || 'Note (Explanation)') : (t('note') || 'Note')} *</label>
                   <input
@@ -1627,12 +1642,13 @@ export default function Import() {
             })()}
             </div>
 
-            <div className="p-3 sm:p-6 md:p-8 border-t border-gray-100 bg-gray-50/50 flex flex-row justify-end gap-2 sm:gap-3">
-              <button onClick={() => setIsAddModalOpen(false)} className="flex-1 sm:flex-none px-4 py-2 sm:px-6 sm:py-3 font-bold text-gray-600 hover:bg-gray-200 rounded-xl transition-colors">{t('cancel')}</button>
-              <button onClick={handleSaveNewWord} className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 sm:py-3 sm:px-8 rounded-xl shadow-sm transition-colors">{t('modal_save_word') || 'Save Word'}</button>
+            <div className="p-3 sm:p-6 md:p-8 border-t border-gray-100 bg-white shrink-0 relative z-10 flex flex-row justify-end gap-2 sm:gap-3">
+              <button type="button" onClick={() => setIsAddModalOpen(false)} className="flex-1 sm:flex-none px-4 py-2 sm:px-6 sm:py-3 font-bold text-gray-600 hover:bg-gray-200 rounded-xl transition-colors">{t('cancel')}</button>
+              <button type="button" onClick={handleSaveNewWord} className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 sm:py-3 sm:px-8 rounded-xl shadow-sm transition-colors">{t('modal_save_word') || 'Save Word'}</button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Overwrite Confirmation Modal */}
@@ -1873,7 +1889,7 @@ export default function Import() {
                   <div className="md:hidden space-y-4 pb-[env(safe-area-inset-bottom)]">
                     {visibleEditEntries.map(({ item, idx, key }) => (
                       <div key={key} className="rounded-2xl border border-blue-100 bg-yellow-50/40 p-4 space-y-3 shadow-sm">
-                        {editingFileCategory === 'articles' ? (
+                        {editLayoutCategory === 'articles' ? (
                           <>
                             <div>
                               <label className="block text-xs font-semibold text-gray-500 mb-1">{t('article')}</label>
@@ -1892,7 +1908,7 @@ export default function Import() {
                               <textarea rows={2} value={item.example || ''} onChange={(e) => handleEditItemChange(idx, 'example', e.target.value)} className={EDIT_FIELD_CLASS} />
                             </div>
                           </>
-                        ) : editingFileCategory === 'prepositions' ? (
+                        ) : editLayoutCategory === 'prepositions' ? (
                           <>
                             <div>
                               <label className="block text-xs font-semibold text-gray-500 mb-1">{t('template_german_verb_header') || 'German Verb + Hungarian'}</label>
@@ -1907,26 +1923,26 @@ export default function Import() {
                               <textarea rows={2} value={item.example || ''} onChange={(e) => handleEditItemChange(idx, 'example', e.target.value)} className={EDIT_FIELD_CLASS} />
                             </div>
                           </>
-                        ) : editingFileCategory === 'false_friends' || editingFileCategory === 'idioms' ? (
+                        ) : editLayoutCategory === 'false_friends' || editLayoutCategory === 'idioms' ? (
                           <>
                             <div>
-                              <label className="block text-xs font-semibold text-gray-500 mb-1">{editingFileCategory === 'idioms' ? (t('idiom_german_label') || 'German Idiom') : t('german')}</label>
+                              <label className="block text-xs font-semibold text-gray-500 mb-1">{editLayoutCategory === 'idioms' ? (t('idiom_german_label') || 'German Idiom') : t('german')}</label>
                               <textarea rows={2} value={item.german || ''} onChange={(e) => handleEditItemChange(idx, 'german', e.target.value)} className={EDIT_FIELD_CLASS} />
                             </div>
                             <div>
-                              <label className="block text-xs font-semibold text-gray-500 mb-1">{editingFileCategory === 'idioms' ? (t('idiom_hungarian_label') || 'Hungarian Meaning') : t('hungarian')}</label>
+                              <label className="block text-xs font-semibold text-gray-500 mb-1">{editLayoutCategory === 'idioms' ? (t('idiom_hungarian_label') || 'Hungarian Meaning') : t('hungarian')}</label>
                               <textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleEditItemChange(idx, 'hungarian', e.target.value)} className={EDIT_FIELD_CLASS} />
                             </div>
                             <div>
-                              <label className="block text-xs font-semibold text-gray-500 mb-1">{editingFileCategory === 'idioms' ? (t('explanation_label') || 'Explanation') : t('example')}</label>
+                              <label className="block text-xs font-semibold text-gray-500 mb-1">{editLayoutCategory === 'idioms' ? (t('explanation_label') || 'Explanation') : t('example')}</label>
                               <textarea rows={2} value={item.example || ''} onChange={(e) => handleEditItemChange(idx, 'example', e.target.value)} className={EDIT_FIELD_CLASS} />
                             </div>
                             <div>
-                              <label className="block text-xs font-semibold text-gray-500 mb-1">{editingFileCategory === 'idioms' ? (t('idiom_note_label') || 'Note') : t('note')}</label>
+                              <label className="block text-xs font-semibold text-gray-500 mb-1">{editLayoutCategory === 'idioms' ? (t('idiom_note_label') || 'Note') : t('note')}</label>
                               <textarea rows={2} value={item.note || ''} onChange={(e) => handleEditItemChange(idx, 'note', e.target.value)} className={EDIT_FIELD_CLASS} />
                             </div>
                           </>
-                        ) : editingFileCategory === 'adjectives' ? (
+                        ) : editLayoutCategory === 'adjectives' ? (
                           <>
                             <div>
                               <label className="block text-xs font-semibold text-gray-500 mb-1">{t('adjective') || 'Adjective'}</label>
@@ -1941,7 +1957,7 @@ export default function Import() {
                               <textarea rows={2} value={item.levels || ''} onChange={(e) => handleEditItemChange(idx, 'levels', e.target.value)} className={EDIT_FIELD_CLASS} />
                             </div>
                           </>
-                        ) : editingFileCategory === 'adjectives_sentences' ? (
+                        ) : editLayoutCategory === 'adjectives_sentences' ? (
                           <>
                             <div>
                               <label className="block text-xs font-semibold text-gray-500 mb-1">{t('question_label') || 'Question'}</label>
@@ -1959,19 +1975,19 @@ export default function Import() {
                         ) : (
                           <>
                             <div>
-                              <label className="block text-xs font-semibold text-gray-500 mb-1">{t('german')}</label>
+                              <label className="block text-xs font-semibold text-gray-500 mb-1">{privateEntryLayout(editingFileCategory) ? t('modal_german_label') : t('german')}</label>
                               <textarea rows={2} value={item.german || ''} onChange={(e) => handleEditItemChange(idx, 'german', e.target.value)} className={EDIT_FIELD_CLASS} />
                             </div>
                             <div>
-                              <label className="block text-xs font-semibold text-gray-500 mb-1">{t('hungarian')}</label>
+                              <label className="block text-xs font-semibold text-gray-500 mb-1">{privateEntryLayout(editingFileCategory) ? t('modal_hungarian_label') : t('hungarian')}</label>
                               <textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleEditItemChange(idx, 'hungarian', e.target.value)} className={EDIT_FIELD_CLASS} />
                             </div>
                             <div>
-                              <label className="block text-xs font-semibold text-gray-500 mb-1">{editingFileCategory === 'verbs' ? (t('hint') || 'Hint / Past Form') : t('example')}</label>
+                              <label className="block text-xs font-semibold text-gray-500 mb-1">{editLayoutCategory === 'verbs' ? (t('hint') || 'Hint / Past Form') : privateEntryLayout(editingFileCategory) ? t('modal_example_label') : t('example')}</label>
                               <textarea
                                 rows={2}
                                 value={item.hint || item.example || ''}
-                                onChange={(e) => handleEditItemChange(idx, editingFileCategory === 'verbs' ? 'hint' : 'example', e.target.value)}
+                                onChange={(e) => handleEditItemChange(idx, editLayoutCategory === 'verbs' ? 'hint' : 'example', e.target.value)}
                                 className={EDIT_FIELD_CLASS}
                               />
                             </div>
@@ -1993,39 +2009,39 @@ export default function Import() {
                     <table className="w-full text-left border-collapse table-fixed min-w-[800px] border border-blue-50 rounded-xl shadow-sm">
                       <thead className="bg-blue-50/80 border-b border-blue-100 sticky top-0 backdrop-blur z-10">
                         <tr>
-                          {editingFileCategory === 'articles' ? (
+                          {editLayoutCategory === 'articles' ? (
                             <>
                               <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('article')}</th>
                               <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('noun')}</th>
                               <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('hungarian')}</th>
                               <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('example')}</th>
                             </>
-                          ) : editingFileCategory === 'false_friends' || editingFileCategory === 'idioms' ? (
+                          ) : editLayoutCategory === 'false_friends' || editLayoutCategory === 'idioms' ? (
                             <>
-                              <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{editingFileCategory === 'idioms' ? (t('idiom_german_label') || 'German Idiom') : t('german')}</th>
-                              <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{editingFileCategory === 'idioms' ? (t('idiom_hungarian_label') || 'Hungarian Meaning') : t('hungarian')}</th>
-                              <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{editingFileCategory === 'idioms' ? (t('explanation_label') || 'Explanation') : t('example')}</th>
-                              <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{editingFileCategory === 'idioms' ? (t('idiom_note_label') || 'Note (Explanation)') : t('note')}</th>
+                              <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{editLayoutCategory === 'idioms' ? (t('idiom_german_label') || 'German Idiom') : t('german')}</th>
+                              <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{editLayoutCategory === 'idioms' ? (t('idiom_hungarian_label') || 'Hungarian Meaning') : t('hungarian')}</th>
+                              <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{editLayoutCategory === 'idioms' ? (t('explanation_label') || 'Explanation') : t('example')}</th>
+                              <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{editLayoutCategory === 'idioms' ? (t('idiom_note_label') || 'Note (Explanation)') : t('note')}</th>
                             </>
-                          ) : editingFileCategory === 'prepositions' ? (
+                          ) : editLayoutCategory === 'prepositions' ? (
                             <>
                               <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('template_german_verb_header') || 'German Verb + Hungarian'}</th>
                               <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('prep_case_label') || 'Preposition + Case'}</th>
                               <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('template_meaning_example_header') || 'Example Sentence'}</th>
                             </>
-                          ) : editingFileCategory === 'adjectives' ? (
+                          ) : editLayoutCategory === 'adjectives' ? (
                             <>
                               <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('adjective') || 'Adjective'}</th>
                               <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('hungarian')}</th>
                               <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('levels') || 'Levels'}</th>
                             </>
-                          ) : editingFileCategory === 'verbs' ? (
+                          ) : editLayoutCategory === 'verbs' ? (
                             <>
                               <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('german')}</th>
                               <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('hungarian')}</th>
                               <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('hint') || 'Hint / Past Form'}</th>
                             </>
-                          ) : editingFileCategory === 'adjectives_sentences' ? (
+                          ) : editLayoutCategory === 'adjectives_sentences' ? (
                             <>
                               <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('question_label') || 'Question'}</th>
                               <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('correct_answer_label') || 'Correct Answer'}</th>
@@ -2033,9 +2049,9 @@ export default function Import() {
                             </>
                           ) : (
                             <>
-                              <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('german')}</th>
-                              <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('hungarian')}</th>
-                              <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{t('example')}</th>
+                              <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{privateEntryLayout(editingFileCategory) ? t('modal_german_label') : t('german')}</th>
+                              <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{privateEntryLayout(editingFileCategory) ? t('modal_hungarian_label') : t('hungarian')}</th>
+                              <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/3">{privateEntryLayout(editingFileCategory) ? t('modal_example_label') : t('example')}</th>
                             </>
                           )}
                           <th className="p-2 sm:p-3 w-10"></th>
@@ -2044,7 +2060,7 @@ export default function Import() {
                       <tbody className="divide-y divide-gray-100">
                         {visibleEditEntries.map(({ item, idx, key }) => (
                           <tr key={key} className={`transition-colors ${pinnedEditMatchKeys ? 'bg-yellow-50' : 'hover:bg-gray-50'}`}>
-                            {editingFileCategory === 'articles' ? (
+                            {editLayoutCategory === 'articles' ? (
                               <>
                                 <td className="p-1 sm:p-2 border-r border-gray-100 align-top">
                                   <textarea rows={2} value={item.article || ''} onChange={(e) => handleEditItemChange(idx, 'article', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" />
@@ -2059,7 +2075,7 @@ export default function Import() {
                                   <textarea rows={2} value={item.example || ''} onChange={(e) => handleEditItemChange(idx, 'example', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" />
                                 </td>
                               </>
-                            ) : editingFileCategory === 'prepositions' ? (
+                            ) : editLayoutCategory === 'prepositions' ? (
                               <>
                                 <td className="p-1 sm:p-2 border-r border-gray-100 align-top">
                                   <textarea rows={2} value={item.german || ''} onChange={(e) => handleEditItemChange(idx, 'german', e.target.value)} placeholder={t('modal_german_prep_verb_placeholder') || "e.g. verzichten, lemondani, felhagyni valamivel"} className="w-full border border-gray-200 rounded p-2 text-sm" />
@@ -2071,7 +2087,7 @@ export default function Import() {
                                   <textarea rows={2} value={item.example || ''} onChange={(e) => handleEditItemChange(idx, 'example', e.target.value)} placeholder={t('meaning_example_placeholder') || "e.g. Ich verzichte auf das Angebot."} className="w-full border border-gray-200 rounded p-2 text-sm" />
                                 </td>
                               </>
-                            ) : editingFileCategory === 'false_friends' || editingFileCategory === 'idioms' ? (
+                            ) : editLayoutCategory === 'false_friends' || editLayoutCategory === 'idioms' ? (
                               <>
                                 <td className="p-1 sm:p-2 border-r border-gray-100 align-top">
                                   <textarea rows={2} value={item.german || ''} onChange={(e) => handleEditItemChange(idx, 'german', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" />
@@ -2086,7 +2102,7 @@ export default function Import() {
                                   <textarea rows={2} value={item.note || ''} onChange={(e) => handleEditItemChange(idx, 'note', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" />
                                 </td>
                               </>
-                            ) : editingFileCategory === 'adjectives' ? (
+                            ) : editLayoutCategory === 'adjectives' ? (
                               <>
                                 <td className="p-1 sm:p-2 border-r border-gray-100 align-top">
                                   <textarea rows={2} value={item.german || ''} onChange={(e) => handleEditItemChange(idx, 'german', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" />
@@ -2098,7 +2114,7 @@ export default function Import() {
                                   <textarea rows={2} value={item.levels || ''} onChange={(e) => handleEditItemChange(idx, 'levels', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" />
                                 </td>
                               </>
-                            ) : editingFileCategory === 'adjectives_sentences' ? (
+                            ) : editLayoutCategory === 'adjectives_sentences' ? (
                               <>
                                 <td className="p-1 sm:p-2 border-r border-gray-100 align-top">
                                   <textarea rows={2} value={item.german || ''} onChange={(e) => handleEditItemChange(idx, 'german', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" />
@@ -2119,7 +2135,7 @@ export default function Import() {
                                   <textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleEditItemChange(idx, 'hungarian', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" />
                                 </td>
                                 <td className="p-1 sm:p-2 align-top">
-                                  <textarea rows={2} value={item.hint || item.example || ''} onChange={(e) => handleEditItemChange(idx, editingFileCategory === 'verbs' ? 'hint' : 'example', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" />
+                                  <textarea rows={2} value={item.hint || item.example || ''} onChange={(e) => handleEditItemChange(idx, editLayoutCategory === 'verbs' ? 'hint' : 'example', e.target.value)} className="w-full border border-gray-200 rounded p-2 text-sm" />
                                 </td>
                               </>
                             )}
