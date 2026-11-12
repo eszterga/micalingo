@@ -1304,10 +1304,10 @@ export default function Import() {
                   <tr>
                     {previewLayout === 'articles' ? (
                       <>
-                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('article')} <span className="text-xs font-normal text-gray-500 block">{t('column_a')}</span></th>
-                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('noun')} <span className="text-xs font-normal text-gray-500 block">{t('column_b')}</span></th>
-                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('hungarian')} <span className="text-xs font-normal text-gray-500 block">{t('column_c')}</span></th>
-                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('example')} <span className="text-xs font-normal text-gray-500 block">{t('column_d')}</span></th>
+                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('modal_article_correct_label') || 'Correct answer (der, die, das) *'} <span className="text-xs font-normal text-gray-500 block">{t('column_a')}</span></th>
+                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('modal_noun_label') || 'Noun (with plural) *'} <span className="text-xs font-normal text-gray-500 block">{t('column_b')}</span></th>
+                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('modal_article_hungarian_label') || 'Hungarian meaning *'} <span className="text-xs font-normal text-gray-500 block">{t('column_c')}</span></th>
+                        <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('modal_article_hint_label') || 'Comment / Hint'} <span className="text-xs font-normal text-gray-500 block">{t('column_d')}</span></th>
                       </>
                     ) : previewLayout === 'false_friends' || previewLayout === 'idioms' ? (
                       <>
@@ -1531,9 +1531,13 @@ export default function Import() {
                 germanLabel = t('idiom_german_label') || "German Idiom *";
                 germanPlaceholder = t('idiom_german_placeholder') || "e.g. Ich verstehe nur Bahnhof";
                 hungarianPlaceholder = t('idiom_hungarian_placeholder') || "e.g. Nekem ez kínai";
+              } else if (!privateLayout && newCategory === 'articles') {
+                hungarianPlaceholder = t('modal_article_hungarian_placeholder') || "e.g. a férfi";
               }
               let hungarianLabel = privateLayout
                 ? t('modal_hungarian_label')
+                : newCategory === 'articles'
+                ? (t('modal_article_hungarian_label') || 'Hungarian meaning *')
                 : newCategory === 'idioms'
                 ? (t('idiom_hungarian_label') || 'Hungarian Meaning *')
                 : newCategory === 'prepositions'
@@ -1543,6 +1547,8 @@ export default function Import() {
                   : t('modal_hungarian_label');
               let exampleLabel = privateLayout
                 ? t('modal_example_label')
+                : newCategory === 'articles'
+                ? (t('modal_article_hint_label') || 'Comment / Hint')
                 : newCategory === 'idioms'
                 ? (t('explanation_label') || 'Explanation')
                 : newCategory === 'prepositions'
@@ -1550,7 +1556,7 @@ export default function Import() {
                   : newCategory === 'adjectives_sentences'
                     ? (t('modal_comment_notes_label') || 'Comment / Notes')
                   : t('modal_example_label');
-              if (!privateLayout && isMatchQuizTopic(newCategory)) {
+              if (!privateLayout && newCategory !== 'articles' && isMatchQuizTopic(newCategory)) {
                 const customA = effectiveLabels[newCategory]?.columnA;
                 const customB = effectiveLabels[newCategory]?.columnB;
                 const customC = effectiveLabels[newCategory]?.columnC;
@@ -1567,9 +1573,9 @@ export default function Import() {
               return (
                 <div className="space-y-4">
               {newCategory === 'articles' && !privateLayout ? (
-                <div className="flex gap-4">
-                  <div className="w-1/3">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('modal_article_label') || 'Article *'}</label>
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{t('modal_article_correct_label') || 'Correct answer (der, die, das) *'}</label>
                     <select
                       value={newArticle}
                       onChange={(e) => setNewArticle(e.target.value)}
@@ -1580,7 +1586,7 @@ export default function Import() {
                       <option value="das">das</option>
                     </select>
                   </div>
-                  <div className="w-2/3">
+                  <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">{t('modal_noun_label') || 'Noun (with plural) *'}</label>
                     <input
                       type="text"
@@ -1591,7 +1597,7 @@ export default function Import() {
                       autoFocus
                     />
                   </div>
-                </div>
+                </>
               ) : (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">{germanLabel}</label>
@@ -1892,19 +1898,19 @@ export default function Import() {
                         {editLayoutCategory === 'articles' ? (
                           <>
                             <div>
-                              <label className="block text-xs font-semibold text-gray-500 mb-1">{t('article')}</label>
+                              <label className="block text-xs font-semibold text-gray-500 mb-1">{t('modal_article_correct_label') || 'Correct answer (der, die, das) *'}</label>
                               <textarea rows={2} value={item.article || ''} onChange={(e) => handleEditItemChange(idx, 'article', e.target.value)} className={EDIT_FIELD_CLASS} />
                             </div>
                             <div>
-                              <label className="block text-xs font-semibold text-gray-500 mb-1">{t('noun')}</label>
+                              <label className="block text-xs font-semibold text-gray-500 mb-1">{t('modal_noun_label') || 'Noun (with plural) *'}</label>
                               <textarea rows={2} value={item.noun || ''} onChange={(e) => handleEditItemChange(idx, 'noun', e.target.value)} className={EDIT_FIELD_CLASS} />
                             </div>
                             <div>
-                              <label className="block text-xs font-semibold text-gray-500 mb-1">{t('hungarian')}</label>
+                              <label className="block text-xs font-semibold text-gray-500 mb-1">{t('modal_article_hungarian_label') || 'Hungarian meaning *'}</label>
                               <textarea rows={2} value={item.hungarian || ''} onChange={(e) => handleEditItemChange(idx, 'hungarian', e.target.value)} className={EDIT_FIELD_CLASS} />
                             </div>
                             <div>
-                              <label className="block text-xs font-semibold text-gray-500 mb-1">{t('example')}</label>
+                              <label className="block text-xs font-semibold text-gray-500 mb-1">{t('modal_article_hint_label') || 'Comment / Hint'}</label>
                               <textarea rows={2} value={item.example || ''} onChange={(e) => handleEditItemChange(idx, 'example', e.target.value)} className={EDIT_FIELD_CLASS} />
                             </div>
                           </>
@@ -2011,10 +2017,10 @@ export default function Import() {
                         <tr>
                           {editLayoutCategory === 'articles' ? (
                             <>
-                              <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('article')}</th>
-                              <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('noun')}</th>
-                              <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('hungarian')}</th>
-                              <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('example')}</th>
+                              <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('modal_article_correct_label') || 'Correct answer (der, die, das) *'}</th>
+                              <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('modal_noun_label') || 'Noun (with plural) *'}</th>
+                              <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('modal_article_hungarian_label') || 'Hungarian meaning *'}</th>
+                              <th className="p-2 sm:p-3 font-semibold text-gray-700 w-1/4">{t('modal_article_hint_label') || 'Comment / Hint'}</th>
                             </>
                           ) : editLayoutCategory === 'false_friends' || editLayoutCategory === 'idioms' ? (
                             <>
