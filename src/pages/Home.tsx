@@ -110,51 +110,51 @@ export default function Home() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-6xl mx-auto z-10 px-4">
-        <AppLink to="/quizzes" className="group relative flex flex-col items-start justify-between p-6 md:p-8 rounded-[2rem] bg-white/70 backdrop-blur-xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500 overflow-hidden" style={{ animation: "fade-in-up 0.8s ease-out 0.1s both" }}>
-          <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center text-3xl mb-10 group-hover:scale-110 transition-transform duration-500 border border-gray-100">🎯</div>
-          <div className="relative z-10 w-full">
-            <h2 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-2xl drop-shadow-sm mb-1">{t("quizzes") || "Quizzes"}</h2>
+        <AppLink to="/quizzes" className="group relative flex flex-col items-center justify-center text-center p-6 md:p-8 rounded-[2rem] bg-white/70 backdrop-blur-xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500 overflow-hidden" style={{ animation: "fade-in-up 0.8s ease-out 0.1s both" }}>
+          <div className="relative z-10 w-full flex flex-col items-center">
+            <h2 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-2xl drop-shadow-sm mb-4">{t("quizzes") || "Quizzes"}</h2>
+            <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition-transform duration-500 border border-gray-100">🎯</div>
             <p className="text-gray-600 font-medium text-sm leading-relaxed">{t("quizzes_subtitle") || "Choose a topic to practice."}</p>
           </div>
         </AppLink>
 
-        <AppLink to="/library" className="group relative flex flex-col items-start justify-between p-6 md:p-8 rounded-[2rem] bg-white/70 backdrop-blur-xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500 overflow-hidden" style={{ animation: "fade-in-up 0.8s ease-out 0.2s both" }}>
-          <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center text-3xl mb-10 group-hover:scale-110 transition-transform duration-500 border border-gray-100">📚</div>
-          <div className="relative z-10 w-full">
-            <h2 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-2xl drop-shadow-sm mb-1">{t("library") || "Library"}</h2>
+        <AppLink to="/library" className="group relative flex flex-col items-center justify-center text-center p-6 md:p-8 rounded-[2rem] bg-white/70 backdrop-blur-xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500 overflow-hidden" style={{ animation: "fade-in-up 0.8s ease-out 0.2s both" }}>
+          <div className="relative z-10 w-full flex flex-col items-center">
+            <h2 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-2xl drop-shadow-sm mb-4">{t("library") || "Library"}</h2>
+            <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition-transform duration-500 border border-gray-100">📚</div>
             <p className="text-gray-600 font-medium text-sm leading-relaxed">{t("library_subtitle") || "Browse the vocabulary collection, or create your own reading and listening collection."}</p>
           </div>
         </AppLink>
 
-        <AppLink to="/grammar" className="group relative flex flex-col items-start justify-between p-6 md:p-8 rounded-[2rem] bg-white/70 backdrop-blur-xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500 overflow-hidden" style={{ animation: "fade-in-up 0.8s ease-out 0.3s both" }}>
-          <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center text-3xl mb-10 group-hover:scale-110 transition-transform duration-500 border border-gray-100">🧩</div>
-          <div className="relative z-10 w-full">
-            <h2 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-2xl drop-shadow-sm mb-1">{t("grammar") || "Grammar"}</h2>
+        <AppLink to="/grammar" className="group relative flex flex-col items-center justify-center text-center p-6 md:p-8 rounded-[2rem] bg-white/70 backdrop-blur-xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500 overflow-hidden" style={{ animation: "fade-in-up 0.8s ease-out 0.3s both" }}>
+          <div className="relative z-10 w-full flex flex-col items-center">
+            <h2 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-2xl drop-shadow-sm mb-4">{t("grammar") || "Grammar"}</h2>
+            <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition-transform duration-500 border border-gray-100">🧩</div>
             <p className="text-gray-600 font-medium text-sm leading-relaxed">{t("grammar_page_subtitle") || "Read through the German cases, tenses, articles, adjective endings, and prepositions."}</p>
           </div>
         </AppLink>
 
-        <AppLink to="/statistics" className="group relative flex flex-col items-start justify-between p-6 md:p-8 rounded-[2rem] bg-white/70 backdrop-blur-xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500 overflow-hidden" style={{ animation: "fade-in-up 0.8s ease-out 0.4s both" }}>
-          <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center text-3xl mb-10 group-hover:scale-110 transition-transform duration-500 border border-gray-100">📈</div>
-          <div className="relative z-10 w-full">
-            <h2 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-2xl drop-shadow-sm mb-1">{t("statistics") || "Statistics"}</h2>
+        <AppLink to="/statistics" className="group relative flex flex-col items-center justify-center text-center p-6 md:p-8 rounded-[2rem] bg-white/70 backdrop-blur-xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500 overflow-hidden" style={{ animation: "fade-in-up 0.8s ease-out 0.4s both" }}>
+          <div className="relative z-10 w-full flex flex-col items-center">
+            <h2 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-2xl drop-shadow-sm mb-4">{t("statistics") || "Statistics"}</h2>
+            <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition-transform duration-500 border border-gray-100">📈</div>
             <p className="text-gray-600 font-medium text-sm leading-relaxed">{t("statistics_page_subtitle") || "Track your learning progress over time."}</p>
           </div>
         </AppLink>
 
-        <AppLink to="/import" className={`group relative flex flex-col items-start justify-between p-6 md:p-8 rounded-[2rem] bg-white/70 backdrop-blur-xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500 overflow-hidden ${!user ? "opacity-80 grayscale-[40%]" : ""}`} style={{ animation: "fade-in-up 0.8s ease-out 0.5s both" }}>
-          <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center text-3xl mb-10 group-hover:scale-110 transition-transform duration-500 border border-gray-100">📥</div>
-          <div className="relative z-10 w-full">
-            <h2 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-2xl drop-shadow-sm mb-1">{t("import_data") || "Import Data"}</h2>
+        <AppLink to="/import" className={`group relative flex flex-col items-center justify-center text-center p-6 md:p-8 rounded-[2rem] bg-white/70 backdrop-blur-xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500 overflow-hidden ${!user ? "opacity-80 grayscale-[40%]" : ""}`} style={{ animation: "fade-in-up 0.8s ease-out 0.5s both" }}>
+          <div className="relative z-10 w-full flex flex-col items-center">
+            <h2 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-2xl drop-shadow-sm mb-4">{t("import_data") || "Import Data"}</h2>
+            <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition-transform duration-500 border border-gray-100">📥</div>
             <p className="text-gray-600 font-medium text-sm leading-relaxed">{t("upload_new_materials") || "Upload new words and phrases."}</p>
-            {!user && <span className="inline-flex items-center gap-1.5 mt-3 text-[10px] font-bold bg-gray-100 text-gray-500 px-3 py-1 rounded-full uppercase shadow-sm"><svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>{t("login_required") || "Login required"}</span>}
+            {!user && <span className="inline-flex items-center justify-center gap-1.5 mt-3 text-[10px] font-bold bg-gray-100 text-gray-500 px-3 py-1 rounded-full uppercase shadow-sm"><svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>{t("login_required") || "Login required"}</span>}
           </div>
         </AppLink>
 
-        <AppLink to="/settings" className="group relative flex flex-col items-start justify-between p-6 md:p-8 rounded-[2rem] bg-white/70 backdrop-blur-xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500 overflow-hidden" style={{ animation: "fade-in-up 0.8s ease-out 0.6s both" }}>
-          <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center text-3xl mb-10 group-hover:scale-110 transition-transform duration-500 border border-gray-100">⚙️</div>
-          <div className="relative z-10 w-full">
-            <h2 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-2xl drop-shadow-sm mb-1">{t("settings") || "Settings"}</h2>
+        <AppLink to="/settings" className="group relative flex flex-col items-center justify-center text-center p-6 md:p-8 rounded-[2rem] bg-white/70 backdrop-blur-xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgba(37,99,235,0.15)] hover:border-blue-200 hover:-translate-y-2 transition-all duration-500 overflow-hidden" style={{ animation: "fade-in-up 0.8s ease-out 0.6s both" }}>
+          <div className="relative z-10 w-full flex flex-col items-center">
+            <h2 className="font-extrabold text-gray-900 group-hover:text-blue-700 transition-colors text-2xl drop-shadow-sm mb-4">{t("settings") || "Settings"}</h2>
+            <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition-transform duration-500 border border-gray-100">⚙️</div>
             <p className="text-gray-600 font-medium text-sm leading-relaxed">{t("settings_subtitle") || "Here you can manage your account and the app settings"}</p>
           </div>
         </AppLink>
