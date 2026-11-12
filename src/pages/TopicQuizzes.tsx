@@ -14,6 +14,8 @@ import {
   isPrivateQuizTopic,
 } from "../lib/quizPool";
 import { isPrivateQuizCard, privateCardTitle, privateSlotNumber, useQuizLabels } from "../lib/quizLabels";
+import ArticleBody from "../components/ArticleBody";
+import { grammarPrimer, type LearnLang } from "../lib/learnContent";
 
 const QUIZ_ACTION_BTN =
   'inline-flex h-7 min-w-[3.5rem] items-center justify-center rounded-md px-2.5 text-[11px] font-bold shadow-sm transition-colors whitespace-nowrap shrink-0';
@@ -62,7 +64,7 @@ export default function TopicQuizzes() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user, isAdmin } = useAuth();
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const { labels: quizLabels } = useQuizLabels(user?.uid);
   const publicDbWordsRaw = useCloudVocabulary("PUBLIC_LIBRARY");
   const publicDbWords = publicDbWordsRaw || [];
@@ -178,6 +180,17 @@ export default function TopicQuizzes() {
             <p className="text-sm sm:text-lg text-blue-900/70 font-medium mt-0.5 sm:mt-1">{t('select_level_to_start') || 'Select a quiz to start practicing.'}</p>
           </div>
         </div>
+
+      {!isPrivateTopic && effectiveTab === 'default' && (() => {
+        const primerId = topic === 'verbs' ? 'tenses' : topic;
+        const primer = primerId ? grammarPrimer(primerId, language as LearnLang) : null;
+        if (!primer) return null;
+        return (
+          <article className="bg-white/80 backdrop-blur-xl border border-white rounded-[1.75rem] p-5 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] text-gray-700">
+            <ArticleBody markdown={primer} />
+          </article>
+        );
+      })()}
 
       {!isPrivateTopic && (
       <div className="flex overflow-x-auto whitespace-nowrap border-b border-white/60">

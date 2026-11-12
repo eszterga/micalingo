@@ -11,6 +11,7 @@ import {
   routeCanonicalPath,
   routeNoindex,
 } from './seo-routes.mjs';
+import { STATIC_CONTENT_STYLE, staticBodyForRoute } from './static-body.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const distDir = path.resolve(__dirname, '..', 'dist');
@@ -80,6 +81,13 @@ function applyPageMeta(html, route, options = {}) {
   return next;
 }
 
+function injectStaticBody(html, route) {
+  const body = staticBodyForRoute(route);
+  if (!body) return html;
+  const block = `${STATIC_CONTENT_STYLE}\n    <main id="static-content">\n${body}\n    </main>\n    `;
+  return html.replace('<div id="root"></div>', `${block}<div id="root"></div>`);
+}
+
 function escapeHtml(value) {
   return String(value)
     .replace(/&/g, '&amp;')
@@ -130,7 +138,7 @@ fs.writeFileSync(
 // GitHub Pages 301s /quizzes → /quizzes/ when only quizzes/index.html exists.
 // quizzes.html makes /quizzes return 200; quizzes/index.html keeps /quizzes/ as 200.
 for (const route of PUBLIC_SPA_ROUTES) {
-  const html = applyPageMeta(indexHtml, route);
+  const html = injectStaticBody(applyPageMeta(indexHtml, route), route);
   if (route === '/') {
     fs.writeFileSync(indexHtmlPath, html, 'utf8');
     continue;

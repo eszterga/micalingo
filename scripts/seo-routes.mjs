@@ -46,12 +46,7 @@ export const INDEXABLE_ROUTES = [
   '/learning-materials/reading',
   '/learning-materials/reading/false-friends',
   '/learning-materials/reading/idioms',
-  ...ARTICLE_CATS.map((cat) => `/learning-materials/reading/articles/${cat}`),
-  ...BOOK_CATS.map((cat) => `/learning-materials/reading/books/${cat}`),
   '/learning-materials/listening',
-  ...MUSIC_CATS.map((cat) => `/learning-materials/listening/music/${cat}`),
-  ...PODCAST_CATS.map((cat) => `/learning-materials/listening/podcasts/${cat}`),
-  ...AUDIOBOOK_CATS.map((cat) => `/learning-materials/listening/audiobooks/${cat}`),
   '/learn',
   '/learn/public-and-private',
   '/learn/der-die-das',
@@ -64,9 +59,19 @@ export const INDEXABLE_ROUTES = [
   '/impressum',
 ];
 
+/** Library folders that only list remote items. Keep them reachable, but do not ask Google to index empty shells. */
+export const THIN_LIBRARY_ROUTES = [
+  ...ARTICLE_CATS.map((cat) => `/learning-materials/reading/articles/${cat}`),
+  ...BOOK_CATS.map((cat) => `/learning-materials/reading/books/${cat}`),
+  ...MUSIC_CATS.map((cat) => `/learning-materials/listening/music/${cat}`),
+  ...PODCAST_CATS.map((cat) => `/learning-materials/listening/podcasts/${cat}`),
+  ...AUDIOBOOK_CATS.map((cat) => `/learning-materials/listening/audiobooks/${cat}`),
+];
+
 /** Routes that must return HTTP 200 on GitHub Pages (copied as dist/<path>/index.html). */
 export const PUBLIC_SPA_ROUTES = [
   ...INDEXABLE_ROUTES,
+  ...THIN_LIBRARY_ROUTES,
   '/statistics',
   '/settings',
   '/login',
@@ -88,32 +93,7 @@ export const SITEMAP_ENTRIES = [
   { path: '/learning-materials/reading', changefreq: 'weekly', priority: '0.7' },
   { path: '/learning-materials/reading/false-friends', changefreq: 'monthly', priority: '0.65' },
   { path: '/learning-materials/reading/idioms', changefreq: 'monthly', priority: '0.65' },
-  ...ARTICLE_CATS.map((cat) => ({
-    path: `/learning-materials/reading/articles/${cat}`,
-    changefreq: 'weekly',
-    priority: '0.55',
-  })),
-  ...BOOK_CATS.map((cat) => ({
-    path: `/learning-materials/reading/books/${cat}`,
-    changefreq: 'weekly',
-    priority: '0.55',
-  })),
   { path: '/learning-materials/listening', changefreq: 'weekly', priority: '0.7' },
-  ...MUSIC_CATS.map((cat) => ({
-    path: `/learning-materials/listening/music/${cat}`,
-    changefreq: 'weekly',
-    priority: '0.5',
-  })),
-  ...PODCAST_CATS.map((cat) => ({
-    path: `/learning-materials/listening/podcasts/${cat}`,
-    changefreq: 'weekly',
-    priority: '0.5',
-  })),
-  ...AUDIOBOOK_CATS.map((cat) => ({
-    path: `/learning-materials/listening/audiobooks/${cat}`,
-    changefreq: 'weekly',
-    priority: '0.5',
-  })),
   { path: '/learn', changefreq: 'weekly', priority: '0.9' },
   { path: '/learn/public-and-private', changefreq: 'monthly', priority: '0.85' },
   { path: '/learn/der-die-das', changefreq: 'monthly', priority: '0.85' },
@@ -130,7 +110,7 @@ export function routeCanonicalPath(route) {
   return LEGACY_CANONICAL[route] || DIRECTORY_CANONICAL[route] || route;
 }
 
-const NOINDEX_ROUTES = new Set(['/excel-save', '/statistics', '/settings', '/login']);
+const NOINDEX_ROUTES = new Set(['/excel-save', '/statistics', '/settings', '/login', ...THIN_LIBRARY_ROUTES]);
 
 export function routeNoindex(route) {
   return NOINDEX_ROUTES.has(route);

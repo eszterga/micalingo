@@ -121,7 +121,7 @@ export const de = {
   welcome_back: "Willkommen, schön dich hier zu sehen!",
   ready_to_learn: "Lerne Deutsch mit kostenlosen, vorgefertigten Deutsch-Ungarisch-Quizzen, oder erstelle neue aus deinem eigenen Wörterbuch und Wortschatz! Mit deinem Google-Konto kannst du eine eigene Bibliothek anlegen und auch andere Sprachen lernen, oder sogar Mathematik- und Geschichtsaufgaben.",
   home_about: "MicaLingo ist eine kostenlose Website – und App –, auf der du deine Sprachkenntnisse mit fertigen Quizzen testen kannst (Deutsch–Ungarisch). Du kannst auch ohne Konto üben, aber nach der Anmeldung kannst du deine bisherigen Ergebnisse speichern und herunterladen, deine eigene Wortsammlung hochladen und weitere Quizze erzeugen. Die App ist derzeit kostenlos. Wenn dir die Seite nützlich ist, kannst du über den Button {support_link} einen beliebigen Betrag überweisen.",
-  home_disclaimer: "Die Seite und die App werden laufend weiterentwickelt, bitte entschuldige daher mögliche Fehler. Feedback und Hinweise nehmen wir gern unter {email} entgegen.",
+  home_disclaimer: "Fragen und Korrekturen nehmen wir gern unter {email} entgegen.",
   import_data: "Daten importieren und verwalten",
   upload_new_materials: "Neue Wörter und Sätze hochladen.",
   login_required: "Anmeldung erforderlich",

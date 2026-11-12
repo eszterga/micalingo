@@ -555,6 +555,11 @@ export type ResolvedSeo = SeoCopy & {
   topic?: string;
 };
 
+function isThinLibraryPath(clean: string) {
+  return /^\/learning-materials\/reading\/(?:articles|books)\/[^/]+$/.test(clean)
+    || /^\/learning-materials\/listening\/(?:music|podcasts|audiobooks)\/[^/]+$/.test(clean);
+}
+
 function pick(map: Localized, lang: SeoLang): SeoCopy {
   return map[lang] || map.en;
 }
@@ -795,7 +800,7 @@ export function resolveSeo(pathname: string, lang: SeoLang): ResolvedSeo {
     return {
       ...pick(ROUTES['/learning-materials'], lang),
       canonicalPath: clean,
-      noindex: false,
+      noindex: isThinLibraryPath(clean),
       pageType: 'page',
     };
   }
@@ -994,26 +999,7 @@ export const SITEMAP_PATHS = [
   '/learning-materials/reading',
   '/learning-materials/reading/false-friends',
   '/learning-materials/reading/idioms',
-  '/learning-materials/reading/articles/history',
-  '/learning-materials/reading/articles/animals',
-  '/learning-materials/reading/articles/music',
-  '/learning-materials/reading/articles/culture',
-  '/learning-materials/reading/articles/politics',
-  '/learning-materials/reading/articles/science',
-  '/learning-materials/reading/articles/celebrities',
-  '/learning-materials/reading/books/classics',
-  '/learning-materials/reading/books/short-stories',
   '/learning-materials/listening',
-  '/learning-materials/listening/music/pop',
-  '/learning-materials/listening/music/rock',
-  '/learning-materials/listening/music/other-music',
-  '/learning-materials/listening/podcasts/politics',
-  '/learning-materials/listening/podcasts/travel',
-  '/learning-materials/listening/podcasts/psychology',
-  '/learning-materials/listening/podcasts/other-podcasts',
-  '/learning-materials/listening/audiobooks/fiction',
-  '/learning-materials/listening/audiobooks/non-fiction',
-  '/learning-materials/listening/audiobooks/other-audiobooks',
   '/learn',
   '/learn/public-and-private',
   '/learn/der-die-das',

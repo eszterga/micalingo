@@ -10,6 +10,8 @@ import { signInWithGoogle } from '../lib/googleAuth';
 import { addCloudWord, useCloudVocabulary, findVocabDuplicate, vocabCategoryKey } from '../lib/firestore';
 import { ImageLightbox, useImageLightbox } from '../components/ImageLightbox';
 import ArticleContent from '../components/ArticleContent';
+import ArticleBody from '../components/ArticleBody';
+import { grammarIndexArticle, grammarPrimer, type LearnLang } from '../lib/learnContent';
 import ReadingSelectionPopover from '../components/ReadingSelectionPopover';
 import { useReadingSelectionPopup } from '../lib/useReadingSelectionPopup';
 import EditorFormatControls from '../components/EditorFormatControls';
@@ -42,7 +44,7 @@ const BackgroundBlobs = () => (
 );
 
 export default function Grammar() {
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const { user, isAdmin, adminMode } = useAuth();
   const { labels: quizLabels } = useQuizLabels(user?.uid);
   const [searchParams] = useSearchParams();
@@ -598,9 +600,13 @@ export default function Grammar() {
         {/* PUBLIC TAB */}
         {activeTab === 'public' && (
           <div className="space-y-6 pt-4">
+            <article className="bg-white/80 backdrop-blur-xl border border-white rounded-[1.75rem] p-5 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] text-gray-700">
+              <ArticleBody markdown={grammarIndexArticle(language as LearnLang)} />
+            </article>
             {publicCategories.map(cat => {
               const isSectionOpen = openPublicSections[cat.id];
               const catItems = publicItems.filter(i => i.categoryId === cat.id);
+              const primer = grammarPrimer(cat.id, language as LearnLang);
               
               return (
                 <section key={cat.id} className="bg-white/60 backdrop-blur-xl rounded-[2rem] sm:rounded-[2.5rem] border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-4 sm:p-6 md:p-8 transition-all duration-300 hover:bg-white/80 overflow-hidden">
@@ -611,6 +617,11 @@ export default function Grammar() {
                     </div>
                     <div className={`w-8 h-8 sm:w-12 sm:h-12 rounded-full bg-white flex items-center justify-center shadow-sm text-blue-600 transition-transform duration-300 flex-shrink-0 ${isSectionOpen ? "rotate-180" : ""}`}><svg className="w-4 h-4 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"></path></svg></div>
                   </button>
+                  {primer && (
+                    <div className="mt-4 text-gray-700 leading-relaxed">
+                      <ArticleBody markdown={primer} />
+                    </div>
+                  )}
                   
                   <div className={`grid transition-[grid-template-rows,opacity] duration-300 ease-in-out ${isSectionOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}>
                     <div className="min-h-0 overflow-hidden">
