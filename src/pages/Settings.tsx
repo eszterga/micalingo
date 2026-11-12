@@ -678,10 +678,18 @@ export default function Settings() {
                         const lang = localStorage.getItem('micalingo_language');
                         const examples = localStorage.getItem('micalingo_show_examples');
                         const hintTime = localStorage.getItem(HINT_READ_TIME_STORAGE_KEY);
+                        const quizNames: [string, string][] = [];
+                        for (let i = 0; i < localStorage.length; i++) {
+                          const key = localStorage.key(i);
+                          if (!key || !key.startsWith('micalingo_quiz_label')) continue;
+                          const value = localStorage.getItem(key);
+                          if (value != null) quizNames.push([key, value]);
+                        }
                         localStorage.clear();
                         if (lang) localStorage.setItem('micalingo_language', lang);
                         if (examples) localStorage.setItem('micalingo_show_examples', examples);
                         if (hintTime) localStorage.setItem(HINT_READ_TIME_STORAGE_KEY, hintTime);
+                        quizNames.forEach(([key, value]) => localStorage.setItem(key, value));
                         window.alert(t('data_cleared' as any) || 'Local progress cleared successfully.');
                         window.location.reload();
                       }
