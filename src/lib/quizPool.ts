@@ -218,10 +218,8 @@ function toQuizWord(word: QuizWord | PublicWord, topic: string): QuizWord | null
 }
 
 function wordMatchesTopic(word: { category?: string }, topic: string) {
-  // Static seed entries usually have no category — they already belong to the topic array.
-  if (word.category === undefined || word.category === null || String(word.category).trim() === '') {
-    return true;
-  }
+  // Each quiz keeps its own words. A missing category is vocabulary only,
+  // so an articles entry is never treated as a vocabulary duplicate or the reverse.
   if (isReadingVocabCategory(word.category)) return false;
   if (isMarkedVocabCategory(word.category)) return false;
   return vocabCategoryKey(word.category) === topic;

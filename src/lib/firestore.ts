@@ -184,7 +184,11 @@ export const isQuizVocabCategory = (category?: string | null) =>
 
 export const isActiveVocabItem = (w: { deleted?: boolean } | null | undefined) => !!w && !w.deleted;
 
-/** Same german + same library topic (reading vs vocabulary quiz stay distinct). */
+/**
+ * Same German text and the same quiz category.
+ * Article quizzes, vocabulary quizzes, reading, and marked lists stay separate.
+ * A blank category is vocabulary only — it does not match articles or any other quiz.
+ */
 export const isSameVocabEntry = (
   a: { german?: string; category?: string },
   german: string,
@@ -193,12 +197,28 @@ export const isSameVocabEntry = (
   vocabGermanKey(a.german) === vocabGermanKey(german) &&
   vocabCategoryKey(a.category) === vocabCategoryKey(category);
 
-/** Find an active duplicate in the SAME topic library only. */
+/** Static public rows belong only to the public library. */
+export function isVocabInLibrary(
+  word: { userId?: string; id?: string; sourceType?: string },
+  libraryUserId: string
+) {
+  const staticRow =
+    word.sourceType === 'static' || String(word.id || '').startsWith('static_');
+  if (staticRow) return libraryUserId === 'PUBLIC_LIBRARY';
+  if (word.userId) return word.userId === libraryUserId;
+  return true;
+}
+
+/**
+ * Active duplicate in one quiz category.
+ * Pass libraryUserId so a private copy never counts as a public duplicate, or the reverse.
+ */
 export function findVocabDuplicate(
-  words: Array<{ id?: string; german?: string; category?: string; deleted?: boolean }>,
+  words: Array<{ id?: string; german?: string; category?: string; deleted?: boolean; userId?: string; sourceType?: string }>,
   german: string,
   category: string,
-  excludeId?: string | null
+  excludeId?: string | null,
+  libraryUserId?: string | null
 ) {
   const key = vocabGermanKey(german);
   const cat = vocabCategoryKey(category);
@@ -206,6 +226,7 @@ export function findVocabDuplicate(
   return words.find((w) => {
     if (!isActiveVocabItem(w)) return false;
     if (excludeId && w.id && w.id === excludeId) return false;
+    if (libraryUserId && !isVocabInLibrary(w, libraryUserId)) return false;
     if (vocabGermanKey(w.german) !== key) return false;
     return vocabCategoryKey(w.category) === cat;
   });

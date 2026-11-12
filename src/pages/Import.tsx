@@ -1,5 +1,5 @@
 import BackLabel from "../components/BackLabel";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useSearchParams, Link } from "react-router-dom";
 import * as XLSX from 'xlsx';
@@ -7,7 +7,7 @@ import FileDropZone from "../components/FileDropZone";
 import { ParsedImport } from "../lib/importParser";
 import { useAuth } from "../AuthContext";
 import { publicVocabulary, publicPhrases, publicArticles, publicPrepositions, publicFalseFriends, publicAdjectives } from '../lib/public-data';
-import { useCloudVocabulary, addCloudWord, bulkAddCloudWords, bulkDeleteCloudWords, updateCloudWord, purgeVocabDuplicatesKeeping, purgeSoftDeletedVocabSiblings, isActiveVocabItem, findVocabDuplicate, vocabCategoryKey, vocabGermanKey } from "../lib/firestore";
+import { useCloudVocabulary, addCloudWord, bulkAddCloudWords, bulkDeleteCloudWords, updateCloudWord, purgeVocabDuplicatesKeeping, purgeSoftDeletedVocabSiblings, isActiveVocabItem, findVocabDuplicate, isVocabInLibrary, vocabCategoryKey, vocabGermanKey } from "../lib/firestore";
 import { useI18n } from "../I18nContext";
 import { isPrivateQuizTopic } from "../lib/quizPool";
 import { defaultQuizTopicTitle, isMatchQuizTopic, isPrivateQuizCard, matchColumnLabel, privateCardTitle, privateSlotNumber, quizDisplayTitle, useQuizLabels } from "../lib/quizLabels";
@@ -61,6 +61,69 @@ const manualCmsLabel = (item: any) => {
   return { fileName, subtitle };
 };
 
+/** Private telc stays on the signed-in account. Otherwise the admin radio picks the library. */
+const targetLibraryUserId = (
+  saveToPublic: boolean,
+  category: string,
+  userId: string | undefined
+) => {
+  if (!userId) return undefined;
+  if (isPrivateQuizTopic(category) || !saveToPublic) return userId;
+  return "PUBLIC_LIBRARY";
+};
+
+const staticSourceForCategory = (category: string) => {
+  const type = vocabCategoryKey(category);
+  if (type === "vocabulary") return publicVocabulary;
+  if (type === "phrases") return publicPhrases;
+  if (type === "articles") return publicArticles;
+  if (type === "prepositions") return publicPrepositions;
+  if (type === "false_friends") return publicFalseFriends;
+  if (type === "adjectives") return publicAdjectives || [];
+  return [];
+};
+
+/**
+ * Words that may count as duplicates: one library, one quiz category.
+ * Public static rows are included only for that same category, and only in the public library.
+ */
+const duplicateCandidates = (
+  cloudWords: any[],
+  libraryUserId: string,
+  category: string
+) => {
+  const cat = vocabCategoryKey(category);
+  const sameLibrary = (cloudWords || []).filter(
+    (w) => isVocabInLibrary(w, libraryUserId)
+  );
+  const cloud = sameLibrary.filter(
+    (w) => isActiveVocabItem(w) && vocabCategoryKey(w.category) === cat
+  );
+  if (libraryUserId !== "PUBLIC_LIBRARY") return cloud;
+
+  const staticRows = staticSourceForCategory(cat)
+    .map((item, idx) => ({
+      ...item,
+      id: `static_${cat}_${idx}`,
+      category: cat,
+      sourceType: "static",
+      isCloud: false,
+      userId: "PUBLIC_LIBRARY",
+      deleted: false,
+    }))
+    .filter((row) => {
+      const key = vocabGermanKey(row.german);
+      if (!key) return false;
+      const hiddenByCloud = sameLibrary.some(
+        (w) =>
+          vocabGermanKey(w.german) === key &&
+          vocabCategoryKey(w.category) === cat
+      );
+      return !hiddenByCloud;
+    });
+  return [...cloud, ...staticRows];
+};
+
 const BackgroundBlobs = () => (
   <>
     <style>{`
@@ -84,13 +147,16 @@ export default function Import() {
   const { user, isAdmin, adminMode } = useAuth();
   const [saveToPublic, setSaveToPublic] = useState(isAdmin ? adminMode : false);
   
-  // Keep personal and public items completely isolated to prevent false duplicates when toggling
+  // Personal and public stay on separate lists so a word may exist in both.
   const personalItems = useCloudVocabulary(user?.uid) || [];
   const publicItems = useCloudVocabulary("PUBLIC_LIBRARY") || [];
   const existingItems = saveToPublic ? publicItems : personalItems;
   
   const [data, setData] = useState<ParsedImport | null>(null);
   const [saving, setSaving] = useState(false);
+  const savingRef = useRef(false);
+  const [savingNewWord, setSavingNewWord] = useState(false);
+  const savingNewWordRef = useRef(false);
   const [activeTemplate, setActiveTemplate] = useState<string | null>(null);
   const [searchParams] = useSearchParams();
   const initialDestination = searchParams.get('destination') || 'vocabulary';
@@ -104,6 +170,9 @@ export default function Import() {
 
   const [editingFile, setEditingFile] = useState<string | null>(null);
   const [editingFileCategory, setEditingFileCategory] = useState<string>('vocabulary');
+  /** Library the open editor belongs to. Saving must not touch the other library. */
+  const [editingLibraryUserId, setEditingLibraryUserId] = useState<string | null>(null);
+  const [editOriginalItems, setEditOriginalItems] = useState<any[]>([]);
   const [editFileItems, setEditFileItems] = useState<any[]>([]);
   const [deletedEditItemIds, setDeletedEditItemIds] = useState<string[]>([]);
   const [isSavingEdit, setIsSavingEdit] = useState(false);
@@ -420,10 +489,50 @@ export default function Import() {
     );
   };
 
+  const closeFileEditor = () => {
+    setEditingFile(null);
+    setEditingLibraryUserId(null);
+    setEditOriginalItems([]);
+    setDeletedEditItemIds([]);
+    setPinnedEditMatchKeys(null);
+    setModalSearchTerm("");
+  };
+
+  const cloudForLibrary = (libraryUserId: string | null | undefined) => {
+    const source = libraryUserId === "PUBLIC_LIBRARY" ? publicItems : personalItems;
+    if (!libraryUserId) return source;
+    return source.filter((w: any) => isVocabInLibrary(w, libraryUserId));
+  };
+
+  const quizCategoryLabel = (category: string, libraryUserId?: string | null) => {
+    const catKey = vocabCategoryKey(category);
+    const dropdown = t(`dropdown_${catKey}`);
+    const fallback = dropdown === `dropdown_${catKey}` ? (defaultQuizTopicTitle(catKey, t) || catKey) : dropdown;
+    const forPublic = libraryUserId ? libraryUserId === "PUBLIC_LIBRARY" : saveToPublic;
+    const labels = forPublic ? publicLabels : privateLabels;
+    if (!forPublic) {
+      return privateCardTitle(
+        labels,
+        catKey,
+        fallback,
+        t("quiz_slot_title_placeholder", { n: privateSlotNumber(catKey) })
+      );
+    }
+    return quizDisplayTitle(labels, catKey, fallback);
+  };
+
   const handleEditFile = (file: ImportedFilePreview) => {
     const items = itemsForImportedFile(file);
     const cloned = JSON.parse(JSON.stringify(items));
+    const owner =
+      items.find((item: any) => item.userId)?.userId ||
+      (items.some((item: any) => item.sourceType === "static" || String(item.id || "").startsWith("static_"))
+        ? "PUBLIC_LIBRARY"
+        : (saveToPublic ? "PUBLIC_LIBRARY" : user?.uid)) ||
+      null;
+    setEditOriginalItems(JSON.parse(JSON.stringify(items)));
     setEditFileItems(cloned);
+    setEditingLibraryUserId(owner);
     setEditingFileCategory(file.destination);
     setEditingFile(file.subtitle ? `${file.fileName} — ${file.subtitle}` : file.fileName);
     setDeletedEditItemIds([]);
@@ -473,36 +582,72 @@ export default function Import() {
   const handleSaveFileEdits = async () => {
     setIsSavingEdit(true);
     try {
+      const editLibraryId = editingLibraryUserId;
+      const editPool = cloudForLibrary(editLibraryId);
+      const originalMap = new Map<string, any>(
+        editOriginalItems.filter((i: any) => i?.id).map((i: any) => [i.id, i])
+      );
+      const categoryForEdit = (orig: any) =>
+        vocabCategoryKey(
+          orig?.category || (editingFileCategory !== "mixed" ? editingFileCategory : "vocabulary")
+        );
+
+      const conflicts: { german: string; category: string }[] = [];
+      for (const item of editFileItems) {
+        const orig = item.id ? originalMap.get(item.id) : undefined;
+        const german = String(item.german || "").trim();
+        if (!orig || !german || !editLibraryId) continue;
+        if (vocabGermanKey(german) === vocabGermanKey(orig.german)) continue;
+        const category = categoryForEdit(orig);
+        const pool = duplicateCandidates(
+          editLibraryId === "PUBLIC_LIBRARY" ? publicItems : personalItems,
+          editLibraryId,
+          category
+        );
+        const duplicate = findVocabDuplicate(
+          pool as any[],
+          german,
+          category,
+          item.id,
+          editLibraryId
+        );
+        if (duplicate) conflicts.push({ german, category });
+      }
+      if (conflicts.length > 0) {
+        alert(t('alert_word_exists', { category: quizCategoryLabel(conflicts[0].category, editLibraryId) }));
+        return;
+      }
+
       if (deletedEditItemIds.length > 0) {
         const cloudDeletes = deletedEditItemIds.filter((id: string) => !id.startsWith('static_'));
         const staticDeletes = deletedEditItemIds.filter((id: string) => id.startsWith('static_'));
 
         const softPurgeTargets = cloudDeletes
-          .map((id) => existingItems.find((i: any) => i.id === id))
+          .map((id) => originalMap.get(id) || editPool.find((i: any) => i.id === id))
           .filter(Boolean)
-          .map((w: any) => ({ german: w.german, category: w.category }));
+          .map((w: any) => ({ german: w.german, category: categoryForEdit(w) }));
 
         if (cloudDeletes.length > 0) await bulkDeleteCloudWords(cloudDeletes);
 
         for (const target of softPurgeTargets) {
           if (target?.german) {
             await purgeSoftDeletedVocabSiblings(
-              existingItems as any[],
+              editPool as any[],
               target.german,
               target.category
             );
           }
         }
 
-        if (staticDeletes.length > 0) {
+        if (staticDeletes.length > 0 && editLibraryId === "PUBLIC_LIBRARY") {
           const tombstones = staticDeletes.map((id: string) => {
-            const orig: any = allItems.find((i: any) => i.id === id);
+            const orig: any = originalMap.get(id);
             return orig
               ? {
                   userId: 'PUBLIC_LIBRARY',
                   german: orig.german,
                   hungarian: orig.hungarian,
-                  category: orig.category || 'vocabulary',
+                  category: categoryForEdit(orig),
                   deleted: true,
                   dateAdded: Date.now()
                 }
@@ -510,15 +655,12 @@ export default function Import() {
           }).filter(Boolean);
           if (tombstones.length > 0) await bulkAddCloudWords(tombstones as any[]);
           for (const t of tombstones as any[]) {
-            await purgeSoftDeletedVocabSiblings(existingItems as any[], t.german, t.category);
+            await purgeSoftDeletedVocabSiblings(editPool as any[], t.german, t.category);
           }
         }
       }
 
       const newCloudItems: any[] = [];
-      const originalMap = new Map<string, any>(
-        allItems.filter((i: any) => i?.id).map((i: any) => [i.id, i])
-      );
 
       for (const item of editFileItems) {
         if (!item.id) continue;
@@ -555,18 +697,21 @@ export default function Import() {
               updatePayload
             );
             await purgeVocabDuplicatesKeeping(
-              existingItems as any[],
+              (editPool as any[]).filter(
+                (w) => vocabCategoryKey(w.category) === categoryForEdit(orig)
+              ),
               updatePayload.german,
-              orig.category || 'vocabulary',
+              categoryForEdit(orig),
               item.id
             );
-          } else {
-            // Static item modified! Tombstone old + create new cloud item
+          } else if (editLibraryId === "PUBLIC_LIBRARY") {
+            // Static item modified! Tombstone old + create new cloud item in the public library only.
+            const staticCategory = categoryForEdit(orig);
             newCloudItems.push({
               userId: 'PUBLIC_LIBRARY',
               german: orig.german,
               hungarian: orig.hungarian,
-              category: orig.category || 'vocabulary',
+              category: staticCategory,
               deleted: true,
               dateAdded: Date.now()
             });
@@ -574,7 +719,7 @@ export default function Import() {
               userId: 'PUBLIC_LIBRARY',
               german: item.german?.trim() || '',
               hungarian: item.hungarian?.trim() || '',
-              category: orig.category || 'vocabulary',
+              category: staticCategory,
               dateAdded: Date.now(),
               sourceFile: orig.sourceFile,
               sourceType: orig.sourceType
@@ -595,10 +740,7 @@ export default function Import() {
         await bulkAddCloudWords(newCloudItems as any[]);
       }
 
-      setEditingFile(null);
-      setDeletedEditItemIds([]);
-      setPinnedEditMatchKeys(null);
-      setModalSearchTerm("");
+      closeFileEditor();
     } catch (error) {
       console.error('Failed to save edits:', error);
       alert('An error occurred while saving edits.');
@@ -875,12 +1017,19 @@ export default function Import() {
   };
 
   const handleSave = () => {
+    if (savingRef.current) return;
     if (previewItems.length === 0 || !user || !data) {
       alert(t('no_items_save'));
       return;
     }
 
     const targetCat = vocabCategoryKey(destination);
+    const libraryUserId = targetLibraryUserId(saveToPublic, targetCat, user.uid);
+    if (!libraryUserId) {
+      alert(t('alert_fill_fields_login'));
+      return;
+    }
+    const libraryCloud = libraryUserId === "PUBLIC_LIBRARY" ? publicItems : personalItems;
 
     // Collapse same-file duplicates (last row wins) so we never insert twin rows
     const uniquePreview = new Map<string, any>();
@@ -896,11 +1045,9 @@ export default function Import() {
       uniquePreview.set(vocabGermanKey(german), { ...item, german, hungarian });
     }
 
-    // Prefer an existing cloud doc over a static library row for the same key
+    // Same library and same quiz only. Articles never block vocabulary, and private never blocks public.
     const existingSet = new Map<string, any>();
-    for (const item of allItems) {
-      if (!isActiveVocabItem(item)) continue;
-      if (vocabCategoryKey(item.category) !== targetCat) continue;
+    for (const item of duplicateCandidates(libraryCloud, libraryUserId, targetCat)) {
       const key = vocabGermanKey(item.german);
       if (!key) continue;
       const prev = existingSet.get(key);
@@ -936,6 +1083,8 @@ export default function Import() {
   };
 
   const executeSave = async (overwrite = false, currentNewItems = itemsToAddNew, currentDuplicates = itemsToOverwrite) => {
+    if (savingRef.current) return;
+    savingRef.current = true;
     setSaving(true);
     setIsOverwriteModalOpen(false);
 
@@ -943,13 +1092,38 @@ export default function Import() {
       let savedCount = 0;
       let overwrittenCount = 0;
       const targetCat = vocabCategoryKey(destination);
-      const forcePrivate = isPrivateQuizTopic(targetCat);
-      const targetUserId = (!forcePrivate && saveToPublic) ? 'PUBLIC_LIBRARY' : user?.uid;
-      const librarySnapshot = [...(existingItems as any[])];
+      const targetUserId = targetLibraryUserId(saveToPublic, targetCat, user?.uid);
+      const libraryCloud = targetUserId === "PUBLIC_LIBRARY" ? publicItems : personalItems;
+      const librarySnapshot = (libraryCloud as any[]).filter(
+        (w) =>
+          (!targetUserId || isVocabInLibrary(w, targetUserId)) &&
+          vocabCategoryKey(w.category) === targetCat
+      );
+
+      // A row that already exists in this library and quiz is not inserted, even if an earlier check missed it.
+      const rowsToInsert: any[] = [];
+      const blockedDuplicates: any[] = [];
+      for (const item of currentNewItems) {
+        const german = item.german?.trim() || "";
+        const alreadyInBatch = rowsToInsert.some(
+          (row) => vocabGermanKey(row.german) === vocabGermanKey(german)
+        );
+        const existing = !targetUserId
+          ? undefined
+          : findVocabDuplicate(
+              duplicateCandidates(libraryCloud, targetUserId, targetCat),
+              german,
+              targetCat,
+              null,
+              targetUserId
+            );
+        if (alreadyInBatch || existing) blockedDuplicates.push(item);
+        else rowsToInsert.push(item);
+      }
 
       // 1. Save brand new items — then hard-purge any twin docs for that german+category
-      if (currentNewItems.length > 0) {
-        const newItemsPayload = currentNewItems.map(item => {
+      if (rowsToInsert.length > 0) {
+        const newItemsPayload = rowsToInsert.map(item => {
           const payload: any = {
             ...item,
             userId: targetUserId,
@@ -1023,20 +1197,30 @@ export default function Import() {
         overwrittenCount = currentDuplicates.length;
       }
 
-      setData(null);
-      let alertMessage = t('import_success', { saved: savedCount });
-      if (overwrittenCount > 0) {
-        alertMessage += `\n${t('import_overwritten', { count: overwrittenCount })}`;
-      } else if (currentDuplicates.length > 0) {
-        alertMessage += `\n${t('import_skipped', { count: currentDuplicates.length })}`;
+      // The duplicate warning already explained the skip. Do not follow it with "Saved".
+      if (savedCount === 0 && overwrittenCount === 0) {
+        if (blockedDuplicates.length > 0 && currentDuplicates.length === 0) {
+          alert(t('alert_word_exists', { category: quizCategoryLabel(targetCat, targetUserId) }));
+        }
+        return;
       }
-      alert(alertMessage);
+
+      setData(null);
+      const parts: string[] = [];
+      if (savedCount > 0) parts.push(t('import_success', { saved: savedCount }));
+      if (overwrittenCount > 0) {
+        parts.push(t('import_overwritten', { count: overwrittenCount }));
+      } else if (currentDuplicates.length + blockedDuplicates.length > 0) {
+        parts.push(t('import_skipped', { count: currentDuplicates.length + blockedDuplicates.length }));
+      }
+      if (parts.length > 0) alert(parts.join('\n'));
 
     } catch (error) {
       console.error('Failed to save vocabulary:', error);
       const message = error instanceof Error ? error.message : JSON.stringify(error);
       alert(`Database error:\n${message}`);
     } finally {
+      savingRef.current = false;
       setSaving(false);
     }
   };
@@ -1053,55 +1237,77 @@ export default function Import() {
   };
 
   const handleSaveNewWord = async () => {
+    if (savingNewWordRef.current) return;
+    savingNewWordRef.current = true;
+    setSavingNewWord(true);
+
     const finalGerman = newCategory === 'articles' && !privateEntryLayout(newCategory)
       ? `${newArticle} ${newNoun.trim()}`
       : newGerman.trim();
 
-    if (!finalGerman || !newHungarian.trim()) {
-      alert(t('alert_fill_fields_login'));
-      return;
-    }
-
-    // Same-topic only: reading (to read) never conflicts with vocabulary quiz
-    const duplicate = findVocabDuplicate(
-      existingItems || [],
-      finalGerman,
-      newCategory
-    );
-
-    if (duplicate) {
-      const catKey = vocabCategoryKey(duplicate.category);
-      let catName = t(`dropdown_${catKey}`);
-      if (catName === `dropdown_${catKey}`) catName = catKey;
-      alert(t('alert_word_exists', { category: catName }));
-      return;
-    }
+    const warnDuplicate = (libraryUserId: string) => {
+      alert(t('alert_word_exists', { category: quizCategoryLabel(newCategory, libraryUserId) }));
+    };
 
     try {
-        const payload: any = {
-          userId: (isPrivateQuizTopic(newCategory) || !saveToPublic) ? user?.uid : "PUBLIC_LIBRARY",
-          german: finalGerman,
-          hungarian: newHungarian.trim(),
-          example: newExample.trim(),
-          note: newCategory === 'false_friends' || newCategory === 'idioms' ? newNote.trim() : "",
-          dateAdded: Date.now(),
-          category: vocabCategoryKey(newCategory),
-          sourceFile: finalGerman,
-          sourceType: "cms"
-        };
+      if (!finalGerman || !newHungarian.trim()) {
+        alert(t('alert_fill_fields_login'));
+        return;
+      }
 
-        const docRef = await addCloudWord(payload);
-        await purgeVocabDuplicatesKeeping(
-          existingItems as any[],
-          finalGerman,
-          vocabCategoryKey(newCategory),
-          docRef.id
-        );
-        setIsAddModalOpen(false);
-        alert(t('saved') || 'Saved!');
+      const libraryUserId = targetLibraryUserId(saveToPublic, newCategory, user?.uid);
+      if (!libraryUserId) {
+        alert(t('alert_fill_fields_login'));
+        return;
+      }
+      const libraryCloud = libraryUserId === "PUBLIC_LIBRARY" ? publicItems : personalItems;
+      const targetCat = vocabCategoryKey(newCategory);
+      // Same library and same quiz category only. A hit stops the save: no second copy, no "Saved".
+      const duplicate = findVocabDuplicate(
+        duplicateCandidates(libraryCloud, libraryUserId, targetCat),
+        finalGerman,
+        targetCat,
+        null,
+        libraryUserId
+      );
+
+      if (duplicate) {
+        warnDuplicate(libraryUserId);
+        return;
+      }
+
+      const payload: any = {
+        userId: libraryUserId,
+        german: finalGerman,
+        hungarian: newHungarian.trim(),
+        example: newExample.trim(),
+        note: newCategory === 'false_friends' || newCategory === 'idioms' ? newNote.trim() : "",
+        dateAdded: Date.now(),
+        category: targetCat,
+        sourceFile: finalGerman,
+        sourceType: "cms"
+      };
+
+      const docRef = await addCloudWord(payload);
+      const writtenPool = (libraryCloud as any[]).filter(
+        (w) =>
+          isVocabInLibrary(w, libraryUserId) &&
+          vocabCategoryKey(w.category) === targetCat
+      );
+      await purgeVocabDuplicatesKeeping(
+        [...writtenPool, { ...payload, id: docRef.id }],
+        finalGerman,
+        targetCat,
+        docRef.id
+      );
+      setIsAddModalOpen(false);
+      alert(t('saved') || 'Saved!');
     } catch (e) {
       console.error("Failed to save word:", e);
       alert(t('error_saving_db'));
+    } finally {
+      savingNewWordRef.current = false;
+      setSavingNewWord(false);
     }
   };
 
@@ -1650,7 +1856,7 @@ export default function Import() {
 
             <div className="p-3 sm:p-6 md:p-8 border-t border-gray-100 bg-white shrink-0 relative z-10 flex flex-row justify-end gap-2 sm:gap-3">
               <button type="button" onClick={() => setIsAddModalOpen(false)} className="flex-1 sm:flex-none px-4 py-2 sm:px-6 sm:py-3 font-bold text-gray-600 hover:bg-gray-200 rounded-xl transition-colors">{t('cancel')}</button>
-              <button type="button" onClick={handleSaveNewWord} className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 sm:py-3 sm:px-8 rounded-xl shadow-sm transition-colors">{t('modal_save_word') || 'Save Word'}</button>
+              <button type="button" onClick={handleSaveNewWord} disabled={savingNewWord} className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 sm:py-3 sm:px-8 rounded-xl shadow-sm transition-colors disabled:opacity-50">{savingNewWord ? t('saving') : (t('modal_save_word') || 'Save Word')}</button>
             </div>
           </div>
         </div>,
@@ -1877,7 +2083,7 @@ export default function Import() {
 
               <button
                 type="button"
-                onClick={() => setEditingFile(null)}
+                onClick={closeFileEditor}
                 className="text-gray-400 hover:text-gray-600 transition-colors p-2 rounded-full hover:bg-gray-200"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -2164,7 +2370,7 @@ export default function Import() {
             <div className="p-3 sm:p-6 md:p-8 border-t border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row justify-end gap-3 shrink-0 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
               <button
                 type="button"
-                onClick={() => setEditingFile(null)}
+                onClick={closeFileEditor}
                 disabled={isSavingEdit}
                 className="w-full sm:w-auto px-6 py-3 font-bold text-gray-600 hover:bg-gray-200 rounded-xl transition-colors disabled:opacity-50"
               >
