@@ -124,6 +124,37 @@ const duplicateCandidates = (
   return [...cloud, ...staticRows];
 };
 
+/** Fields written to Firestore. Preview-only flags must not go into updateDoc. */
+const importCloudPayload = (
+  item: any,
+  userId: string,
+  category: string,
+  source?: { fileName?: string; fileType?: string }
+) => {
+  const payload: Record<string, string | number | boolean> = {
+    userId,
+    german: String(item?.german || "").trim(),
+    hungarian: String(item?.hungarian || "").trim(),
+    example: String(item?.example || "").trim(),
+    category,
+    deleted: false,
+  };
+  const optional: Array<[string, unknown]> = [
+    ["hint", item?.hint],
+    ["note", item?.note],
+    ["levels", item?.levels],
+    ["article", item?.article],
+    ["noun", item?.noun],
+  ];
+  for (const [key, value] of optional) {
+    const text = String(value ?? "").trim();
+    if (text) payload[key] = text;
+  }
+  if (source?.fileName) payload.sourceFile = source.fileName;
+  if (source?.fileType) payload.sourceType = source.fileType;
+  return payload;
+};
+
 const BackgroundBlobs = () => (
   <>
     <style>{`
@@ -205,6 +236,10 @@ export default function Import() {
   const [isOverwriteModalOpen, setIsOverwriteModalOpen] = useState(false);
   const [itemsToOverwrite, setItemsToOverwrite] = useState<any[]>([]);
   const [itemsToAddNew, setItemsToAddNew] = useState<any[]>([]);
+  // The dialog buttons must use the split computed when the warning opened,
+  // not a later render's empty state.
+  const pendingNewItemsRef = useRef<any[]>([]);
+  const pendingDuplicatesRef = useRef<any[]>([]);
 
   useEffect(() => {
     setSaveToPublic(isAdmin ? adminMode : false);
@@ -1072,6 +1107,8 @@ export default function Import() {
       }
     }
 
+    pendingNewItemsRef.current = newItems;
+    pendingDuplicatesRef.current = duplicates;
     setItemsToAddNew(newItems);
     setItemsToOverwrite(duplicates);
 
@@ -1100,81 +1137,55 @@ export default function Import() {
           vocabCategoryKey(w.category) === targetCat
       );
 
-      // A row that already exists in this library and quiz is not inserted, even if an earlier check missed it.
+      const source = { fileName: data?.fileName, fileType: data?.fileType };
+      const seenNew = new Set<string>();
       const rowsToInsert: any[] = [];
-      const blockedDuplicates: any[] = [];
       for (const item of currentNewItems) {
-        const german = item.german?.trim() || "";
-        const alreadyInBatch = rowsToInsert.some(
-          (row) => vocabGermanKey(row.german) === vocabGermanKey(german)
-        );
-        const existing = !targetUserId
-          ? undefined
-          : findVocabDuplicate(
-              duplicateCandidates(libraryCloud, targetUserId, targetCat),
-              german,
-              targetCat,
-              null,
-              targetUserId
-            );
-        if (alreadyInBatch || existing) blockedDuplicates.push(item);
-        else rowsToInsert.push(item);
+        const german = String(item?.german || "").trim();
+        const key = vocabGermanKey(german);
+        if (!key || !String(item?.hungarian || "").trim() || seenNew.has(key)) continue;
+        seenNew.add(key);
+        rowsToInsert.push(item);
       }
 
-      // 1. Save brand new items — then hard-purge any twin docs for that german+category
-      if (rowsToInsert.length > 0) {
-        const newItemsPayload = rowsToInsert.map(item => {
-          const payload: any = {
-            ...item,
-            userId: targetUserId,
-            dateAdded: Date.now(),
-            category: targetCat,
-            deleted: false
-          };
-          if (data?.fileName) payload.sourceFile = data.fileName;
-          if (data?.fileType) payload.sourceType = data.fileType;
-          Object.keys(payload).forEach(k => payload[k] === undefined && delete payload[k]);
-          return payload;
-        });
+      // 1. New rows are saved either way. Skip must not turn them into duplicates.
+      if (rowsToInsert.length > 0 && targetUserId) {
+        const newItemsPayload = rowsToInsert.map((item) => ({
+          ...importCloudPayload(item, targetUserId, targetCat, source),
+          dateAdded: Date.now(),
+        }));
         const createdIds = await bulkAddCloudWords(newItemsPayload);
         const withIds = newItemsPayload.map((item, i) => ({ ...item, id: createdIds[i] }));
-        const pool = [...librarySnapshot, ...withIds];
-        for (let i = 0; i < withIds.length; i++) {
-          const item = withIds[i];
+        for (const item of withIds) {
           if (item.german && item.id) {
-            await purgeVocabDuplicatesKeeping(pool as any[], item.german, targetCat, item.id);
+            await purgeSoftDeletedVocabSiblings(librarySnapshot as any[], item.german, targetCat, item.id);
           }
         }
         savedCount = newItemsPayload.length;
       }
 
-      // 2. Overwrite duplicates in place (never insert a second active copy)
-      if (overwrite && currentDuplicates.length > 0) {
+      // 2. Overwrite replaces only the rows that already exist. Skip leaves them untouched.
+      if (overwrite && currentDuplicates.length > 0 && targetUserId) {
         const cloudUpdates: Promise<void>[] = [];
-        const newCloudItems: any[] = [];
+        const staticReplacements: any[] = [];
 
         for (const item of currentDuplicates) {
-          const { idToUpdate, isStatic, ...newItemData } = item;
+          const idToUpdate = item?.idToUpdate ? String(item.idToUpdate) : "";
+          const isStatic = !!item?.isStatic || !idToUpdate || idToUpdate.startsWith("static_");
+          const payload = importCloudPayload(item, targetUserId, targetCat, source);
+          if (!payload.german || !payload.hungarian) continue;
 
-          const payload: any = {
-            ...newItemData,
-            userId: targetUserId,
-            updatedAt: Date.now(),
-            category: targetCat,
-            deleted: false
-          };
-          if (data?.fileName) payload.sourceFile = data.fileName;
-          if (data?.fileType) payload.sourceType = data.fileType;
-          Object.keys(payload).forEach(k => payload[k] === undefined && delete payload[k]);
-
-          if (isStatic || !idToUpdate || String(idToUpdate).startsWith('static_')) {
-            newCloudItems.push(payload);
+          if (isStatic) {
+            staticReplacements.push({ ...payload, dateAdded: Date.now() });
           } else {
             cloudUpdates.push(
-              updateCloudWord(idToUpdate, payload).then(() =>
+              updateCloudWord(idToUpdate, {
+                ...payload,
+                updatedAt: Date.now(),
+              }).then(() =>
                 purgeVocabDuplicatesKeeping(
                   librarySnapshot as any[],
-                  payload.german || newItemData.german,
+                  String(payload.german),
                   targetCat,
                   idToUpdate
                 ).then(() => undefined)
@@ -1183,35 +1194,33 @@ export default function Import() {
           }
         }
 
-        if (newCloudItems.length > 0) {
-          const createdIds = await bulkAddCloudWords(newCloudItems);
-          const withIds = newCloudItems.map((item, i) => ({ ...item, id: createdIds[i] }));
+        if (staticReplacements.length > 0) {
+          const createdIds = await bulkAddCloudWords(staticReplacements);
+          const withIds = staticReplacements.map((item, i) => ({ ...item, id: createdIds[i] }));
           const pool = [...librarySnapshot, ...withIds];
           for (const item of withIds) {
             if (item.german && item.id) {
-              await purgeVocabDuplicatesKeeping(pool as any[], item.german, targetCat, item.id);
+              await purgeVocabDuplicatesKeeping(pool as any[], String(item.german), targetCat, item.id);
             }
           }
         }
         if (cloudUpdates.length > 0) await Promise.all(cloudUpdates);
-        overwrittenCount = currentDuplicates.length;
+        overwrittenCount = cloudUpdates.length + staticReplacements.length;
       }
 
-      // The duplicate warning already explained the skip. Do not follow it with "Saved".
       if (savedCount === 0 && overwrittenCount === 0) {
-        if (blockedDuplicates.length > 0 && currentDuplicates.length === 0) {
-          alert(t('alert_word_exists', { category: quizCategoryLabel(targetCat, targetUserId) }));
-        }
         return;
       }
 
       setData(null);
+      pendingNewItemsRef.current = [];
+      pendingDuplicatesRef.current = [];
       const parts: string[] = [];
       if (savedCount > 0) parts.push(t('import_success', { saved: savedCount }));
       if (overwrittenCount > 0) {
         parts.push(t('import_overwritten', { count: overwrittenCount }));
-      } else if (currentDuplicates.length + blockedDuplicates.length > 0) {
-        parts.push(t('import_skipped', { count: currentDuplicates.length + blockedDuplicates.length }));
+      } else if (currentDuplicates.length > 0) {
+        parts.push(t('import_skipped', { count: currentDuplicates.length }));
       }
       if (parts.length > 0) alert(parts.join('\n'));
 
@@ -1881,10 +1890,10 @@ export default function Import() {
             </div>
             <div className="p-6 md:p-8 border-t border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row justify-end gap-3">
               <button onClick={() => setIsOverwriteModalOpen(false)} className="w-full sm:w-auto px-6 py-3 font-bold text-gray-600 hover:bg-gray-200 rounded-xl transition-colors">{t('cancel')}</button>
-              <button onClick={() => executeSave(false)} className="w-full sm:w-auto px-6 py-3 font-bold text-blue-700 bg-blue-100 hover:bg-blue-200 rounded-xl transition-colors">
+              <button onClick={() => executeSave(false, pendingNewItemsRef.current, pendingDuplicatesRef.current)} disabled={saving} className="w-full sm:w-auto px-6 py-3 font-bold text-blue-700 bg-blue-100 hover:bg-blue-200 rounded-xl transition-colors disabled:opacity-50">
                 {t('skip_button') || 'Skip Duplicates'}
               </button>
-              <button onClick={() => executeSave(true)} className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl shadow-sm transition-colors">
+              <button onClick={() => executeSave(true, pendingNewItemsRef.current, pendingDuplicatesRef.current)} disabled={saving} className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl shadow-sm transition-colors disabled:opacity-50">
                 {t('overwrite_button') || 'Overwrite'}
               </button>
             </div>
