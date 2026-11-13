@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { deleteField, doc, onSnapshot, setDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDocFromServer, onSnapshot, setDoc, updateDoc } from 'firebase/firestore';
 import { dbCloud } from './firebase';
 import { localizedColumnLabel } from './localizedLabel';
 
@@ -147,9 +147,11 @@ type TitleStamp = { title: string; updatedAt: number };
 type TitleBook = Partial<Record<PrivateQuizTopic, TitleStamp>>;
 
 const rememberedTitles = new Map<string, TitleBook>();
+const columnMemory = new Map<string, QuizLabelMap>();
 const repairKeys = new Set<string>();
 const ensureDocTasks = new Map<string, Promise<void>>();
 const writeTails = new Map<string, Promise<void>>();
+const serverLoads = new Map<string, Promise<Record<string, unknown> | null>>();
 
 function readStorage(key: string): unknown {
   try {
@@ -170,6 +172,19 @@ function writeStorage(key: string, value: unknown) {
   }
 }
 
+function asMillis(value: unknown): number {
+  if (typeof value === 'number' && Number.isFinite(value) && value > 0) return value;
+  if (value && typeof value === 'object') {
+    const stamp = value as { toMillis?: () => number; seconds?: number };
+    if (typeof stamp.toMillis === 'function') {
+      const ms = stamp.toMillis();
+      if (typeof ms === 'number' && Number.isFinite(ms) && ms > 0) return ms;
+    }
+    if (typeof stamp.seconds === 'number' && stamp.seconds > 0) return Math.round(stamp.seconds * 1000);
+  }
+  return 0;
+}
+
 function readTitleBook(raw: unknown, keepBlanks: boolean): TitleBook {
   if (!raw || typeof raw !== 'object') return {};
   const source = raw as Record<string, unknown>;
@@ -179,11 +194,61 @@ function readTitleBook(raw: unknown, keepBlanks: boolean): TitleBook {
     if (!value || typeof value !== 'object') continue;
     const record = value as Record<string, unknown>;
     const title = clip(record.title, LIMITS.title);
-    const updatedAt = typeof record.updatedAt === 'number' && record.updatedAt > 0 ? record.updatedAt : 0;
+    const updatedAt = asMillis(record.updatedAt);
     if (!title && (!keepBlanks || updatedAt <= 0)) continue;
     book[card.topic] = { title, updatedAt };
   }
   return book;
+}
+
+/** Newer stamp wins. A missing incoming value keeps the current one, so a blank cache cannot erase a name. */
+function preferStamp(current: TitleStamp | undefined, incoming: TitleStamp | undefined): TitleStamp | undefined {
+  if (!incoming || (!incoming.title && incoming.updatedAt <= 0)) return current;
+  if (!current) return incoming;
+  if (incoming.updatedAt > current.updatedAt) return incoming;
+  if (incoming.updatedAt < current.updatedAt) return current;
+  if (current.title) return current;
+  if (incoming.title) return incoming;
+  return current;
+}
+
+function mergeBooks(...books: TitleBook[]): TitleBook {
+  const next: TitleBook = {};
+  for (const book of books) {
+    for (const card of PRIVATE_QUIZ_CARDS) {
+      const picked = preferStamp(next[card.topic], book[card.topic]);
+      if (picked) next[card.topic] = picked;
+    }
+  }
+  return next;
+}
+
+function sameBook(left: TitleBook, right: TitleBook): boolean {
+  return PRIVATE_QUIZ_CARDS.every((card) => {
+    const a = left[card.topic];
+    const b = right[card.topic];
+    return (a?.title || '') === (b?.title || '') && (a?.updatedAt || 0) === (b?.updatedAt || 0);
+  });
+}
+
+/** Titles saved on the account. An absent slot is not a deletion; a blank title with a timestamp is. */
+function cloudBook(data: Record<string, unknown> | null): TitleBook {
+  if (!data) return {};
+  const primary = readTitleBook(data.quizTitles, true);
+  const legacy = readTitleBook(data.quizLabels, true);
+  const next: TitleBook = {};
+  for (const card of PRIVATE_QUIZ_CARDS) {
+    const fromPrimary = primary[card.topic];
+    const fromLegacy = legacy[card.topic];
+    if (fromPrimary && (fromPrimary.title || fromPrimary.updatedAt > 0)) {
+      if (!fromLegacy || fromPrimary.updatedAt >= fromLegacy.updatedAt) next[card.topic] = fromPrimary;
+      else if (fromLegacy.title) next[card.topic] = fromLegacy;
+      else next[card.topic] = fromPrimary;
+    } else if (fromLegacy?.title) {
+      next[card.topic] = fromLegacy;
+    }
+  }
+  return next;
 }
 
 function readIntent(userId: string): TitleBook {
@@ -219,28 +284,6 @@ function forgetTitle(userId: string, topic: PrivateQuizTopic) {
   const next = { ...prev };
   delete next[topic];
   rememberedTitles.set(userId, next);
-}
-
-/**
- * A newer explicit rename wins. An empty cloud snapshot does not.
- * An unstamped browser copy fills a missing cloud name, and does not replace one that is still stored.
- */
-function chooseTitle(intent: TitleStamp | undefined, primary: TitleStamp | undefined, legacy: TitleStamp | undefined, remembered: TitleStamp | undefined): TitleStamp | null {
-  const options: { title: string; updatedAt: number; rank: number }[] = [];
-  if (intent && (intent.title || intent.updatedAt > 0)) {
-    const stamped = intent.updatedAt > 0;
-    options.push({ title: intent.title, updatedAt: intent.updatedAt, rank: intent.title ? (stamped ? 4 : 1) : 4 });
-  }
-  if (primary?.title) options.push({ title: primary.title, updatedAt: primary.updatedAt, rank: 3 });
-  if (legacy?.title) options.push({ title: legacy.title, updatedAt: legacy.updatedAt, rank: 2 });
-  if (remembered?.title) options.push({ title: remembered.title, updatedAt: remembered.updatedAt, rank: 0 });
-  let winner: { title: string; updatedAt: number; rank: number } | null = null;
-  for (const option of options) {
-    if (!winner || option.updatedAt > winner.updatedAt || (option.updatedAt === winner.updatedAt && option.rank > winner.rank)) {
-      winner = option;
-    }
-  }
-  return winner ? { title: winner.title, updatedAt: winner.updatedAt } : null;
 }
 
 function labelsFromBook(book: TitleBook, columns: QuizLabelMap): QuizLabelMap {
@@ -288,28 +331,96 @@ function ensureSettingsDoc(userId: string) {
 /**
  * Writes one topic through dotted fields. A nested set() would replace every other name,
  * which is how a reload used to wipe the private library.
+ * An empty title stays on the document as a timestamped blank, so "missing" never means "deleted".
  */
 async function writeTopicTitle(userId: string, topic: PrivateQuizTopic, title: string, updatedAt: number) {
   const ref = doc(dbCloud, 'user_settings', userId);
-  const payload = title
-    ? {
-        [`quizTitles.${topic}.title`]: title,
-        [`quizTitles.${topic}.updatedAt`]: updatedAt,
-        [`quizLabels.${topic}.title`]: title,
-        [`quizLabels.${topic}.updatedAt`]: updatedAt,
-      }
-    : {
-        [`quizTitles.${topic}`]: deleteField(),
-        [`quizLabels.${topic}`]: deleteField(),
-      };
+  const payload = {
+    [`quizTitles.${topic}.title`]: title,
+    [`quizTitles.${topic}.updatedAt`]: updatedAt,
+    [`quizLabels.${topic}.title`]: title,
+    [`quizLabels.${topic}.updatedAt`]: updatedAt,
+  };
   try {
     await updateDoc(ref, payload);
   } catch (error) {
     if (firestoreCode(error) !== 'not-found') throw error;
-    if (!title) return;
     await ensureSettingsDoc(userId);
     await updateDoc(ref, payload);
   }
+}
+
+type TitleSource = 'cache' | 'server' | 'listen';
+
+/**
+ * Keeps every saved name.
+ * The direct server read can rename or clear a slot.
+ * A live listener can apply a newer save.
+ * A cache snapshot can fill a hole, and cannot erase a name it simply does not contain.
+ */
+function resolveTitles(userId: string, cloud: TitleBook, source: TitleSource): TitleBook {
+  const next: TitleBook = mergeBooks(rememberedTitles.get(userId) || {}, readIntent(userId));
+  for (const card of PRIVATE_QUIZ_CARDS) {
+    const remote = cloud[card.topic];
+    if (!remote || (!remote.title && remote.updatedAt <= 0)) continue;
+    const local = next[card.topic];
+    if (!local) {
+      next[card.topic] = remote;
+      continue;
+    }
+    if (source === 'server') {
+      if (local.updatedAt > remote.updatedAt) continue;
+      next[card.topic] = remote;
+      continue;
+    }
+    if (source === 'listen') {
+      if (remote.updatedAt > local.updatedAt) next[card.topic] = remote;
+      continue;
+    }
+    const picked = preferStamp(local, remote);
+    if (picked) next[card.topic] = picked;
+  }
+  const persisted = mergeBooks(readIntent(userId), next);
+  if (!sameBook(readIntent(userId), persisted)) writeIntent(userId, persisted);
+  for (const card of PRIVATE_QUIZ_CARDS) {
+    const entry = persisted[card.topic];
+    if (!entry) continue;
+    if (entry.title) rememberTitles(userId, { [card.topic]: entry });
+    else if (entry.updatedAt > 0) forgetTitle(userId, card.topic);
+  }
+  return persisted;
+}
+
+function rememberColumns(userId: string, incoming: QuizLabelMap, source: TitleSource): QuizLabelMap {
+  const prev = columnMemory.get(userId) || {};
+  if (source !== 'server' && Object.keys(incoming).length === 0) return prev;
+  const next: QuizLabelMap = { ...prev };
+  for (const card of PRIVATE_QUIZ_CARDS) {
+    const found = incoming[card.topic];
+    if (found) next[card.topic] = { ...(prev[card.topic] || {}), ...found };
+  }
+  columnMemory.set(userId, next);
+  return next;
+}
+
+/** One network read per account, shared by every page that shows the names. */
+function loadSettingsFromServer(userId: string): Promise<Record<string, unknown> | null> {
+  const existing = serverLoads.get(userId);
+  if (existing) return existing;
+  const task = getDocFromServer(doc(dbCloud, 'user_settings', userId))
+    .then((snap) => (snap.exists() ? snap.data() as Record<string, unknown> : null));
+  serverLoads.set(userId, task);
+  void task.then(
+    () => {
+      window.setTimeout(() => {
+        if (serverLoads.get(userId) === task) serverLoads.delete(userId);
+      }, 1500);
+    },
+    () => {
+      if (serverLoads.get(userId) === task) serverLoads.delete(userId);
+    },
+  );
+  return task;
 }
 
 export function useQuizLabels(userId: string | undefined) {
@@ -328,55 +439,18 @@ export function useQuizLabels(userId: string | undefined) {
     hydrated.current = false;
     const intent = readIntent(userId);
     rememberTitles(userId, intent);
-    setLabels(labelsFromBook(intent, {}));
+    let held = mergeBooks(rememberedTitles.get(userId) || {}, intent);
+    setLabels(labelsFromBook(held, columnMemory.get(userId) || {}));
     hydrated.current = true;
     const ref = doc(dbCloud, 'user_settings', userId);
 
-    const apply = (data: Record<string, unknown> | null, fromCache: boolean) => {
+    const apply = (data: Record<string, unknown> | null, source: TitleSource) => {
       if (cancelled) return;
-      const primary = readTitleBook(data?.quizTitles, false);
-      const legacy = readTitleBook(data?.quizLabels, false);
-      if (fromCache) rememberTitles(userId, { ...legacy, ...primary });
-      const remembered = rememberedTitles.get(userId) || {};
-      const intentNow = readIntent(userId);
-      const chosen: TitleBook = {};
-      let intentChanged = false;
-      const nextIntent: TitleBook = { ...intentNow };
-      for (const card of PRIVATE_QUIZ_CARDS) {
-        let winner = chooseTitle(intentNow[card.topic], primary[card.topic], legacy[card.topic], remembered[card.topic]);
-        if (!fromCache && winner?.title && winner.updatedAt <= 0) {
-          winner = { title: winner.title, updatedAt: Date.now() };
-        }
-        if (winner) chosen[card.topic] = winner;
-        const previous = nextIntent[card.topic];
-        if (!winner) {
-          if (previous) {
-            delete nextIntent[card.topic];
-            intentChanged = true;
-          }
-          continue;
-        }
-        if (!previous || previous.title !== winner.title || previous.updatedAt !== winner.updatedAt) {
-          nextIntent[card.topic] = winner;
-          intentChanged = true;
-        }
-      }
-      if (!fromCache) {
-        const latest = readIntent(userId);
-        for (const card of PRIVATE_QUIZ_CARDS) {
-          const fresh = latest[card.topic];
-          const decided = nextIntent[card.topic];
-          if (fresh && (!decided || fresh.updatedAt > decided.updatedAt)) {
-            nextIntent[card.topic] = fresh;
-            chosen[card.topic] = fresh;
-            intentChanged = true;
-          }
-        }
-      }
-      setLabels(labelsFromBook(chosen, columnMap(data?.quizTitles, data?.quizLabels)));
-      if (fromCache) return;
-      if (intentChanged) writeIntent(userId, nextIntent);
-      void repairChosen(userId, chosen, primary);
+      const cloud = cloudBook(data);
+      held = mergeBooks(held, resolveTitles(userId, cloud, source));
+      const columns = rememberColumns(userId, columnMap(data?.quizTitles, data?.quizLabels), source);
+      setLabels(labelsFromBook(held, columns));
+      if (source === 'server') void repairChosen(userId, held, cloud);
     };
 
     const listen = () => {
@@ -385,12 +459,13 @@ export function useQuizLabels(userId: string | undefined) {
         ref,
         (snap) => {
           attempt = 0;
-          apply(snap.exists() ? snap.data() as Record<string, unknown> : null, snap.metadata.fromCache);
+          const source: TitleSource = snap.metadata.fromCache || snap.metadata.hasPendingWrites ? 'cache' : 'listen';
+          apply(snap.exists() ? snap.data() as Record<string, unknown> : null, source);
         },
         (error) => {
           console.error('Failed to load quiz labels', error);
           if (cancelled) return;
-          setLabels(labelsFromBook(readIntent(userId), {}));
+          setLabels(labelsFromBook(mergeBooks(held, readIntent(userId), rememberedTitles.get(userId) || {}), columnMemory.get(userId) || {}));
           if (attempt >= 3) return;
           attempt += 1;
           window.setTimeout(() => {
@@ -400,6 +475,15 @@ export function useQuizLabels(userId: string | undefined) {
       );
     };
     listen();
+
+    // Desktop keeps a persistent Firestore cache. After login or a deploy that cache can be a
+    // blank copy of the settings doc, and the live listener will not replace it until something
+    // writes. Read the account directly so the saved names show without editing one of them.
+    void loadSettingsFromServer(userId).then((data) => {
+      apply(data, 'server');
+    }).catch((error) => {
+      console.error('Failed to refresh quiz labels from server', error);
+    });
 
     return () => {
       cancelled = true;
@@ -432,11 +516,12 @@ export function useQuizLabels(userId: string | undefined) {
   return { labels, saveTopic };
 }
 
-function repairChosen(userId: string, chosen: TitleBook, primary: TitleBook) {
+function repairChosen(userId: string, chosen: TitleBook, cloud: TitleBook) {
   for (const card of PRIVATE_QUIZ_CARDS) {
     const winner = chosen[card.topic];
-    const stored = primary[card.topic];
-    if (!winner) continue;
+    const stored = cloud[card.topic];
+    if (!winner || (!winner.title && winner.updatedAt <= 0)) continue;
+    if (stored && stored.updatedAt > winner.updatedAt) continue;
     if ((stored?.title || '') === winner.title && (stored?.updatedAt || 0) === winner.updatedAt) continue;
     const key = `${userId}:${card.topic}:${winner.title}:${winner.updatedAt}`;
     if (repairKeys.has(key)) continue;
