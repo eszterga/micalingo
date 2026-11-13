@@ -1,1 +1,0 @@
-const s={classics:"classic_literature","short-stories":"short_stories","other-music":"other_music","other-podcasts":"other_podcasts","non-fiction":"non_fiction","other-audiobooks":"other_audiobooks"};function t(o){return o?s[o]||o:""}export{t as c};
