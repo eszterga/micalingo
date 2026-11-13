@@ -96,9 +96,9 @@ const duplicateCandidates = (
   const sameLibrary = (cloudWords || []).filter(
     (w) => isVocabInLibrary(w, libraryUserId)
   );
-  const cloud = sameLibrary.filter(
-    (w) => isActiveVocabItem(w) && vocabCategoryKey(w.category) === cat
-  );
+  const cloud = sameLibrary
+    .filter((w) => isActiveVocabItem(w) && vocabCategoryKey(w.category) === cat)
+    .map((w) => ({ ...w, isCloud: true }));
   if (libraryUserId !== "PUBLIC_LIBRARY") return cloud;
 
   const staticRows = staticSourceForCategory(cat)
@@ -1100,7 +1100,7 @@ export default function Import() {
         duplicates.push({
           ...item,
           idToUpdate: existingItem.id,
-          isStatic: !existingItem.isCloud
+          isStatic: existingItem.isCloud === false || String(existingItem.id || "").startsWith("static_")
         });
       } else {
         newItems.push(item);
@@ -1171,11 +1171,13 @@ export default function Import() {
 
         for (const item of currentDuplicates) {
           const idToUpdate = item?.idToUpdate ? String(item.idToUpdate) : "";
-          const isStatic = !!item?.isStatic || !idToUpdate || idToUpdate.startsWith("static_");
+          // A real saved word, including Vocabulary (to read), is updated in place.
+          // Only built-in public rows have no cloud id and must be inserted.
+          const canUpdateInPlace = !!idToUpdate && !idToUpdate.startsWith("static_");
           const payload = importCloudPayload(item, targetUserId, targetCat, source);
           if (!payload.german || !payload.hungarian) continue;
 
-          if (isStatic) {
+          if (!canUpdateInPlace) {
             staticReplacements.push({ ...payload, dateAdded: Date.now() });
           } else {
             cloudUpdates.push(

@@ -304,8 +304,8 @@ export const bulkAddCloudWords = async (words: Omit<CloudVocabularyItem, 'id'>[]
       console.error(`Invalid word at index ${i}:`, word);
       throw new Error(`Invalid word data at row ${i + 1}: german and hungarian are required. Got: ${JSON.stringify(word)}`);
     }
-    if (typeof word.dateAdded !== 'number') {
-      throw new Error(`Invalid word at index ${i}: dateAdded must be a number`);
+    if (typeof word.dateAdded !== 'number' || Number.isNaN(word.dateAdded)) {
+      word.dateAdded = Date.now();
     }
   }
 
