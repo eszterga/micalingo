@@ -7,7 +7,7 @@ import FileDropZone from "../components/FileDropZone";
 import { ParsedImport } from "../lib/importParser";
 import { useAuth } from "../AuthContext";
 import { publicVocabulary, publicPhrases, publicArticles, publicPrepositions, publicFalseFriends, publicAdjectives } from '../lib/public-data';
-import { useCloudVocabulary, addCloudWord, bulkAddCloudWords, bulkDeleteCloudWords, updateCloudWord, purgeVocabDuplicatesKeeping, purgeSoftDeletedVocabSiblings, isActiveVocabItem, findVocabDuplicate, isVocabInLibrary, vocabCategoryKey, vocabGermanKey } from "../lib/firestore";
+import { useCloudVocabulary, addCloudWord, bulkAddCloudWords, bulkDeleteCloudWords, updateCloudWord, purgeVocabDuplicatesKeeping, purgeSoftDeletedVocabSiblings, isActiveVocabItem, findVocabDuplicate, isVocabInLibrary, vocabCategoryKey, vocabGermanKey, type CloudVocabularyItem } from "../lib/firestore";
 import { useI18n } from "../I18nContext";
 import { isPrivateQuizTopic } from "../lib/quizPool";
 import { defaultQuizTopicTitle, isMatchQuizTopic, isPrivateQuizCard, matchColumnLabel, privateCardTitle, privateSlotNumber, quizDisplayTitle, useQuizLabels } from "../lib/quizLabels";
@@ -130,8 +130,8 @@ const importCloudPayload = (
   userId: string,
   category: string,
   source?: { fileName?: string; fileType?: string }
-) => {
-  const payload: Record<string, string | number | boolean> = {
+): Omit<CloudVocabularyItem, "id" | "dateAdded"> => {
+  const payload: Omit<CloudVocabularyItem, "id" | "dateAdded"> = {
     userId,
     german: String(item?.german || "").trim(),
     hungarian: String(item?.hungarian || "").trim(),
@@ -139,17 +139,16 @@ const importCloudPayload = (
     category,
     deleted: false,
   };
-  const optional: Array<[string, unknown]> = [
-    ["hint", item?.hint],
-    ["note", item?.note],
-    ["levels", item?.levels],
-    ["article", item?.article],
-    ["noun", item?.noun],
-  ];
-  for (const [key, value] of optional) {
-    const text = String(value ?? "").trim();
-    if (text) payload[key] = text;
-  }
+  const hint = String(item?.hint ?? "").trim();
+  const note = String(item?.note ?? "").trim();
+  const levels = String(item?.levels ?? "").trim();
+  const article = String(item?.article ?? "").trim();
+  const noun = String(item?.noun ?? "").trim();
+  if (hint) payload.hint = hint;
+  if (note) payload.note = note;
+  if (levels) payload.levels = levels;
+  if (article) payload.article = article;
+  if (noun) payload.noun = noun;
   if (source?.fileName) payload.sourceFile = source.fileName;
   if (source?.fileType) payload.sourceType = source.fileType;
   return payload;
@@ -1150,7 +1149,7 @@ export default function Import() {
 
       // 1. New rows are saved either way. Skip must not turn them into duplicates.
       if (rowsToInsert.length > 0 && targetUserId) {
-        const newItemsPayload = rowsToInsert.map((item) => ({
+        const newItemsPayload: Omit<CloudVocabularyItem, "id">[] = rowsToInsert.map((item) => ({
           ...importCloudPayload(item, targetUserId, targetCat, source),
           dateAdded: Date.now(),
         }));

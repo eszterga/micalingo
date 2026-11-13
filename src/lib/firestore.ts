@@ -14,6 +14,11 @@ export interface CloudVocabularyItem {
   sourceType?: string;
   deleted?: boolean;
   note?: string;
+  hint?: string;
+  levels?: string;
+  article?: string;
+  noun?: string;
+  updatedAt?: number;
 }
 
 const VOCAB_COLLECTION = 'vocabulary';
