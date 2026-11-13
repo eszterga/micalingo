@@ -9,7 +9,6 @@ import { useI18n } from '../I18nContext';
 import { addCloudWord, useCloudVocabulary, findVocabDuplicate, vocabCategoryKey } from '../lib/firestore';
 import { useQuizLabels } from '../lib/quizLabels';
 import { QuizCategoryOptions } from '../components/QuizCategoryOptions';
-import { fetchVisibleLibraryItems } from '../lib/libraryContent';
 import { ImageLightbox, useImageLightbox } from '../components/ImageLightbox';
 import ArticleContent from '../components/ArticleContent';
 import ReadingSelectionPopover from '../components/ReadingSelectionPopover';
@@ -22,6 +21,7 @@ import {
   getSelectionBookmark,
   type SelectionBookmark,
 } from '../lib/richTextSelection';
+import { localizedGrammarItemTitle } from '../lib/localizedLabel';
 import { applyBulletList, restoreEditorSelection } from '../lib/editorFormat';
 
 const BackgroundBlobs = () => (
@@ -212,7 +212,20 @@ export default function GrammarCategory() {
   const fetchItems = useCallback(async () => {
     setItemsLoading(true);
     try {
-      const data = await fetchVisibleLibraryItems(collectionName, categoryId, user?.uid);
+      const publicSnap = await getDocs(query(collection(dbCloud, collectionName), where('userId', '==', 'PUBLIC_LIBRARY')));
+      const byId = new Map<string, any>();
+      publicSnap.docs.forEach((d) => {
+        const item: any = { id: d.id, ...d.data() };
+        if (item.categoryId === categoryId) byId.set(d.id, item);
+      });
+      if (user?.uid) {
+        const ownSnap = await getDocs(query(collection(dbCloud, collectionName), where('userId', '==', user.uid)));
+        ownSnap.docs.forEach((d) => {
+          const item: any = { id: d.id, ...d.data() };
+          if (item.categoryId === categoryId) byId.set(d.id, item);
+        });
+      }
+      const data = Array.from(byId.values()).sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
       setItems(data);
     } catch (e) {
       console.error("Error fetching items:", e);
@@ -563,31 +576,6 @@ export default function GrammarCategory() {
           </div>
         </div>
 
-        {primer && (
-          <div className="bg-white/80 backdrop-blur-xl border border-white rounded-[1.75rem] p-5 md:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-            <h2 className="text-xl font-extrabold text-blue-950 mb-3">{t("grammar_primer_heading")}</h2>
-            {categoryId && bookmarks[`primer-${categoryId}`] && (
-              <div className="flex items-center gap-2 mb-3">
-                <span onClick={(e) => handleContinueFrom(e, `primer-${categoryId}`, bookmarks[`primer-${categoryId}`])} className="inline-flex items-center gap-1.5 text-xs font-bold bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-lg hover:bg-yellow-200 transition-colors shadow-sm cursor-pointer border border-yellow-300">
-                  🔖 {t("continue_from") || "Continue from:"} "{bookmarks[`primer-${categoryId}`].substring(0, 25)}..."
-                </span>
-                <button onClick={(e) => deleteBookmark(e, `primer-${categoryId}`)} className="p-1 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors shadow-sm" title="Delete bookmark">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
-              </div>
-            )}
-            <ArticleBody id={`article-content-primer-${categoryId}`} selectionId={`primer-${categoryId}`} markdown={primer} />
-            <p className="mt-4 text-sm font-bold">
-              <AppLink to="/learn" className="text-blue-700 hover:text-blue-900">{t("learn_hub_title")} →</AppLink>
-            </p>
-          </div>
-        )}
-
-        <div className="bg-blue-50/80 backdrop-blur-sm border border-blue-200/60 text-blue-900 p-5 rounded-[1.5rem] shadow-sm text-sm font-medium mb-6 flex items-center gap-3">
-          <span className="text-xl">🔖</span>
-          {user ? (t("bookmark_instructions_logged_in") || "Highlight any text while reading to save a bookmark, or save the highlighted text directly to your personal vocabulary database or into your quizzes!") : (t("bookmark_instructions_guest") || "Highlight any text while reading to save a bookmark, or save the highlighted text directly to your personal vocabulary database or into your quizzes! (This feature is exclusively available for logged-in users. Log in to use it!)")}
-        </div>
-
         {user && (
           <div className="flex justify-end">
             <button onClick={openAddModal} className="w-full sm:w-auto justify-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-xl shadow-sm transition-colors flex items-center gap-2">
@@ -601,8 +589,38 @@ export default function GrammarCategory() {
             <div className="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4" />
             <p className="text-blue-900/70 text-lg font-medium">{t("loading") || "Loading..."}</p>
           </div>
-        ) : items.length > 0 ? (
+        ) : (items.length > 0 || primer) ? (
           <div className="space-y-8">
+            {primer && categoryId && (
+              <div className="relative bg-white/80 backdrop-blur-xl p-5 md:p-8 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white">
+                <button type="button" onClick={() => toggleExpand(`primer-${categoryId}`)} className="w-full flex items-center justify-between gap-4 outline-none text-left">
+                  <div className="flex flex-col items-start gap-2 text-left pr-4">
+                    <h2 className="text-2xl font-extrabold text-blue-950 m-0 leading-tight">{t("grammar_primer_heading")}</h2>
+                    {bookmarks[`primer-${categoryId}`] && (
+                      <div className="flex items-center gap-2 mt-1">
+                        <span onClick={(e) => handleContinueFrom(e, `primer-${categoryId}`, bookmarks[`primer-${categoryId}`])} className="inline-flex items-center gap-1.5 text-xs font-bold bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-lg hover:bg-yellow-200 transition-colors shadow-sm cursor-pointer border border-yellow-300">
+                          🔖 {t("continue_from") || "Continue from:"} "{bookmarks[`primer-${categoryId}`].substring(0, 25)}..."
+                        </span>
+                        <button onClick={(e) => deleteBookmark(e, `primer-${categoryId}`)} className="p-1 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors shadow-sm" title="Delete bookmark">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                  <div className={`w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center shadow-sm text-blue-600 transition-transform duration-500 flex-shrink-0 ${expandedItems.has(`primer-${categoryId}`) ? "rotate-180" : ""}`}>
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                  </div>
+                </button>
+                {expandedItems.has(`primer-${categoryId}`) && (
+                  <div className="pt-2 border-t border-blue-50/50 mt-6">
+                    <ArticleBody id={`article-content-primer-${categoryId}`} selectionId={`primer-${categoryId}`} markdown={primer} />
+                    <p className="mt-4 text-sm font-bold">
+                      <AppLink to="/learn" className="text-blue-700 hover:text-blue-900">{t("learn_hub_title")} →</AppLink>
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
             {items.map((item) => {
               const isExpanded = expandedItems.has(item.id);
               return (
@@ -610,7 +628,7 @@ export default function GrammarCategory() {
                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 w-full">
                     <button onClick={() => toggleExpand(item.id)} className="flex-1 w-full flex items-center justify-between group outline-none text-left">
                       <div className="flex flex-col items-start gap-2 text-left pr-4">
-                        <h2 className="text-2xl font-extrabold text-blue-950 m-0 leading-tight">{item.title}</h2>
+                        <h2 className="text-2xl font-extrabold text-blue-950 m-0 leading-tight">{localizedGrammarItemTitle(item.title, t)}</h2>
                         {bookmarks[item.id] && (
                           <div className="flex items-center gap-2 mt-1">
                             <span onClick={(e) => handleContinueFrom(e, item.id, bookmarks[item.id])} className="inline-flex items-center gap-1.5 text-xs font-bold bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-lg hover:bg-yellow-200 transition-colors shadow-sm cursor-pointer border border-yellow-300">

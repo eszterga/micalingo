@@ -78,6 +78,26 @@ export function localizedColumnLabel(saved: string, fallback: string): string {
   return saved;
 }
 
+const GRAMMAR_ITEM_TITLE_KEYS: Record<string, string> = {
+  "Die vier Fälle / Kasus": "grammar_item_four_cases",
+  "Die Vergangenheit: Perfekt und Präteritum": "grammar_item_past",
+  "Bestimmte und unbestimmte Artikel": "grammar_item_articles",
+  "Adjektive: Komparation und Deklination": "grammar_item_adjectives",
+  "Präpositionen: Akkusativ, Dativ und Wechselpräpositionen": "grammar_item_prepositions",
+  "Satzbau und Wortstellung": "grammar_item_sentence",
+};
+
+/** Public grammar rule titles follow the interface language. A title the user wrote stays. */
+export function localizedGrammarItemTitle(
+  storedTitle: string,
+  translate: (key: string) => string,
+): string {
+  const key = GRAMMAR_ITEM_TITLE_KEYS[(storedTitle || "").trim()];
+  if (!key) return storedTitle;
+  const translated = translate(key);
+  return translated && translated !== key ? translated : storedTitle;
+}
+
 /** Default private categories (Category 1 / 1. Kategória / Kategorie 1) follow the interface language. */
 export function localizedPrivateCategoryTitle(
   categoryId: string,

@@ -661,12 +661,6 @@ Fragen und Korrekturen nehmen wir gern unter support.micalingo@gmail.com entgege
 Kérdéseidet és javaslataidat a support.micalingo@gmail.com címre várjuk.`,
 };
 
-export const GRAMMAR_INDEX_ARTICLE: Record<LearnLang, string> = {
-  en: `Use this section as a **rule book next to the quizzes**. Open a category, read the primer, then drill the same pattern. A useful order for self-learners is [articles](/grammar/articles/) → [cases](/grammar/cases/) → [prepositions](/grammar/prepositions/) → [tenses](/grammar/tenses/) → [adjectives](/grammar/adjectives/) → [sentence structure](/grammar/sentence-structure/). Longer walkthroughs live under [Study guides](/learn/).`,
-  de: `Dieser Bereich ist das **Regelheft neben den Quizzen**. Kategorie öffnen, Primer lesen, dasselbe Muster üben. Sinnvolle Reihenfolge zum Selbstlernen: [Artikel](/grammar/articles/) → [Fälle](/grammar/cases/) → [Präpositionen](/grammar/prepositions/) → [Zeitformen](/grammar/tenses/) → [Adjektive](/grammar/adjectives/) → [Satzbau](/grammar/sentence-structure/). Längere Texte unter [Lernratgeber](/learn/).`,
-  hu: `Ez a rész a **szabályfüzet a kvízek mellett**. Nyiss egy kategóriát, olvasd a bevezetőt, gyakorold ugyanazt. Önálló tanuláshoz jó sorrend: [névelők](/grammar/articles/) → [esetek](/grammar/cases/) → [prepozíciók](/grammar/prepositions/) → [igeidők](/grammar/tenses/) → [melléknevek](/grammar/adjectives/) → [szórend](/grammar/sentence-structure/). Hosszabb anyag: [Útmutató](/learn/).`,
-};
-
 export const QUIZ_INDEX_ARTICLE: Record<LearnLang, string> = {
   en: `The **public** quizzes are German–Hungarian and grouped by skill. Start with the leak you already know — for most learners that is [articles](/quizzes/articles/) or [verbs](/quizzes/verbs/). Each topic page includes a sample of the words you will meet, so you can look them over before you press Start.
 
@@ -703,10 +697,6 @@ export function grammarPrimer(categoryId: string | undefined, lang: LearnLang): 
 
 export function homeArticle(lang: LearnLang) {
   return pick(HOME_ARTICLE, lang);
-}
-
-export function grammarIndexArticle(lang: LearnLang) {
-  return pick(GRAMMAR_INDEX_ARTICLE, lang);
 }
 
 export function quizIndexArticle(lang: LearnLang) {

@@ -182,7 +182,6 @@ function extractWords(exportName, limit) {
 const guides = extractGuides(learnSource);
 const guidesBySlug = Object.fromEntries(guides.map((guide) => [guide.slug, guide]));
 const primers = extractPrimers(learnSource);
-const grammarIndex = extractNamedArticle(learnSource, 'GRAMMAR_INDEX_ARTICLE');
 const quizIndex = extractNamedArticle(learnSource, 'QUIZ_INDEX_ARTICLE');
 
 const TOPIC_EXPORT = {
@@ -369,7 +368,7 @@ ${guideList()}`;
     const links = Object.keys(primers)
       .map((id) => `<li><a href="/grammar/${id}">${esc(id.replace(/-/g, ' '))}</a></li>`)
       .join('');
-    return `<h1>German grammar</h1>${markdownToHtml(grammarIndex)}<ul>${links}</ul>${Object.entries(primers)
+    return `<h1>German grammar</h1><ul>${links}</ul>${Object.entries(primers)
       .map(([id, text]) => `<h2>${esc(id.replace(/-/g, ' '))}</h2>${markdownToHtml(text)}`)
       .join('\n')}`;
   }

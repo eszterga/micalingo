@@ -11,7 +11,7 @@ import { addCloudWord, useCloudVocabulary, findVocabDuplicate, vocabCategoryKey 
 import { ImageLightbox, useImageLightbox } from '../components/ImageLightbox';
 import ArticleContent from '../components/ArticleContent';
 import ArticleBody from '../components/ArticleBody';
-import { grammarIndexArticle, grammarPrimer, type LearnLang } from '../lib/learnContent';
+import { grammarPrimer, type LearnLang } from '../lib/learnContent';
 import ReadingSelectionPopover from '../components/ReadingSelectionPopover';
 import { useReadingSelectionPopup } from '../lib/useReadingSelectionPopup';
 import EditorFormatControls from '../components/EditorFormatControls';
@@ -22,7 +22,7 @@ import {
 import { applyBulletList, restoreEditorSelection } from '../lib/editorFormat';
 import { QuizCategoryOptions } from '../components/QuizCategoryOptions';
 import { useQuizLabels } from '../lib/quizLabels';
-import { localizedPrivateCategoryTitle } from '../lib/localizedLabel';
+import { localizedGrammarItemTitle, localizedPrivateCategoryTitle } from '../lib/localizedLabel';
 
 const BackgroundBlobs = () => (
   <>
@@ -591,18 +591,9 @@ export default function Grammar() {
           </button>
         </div>
 
-        <div className="bg-blue-50/80 backdrop-blur-sm border border-blue-200/60 text-blue-900 p-5 rounded-[1.5rem] shadow-sm text-sm font-medium mb-6 flex items-center gap-3">
-          <span className="text-xl">🔖</span>
-
-          {user ? (t("bookmark_instructions_logged_in") || "Highlight any text while reading to save a bookmark, or save the highlighted text directly to your personal vocabulary database or into your quizzes!") : (t("bookmark_instructions_guest") || "Highlight any text while reading to save a bookmark, or save the highlighted text directly to your personal vocabulary database or into your quizzes! (This feature is exclusively available for logged-in users. Log in to use it!)")}
-        </div>
-
         {/* PUBLIC TAB */}
         {activeTab === 'public' && (
           <div className="space-y-6 pt-4">
-            <article className="bg-white/80 backdrop-blur-xl border border-white rounded-[1.75rem] p-5 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] text-gray-700">
-              <ArticleBody markdown={grammarIndexArticle(language as LearnLang)} />
-            </article>
             {publicCategories.map(cat => {
               const isSectionOpen = openPublicSections[cat.id];
               const catItems = publicItems.filter(i => i.categoryId === cat.id);
@@ -617,11 +608,6 @@ export default function Grammar() {
                     </div>
                     <div className={`w-8 h-8 sm:w-12 sm:h-12 rounded-full bg-white flex items-center justify-center shadow-sm text-blue-600 transition-transform duration-300 flex-shrink-0 ${isSectionOpen ? "rotate-180" : ""}`}><svg className="w-4 h-4 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"></path></svg></div>
                   </button>
-                  {primer && (
-                    <div className="mt-4 text-gray-700 leading-relaxed">
-                      <ArticleBody markdown={primer} />
-                    </div>
-                  )}
                   
                   <div className={`grid transition-[grid-template-rows,opacity] duration-300 ease-in-out ${isSectionOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"}`}>
                     <div className="min-h-0 overflow-hidden">
@@ -633,16 +619,31 @@ export default function Grammar() {
                             </button>
                           </div>
                         )}
-                        {!catItems || catItems.length === 0 ? (
+                        {(!catItems || catItems.length === 0) && !primer ? (
                           <div className="text-center py-8 text-gray-500 bg-white/40 rounded-xl border border-dashed border-gray-300">{t("no_items") || "No items yet."}</div>
                         ) : (
                           <div className="space-y-4 sm:space-y-6 pt-2 pb-2">
+                            {primer && (
+                              <div className="relative bg-white/90 backdrop-blur-xl p-4 sm:p-5 md:p-6 rounded-[1.5rem] sm:rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-blue-50 overflow-hidden">
+                                <button type="button" onClick={() => toggleItem(`primer-${cat.id}`)} className="w-full flex items-start justify-between gap-2 outline-none text-left min-w-0">
+                                  <h3 className="font-extrabold text-gray-900 text-base sm:text-xl m-0 leading-tight break-words">{t("grammar_primer_heading")}</h3>
+                                  <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-blue-50 flex items-center justify-center shadow-sm text-blue-600 transition-transform duration-300 flex-shrink-0 ${expandedItems.has(`primer-${cat.id}`) ? "rotate-180" : ""}`}><svg className="w-4 h-4 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"></path></svg></div>
+                                </button>
+                                <div className={`grid transition-[grid-template-rows,opacity,margin] duration-300 ease-in-out ${expandedItems.has(`primer-${cat.id}`) ? "grid-rows-[1fr] opacity-100 mt-4 sm:mt-6" : "grid-rows-[0fr] opacity-0 mt-0"}`}>
+                                  <div className="min-h-0 overflow-hidden">
+                                    <div className="pt-2 border-t border-blue-50/50 mt-2 text-gray-700 leading-relaxed">
+                                      <ArticleBody markdown={primer} />
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
                             {catItems.map((item: any) => (
                               <div key={item.id} className="relative bg-white/90 backdrop-blur-xl p-4 sm:p-5 md:p-6 rounded-[1.5rem] sm:rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-blue-50 transition-all duration-300 group/item overflow-hidden">
                                 <div className="flex flex-col gap-3 w-full min-w-0">
                                   <button onClick={() => toggleItem(item.id)} className="w-full flex items-start justify-between gap-2 group outline-none text-left min-w-0">
                                     <div className="flex flex-col items-start gap-2 text-left min-w-0 flex-1">
-                                      <h3 className="font-extrabold text-gray-900 group-hover/item:text-blue-700 transition-colors text-base sm:text-xl m-0 leading-tight break-words">{item.title}</h3>
+                                      <h3 className="font-extrabold text-gray-900 group-hover/item:text-blue-700 transition-colors text-base sm:text-xl m-0 leading-tight break-words">{localizedGrammarItemTitle(item.title, t)}</h3>
                                       {bookmarks[item.id] && (
                                         <div className="flex items-center gap-2 mt-1 max-w-full">
                                           <span onClick={(e) => handleContinueFrom(e, item.id, bookmarks[item.id])} className="inline-flex items-center gap-1.5 text-xs font-bold bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-lg shadow-sm border border-yellow-300 cursor-pointer hover:bg-yellow-200 transition-colors max-w-full truncate">🔖 {t("continue_from") || "Continue from:"} "{bookmarks[item.id].substring(0, 25)}..."</span>
@@ -748,7 +749,7 @@ export default function Grammar() {
                                     <div className="flex flex-col gap-3 w-full min-w-0">
                                       <button onClick={() => toggleItem(item.id)} className="w-full flex items-start justify-between gap-2 group outline-none text-left min-w-0">
                                         <div className="flex flex-col items-start gap-2 text-left min-w-0 flex-1">
-                                          <h3 className="font-extrabold text-gray-900 group-hover/item:text-blue-700 transition-colors text-base sm:text-xl m-0 leading-tight break-words">{item.title}</h3>
+                                          <h3 className="font-extrabold text-gray-900 group-hover/item:text-blue-700 transition-colors text-base sm:text-xl m-0 leading-tight break-words">{localizedGrammarItemTitle(item.title, t)}</h3>
                                           {bookmarks[item.id] && (
                                             <div className="flex items-center gap-2 mt-1 max-w-full">
                                               <span className="inline-flex items-center gap-1.5 text-xs font-bold bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-lg shadow-sm border border-yellow-300 cursor-pointer hover:bg-yellow-200 transition-colors max-w-full truncate">🔖 {t("continue_from") || "Continue from:"} "{bookmarks[item.id].substring(0, 25)}..."</span>
