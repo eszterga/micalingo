@@ -148,7 +148,13 @@ function extractQuoted(source, key) {
   return '';
 }
 
-function extractWords(exportName, limit) {
+function fieldValue(chunk, name) {
+  const re = new RegExp(`${name}:\\s*"((?:\\\\.|[^"\\\\])*)"`);
+  const match = chunk.match(re);
+  return match ? match[1].replace(/\\"/g, '"') : '';
+}
+
+function extractWords(exportName) {
   const start = dataSource.indexOf(`export const ${exportName}`);
   if (start < 0) return [];
   const bracket = dataSource.indexOf('= [', start);
@@ -167,13 +173,19 @@ function extractWords(exportName, limit) {
   }
   const body = dataSource.slice(bracket, end);
   const words = [];
-  const re = /german:\s*"((?:\\.|[^"\\])*)"\s*,\s*hungarian:\s*"((?:\\.|[^"\\])*)"/g;
+  const re = /\{[^{}]*\}/g;
   let match = re.exec(body);
-  while (match && words.length < limit) {
-    words.push({
-      german: match[1].replace(/\\"/g, '"'),
-      hungarian: match[2].replace(/\\"/g, '"'),
-    });
+  while (match) {
+    const german = fieldValue(match[0], 'german');
+    if (german) {
+      words.push({
+        german,
+        hungarian: fieldValue(match[0], 'hungarian'),
+        example: fieldValue(match[0], 'example'),
+        note: fieldValue(match[0], 'note'),
+        case: fieldValue(match[0], 'case'),
+      });
+    }
     match = re.exec(body);
   }
   return words;
@@ -181,8 +193,6 @@ function extractWords(exportName, limit) {
 
 const guides = extractGuides(learnSource);
 const guidesBySlug = Object.fromEntries(guides.map((guide) => [guide.slug, guide]));
-const primers = extractPrimers(learnSource);
-const quizIndex = extractNamedArticle(learnSource, 'QUIZ_INDEX_ARTICLE');
 
 const TOPIC_EXPORT = {
   vocabulary: 'publicVocabulary',
@@ -190,6 +200,16 @@ const TOPIC_EXPORT = {
   articles: 'publicArticles',
   prepositions: 'publicPrepositions',
   adjectives: 'publicAdjectives',
+  'false-friends': 'publicFalseFriends',
+};
+
+const GRAMMAR_FACTS = {
+  cases: 'Public grammar articles filed under Cases (Nominativ, Akkusativ, Dativ, Genitiv).',
+  tenses: 'Public grammar articles filed under Tenses.',
+  articles: 'Public grammar articles filed under Articles and genders.',
+  adjectives: 'Public grammar articles filed under Adjectives.',
+  prepositions: 'Public grammar articles filed under Prepositions.',
+  'sentence-structure': 'Public grammar articles filed under Sentence structure.',
 };
 
 function esc(value) {
@@ -281,21 +301,36 @@ function markdownToHtml(markdown) {
   return html.join('\n');
 }
 
-function wordTable(words, germanLabel, meaningLabel) {
+function wordTable(words) {
   if (!words.length) return '';
+  const showExample = words.some((word) => word.example);
+  const showNote = words.some((word) => word.note);
+  const showCase = words.some((word) => word.case);
+  const head = ['German', 'Hungarian'];
+  if (showCase) head.push('Case');
+  if (showExample) head.push('Example');
+  if (showNote) head.push('Note');
   const rows = words
-    .map((word) => `<tr><td>${esc(word.german)}</td><td>${esc(word.hungarian)}</td></tr>`)
+    .map((word) => {
+      const cells = [word.german, word.hungarian];
+      if (showCase) cells.push(word.case || '');
+      if (showExample) cells.push(word.example || '');
+      if (showNote) cells.push(word.note || '');
+      return `<tr>${cells.map((cell) => `<td>${esc(cell)}</td>`).join('')}</tr>`;
+    })
     .join('');
-  return `<table><thead><tr><th>${esc(germanLabel)}</th><th>${esc(meaningLabel)}</th></tr></thead><tbody>${rows}</tbody></table>`;
+  return `<table><thead><tr>${head.map((cell) => `<th>${esc(cell)}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table>`;
 }
 
-function guideList() {
-  return `<ul>${guides
-    .map(
-      (guide) =>
-        `<li><a href="/learn/${guide.slug}"><strong>${esc(guide.title)}</strong></a> — ${esc(guide.description)}</li>`
-    )
-    .join('')}</ul>`;
+function siteLinks() {
+  return `<ul>
+<li><a href="/quizzes">Quizzes</a> — public German–Hungarian quizzes for vocabulary, articles, phrases, prepositions, adjectives, and verbs.</li>
+<li><a href="/grammar">Grammar</a> — public articles on cases, tenses, articles, adjectives, prepositions, and sentence structure.</li>
+<li><a href="/library">Library</a> — reading and listening materials, and vocabulary to read.</li>
+<li><a href="/learning-materials/reading/false-friends">Loanwords</a></li>
+<li><a href="/learn/public-and-private">Public library and your own quizzes</a></li>
+<li><a href="/about">About and contact</a></li>
+</ul>`;
 }
 
 function legalSections(prefix, count) {
@@ -347,17 +382,19 @@ export function staticBodyForRoute(route) {
   if (pathName === '/') {
     const about = extractQuoted(enSource, 'home_about').replaceAll('{support_link}', 'Support MicaLingo');
     const contact = extractQuoted(enSource, 'home_disclaimer').replaceAll('{email}', 'support.micalingo@gmail.com');
-    return `<h1>Learn German with MicaLingo</h1>
+    const ready = extractQuoted(enSource, 'ready_to_learn');
+    return `<h1>${esc(extractQuoted(enSource, 'home_h1') || 'MicaLingo')}</h1>
+<p>${esc(ready)}</p>
 <p>${esc(about)}</p>
 <p>${esc(contact)}</p>
-<h2>Study guides</h2>
-${guideList()}
-<p>Public quizzes and grammar explanations are open without an account. <a href="/quizzes">Start with the quizzes</a> or <a href="/grammar">read the grammar primers</a>.</p>`;
+<h2>What is on this site</h2>
+${siteLinks()}`;
   }
   if (pathName === '/learn') {
-    return `<h1>German study guides</h1>
-<p>Original explanations for Hungarian and English speakers learning German. Each guide stays on the page — it is not a link list to another site.</p>
-${guideList()}`;
+    return `<h1>${esc(extractQuoted(enSource, 'learn_hub_title') || 'How MicaLingo works')}</h1>
+<p>${esc(extractQuoted(enSource, 'learn_hub_intro'))}</p>
+${guideListFromGuides()}
+${siteLinks()}`;
   }
   if (pathName.startsWith('/learn/')) {
     const guide = guidesBySlug[pathName.slice('/learn/'.length)];
@@ -365,33 +402,45 @@ ${guideList()}`;
     return `<h1>${esc(guide.title)}</h1><p>${esc(guide.description)}</p>${markdownToHtml(guide.body)}`;
   }
   if (pathName === '/grammar') {
-    const links = Object.keys(primers)
-      .map((id) => `<li><a href="/grammar/${id}">${esc(id.replace(/-/g, ' '))}</a></li>`)
+    const links = Object.entries(GRAMMAR_FACTS)
+      .map(([id, text]) => `<li><a href="/grammar/${id}">${esc(id.replace(/-/g, ' '))}</a> — ${esc(text)}</li>`)
       .join('');
-    return `<h1>German grammar</h1><ul>${links}</ul>${Object.entries(primers)
-      .map(([id, text]) => `<h2>${esc(id.replace(/-/g, ' '))}</h2>${markdownToHtml(text)}`)
-      .join('\n')}`;
+    return `<h1>German grammar</h1>
+<p>${esc(PAGE_META['/grammar']?.description || '')}</p>
+<ul>${links}</ul>
+<p>Each category opens the articles stored in the public library.</p>`;
   }
   if (pathName.startsWith('/grammar/')) {
     const id = pathName.slice('/grammar/'.length);
-    const primer = primers[id];
-    if (!primer) return '';
+    const fact = GRAMMAR_FACTS[id];
+    if (!fact) return '';
     const meta = PAGE_META[pathName];
-    return `<h1>${esc(meta?.title || id)}</h1>${markdownToHtml(primer)}<p><a href="/grammar">All grammar topics</a></p>`;
+    return `<h1>${esc(meta?.title || id)}</h1><p>${esc(fact)}</p><p><a href="/grammar">All grammar categories</a></p>`;
   }
   if (pathName === '/quizzes') {
-    return `<h1>German quizzes</h1>${markdownToHtml(quizIndex)}`;
+    return `<h1>German quizzes</h1>
+<p>${esc(PAGE_META['/quizzes']?.description || '')}</p>
+<ul>
+<li><a href="/quizzes/vocabulary">Vocabulary</a></li>
+<li><a href="/quizzes/articles">Articles (der, die, das)</a></li>
+<li><a href="/quizzes/phrases">Phrases</a></li>
+<li><a href="/quizzes/prepositions">Prepositions</a></li>
+<li><a href="/quizzes/adjectives">Adjectives</a></li>
+<li><a href="/quizzes/verbs">Verbs</a></li>
+</ul>
+<p>Each topic page shows 25 examples from the public library.</p>`;
   }
   if (pathName.startsWith('/quizzes/')) {
     const topic = pathName.slice('/quizzes/'.length);
     const meta = PAGE_META[pathName];
-    const primerId = topic === 'verbs' ? 'tenses' : topic;
-    const primer = primers[primerId] || '';
-    const words = TOPIC_EXPORT[topic] ? extractWords(TOPIC_EXPORT[topic], 12) : [];
+    const words = TOPIC_EXPORT[topic] ? extractWords(TOPIC_EXPORT[topic]).slice(0, 25) : [];
+    const intro = words.length
+      ? `<h2>Examples in this library</h2><p>Examples from the public library.</p>`
+      : '';
     return `<h1>${esc(meta?.title || topic)}</h1>
 <p>${esc(meta?.description || '')}</p>
-${primer ? markdownToHtml(primer) : ''}
-${wordTable(words, 'German', 'Hungarian')}
+${intro}
+${wordTable(words)}
 <p><a href="/quizzes">All quizzes</a></p>`;
   }
   if (pathName === '/about') return aboutHtml();
@@ -400,22 +449,31 @@ ${wordTable(words, 'German', 'Hungarian')}
   if (pathName === '/cookies') return legalSections('cookies', 8);
   if (pathName === '/impressum') return legalSections('impressum', 6);
   if (pathName === '/vocabulary') {
-    return `<h1>German vocabulary</h1>
-<p>${esc(PAGE_META['/vocabulary']?.description || '')}</p>
-${wordTable(extractWords('publicVocabulary', 15), 'German', 'Hungarian')}
-<p>Practise the same words in the <a href="/quizzes/vocabulary">vocabulary quiz</a>.</p>`;
+    return `<h1>${esc(extractQuoted(enSource, 'dropdown_reading') || 'Vocabulary (to read)')}</h1>
+<p>${esc(extractQuoted(enSource, 'vocab_reading_subtitle'))}</p>
+<p>The words on this page come from the public reading list. Quiz entries are on the <a href="/quizzes/vocabulary">vocabulary quiz</a>.</p>`;
   }
   if (pathName === '/learning-materials/reading/false-friends') {
-    return `<h1>German false friends for Hungarian speakers</h1>
-<p>These words look familiar and mean something else. The note is the usual mistake.</p>
-${wordTable(extractWords('publicFalseFriends', 12), 'German', 'Hungarian')}
-<p><a href="/learning-materials/reading">More reading</a></p>`;
+    const words = extractWords('publicFalseFriends');
+    return `<h1>${esc(extractQuoted(enSource, 'false_friends') || 'Loanwords')}</h1>
+<p>${esc(extractQuoted(enSource, 'false_friends_desc'))}</p>
+${wordTable(words)}
+<p><a href="/learning-materials/reading">Reading</a></p>`;
   }
-  if (pathName === '/library' || pathName === '/learning-materials' || pathName === '/learning-materials/reading' || pathName === '/learning-materials/listening') {
+  if (pathName === '/library' || pathName === '/learning-materials' || pathName === '/learning-materials/reading' || pathName === '/learning-materials/listening' || pathName === '/learning-materials/reading/idioms') {
     const meta = PAGE_META[pathName];
-    return `<h1>${esc(meta?.title || 'MicaLingo')}</h1><p>${esc(meta?.description || '')}</p>${guideList()}`;
+    return `<h1>${esc(meta?.title || 'MicaLingo')}</h1><p>${esc(meta?.description || '')}</p>${siteLinks()}`;
   }
   return '';
+}
+
+function guideListFromGuides() {
+  return `<ul>${guides
+    .map(
+      (guide) =>
+        `<li><a href="/learn/${guide.slug}"><strong>${esc(guide.title)}</strong></a> — ${esc(guide.description)}</li>`
+    )
+    .join('')}</ul>`;
 }
 
 export const STATIC_CONTENT_STYLE = `<style>

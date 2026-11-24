@@ -128,6 +128,7 @@ export type QuizWord = {
   hungarian: string;
   example?: string;
   note?: string;
+  case?: string;
   category?: string;
   deleted?: boolean;
 };
@@ -206,13 +207,17 @@ export function isQuizableWord(
 
 function toQuizWord(word: QuizWord | PublicWord, topic: string): QuizWord | null {
   if (topic === 'articles') {
-    return normalizeArticleQuizWord(word);
+    const entry = normalizeArticleQuizWord(word);
+    if (!entry) return null;
+    if (word.case) entry.case = word.case;
+    return entry;
   }
   return {
     german: (word.german || '').trim(),
     hungarian: (word.hungarian || '').trim(),
     example: word.example,
     note: word.note,
+    case: word.case,
     category: topic,
   };
 }
@@ -287,6 +292,7 @@ export function buildPublicQuizPool(
           hungarian: (word.hungarian || '').trim(),
           example: typeof word.example === 'string' ? word.example : undefined,
           note: typeof (word as QuizWord).note === 'string' ? (word as QuizWord).note : undefined,
+          case: typeof (word as QuizWord).case === 'string' ? (word as QuizWord).case : undefined,
           category: topic,
         },
         topic

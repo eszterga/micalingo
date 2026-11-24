@@ -10,6 +10,12 @@ export default function LearnGuide({ forcedSlug }: { forcedSlug?: string }) {
   const { t, language } = useI18n();
   const lang = language as LearnLang;
   const slug = forcedSlug || slugParam;
+  const legacyTarget =
+    slug === 'der-die-das' ? '/quizzes/articles'
+    : slug === 'german-cases' ? '/grammar/cases'
+    : slug === 'german-verbs' ? '/quizzes/verbs'
+    : null;
+  if (legacyTarget) return <Navigate to={legacyTarget} replace />;
   const guide = slug ? getLearnGuide(slug) : undefined;
 
   if (!guide) {

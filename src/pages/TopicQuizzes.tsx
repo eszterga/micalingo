@@ -14,14 +14,16 @@ import {
   isPrivateQuizTopic,
 } from "../lib/quizPool";
 import { isPrivateQuizCard, privateCardTitle, privateSlotNumber, useQuizLabels } from "../lib/quizLabels";
-import ArticleBody from "../components/ArticleBody";
-import { grammarPrimer, type LearnLang } from "../lib/learnContent";
-
 const QUIZ_ACTION_BTN =
   'inline-flex h-7 min-w-[3.5rem] items-center justify-center rounded-md px-2.5 text-[11px] font-bold shadow-sm transition-colors whitespace-nowrap shrink-0';
 
 function quizActionLabel(label: string) {
   return label.replace(/\s*→\s*$/, '');
+}
+
+function quizEntryCase(word: object): string {
+  const value = (word as { case?: unknown }).case;
+  return typeof value === 'string' ? value : '';
 }
 
 function quizScorePresentation(score: number, total: number) {
@@ -64,7 +66,7 @@ export default function TopicQuizzes() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user, isAdmin } = useAuth();
-  const { t, language } = useI18n();
+  const { t } = useI18n();
   const { labels: quizLabels } = useQuizLabels(user?.uid);
   const publicDbWordsRaw = useCloudVocabulary("PUBLIC_LIBRARY");
   const publicDbWords = publicDbWordsRaw || [];
@@ -129,7 +131,10 @@ export default function TopicQuizzes() {
     return base;
   }, [topic, t, isAdmin, activeTab, quizLabels]);
 
-  const sampleWords = isPrivateQuizTopic(topic) ? [] : sourceData.slice(0, 6);
+  const quizExamples = isPrivateQuizTopic(topic) ? [] : sourceData.slice(0, 25);
+  const showExample = quizExamples.some((word) => (word.example || '').trim());
+  const showNote = quizExamples.some((word) => (word.note || '').trim());
+  const showCase = quizExamples.some((word) => quizEntryCase(word).trim());
   const isPrivateTopic = isPrivateQuizTopic(topic);
   const effectiveTab = isPrivateTopic ? 'custom' : activeTab;
 
@@ -180,17 +185,6 @@ export default function TopicQuizzes() {
             <p className="text-sm sm:text-lg text-blue-900/70 font-medium mt-0.5 sm:mt-1">{t('select_level_to_start') || 'Select a quiz to start practicing.'}</p>
           </div>
         </div>
-
-      {!isPrivateTopic && effectiveTab === 'default' && (() => {
-        const primerId = topic === 'verbs' ? 'tenses' : topic;
-        const primer = primerId ? grammarPrimer(primerId, language as LearnLang) : null;
-        if (!primer) return null;
-        return (
-          <article className="bg-white/80 backdrop-blur-xl border border-white rounded-[1.75rem] p-5 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] text-gray-700">
-            <ArticleBody markdown={primer} />
-          </article>
-        );
-      })()}
 
       {!isPrivateTopic && (
       <div className="flex overflow-x-auto whitespace-nowrap border-b border-white/60">
@@ -403,7 +397,7 @@ export default function TopicQuizzes() {
         </div>
       )}
 
-        {effectiveTab === 'default' && sampleWords.length > 0 && (
+        {effectiveTab === 'default' && quizExamples.length > 0 && (
           <div className="bg-white/70 backdrop-blur-xl border border-white rounded-[1.5rem] p-5 md:p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
             <h2 className="text-lg font-extrabold text-blue-950 mb-2">{t('sample_words_heading')}</h2>
             <p className="text-sm text-blue-900/70 font-medium mb-3">{t('sample_words_intro')}</p>
@@ -417,13 +411,19 @@ export default function TopicQuizzes() {
                     <th className="text-left font-extrabold px-3 py-2.5">
                       {topic === 'adjectives_sentences' ? (t('correct_answer_label') || 'Correct Answer') : (t('hungarian') || 'Meaning')}
                     </th>
+                    {showCase && <th className="text-left font-extrabold px-3 py-2.5">{t('case_label')}</th>}
+                    {showExample && <th className="text-left font-extrabold px-3 py-2.5">{t('example_label') || 'Example'}</th>}
+                    {showNote && <th className="text-left font-extrabold px-3 py-2.5">{t('note') || 'Note'}</th>}
                   </tr>
                 </thead>
                 <tbody>
-                  {sampleWords.map((word, i) => (
-                    <tr key={`${word.german}-${i}`} className="border-t border-blue-50">
+                  {quizExamples.map((word, i) => (
+                    <tr key={`${word.german}-${i}`} className="border-t border-blue-50 align-top">
                       <td className="px-3 py-2 font-bold text-gray-900">{word.german}</td>
                       <td className="px-3 py-2 text-gray-700">{word.hungarian}</td>
+                      {showCase && <td className="px-3 py-2 text-gray-700">{quizEntryCase(word)}</td>}
+                      {showExample && <td className="px-3 py-2 text-gray-700">{word.example || ''}</td>}
+                      {showNote && <td className="px-3 py-2 text-gray-700">{word.note || ''}</td>}
                     </tr>
                   ))}
                 </tbody>

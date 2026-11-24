@@ -18,6 +18,9 @@ export const LEGACY_CANONICAL = {
   ...Object.fromEntries(QUIZ_TOPICS.map((topic) => [`/practice/${topic}`, `/quizzes/${topic}`])),
   '/learn/german-exam-prep': '/learn/public-and-private',
   '/learn/weekly-german-practice': '/learn',
+  '/learn/der-die-das': '/quizzes/articles',
+  '/learn/german-cases': '/grammar/cases',
+  '/learn/german-verbs': '/quizzes/verbs',
 };
 
 /**
@@ -49,9 +52,6 @@ export const INDEXABLE_ROUTES = [
   '/learning-materials/listening',
   '/learn',
   '/learn/public-and-private',
-  '/learn/der-die-das',
-  '/learn/german-cases',
-  '/learn/german-verbs',
   '/about',
   '/privacy',
   '/terms',
@@ -94,11 +94,8 @@ export const SITEMAP_ENTRIES = [
   { path: '/learning-materials/reading/false-friends', changefreq: 'monthly', priority: '0.65' },
   { path: '/learning-materials/reading/idioms', changefreq: 'monthly', priority: '0.65' },
   { path: '/learning-materials/listening', changefreq: 'weekly', priority: '0.7' },
-  { path: '/learn', changefreq: 'weekly', priority: '0.9' },
-  { path: '/learn/public-and-private', changefreq: 'monthly', priority: '0.85' },
-  { path: '/learn/der-die-das', changefreq: 'monthly', priority: '0.85' },
-  { path: '/learn/german-cases', changefreq: 'monthly', priority: '0.85' },
-  { path: '/learn/german-verbs', changefreq: 'monthly', priority: '0.85' },
+  { path: '/learn', changefreq: 'weekly', priority: '0.6' },
+  { path: '/learn/public-and-private', changefreq: 'monthly', priority: '0.6' },
   { path: '/about', changefreq: 'monthly', priority: '0.5' },
   { path: '/privacy', changefreq: 'yearly', priority: '0.3' },
   { path: '/terms', changefreq: 'yearly', priority: '0.3' },
@@ -212,8 +209,8 @@ export const PAGE_META = {
     description: 'Track German quiz scores and learning progress for vocabulary, grammar, articles, and verbs.',
   },
   '/vocabulary': {
-    title: 'German Vocabulary List: Words to Learn & Review | MicaLingo',
-    description: 'Build German vocabulary with searchable word lists, example sentences, and translations. Review German words for everyday use.',
+    title: 'Vocabulary to read | MicaLingo',
+    description: 'German words to read and review. This list is separate from the public quiz libraries.',
   },
   '/practice': {
     title: 'German Practice Exercises | MicaLingo',
@@ -264,24 +261,12 @@ export const PAGE_META = {
     description: 'Improve German listening with music, podcasts, and audiobooks selected for language learners.',
   },
   '/learn': {
-    title: 'German Study Guides: Articles, Cases & Verbs | MicaLingo',
-    description: 'Original German study guides for self-learners: public vs private library, der/die/das, German cases, and verbs.',
+    title: 'How MicaLingo works | MicaLingo',
+    description: 'The public quizzes are German–Hungarian. After Google sign-in you can upload your own list and generate quizzes.',
   },
   '/learn/public-and-private': {
     title: 'Public German–Hungarian library vs your own quizzes | MicaLingo',
     description: 'How MicaLingo works for self-learners: public quizzes are German–Hungarian; a Google login lets you build a private library in any languages.',
-  },
-  '/learn/der-die-das': {
-    title: 'How to learn German articles der, die, das | MicaLingo',
-    description: 'A method for German noun gender: learn the article with the noun, use ending patterns, and quiz the rest.',
-  },
-  '/learn/german-cases': {
-    title: 'German cases without panic | MicaLingo',
-    description: 'Nominativ, Akkusativ, Dativ and Genitiv for self-learners, plus Wechselpräpositionen for location vs direction.',
-  },
-  '/learn/german-verbs': {
-    title: 'German verbs you actually need | MicaLingo',
-    description: 'Present tense, Perfekt with haben or sein, and separable verbs for German self-learners.',
   },
   '/about': {
     title: 'About MicaLingo — Learn German Online',

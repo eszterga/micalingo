@@ -118,22 +118,22 @@ const ROUTES: Record<string, Localized> = {
   },
   '/vocabulary': {
     en: {
-      title: 'German Vocabulary List: Words to Learn & Review | MicaLingo',
+      title: 'Vocabulary to read | MicaLingo',
       description:
-        'Build German vocabulary with searchable word lists, example sentences, and translations. Review German words for everyday use.',
-      keywords: 'German vocabulary, German word list, learn German words, German dictionary, Wortschatz',
+        'German words to read and review. This list is separate from the public quiz libraries.',
+      keywords: 'German vocabulary, German word list, learn German words, Wortschatz, MicaLingo',
     },
     de: {
-      title: 'Deutscher Wortschatz: Vokabeln lernen & wiederholen | MicaLingo',
+      title: 'Wortschatz zum Lesen | MicaLingo',
       description:
-        'Baue deinen deutschen Wortschatz mit durchsuchbaren Wortlisten, Beispielsätzen und Übersetzungen auf. Vokabeln für den Alltag.',
-      keywords: 'deutscher Wortschatz, Vokabelliste, deutsche Wörter lernen, Vokabeln',
+        'Deutsche Wörter zum Lesen und Wiederholen. Diese Liste ist von den öffentlichen Quiz-Bibliotheken getrennt.',
+      keywords: 'deutscher Wortschatz, Vokabelliste, deutsche Wörter, MicaLingo',
     },
     hu: {
-      title: 'Német szókincs: szavak tanulása és ismétlése | MicaLingo',
+      title: 'Szókincs olvasáshoz | MicaLingo',
       description:
-        'Építsd a német szókincsed kereshető szólistákkal, példamondatokkal és fordításokkal. Ismételd a szavakat hétköznapi használatra.',
-      keywords: 'német szókincs, német szólista, német szavak, szótár',
+        'Német szavak olvasáshoz és ismétléshez. Ez a lista külön van a nyilvános kvízkönyvtáraktól.',
+      keywords: 'német szókincs, német szólista, német szavak, MicaLingo',
     },
   },
   '/practice': {
@@ -260,19 +260,19 @@ const ROUTES: Record<string, Localized> = {
   },
   '/learn': {
     en: {
-      title: 'German Study Guides: Articles, Cases & Verbs | MicaLingo',
-      description: 'Original German study guides for self-learners: public vs private library, der/die/das, German cases, and verbs.',
-      keywords: 'German study guides, der die das, German cases, self-learning German',
+      title: 'How MicaLingo works | MicaLingo',
+      description: 'The public quizzes are German–Hungarian. After Google sign-in you can upload your own list and generate quizzes, including topics that are not a language.',
+      keywords: 'MicaLingo, public library, private quizzes, learn German',
     },
     de: {
-      title: 'Deutsch-Lernratgeber: Artikel, Fälle & Verben | MicaLingo',
-      description: 'Eigene Ratgeber zum Selbstlernen: öffentlich vs privat, der/die/das, deutsche Fälle und Verben.',
-      keywords: 'Deutsch Lernratgeber, der die das, Kasus, Selbstlernen',
+      title: 'So funktioniert MicaLingo | MicaLingo',
+      description: 'Die öffentlichen Quizze sind Deutsch–Ungarisch. Nach der Google-Anmeldung lädst du eine eigene Liste hoch und erzeugst Quizze, auch zu Themen, die keine Sprache sind.',
+      keywords: 'MicaLingo, öffentliche Bibliothek, eigene Quizze, Deutsch lernen',
     },
     hu: {
       title: 'Útmutató | MicaLingo',
       description: 'Gyakorolj az előre elkészített német-magyar kvízekkel, vagy belépés és egy excel táblányi tudásanyag feltöltése után generálj személyreszabott kvízeket.',
-      keywords: 'német útmutató, der die das, német esetek, önálló tanulás',
+      keywords: 'MicaLingo, nyilvános könyvtár, saját kvíz, német tanulás',
     },
   },
   '/privacy': {
@@ -671,6 +671,23 @@ export function resolveSeo(pathname: string, lang: SeoLang): ResolvedSeo {
         pageType: 'page',
       };
     }
+    const legacyLearn: Record<string, string> = {
+      'der-die-das': '/quizzes/articles',
+      'german-cases': '/grammar/cases',
+      'german-verbs': '/quizzes/verbs',
+    };
+    if (legacyLearn[topic]) {
+      const target = legacyLearn[topic];
+      const topicKey = target.startsWith('/quizzes/') ? target.slice('/quizzes/'.length) : '';
+      const grammarKey = target.startsWith('/grammar/') ? target.slice('/grammar/'.length) : '';
+      const copy = (topicKey && QUIZ_TOPICS[topicKey]) || (grammarKey && GRAMMAR_CATS[grammarKey]) || ROUTES['/learn'];
+      return {
+        ...pick(copy, lang),
+        canonicalPath: target,
+        noindex: false,
+        pageType: 'page',
+      };
+    }
     const guide = getLearnGuide(topic);
     if (guide) {
       return {
@@ -1002,9 +1019,6 @@ export const SITEMAP_PATHS = [
   '/learning-materials/listening',
   '/learn',
   '/learn/public-and-private',
-  '/learn/der-die-das',
-  '/learn/german-cases',
-  '/learn/german-verbs',
   '/about',
   '/privacy',
   '/terms',

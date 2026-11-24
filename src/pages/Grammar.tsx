@@ -10,8 +10,6 @@ import { signInWithGoogle } from '../lib/googleAuth';
 import { addCloudWord, useCloudVocabulary, findVocabDuplicate, vocabCategoryKey } from '../lib/firestore';
 import { ImageLightbox, useImageLightbox } from '../components/ImageLightbox';
 import ArticleContent from '../components/ArticleContent';
-import ArticleBody from '../components/ArticleBody';
-import { grammarPrimer, type LearnLang } from '../lib/learnContent';
 import ReadingSelectionPopover from '../components/ReadingSelectionPopover';
 import { useReadingSelectionPopup } from '../lib/useReadingSelectionPopup';
 import EditorFormatControls from '../components/EditorFormatControls';
@@ -44,7 +42,7 @@ const BackgroundBlobs = () => (
 );
 
 export default function Grammar() {
-  const { t, language } = useI18n();
+  const { t } = useI18n();
   const { user, isAdmin, adminMode } = useAuth();
   const { labels: quizLabels } = useQuizLabels(user?.uid);
   const [searchParams] = useSearchParams();
@@ -597,8 +595,7 @@ export default function Grammar() {
             {publicCategories.map(cat => {
               const isSectionOpen = openPublicSections[cat.id];
               const catItems = publicItems.filter(i => i.categoryId === cat.id);
-              const primer = grammarPrimer(cat.id, language as LearnLang);
-              
+
               return (
                 <section key={cat.id} className="bg-white/60 backdrop-blur-xl rounded-[2rem] sm:rounded-[2.5rem] border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-4 sm:p-6 md:p-8 transition-all duration-300 hover:bg-white/80 overflow-hidden">
                   <button onClick={() => togglePublicSection(cat.id)} className="w-full flex items-center justify-between gap-2 group outline-none min-w-0">
@@ -619,25 +616,10 @@ export default function Grammar() {
                             </button>
                           </div>
                         )}
-                        {(!catItems || catItems.length === 0) && !primer ? (
+                        {(!catItems || catItems.length === 0) ? (
                           <div className="text-center py-8 text-gray-500 bg-white/40 rounded-xl border border-dashed border-gray-300">{t("no_items") || "No items yet."}</div>
                         ) : (
                           <div className="space-y-4 sm:space-y-6 pt-2 pb-2">
-                            {primer && (
-                              <div className="relative bg-white/90 backdrop-blur-xl p-4 sm:p-5 md:p-6 rounded-[1.5rem] sm:rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-blue-50 overflow-hidden">
-                                <button type="button" onClick={() => toggleItem(`primer-${cat.id}`)} className="w-full flex items-start justify-between gap-2 outline-none text-left min-w-0">
-                                  <h3 className="font-extrabold text-gray-900 text-base sm:text-xl m-0 leading-tight break-words">{t("grammar_primer_heading")}</h3>
-                                  <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-blue-50 flex items-center justify-center shadow-sm text-blue-600 transition-transform duration-300 flex-shrink-0 ${expandedItems.has(`primer-${cat.id}`) ? "rotate-180" : ""}`}><svg className="w-4 h-4 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"></path></svg></div>
-                                </button>
-                                <div className={`grid transition-[grid-template-rows,opacity,margin] duration-300 ease-in-out ${expandedItems.has(`primer-${cat.id}`) ? "grid-rows-[1fr] opacity-100 mt-4 sm:mt-6" : "grid-rows-[0fr] opacity-0 mt-0"}`}>
-                                  <div className="min-h-0 overflow-hidden">
-                                    <div className="pt-2 border-t border-blue-50/50 mt-2 text-gray-700 leading-relaxed">
-                                      <ArticleBody markdown={primer} />
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            )}
                             {catItems.map((item: any) => (
                               <div key={item.id} className="relative bg-white/90 backdrop-blur-xl p-4 sm:p-5 md:p-6 rounded-[1.5rem] sm:rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-blue-50 transition-all duration-300 group/item overflow-hidden">
                                 <div className="flex flex-col gap-3 w-full min-w-0">
